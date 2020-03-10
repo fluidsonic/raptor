@@ -2,34 +2,24 @@ package io.fluidsonic.raptor
 
 import io.fluidsonic.raptor.Raptor.*
 import kotlinx.atomicfu.*
+import org.kodein.di.*
 
 
 internal class RaptorImpl(
 	private val config: RaptorConfig
 ) : Raptor {
 
-	private var instance: RaptorInstance? = null
-	private val stateRef = atomic(State.stopped)
+	private val stateRef = atomic(State.initial)
+
+	val scope = RaptorScopeImpl(
+		dkodein = Kodein.direct { import(config.kodeinModule) }
+	)
 
 
 	override suspend fun start() {
 		check(stateRef.compareAndSet(expect = State.stopped, update = State.starting)) { "Cannot start Raptor unless it's in 'stopped' state." }
 
-		val instance: RaptorInstance
-
-		try {
-			instance = RaptorInstance(config = config)
-			instance.start()
-
-			this.instance = instance
-		}
-		catch (e: Throwable) {
-			stateRef.value = State.stopped
-
-			throw e
-		}
-
-		with(instance) {
+		with(scope) {
 			for (callback in config.startCallbacks)
 				callback()
 		}
@@ -45,21 +35,12 @@ internal class RaptorImpl(
 	override suspend fun stop() {
 		check(stateRef.compareAndSet(expect = State.started, update = State.stopping)) { "Cannot start Raptor unless it's in 'started' state." }
 
-		val instance = checkNotNull(this.instance)
-
-		with(instance) {
+		with(scope) {
 			for (callback in config.stopCallbacks)
 				callback()
 		}
 
-		this.instance = null
-
-		try {
-			instance.stop()
-		}
-		finally {
-			stateRef.value = State.stopped
-		}
+		stateRef.value = State.stopped
 	}
 }
 

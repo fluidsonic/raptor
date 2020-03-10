@@ -11,6 +11,7 @@ interface Raptor {
 
 	enum class State {
 
+		initial,
 		started,
 		starting,
 		stopped,
@@ -19,5 +20,5 @@ interface Raptor {
 }
 
 
-fun raptor(configure: RaptorConfigScope.() -> Unit): Raptor =
-	RaptorImpl(config = RaptorConfigScopeImpl().apply(configure).build())
+fun raptor(configure: RaptorSetup.() -> Unit): Raptor =
+	RaptorImpl(config = RaptorSetupImpl().apply(configure).complete())

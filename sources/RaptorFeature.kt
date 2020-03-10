@@ -1,11 +1,10 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.raptor.configuration.*
 
-interface RaptorFeature<ConfigDsl : Any> {
 
-	fun RaptorConfigScope.configure() = Unit
-	fun RaptorConfigScope.configure(dslConfig: ConfigDsl.() -> Unit) = Unit // FIXME default impl must call block
-	fun RaptorRouteConfigScope.configure() = Unit
-	fun RaptorServerConfigScope.configure() = Unit
-	fun RaptorTransactionConfigScope.configure() = Unit
+interface RaptorFeature {
+
+	fun RaptorFeatureCompletion.complete() = Unit
+	fun RaptorFeatureSetup.setup() = Unit
 }
