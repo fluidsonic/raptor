@@ -1,3 +1,6 @@
+// https://youtrack.jetbrains.com/issue/KT-12495
+@file:JvmName("PhoneNumber@graph")
+
 package io.fluidsonic.raptor
 
 

@@ -13,7 +13,8 @@ private class ScopedBsonDefinition<Value : Any>(
 }
 
 
-inline fun <reified Value : Any> bsonDefinition(@BuilderInference noinline config: RaptorBsonDefinitionScope<Value>.() -> Unit) =
+// FIXME add @BuilderInference once compiler errors are fixed
+inline fun <reified Value : Any> bsonDefinition(noinline config: RaptorBsonDefinitionScope<Value>.() -> Unit) =
 	bsonDefinition(valueClass = Value::class, config = config)
 
 

@@ -1,3 +1,6 @@
+// https://youtrack.jetbrains.com/issue/KT-12495
+@file:JvmName("Country@graph")
+
 package io.fluidsonic.raptor
 
 import io.fluidsonic.stdlib.*

@@ -3,7 +3,7 @@ package io.fluidsonic.raptor
 import io.ktor.http.*
 
 
-fun Url.toBuilder() =
+fun Url.toBuilder(): URLBuilder =
 	URLBuilder().takeFrom(this)
 
 
@@ -12,6 +12,10 @@ fun Url.toBuilder() =
 //	parse = ::Url,
 //	serialize = Url::toString
 //)
+
+
+fun URLBuilder.appendParameters(parameters: Parameters) =
+	apply { this.parameters.appendAll(parameters) }
 
 
 fun URLBuilder.appendPath(vararg components: String) =

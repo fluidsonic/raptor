@@ -1,3 +1,6 @@
+// https://youtrack.jetbrains.com/issue/KT-12495
+@file:JvmName("Url@graph")
+
 package io.fluidsonic.raptor
 
 import io.ktor.http.*
