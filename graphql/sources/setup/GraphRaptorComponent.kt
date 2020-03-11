@@ -1,15 +1,38 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.stdlib.*
+import io.fluidsonic.time.*
+import io.ktor.http.*
+
 
 @Raptor.Dsl3
-class GraphRaptorComponent internal constructor() : RaptorComponent.Taggable {
+class GraphRaptorComponent internal constructor(
+	override val raptorTags: Set<Any>
+) : RaptorComponent.Taggable {
 
-	internal val definitions = GraphQLRaptorFeature.defaultDefinitions.toMutableList()
+	internal val definitions = defaultDefinitions.toMutableList()
 
 
-	internal fun complete() = GraphRaptorConfig(
-		definitions = definitions
-	)
+	companion object {
+
+		private val defaultDefinitions = listOf<RaptorGraphDefinition>(
+			AccessToken.graphDefinition(),
+			Cents.graphDefinition(),
+			Country.graphDefinition(),
+			Currency.graphDefinition(),
+			EmailAddress.graphDefinition(),
+			LocalDate.graphDefinition(),
+			LocalTime.graphDefinition(),
+			Money.graphDefinition(),
+			Password.graphDefinition(),
+			PreciseDuration.graphDefinition(),
+			PhoneNumber.graphDefinition(),
+			Timestamp.graphDefinitions(),
+			TimeZone.graphDefinition(),
+			Unit.graphDefinition(),
+			Url.graphDefinition()
+		)
+	}
 }
 
 
@@ -22,13 +45,8 @@ fun RaptorConfigurable<GraphRaptorComponent>.definitions(vararg definitions: Rap
 
 @Raptor.Dsl3
 fun RaptorConfigurable<GraphRaptorComponent>.definitions(definitions: Iterable<RaptorGraphDefinition>) {
-	forEachComponent {
+	raptorComponentConfiguration {
 		this.definitions += definitions
 	}
 }
 
-
-@Raptor.Dsl3
-fun RaptorConfigurable<RaptorKtorRouteComponent>.newGraph(config: RaptorConfigurable<GraphRaptorComponent> = {}) {
-	TODO()
-}

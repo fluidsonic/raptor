@@ -4,11 +4,11 @@ import io.ktor.application.*
 import io.ktor.util.*
 
 
-private val transactionKtorAttributeKey = AttributeKey<RaptorKtorServerTransactionImpl>("Raptor: transaction")
+private val transactionKtorAttributeKey = AttributeKey<KtorServerTransactionImpl>("Raptor: transaction")
 
 
 internal class RaptorTransactionKtorFeature(
-	private val server: RaptorKtorServerImpl
+	private val server: KtorServer
 ) : ApplicationFeature<ApplicationCallPipeline, Unit, Unit> {
 
 	override val key = AttributeKey<Unit>("Raptor: transaction feature")

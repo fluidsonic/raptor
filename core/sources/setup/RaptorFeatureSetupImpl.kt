@@ -5,22 +5,20 @@ import org.kodein.di.*
 
 @Raptor.Dsl3
 class RaptorFeatureSetupImpl internal constructor(
-	context: RaptorSetupContext
-) : RaptorFeatureSetup {
+	context: RaptorComponentRegistry
+) : RaptorFeatureComponent {
 
 	private val kodeinConfigs: MutableList<Kodein.Builder.() -> Unit> = mutableListOf()
 	private val startCallbacks: MutableList<suspend RaptorScope.() -> Unit> = mutableListOf()
 	private val stopCallbacks: MutableList<suspend RaptorScope.() -> Unit> = mutableListOf()
 
-	override val raptorSetupContext = context
+	override val raptorComponentRegistry = context
 
 
 	// FIXME duplicates
 	override fun install(feature: RaptorFeature) {
 		with(feature) {
-			raptorSetupContext.configure<RaptorFeatureSetup> {
-				setup()
-			}
+			setup()
 		}
 	}
 

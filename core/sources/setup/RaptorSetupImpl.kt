@@ -9,12 +9,12 @@ internal class RaptorSetupImpl : RaptorSetup {
 	private val startCallbacks: MutableList<suspend RaptorScope.() -> Unit> = mutableListOf()
 	private val stopCallbacks: MutableList<suspend RaptorScope.() -> Unit> = mutableListOf()
 
-	override val raptorSetupContext = RaptorSetupContext()
+	override val raptorComponentRegistry = RaptorComponentRegistry()
 
 
 	init {
-		raptorSetupContext.register<RaptorFeatureSetup>(RaptorFeatureSetupImpl(
-			context = raptorSetupContext
+		raptorComponentRegistry.register<RaptorFeatureComponent>(RaptorFeatureSetupImpl(
+			context = raptorComponentRegistry
 		))
 	}
 
@@ -32,9 +32,7 @@ internal class RaptorSetupImpl : RaptorSetup {
 	// FIXME duplicates
 	override fun install(feature: RaptorFeature) {
 		with(feature) {
-			raptorSetupContext.configure<RaptorFeatureSetup> {
-				setup()
-			}
+			setup()
 		}
 	}
 

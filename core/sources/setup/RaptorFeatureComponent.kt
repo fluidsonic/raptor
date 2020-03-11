@@ -4,7 +4,10 @@ import org.kodein.di.*
 
 
 @Raptor.Dsl3
-interface RaptorFeatureSetup : RaptorComponent {
+interface RaptorFeatureComponent : RaptorComponent {
+
+	val raptorComponentRegistry: RaptorComponentRegistry
+
 
 	@Raptor.Dsl3
 	fun install(feature: RaptorFeature)
@@ -21,6 +24,6 @@ interface RaptorFeatureSetup : RaptorComponent {
 
 
 // FIXME move to relevant file
-val RaptorFeatureSetup.transactions
+val RaptorFeatureComponent.transactions
 	get(): RaptorConfigurableCollection<RaptorTransactionComponent> =
-		raptorSetupContext.getOrCreateComponentCollection()
+		TODO()

@@ -1,4 +1,4 @@
 package io.fluidsonic.raptor
 
 
-interface RaptorGraphScope : RaptorKtorServerTransactionScope
+interface RaptorGraphScope : KtorServerTransactionScope

@@ -13,9 +13,9 @@ import org.slf4j.event.*
 import java.util.concurrent.*
 
 
-internal class RaptorKtorServerImpl(
-	private val config: RaptorKtorServerConfig
-) : RaptorKtorServerScope, DKodeinAware { // FIXME hmm
+internal class KtorServer(
+	private val config: KtorServerConfig
+) : KtorServerScope, DKodeinAware { // FIXME hmm
 
 	private val ktorEnvironment = commandLineEnvironment(arrayOf())
 	private var engine = embeddedServer(Netty, ktorEnvironment)
@@ -24,8 +24,8 @@ internal class RaptorKtorServerImpl(
 	override val dkodein = Kodein.direct { import(config.kodeinModule) }
 
 
-	override fun beginTransaction(): RaptorKtorServerTransactionImpl { // FIXME here?
-		val transaction = RaptorKtorServerTransactionImpl(
+	override fun beginTransaction(): KtorServerTransactionImpl { // FIXME here?
+		val transaction = KtorServerTransactionImpl(
 			parentScope = this
 		)
 
@@ -125,9 +125,9 @@ internal class RaptorKtorServerImpl(
 		install(XForwardedHeaderSupport)
 		install(EncryptionEnforcementKtorFeature)
 
-		install(RaptorTransactionKtorFeature(server = this@RaptorKtorServerImpl))
+		install(RaptorTransactionKtorFeature(server = this@KtorServer))
 
-		config.ktorApplicationConfig(this)
+		config.customConfig(this)
 
 		val rootConfig = config.routingConfig
 		if (rootConfig != null)
@@ -137,11 +137,11 @@ internal class RaptorKtorServerImpl(
 	}
 
 
-	private fun Route.configure(config: RaptorKtorRouteConfig) {
+	private fun Route.configure(config: KtorRouteConfig) {
 		route(config.path) {
 			// FIXME kodein
 
-			config.ktorConfig(this)
+			config.customConfig(this)
 
 			for (childConfig in config.children) {
 				configure(childConfig)

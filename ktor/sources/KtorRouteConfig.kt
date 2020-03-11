@@ -4,9 +4,9 @@ import io.ktor.routing.*
 import org.kodein.di.*
 
 
-internal class RaptorKtorRouteConfig(
-	val children: List<RaptorKtorRouteConfig>,
+internal class KtorRouteConfig(
+	val children: List<KtorRouteConfig>,
+	val customConfig: Route.() -> Unit,
 	val kodeinModule: Kodein.Module,
-	val ktorConfig: Route.() -> Unit,
 	val path: String
 )

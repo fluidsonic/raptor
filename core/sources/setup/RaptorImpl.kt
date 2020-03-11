@@ -1,4 +1,4 @@
-package io.fluidsonic.raptor.setup
+package io.fluidsonic.raptor
 
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.Raptor.*

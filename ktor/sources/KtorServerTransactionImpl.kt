@@ -3,9 +3,9 @@ package io.fluidsonic.raptor
 import kotlinx.atomicfu.*
 
 
-internal class RaptorKtorServerTransactionImpl(
-	private val parentScope: RaptorKtorServerScope
-) : RaptorKtorServerTransaction {
+internal class KtorServerTransactionImpl(
+	private val parentScope: KtorServerScope
+) : KtorServerTransaction {
 
 	private val isCompleteRef = atomic(false)
 

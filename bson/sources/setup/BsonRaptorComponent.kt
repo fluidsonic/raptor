@@ -9,14 +9,6 @@ class BsonRaptorComponent internal constructor() : RaptorComponent {
 
 	internal val definitions = defaultDefinitions.toMutableList()
 
-	override val raptorSetupContext: RaptorSetupContext
-		get() = TODO()
-
-
-	internal fun complete() = BsonRaptorConfig(
-		definitions = definitions
-	)
-
 
 	companion object {
 
@@ -49,7 +41,7 @@ fun RaptorConfigurable<BsonRaptorComponent>.definitions(vararg definitions: Rapt
 
 @Raptor.Dsl3
 fun RaptorConfigurable<BsonRaptorComponent>.definitions(definitions: Iterable<RaptorBsonDefinition<*>>) {
-	forEachComponent {
+	raptorComponentConfiguration {
 		this.definitions += definitions
 	}
 }

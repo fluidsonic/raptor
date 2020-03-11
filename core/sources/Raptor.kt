@@ -1,7 +1,5 @@
 package io.fluidsonic.raptor
 
-import io.fluidsonic.raptor.setup.*
-
 
 @Raptor.Dsl3
 interface Raptor {
@@ -13,6 +11,7 @@ interface Raptor {
 
 
 	@DslMarker
+	@Retention(AnnotationRetention.SOURCE)
 	annotation class Dsl3
 
 
