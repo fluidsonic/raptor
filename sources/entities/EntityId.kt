@@ -5,7 +5,6 @@ import org.bson.types.*
 import kotlin.reflect.*
 
 
-// FIXME refactor and move somewhere else
 interface EntityId {
 
 	val factory: Factory<*>
@@ -138,6 +137,15 @@ fun <Id : EntityId> EntityId.Factory<Id>.bsonDefinition() = bsonDefinition(idCla
 
 	encode { value ->
 		writeIdValue(value)
+	}
+}
+
+
+
+fun <Id : EntityId> EntityId.Factory<Id>.graphDefinition() = graphAliasDefinition {
+	conversion(idClass, GraphId::class) {
+		parse { parse(it.value) ?: error("\"${it.value}\" is not a valid '$graphName'.") } // FIXME graph error
+		serialize { GraphId(it.serialize()) }
 	}
 }
 

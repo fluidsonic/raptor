@@ -1,14 +1,13 @@
 package io.fluidsonic.raptor
 
-import io.fluidsonic.raptor.configuration.*
 import io.ktor.routing.*
 import org.kodein.di.*
 
 
 internal class RaptorKtorRouteSetupImpl(
 	private val path: String,
-	parent: RaptorSetupElement
-) : RaptorKtorRouteSetup, RaptorSetupElement by parent, RaptorSetupScope.KodeinScope {
+	parent: RaptorComponent
+) : RaptorKtorRouteComponent, RaptorComponent by parent {
 
 	private val kodeinConfigs = mutableListOf<Kodein.Builder.() -> Unit>()
 	private val ktorRouteConfigs = mutableListOf<Route.() -> Unit>()
@@ -57,19 +56,19 @@ internal class RaptorKtorRouteSetupImpl(
 	}
 
 
-	fun route(path: String, vararg tags: Any = emptyArray(), config: RaptorKtorRouteSetup.() -> Unit) {
+	fun route(path: String, vararg tags: Any = emptyArray(), config: RaptorKtorRouteComponent.() -> Unit) {
 		routes.create(path = path, tags = *tags, config = config)
 	}
 
 
 	// FIXME generalize so that code between server routes and child routes can be reused
-	override fun RaptorSetupComponentCollection<RaptorKtorRouteSetup>.create(path: String, vararg tags: Any, config: RaptorKtorRouteSetup.() -> Unit) {
+	override fun RaptorComponentCollection<RaptorKtorRouteComponent>.create(path: String, vararg tags: Any, config: RaptorKtorRouteComponent.() -> Unit) {
 		val setup = RaptorKtorRouteSetupImpl(
 			path = path, // FIXME subpath
 			parent = this@RaptorKtorRouteSetupImpl
 		)
 
 		routeSetups += setup
-		raptorSetupContext.register<RaptorKtorRouteSetup>(setup = setup, tags = *tags, config = config)
+		raptorSetupContext.register<RaptorKtorRouteComponent>(setup = setup, tags = *tags, config = config)
 	}
 }

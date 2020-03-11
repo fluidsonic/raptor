@@ -1,20 +1,22 @@
 package io.fluidsonic.raptor
 
-import io.fluidsonic.raptor.configuration.*
-
 
 object BsonRaptorFeature : RaptorFeature {
 
 	override fun RaptorFeatureSetup.setup() {
-		raptorSetupContext.register(BsonRaptorSetup())
+		raptorSetupContext.register(BsonRaptorComponent())
 
 		// FIXME bind CodecRegistry
 	}
 }
 
 
-fun RaptorFeatureSetup.bson(config: BsonRaptorSetup.() -> Unit) {
-	install(BsonRaptorFeature) // FIXME check duplicates
+// FIXME is it okay to automatically register the feature?
+// FIXME component naming
+@Raptor.Dsl3
+val RaptorFeatureSetup.bson
+	get(): RaptorConfigurable<BsonRaptorComponent> {
+		install(BsonRaptorFeature) // FIXME check duplicates
 
-	raptorSetupContext.configure(config)
-}
+		return raptorSetupContext.getOrCreateComponent { BsonRaptorComponent() }
+	}

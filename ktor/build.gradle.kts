@@ -6,7 +6,7 @@ fluidJvmLibraryVariant(JvmTarget.jdk8) {
 }
 
 dependencies {
-	api(project(":"))
+	api(project(":raptor-core"))
 
 	api(ktor("auth-jwt"))
 	api(ktor("server-netty"))
@@ -21,11 +21,6 @@ tasks {
 		}
 	}
 }
-
-// FIXME
-//repositories {
-//	bintray("kotlin/ktor")
-//}
 
 
 @Suppress("unused")

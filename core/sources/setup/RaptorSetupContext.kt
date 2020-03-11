@@ -6,11 +6,6 @@ import kotlin.reflect.*
 // FIXME
 class RaptorSetupContext internal constructor() {
 
-	fun <Setup : Any> collection(setupClass: KClass<Setup>): RaptorSetupComponentCollection<Setup> {
-		TODO()
-	}
-
-
 	fun <Setup : Any> configure(setupClass: KClass<Setup>, config: Setup.() -> Unit) {
 		TODO()
 	}
@@ -22,12 +17,18 @@ class RaptorSetupContext internal constructor() {
 }
 
 
-inline fun <reified Setup : Any> RaptorSetupContext.collection() =
-	collection(setupClass = Setup::class)
-
-
 inline fun <reified Setup : Any> RaptorSetupContext.configure(noinline config: Setup.() -> Unit) =
 	configure(setupClass = Setup::class, config = config)
+
+
+inline fun <reified Component : RaptorComponent> RaptorSetupContext.getOrCreateComponent(
+	noinline create: () -> Component
+): RaptorConfigurable<Component> =
+	TODO()
+
+
+inline fun <reified Component : RaptorComponent> RaptorSetupContext.getOrCreateComponentCollection(): RaptorConfigurableCollection<Component> =
+	TODO()
 
 
 inline fun <reified Setup : Any> RaptorSetupContext.register(

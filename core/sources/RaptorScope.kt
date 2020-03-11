@@ -3,6 +3,7 @@ package io.fluidsonic.raptor
 import org.kodein.di.*
 
 
+@Raptor.Dsl3
 interface RaptorScope : DKodeinAware {
 
 	// FIXME move as this will bleed into every scope
@@ -10,8 +11,10 @@ interface RaptorScope : DKodeinAware {
 }
 
 
-//// FIXME move as this will bleed into every scope
-//suspend inline fun <Result> RaptorScope.transaction(block: RaptorTransactionScope.() -> Result): Result {
+// FIXME move as this will bleed into every scope
+suspend inline fun <Result> RaptorScope.withNewTransaction(block: RaptorTransactionScope.() -> Result): Result {
+	TODO()
+//
 //	val transaction = beginTransaction()
 //	transaction.start()
 //
@@ -36,4 +39,4 @@ interface RaptorScope : DKodeinAware {
 //		else
 //			transaction.stop()
 //	}
-//}
+}

@@ -1,12 +1,11 @@
 package io.fluidsonic.raptor
 
-import io.fluidsonic.raptor.configuration.*
 
-
+@Raptor.Dsl3
 object KtorRaptorFeature : RaptorFeature {
 
-	override fun RaptorFeatureCompletion.complete() {
-		raptorSetupContext.configure<RaptorKtorSetupImpl> { // FIXME hack
+	override fun RaptorFeatureSetupCompletion.completeSetup() {
+		raptorSetupContext.configure<RaptorKtorComponent> { // FIXME hack
 			val config = complete()
 			val servers = config.servers.map(::RaptorKtorServerImpl)
 			if (servers.isNotEmpty()) {
@@ -26,9 +25,10 @@ object KtorRaptorFeature : RaptorFeature {
 
 
 // FIXME de-dup
-fun RaptorFeatureSetup.ktor(config: RaptorKtorSetup.() -> Unit) {
-	val setup = RaptorKtorSetupImpl(parent = this)
+@Raptor.Dsl3
+fun RaptorFeatureSetup.ktor(config: RaptorConfigurable<RaptorKtorComponent>.() -> Unit) {
+	val setup = RaptorKtorComponent(parent = this)
 
-	raptorSetupContext.register<RaptorKtorSetup>(setup = setup, config = config)
+	raptorSetupContext.register<RaptorKtorComponent>(setup = setup, config = config)
 	raptorSetupContext.register(setup = setup, config = config)
 }

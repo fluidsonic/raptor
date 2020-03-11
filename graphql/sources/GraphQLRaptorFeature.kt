@@ -28,8 +28,8 @@ object GraphQLRaptorFeature : RaptorKtorRouteFeature {
 	)
 
 
-	override fun RaptorFeatureSetup.setup(scope: RaptorKtorRouteSetup) {
-		raptorSetupContext.register(GraphQLRaptorSetup())
+	override fun RaptorFeatureSetup.setup(scope: RaptorKtorRouteComponent) {
+		raptorSetupContext.register(GraphRaptorComponent())
 
 //		custom {
 //			get {
@@ -51,19 +51,8 @@ object GraphQLRaptorFeature : RaptorKtorRouteFeature {
 }
 
 
-fun RaptorKtorRouteSetup.graphql(config: GraphQLRaptorSetup.() -> Unit) {
-	install(GraphQLRaptorFeature) // FIXME check duplicates
-
-	raptorSetupContext.configure(config)
-}
-
-
-fun RaptorFeatureSetup.graphql(config: GraphQLRaptorSetup.() -> Unit) {
-	ktor {
-		servers.all {
-			routes.all {
-				graphql(config = config)
-			}
-		}
+@Raptor.Dsl3
+val RaptorFeatureSetup.graph
+	get(): RaptorConfigurableCollection<GraphRaptorComponent> {
+		return raptorSetupContext.getComponentCollection<GraphRaptorComponent>()
 	}
-}

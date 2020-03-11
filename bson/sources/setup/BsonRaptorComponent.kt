@@ -4,23 +4,18 @@ import io.fluidsonic.stdlib.*
 import io.fluidsonic.time.*
 
 
-class BsonRaptorSetup internal constructor() {
+@Raptor.Dsl3
+class BsonRaptorComponent internal constructor() : RaptorComponent {
 
-	private val definitions = defaultDefinitions.toMutableList()
+	internal val definitions = defaultDefinitions.toMutableList()
+
+	override val raptorSetupContext: RaptorSetupContext
+		get() = TODO()
 
 
 	internal fun complete() = BsonRaptorConfig(
 		definitions = definitions
 	)
-
-
-	fun definitions(vararg definitions: RaptorBsonDefinition<*>) =
-		definitions(definitions.asIterable())
-
-
-	fun definitions(definitions: Iterable<RaptorBsonDefinition<*>>) {
-		this.definitions += definitions
-	}
 
 
 	companion object {
@@ -42,5 +37,19 @@ class BsonRaptorSetup internal constructor() {
 			TimeZone.bsonDefinition()
 			//Url.bsonDefinition() // FIXME requires ktor
 		)
+	}
+}
+
+
+@Raptor.Dsl3
+fun RaptorConfigurable<BsonRaptorComponent>.definitions(vararg definitions: RaptorBsonDefinition<*>) {
+	definitions(definitions.asIterable())
+}
+
+
+@Raptor.Dsl3
+fun RaptorConfigurable<BsonRaptorComponent>.definitions(definitions: Iterable<RaptorBsonDefinition<*>>) {
+	forEachComponent {
+		this.definitions += definitions
 	}
 }

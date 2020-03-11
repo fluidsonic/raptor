@@ -15,7 +15,7 @@ internal fun TypedId.Companion.bsonDefinition(factoryProvider: EntityIdFactoryPr
 	decode {
 		readDocument {
 			val factory = readString("type").let { type ->
-				factoryProvider.idFactoryForType(type) ?: throw BsonException("ID type '$type' has not been registered with Baku")
+				factoryProvider.idFactoryForType(type) ?: throw BsonException("ID type '$type' has not been registered with Raptor")
 			}
 
 			readName("id")

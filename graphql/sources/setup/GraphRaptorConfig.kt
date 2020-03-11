@@ -1,6 +1,6 @@
 package io.fluidsonic.raptor
 
 
-internal class GraphQLRaptorConfig(
+internal class GraphRaptorConfig(
 	val definitions: Collection<RaptorGraphDefinition> // FIXME rn Raptor
 )
