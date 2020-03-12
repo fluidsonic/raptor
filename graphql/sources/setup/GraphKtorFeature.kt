@@ -9,7 +9,7 @@ import org.kodein.di.erased.*
 // FIXME does this have to be a feature?
 object GraphKtorFeature : KtorRouteFeature {
 
-	override fun RaptorFeatureComponent.setup(target: RaptorConfigurable<KtorRouteRaptorComponent>) {
+	override fun RaptorFeatureSetup.setup(target: RaptorConfigurable<KtorRouteRaptorComponent>) {
 		// FIXME scope to local and add global as option?!
 
 		target {
@@ -46,7 +46,7 @@ object GraphKtorFeature : KtorRouteFeature {
 
 
 @Raptor.Dsl3
-val RaptorFeatureComponent.graphs: RaptorConfigurableCollection<GraphRaptorComponent>
+val RaptorConfigurable<RaptorFeatureComponent>.graphs: RaptorConfigurableCollection<GraphRaptorComponent>
 	get() = raptorComponentRegistry.configureAll()
 
 

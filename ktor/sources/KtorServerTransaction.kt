@@ -1,4 +1,7 @@
 package io.fluidsonic.raptor
 
 
-interface KtorServerTransaction : RaptorTransaction
+interface KtorServerTransaction : RaptorTransaction {
+
+	override val context: KtorServerTransactionContext
+}

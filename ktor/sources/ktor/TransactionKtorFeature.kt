@@ -4,11 +4,8 @@ import io.ktor.application.*
 import io.ktor.util.*
 
 
-private val transactionKtorAttributeKey = AttributeKey<KtorServerTransactionImpl>("Raptor: transaction")
-
-
 internal class RaptorTransactionKtorFeature(
-	private val server: KtorServer
+	private val scope: KtorServerScopeImpl
 ) : ApplicationFeature<ApplicationCallPipeline, Unit, Unit> {
 
 	override val key = AttributeKey<Unit>("Raptor: transaction feature")
@@ -19,29 +16,20 @@ internal class RaptorTransactionKtorFeature(
 		Unit.configure()
 
 		pipeline.intercept(ApplicationCallPipeline.Setup) {
-			val transaction = server.beginTransaction()
-			var exception: Throwable? = null
+			val transaction = scope.context.createTransaction()
+			call.attributes.put(transactionAttributeKey, transaction)
 
 			try {
-				call.attributes.put(transactionKtorAttributeKey, transaction)
-			}
-			catch (e: Throwable) {
-				exception = e
-
-				throw e
+				proceed()
 			}
 			finally {
-				try {
-					transaction.complete()
-				}
-				catch (e: Throwable) {
-					if (exception != null) exception.addSuppressed(e)
-					else throw e
-				}
-				finally {
-					call.attributes.remove(transactionKtorAttributeKey)
-				}
+				call.attributes.remove(transactionAttributeKey)
 			}
 		}
+	}
+
+	companion object {
+
+		private val transactionAttributeKey = AttributeKey<KtorServerTransactionImpl>("Raptor: transaction")
 	}
 }

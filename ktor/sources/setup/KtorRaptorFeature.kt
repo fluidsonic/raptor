@@ -1,12 +1,14 @@
 package io.fluidsonic.raptor
 
+import org.kodein.di.erased.*
+
 
 @Raptor.Dsl3
 object KtorRaptorFeature : RaptorFeature {
 
-	override fun RaptorFeatureComponent.setup() {
+	override fun RaptorFeatureSetup.setup() {
 		raptorComponentRegistry.register(KtorRaptorComponent(
-			featureComponent = this
+			featureSetup = this
 		))
 	}
 
@@ -14,15 +16,24 @@ object KtorRaptorFeature : RaptorFeature {
 	override fun RaptorFeatureSetupCompletion.completeSetup() {
 		val config = component<KtorRaptorComponent>()?.complete() ?: return
 
-		val servers = config.servers.map(::KtorServer)
-		if (servers.isNotEmpty()) {
+		if (config.servers.isNotEmpty()) {
+			for (serverConfig in config.servers)
+				kodein {
+					bind<KtorServerImpl>(tag = serverConfig) with singleton {
+						KtorServerImpl(
+							config = serverConfig,
+							parentContext = instance()
+						)
+					}
+				}
+
 			onStart {
-				for (server in servers)
+				for (server in allInstances<KtorServerImpl>())
 					server.start()
 			}
 
 			onStop {
-				for (server in servers)
+				for (server in allInstances<KtorServerImpl>())
 					server.stop()
 			}
 		}
@@ -31,7 +42,7 @@ object KtorRaptorFeature : RaptorFeature {
 
 
 @Raptor.Dsl3
-val RaptorFeatureComponent.ktor: RaptorConfigurable<KtorRaptorComponent>
+val RaptorConfigurable<RaptorFeatureComponent>.ktor: RaptorConfigurable<KtorRaptorComponent>
 	get() {
 		install(KtorRaptorFeature) // FIXME check duplicates
 

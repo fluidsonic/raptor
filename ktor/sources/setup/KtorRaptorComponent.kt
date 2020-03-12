@@ -2,7 +2,7 @@ package io.fluidsonic.raptor
 
 
 class KtorRaptorComponent internal constructor(
-	internal val featureComponent: RaptorFeatureComponent
+	internal val featureSetup: RaptorFeatureSetup
 ) : RaptorComponent {
 
 	internal val serverComponents: MutableList<KtorServerRaptorComponent> = mutableListOf()
@@ -23,7 +23,7 @@ fun RaptorConfigurable<KtorRaptorComponent>.newServer(
 
 	raptorComponentConfiguration {
 		val component = KtorServerRaptorComponent(
-			featureComponent = featureComponent,
+			featureSetup = featureSetup,
 			raptorTags = tags.toHashSet()
 		)
 		serverComponents += component

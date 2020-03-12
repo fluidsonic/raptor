@@ -1,20 +1,12 @@
 package io.fluidsonic.raptor
 
-import kotlinx.atomicfu.*
-
 
 internal class KtorServerTransactionImpl(
-	private val parentScope: KtorServerScope
+	parentContext: KtorServerContextImpl
 ) : KtorServerTransaction {
 
-	private val isCompleteRef = atomic(false)
-
-
-	override fun complete() {
-		check(isCompleteRef.compareAndSet(expect = false, update = true)) { "Transaction is already complete." }
-	}
-
-
-	override val isComplete
-		get() = isCompleteRef.value
+	override val context = KtorServerTransactionContextImpl(
+		dkodein = parentContext.dkodein, // FIXME create own
+		parentContext = parentContext
+	)
 }

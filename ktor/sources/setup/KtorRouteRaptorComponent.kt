@@ -5,13 +5,14 @@ import org.kodein.di.*
 
 
 class KtorRouteRaptorComponent internal constructor(
-	internal val featureComponent: RaptorFeatureComponent,
+	internal val featureSetup: RaptorFeatureSetup,
 	private val path: String,
 	override val raptorTags: Set<Any>
-) : RaptorComponent.Taggable {
+) : RaptorComponent.KodeinBoundary, RaptorComponent.Taggable {
+
+	private val kodeinConfigs = mutableListOf<Kodein.Builder.() -> Unit>()
 
 	internal val customConfigs = mutableListOf<Route.() -> Unit>()
-	internal val kodeinConfigs = mutableListOf<Kodein.Builder.() -> Unit>()
 	internal val routeComponents = mutableListOf<KtorRouteRaptorComponent>()
 	internal var wrapper: (Route.(next: Route.() -> Unit) -> Route)? = null
 
@@ -35,6 +36,11 @@ class KtorRouteRaptorComponent internal constructor(
 			wrapper = wrapper
 		)
 	}
+
+
+	override fun kodein(configure: Kodein.Builder.() -> Unit) {
+		kodeinConfigs += configure
+	}
 }
 
 
@@ -52,16 +58,8 @@ fun RaptorConfigurable<KtorRouteRaptorComponent>.install(feature: KtorRouteFeatu
 
 	raptorComponentConfiguration {
 		with(feature) {
-			featureComponent.setup(target = target)
+			featureSetup.setup(target = target)
 		}
-	}
-}
-
-
-@Raptor.Dsl3
-fun RaptorConfigurable<KtorRouteRaptorComponent>.kodein(configure: Kodein.Builder.() -> Unit) { // FIXME make own API
-	raptorComponentConfiguration {
-		kodeinConfigs += configure
 	}
 }
 
@@ -76,7 +74,7 @@ fun RaptorConfigurable<KtorRouteRaptorComponent>.newRoute(
 
 	raptorComponentConfiguration {
 		val component = KtorRouteRaptorComponent(
-			featureComponent = featureComponent,
+			featureSetup = featureSetup,
 			path = path,
 			raptorTags = tags.toHashSet()
 		)

@@ -1,5 +1,3 @@
-@file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
-
 package io.fluidsonic.raptor
 
 
@@ -34,44 +32,4 @@ interface RaptorConfigurable<out Component : RaptorComponent> {
 @Raptor.Dsl3
 operator fun <Configurable : RaptorConfigurable<*>> Configurable.invoke(configure: Configurable.() -> Unit) {
 	configure()
-}
-
-
-@kotlin.internal.LowPriorityInOverloadResolution
-@Raptor.Dsl3
-fun <Component : RaptorComponent.Taggable> RaptorConfigurable<Component>.withTag(
-	tag: Any
-) =
-	withTags(tag)
-
-
-@kotlin.internal.LowPriorityInOverloadResolution
-@Raptor.Dsl3
-fun <Component : RaptorComponent.Taggable> RaptorConfigurable<Component>.withTag(
-	tag: Any,
-	configure: RaptorConfigurable<Component>.() -> Unit
-) {
-	withTag(tag).invoke(configure)
-}
-
-
-@kotlin.internal.LowPriorityInOverloadResolution
-@Raptor.Dsl3
-fun <Component : RaptorComponent.Taggable> RaptorConfigurable<Component>.withTags(
-	vararg tags: Any
-): RaptorConfigurable<Component> {
-	@Suppress("NAME_SHADOWING")
-	val tags = tags.toHashSet()
-
-	return raptorComponentFilter { it.raptorTags.containsAll(tags) }
-}
-
-
-@kotlin.internal.LowPriorityInOverloadResolution
-@Raptor.Dsl3
-fun <Component : RaptorComponent.Taggable> RaptorConfigurable<Component>.withTags(
-	vararg tags: Any,
-	configure: RaptorConfigurable<Component>.() -> Unit
-) {
-	withTags(*tags).invoke(configure)
 }

@@ -4,31 +4,43 @@ import org.kodein.di.*
 
 
 @Raptor.Dsl3
-interface RaptorFeatureComponent : RaptorComponent {
+open class RaptorFeatureComponent internal constructor() : RaptorComponent.TransactionBoundary<RaptorTransaction> {
 
-	val raptorComponentRegistry: RaptorComponentRegistry
+	internal val features: MutableSet<RaptorFeature> = mutableSetOf()
+	internal val kodeinConfigs: MutableList<Kodein.Builder.() -> Unit> = mutableListOf()
+	internal val startCallbacks: MutableList<suspend RaptorScope.() -> Unit> = mutableListOf()
+	internal val stopCallbacks: MutableList<suspend RaptorScope.() -> Unit> = mutableListOf()
 
-
-	@Raptor.Dsl3
-	fun install(feature: RaptorFeature)
-
-	@Raptor.Dsl3
-	fun kodein(config: Kodein.Builder.() -> Unit)
 
 	@Raptor.Dsl3
-	fun onStart(callback: suspend RaptorScope.() -> Unit)
-
-	@Raptor.Dsl3
-	fun onStop(callback: suspend RaptorScope.() -> Unit)
+	override fun kodein(configure: Kodein.Builder.() -> Unit) {
+		kodeinConfigs += configure
+	}
 }
 
 
-// FIXME move to relevant file
 @Raptor.Dsl3
-fun RaptorFeatureComponent.transactions(configure: RaptorTransactionSetup.() -> Unit) {
-	raptorComponentRegistry.configureSingleOrCreate(::RaptorTransactionConfigurationComponent) {
-		raptorComponentConfiguration {
-			add(configure)
-		}
+fun RaptorConfigurable<RaptorFeatureComponent>.install(feature: RaptorFeature) {
+	raptorComponentConfiguration {
+		if (features.add(feature))
+			with(feature) {
+				this@install.setup()
+			}
+	}
+}
+
+
+@Raptor.Dsl3
+fun RaptorConfigurable<RaptorFeatureComponent>.onStart(callback: suspend RaptorScope.() -> Unit) {
+	raptorComponentConfiguration {
+		startCallbacks += callback
+	}
+}
+
+
+@Raptor.Dsl3
+fun RaptorConfigurable<RaptorFeatureComponent>.onStop(callback: suspend RaptorScope.() -> Unit) {
+	raptorComponentConfiguration {
+		stopCallbacks += callback
 	}
 }

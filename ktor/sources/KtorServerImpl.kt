@@ -13,26 +13,18 @@ import org.slf4j.event.*
 import java.util.concurrent.*
 
 
-internal class KtorServer(
-	private val config: KtorServerConfig
-) : KtorServerScope, DKodeinAware { // FIXME hmm
+internal class KtorServerImpl(
+	private val config: KtorServerConfig,
+	parentContext: RaptorContext
+) {
 
-	private val ktorEnvironment = commandLineEnvironment(arrayOf())
-	private var engine = embeddedServer(Netty, ktorEnvironment)
+	private var engine = embeddedServer(Netty, commandLineEnvironment(arrayOf()))
 	private val stateRef = atomic(State.initial)
 
-	override val dkodein = Kodein.direct { import(config.kodeinModule) }
-
-
-	override fun beginTransaction(): KtorServerTransactionImpl { // FIXME here?
-		val transaction = KtorServerTransactionImpl(
-			parentScope = this
-		)
-
-		// FIXME how access transaction config and call all onStart?
-
-		return transaction
-	}
+	val context = KtorServerContextImpl(
+		dkodein = Kodein.direct { import(config.kodeinModule) },
+		parentContext = parentContext
+	)
 
 
 	suspend fun start() {
@@ -57,7 +49,7 @@ internal class KtorServer(
 		var exception: Throwable? = null
 
 		// Engine is created before monitoring the start event because Netty's subscriptions must be processed first.
-		val subscription = ktorEnvironment.monitor.subscribe(ApplicationStarting) { application ->
+		val subscription = engine.environment.monitor.subscribe(ApplicationStarting) { application ->
 			try {
 				application.configure()
 			}
@@ -124,8 +116,7 @@ internal class KtorServer(
 
 		install(XForwardedHeaderSupport)
 		install(EncryptionEnforcementKtorFeature)
-
-		install(RaptorTransactionKtorFeature(server = this@KtorServer))
+		install(RaptorTransactionKtorFeature(scope = context.createScope()))
 
 		config.customConfig(this)
 

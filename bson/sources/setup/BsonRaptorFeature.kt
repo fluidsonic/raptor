@@ -6,7 +6,7 @@ import org.kodein.di.erased.*
 
 object BsonRaptorFeature : RaptorFeature {
 
-	override fun RaptorFeatureComponent.setup() {
+	override fun RaptorFeatureSetup.setup() {
 		raptorComponentRegistry.register(BsonRaptorComponent())
 	}
 
@@ -34,7 +34,7 @@ object BsonRaptorFeature : RaptorFeature {
 
 // FIXME is it okay to automatically register the feature?
 @Raptor.Dsl3
-val RaptorFeatureComponent.bson: RaptorConfigurable<BsonRaptorComponent>
+val RaptorConfigurable<RaptorFeatureComponent>.bson: RaptorConfigurable<BsonRaptorComponent>
 	get() {
 		install(BsonRaptorFeature) // FIXME check duplicates
 

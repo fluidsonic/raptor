@@ -5,12 +5,13 @@ import org.kodein.di.*
 
 
 class KtorServerRaptorComponent internal constructor(
-	internal val featureComponent: RaptorFeatureComponent,
+	internal val featureSetup: RaptorFeatureSetup,
 	override val raptorTags: Set<Any>
-) : RaptorComponent.Taggable {
+) : RaptorComponent.Taggable, RaptorComponent.TransactionBoundary<KtorServerTransaction> {
+
+	private val kodeinConfigs = mutableListOf<Kodein.Builder.() -> Unit>()
 
 	internal val customConfigs = mutableListOf<Application.() -> Unit>()
-	internal val kodeinConfigs = mutableListOf<Kodein.Builder.() -> Unit>()
 	internal val routeComponents = mutableListOf<KtorRouteRaptorComponent>()
 
 
@@ -41,6 +42,11 @@ class KtorServerRaptorComponent internal constructor(
 			routingConfig = routingConfig
 		)
 	}
+
+
+	override fun kodein(configure: Kodein.Builder.() -> Unit) {
+		kodeinConfigs += configure
+	}
 }
 
 
@@ -58,16 +64,8 @@ fun RaptorConfigurable<KtorServerRaptorComponent>.install(feature: KtorServerFea
 
 	raptorComponentConfiguration {
 		with(feature) {
-			featureComponent.setup(target = target)
+			featureSetup.setup(target = target)
 		}
-	}
-}
-
-
-@Raptor.Dsl3
-fun RaptorConfigurable<KtorServerRaptorComponent>.kodein(configure: Kodein.Builder.() -> Unit) { // FIXME make own API
-	raptorComponentConfiguration {
-		kodeinConfigs += configure
 	}
 }
 
@@ -91,7 +89,7 @@ fun RaptorConfigurable<KtorServerRaptorComponent>.newRoute(
 
 	raptorComponentConfiguration {
 		val component = KtorRouteRaptorComponent(
-			featureComponent = featureComponent,
+			featureSetup = featureSetup,
 			path = path,
 			raptorTags = tags.toHashSet()
 		)
