@@ -5,6 +5,7 @@ import org.kodein.di.*
 
 internal class RaptorSetupImpl : RaptorSetup {
 
+	private val features: MutableSet<RaptorFeature> = mutableSetOf()
 	private val kodeinConfigs: MutableList<Kodein.Builder.() -> Unit> = mutableListOf()
 	private val startCallbacks: MutableList<suspend RaptorScope.() -> Unit> = mutableListOf()
 	private val stopCallbacks: MutableList<suspend RaptorScope.() -> Unit> = mutableListOf()
@@ -29,8 +30,10 @@ internal class RaptorSetupImpl : RaptorSetup {
 	)
 
 
-	// FIXME duplicates
 	override fun install(feature: RaptorFeature) {
+		if (!features.add(feature))
+			return
+
 		with(feature) {
 			setup()
 		}

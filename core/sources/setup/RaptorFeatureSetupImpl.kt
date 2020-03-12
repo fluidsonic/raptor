@@ -8,6 +8,7 @@ class RaptorFeatureSetupImpl internal constructor(
 	context: RaptorComponentRegistry
 ) : RaptorFeatureComponent {
 
+	private val features: MutableSet<RaptorFeature> = mutableSetOf()
 	private val kodeinConfigs: MutableList<Kodein.Builder.() -> Unit> = mutableListOf()
 	private val startCallbacks: MutableList<suspend RaptorScope.() -> Unit> = mutableListOf()
 	private val stopCallbacks: MutableList<suspend RaptorScope.() -> Unit> = mutableListOf()
@@ -15,8 +16,10 @@ class RaptorFeatureSetupImpl internal constructor(
 	override val raptorComponentRegistry = context
 
 
-	// FIXME duplicates
 	override fun install(feature: RaptorFeature) {
+		if (!features.add(feature))
+			return
+
 		with(feature) {
 			setup()
 		}

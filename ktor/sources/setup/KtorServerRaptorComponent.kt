@@ -30,7 +30,8 @@ class KtorServerRaptorComponent internal constructor(
 					children = it,
 					kodeinModule = kodeinModule,
 					customConfig = {},
-					path = ""
+					path = "",
+					wrapper = null
 				)
 			}
 
@@ -92,7 +93,7 @@ fun RaptorConfigurable<KtorServerRaptorComponent>.newRoute(
 		val component = KtorRouteRaptorComponent(
 			featureComponent = featureComponent,
 			path = path,
-			raptorTags = tags.toSet()
+			raptorTags = tags.toHashSet()
 		)
 		routeComponents += component
 

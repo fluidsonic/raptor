@@ -8,5 +8,6 @@ internal class KtorRouteConfig(
 	val children: List<KtorRouteConfig>,
 	val customConfig: Route.() -> Unit,
 	val kodeinModule: Kodein.Module,
-	val path: String
+	val path: String,
+	val wrapper: (Route.(next: Route.() -> Unit) -> Route)?
 )

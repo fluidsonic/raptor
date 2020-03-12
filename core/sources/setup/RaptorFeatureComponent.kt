@@ -24,6 +24,11 @@ interface RaptorFeatureComponent : RaptorComponent {
 
 
 // FIXME move to relevant file
-val RaptorFeatureComponent.transactions
-	get(): RaptorConfigurableCollection<RaptorTransactionComponent> =
-		TODO()
+@Raptor.Dsl3
+fun RaptorFeatureComponent.transactions(configure: RaptorTransactionSetup.() -> Unit) {
+	raptorComponentRegistry.configureSingleOrCreate(::RaptorTransactionConfigurationComponent) {
+		raptorComponentConfiguration {
+			add(configure)
+		}
+	}
+}

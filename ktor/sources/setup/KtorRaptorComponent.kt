@@ -24,7 +24,7 @@ fun RaptorConfigurable<KtorRaptorComponent>.newServer(
 	raptorComponentConfiguration {
 		val component = KtorServerRaptorComponent(
 			featureComponent = featureComponent,
-			raptorTags = tags.toSet()
+			raptorTags = tags.toHashSet()
 		)
 		serverComponents += component
 

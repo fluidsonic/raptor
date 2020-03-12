@@ -18,7 +18,7 @@ internal class RaptorImpl(
 
 
 	override suspend fun start() {
-		check(stateRef.compareAndSet(expect = State.stopped, update = State.starting)) { "Cannot start Raptor unless it's in 'stopped' state." }
+		check(stateRef.compareAndSet(expect = State.initial, update = State.starting)) { "Cannot start Raptor unless it's in 'stopped' state." }
 
 		with(scope) {
 			for (callback in this@RaptorImpl.config.startCallbacks) // FIXME get rid of this@RaptorImpl.

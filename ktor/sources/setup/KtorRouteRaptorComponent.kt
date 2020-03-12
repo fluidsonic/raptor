@@ -13,6 +13,7 @@ class KtorRouteRaptorComponent internal constructor(
 	internal val customConfigs = mutableListOf<Route.() -> Unit>()
 	internal val kodeinConfigs = mutableListOf<Kodein.Builder.() -> Unit>()
 	internal val routeComponents = mutableListOf<KtorRouteRaptorComponent>()
+	internal var wrapper: (Route.(next: Route.() -> Unit) -> Route)? = null
 
 
 	internal fun complete(): KtorRouteConfig {
@@ -30,7 +31,8 @@ class KtorRouteRaptorComponent internal constructor(
 			children = children,
 			customConfig = customConfig,
 			kodeinModule = kodeinModule,
-			path = path
+			path = path,
+			wrapper = wrapper
 		)
 	}
 }
@@ -76,7 +78,7 @@ fun RaptorConfigurable<KtorRouteRaptorComponent>.newRoute(
 		val component = KtorRouteRaptorComponent(
 			featureComponent = featureComponent,
 			path = path,
-			raptorTags = tags.toSet()
+			raptorTags = tags.toHashSet()
 		)
 		routeComponents += component
 
@@ -92,5 +94,13 @@ val RaptorConfigurable<KtorRouteRaptorComponent>.routes: RaptorConfigurableColle
 
 @Raptor.Dsl3
 fun RaptorConfigurable<KtorRouteRaptorComponent>.wrap(wrapper: Route.(next: Route.() -> Unit) -> Route) {
-	TODO()
+	raptorComponentConfiguration {
+		val previousWrapper = this.wrapper
+		if (previousWrapper != null)
+			this.wrapper = { next ->
+				previousWrapper { wrapper(next) }
+			}
+		else
+			this.wrapper = wrapper
+	}
 }

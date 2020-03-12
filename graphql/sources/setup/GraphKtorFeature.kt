@@ -59,7 +59,7 @@ fun RaptorConfigurable<KtorRouteRaptorComponent>.newGraph(
 
 	// FIXME fail on duplicate
 	raptorComponentRegistry.register(
-		component = GraphRaptorComponent(raptorTags = tags.toSet()),
+		component = GraphRaptorComponent(raptorTags = tags.toHashSet()),
 		configure = configure
 	)
 }
