@@ -19,11 +19,14 @@ class KtorRouteRaptorComponent internal constructor(
 	internal var wrapper: (Route.(next: Route.() -> Unit) -> Route)? = null
 
 
-	internal fun complete(serverCompletion: KtorServerFeatureSetupCompletion): KtorRouteConfig {
+	internal fun complete(
+		componentRegistry: RaptorComponentRegistry,
+		serverCompletion: KtorServerFeatureSetupCompletion
+	): KtorRouteConfig {
 		// FIXME check/clean path
 
 		val completion = KtorRouteFeatureSetupCompletion(
-			componentRegistry = serverCompletion.server.componentRegistry.getSingle(this).registry,
+			componentRegistry = componentRegistry,
 			serverCompletion = serverCompletion
 		)
 
@@ -42,7 +45,10 @@ class KtorRouteRaptorComponent internal constructor(
 
 		val customConfig = customConfigs.flatten()
 		val children = routeComponents.map { routeComponent ->
-			routeComponent.complete(serverCompletion = serverCompletion)
+			routeComponent.complete(
+				componentRegistry = componentRegistry.getSingle(routeComponent).registry,
+				serverCompletion = serverCompletion
+			)
 		}
 
 		return KtorRouteConfig(

@@ -5,6 +5,8 @@ import kotlin.reflect.*
 
 interface RaptorComponentRegistry {
 
+	val parent: RaptorComponentRegistry?
+
 	fun <Component : RaptorComponent> getAll(clazz: KClass<Component>): List<RaptorComponentRegistration<Component>>
 
 	fun <Component : RaptorComponent> getSingle(clazz: KClass<Component>): RaptorComponentRegistration<Component>?
@@ -13,6 +15,8 @@ interface RaptorComponentRegistry {
 
 
 	interface Mutable : RaptorComponentRegistry {
+
+		override val parent: Mutable?
 
 		fun <Component : RaptorComponent> configureAll(clazz: KClass<Component>): RaptorComponentScope.Collection<Component>
 

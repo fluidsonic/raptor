@@ -11,4 +11,4 @@ val KtorServerFeatureSetup.global
 
 @Raptor.Dsl3
 val KtorServerFeatureSetup.server
-	get() = raptorComponentSelection.map { registry.configureSingle(component.serverComponent) }
+	get() = raptorComponentSelection.map { containingRegistry.parent!!.configureSingle(component.serverComponent) }

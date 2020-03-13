@@ -17,8 +17,9 @@ class KtorServerRaptorComponent internal constructor(
 
 
 	internal fun complete(globalCompletion: RaptorFeatureSetupCompletion): KtorServerConfig {
+		val componentRegistry = globalCompletion.componentRegistry.getSingle(this).registry
 		val completion = KtorServerFeatureSetupCompletion(
-			componentRegistry = globalCompletion.componentRegistry.getSingle(this).registry,
+			componentRegistry = componentRegistry,
 			globalCompletion = globalCompletion
 		)
 
@@ -28,7 +29,10 @@ class KtorServerRaptorComponent internal constructor(
 			}
 
 		val routeConfigs = routeComponents.map { routeComponent ->
-			routeComponent.complete(serverCompletion = completion)
+			routeComponent.complete(
+				componentRegistry = componentRegistry.getSingle(routeComponent).registry,
+				serverCompletion = completion
+			)
 		}
 
 		val kodeinModule = Kodein.Module(name = "raptor/server") { // FIXME server id

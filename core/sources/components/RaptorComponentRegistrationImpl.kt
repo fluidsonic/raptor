@@ -1,8 +1,9 @@
 package io.fluidsonic.raptor
 
 
-internal class RaptorComponentRegistrationImpl<out Component : RaptorComponent>(
+internal class RaptorComponentRegistrationImpl<out Component : RaptorComponent> private constructor(
 	override val component: Component,
+	override val containingRegistry: RaptorComponentRegistryImpl,
 	override val registry: RaptorComponentRegistryImpl
 ) : RaptorComponentRegistration.Mutable<Component>, RaptorComponentScope.Collection<Component>, RaptorComponentScope.Selection.Collection<Component> {
 
@@ -38,14 +39,15 @@ internal class RaptorComponentRegistrationImpl<out Component : RaptorComponent>(
 
 		fun addComponent(
 			component: Component,
+			containingRegistry: RaptorComponentRegistryImpl,
 			registry: RaptorComponentRegistryImpl
 		): RaptorComponentRegistrationImpl<Component> {
-			registrations.firstOrNull { it.component === component }?.let { existingRegistration ->
-				error("Cannot register component of ${component::class} since it has already been registered: ${existingRegistration.component}")
-			}
+			if (registrations.any { it.component === component })
+				error("Cannot register component of ${component::class} since it has already been registered: $component")
 
 			val registration = RaptorComponentRegistrationImpl(
 				component = component,
+				containingRegistry = containingRegistry,
 				registry = registry
 			)
 			registrations += registration

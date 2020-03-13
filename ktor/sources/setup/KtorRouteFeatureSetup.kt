@@ -11,10 +11,9 @@ val KtorRouteFeatureSetup.global
 
 @Raptor.Dsl3
 val KtorRouteFeatureSetup.route
-	get() = raptorComponentSelection.map { registry.configureSingle(component.routeComponent) }
-// FIXME crash here because registry points to children but we query the component itself which is in the parent registry!
+	get() = raptorComponentSelection.map { containingRegistry.parent!!.configureSingle(component.routeComponent) }
 
 
 @Raptor.Dsl3
 val KtorRouteFeatureSetup.server
-	get() = raptorComponentSelection.map { registry.configureSingle(component.serverComponent) }
+	get() = raptorComponentSelection.map { containingRegistry.parent!!.configureSingle(component.serverComponent) }

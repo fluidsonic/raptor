@@ -3,7 +3,9 @@ package io.fluidsonic.raptor
 import kotlin.reflect.*
 
 
-internal class RaptorComponentRegistryImpl : RaptorComponentRegistry.Mutable {
+internal class RaptorComponentRegistryImpl(
+	override val parent: RaptorComponentRegistry.Mutable? = null
+) : RaptorComponentRegistry.Mutable {
 
 	private val registrationsByClass: MutableMap<KClass<out RaptorComponent>, RaptorComponentRegistrationImpl.Collection<*>> = hashMapOf()
 
@@ -26,7 +28,7 @@ internal class RaptorComponentRegistryImpl : RaptorComponentRegistry.Mutable {
 
 	override fun <Component : RaptorComponent> configureSingle(component: Component, clazz: KClass<Component>): RaptorComponentScope<Component> =
 		getCollection(clazz)?.firstOrNull { it.component === component }
-			?: error("Cannot get registration for component instance that is not registered: $component")
+			?: error("Cannot get registration for component instance of ${component::class} that is not registered: $component")
 
 
 	override fun <Component : RaptorComponent> getAll(clazz: KClass<Component>): List<RaptorComponentRegistration.Mutable<Component>> =
@@ -69,6 +71,7 @@ internal class RaptorComponentRegistryImpl : RaptorComponentRegistry.Mutable {
 	): RaptorComponentScope<Component> =
 		getOrCreateCollection(clazz).addComponent(
 			component = component,
-			registry = if (definesScope) RaptorComponentRegistryImpl() else this
+			containingRegistry = this,
+			registry = if (definesScope) RaptorComponentRegistryImpl(parent = this) else this
 		)
 }

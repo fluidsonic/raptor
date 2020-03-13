@@ -51,7 +51,5 @@ val RaptorComponentScope<RaptorFeatureComponent>.ktor: RaptorComponentScope<Ktor
 	get() {
 		install(KtorRaptorFeature)
 
-		return raptorComponentSelection.map {
-			registry.configureSingle()
-		}
+		return raptorComponentSelection.map { registry.configureSingle() }
 	}
