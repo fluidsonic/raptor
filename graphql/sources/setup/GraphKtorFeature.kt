@@ -5,40 +5,41 @@ import io.ktor.routing.*
 import org.kodein.di.erased.*
 
 
-// FIXME Also, how to "complete" a configuration?
-// FIXME does this have to be a feature?
 object GraphKtorFeature : KtorRouteFeature {
 
-	override fun RaptorFeatureSetup.setup(target: RaptorConfigurable<KtorRouteRaptorComponent>) {
+	override fun KtorRouteFeatureSetup.setup() {
 		// FIXME scope to local and add global as option?!
 
-		target {
+		route {
 			custom {
 				get {
-					dkodein.instance<GraphRoute>().handle(call)
+					instance<GraphRoute>().handle(call)
 				}
 
 				post {
-					dkodein.instance<GraphRoute>().handle(call)
+					instance<GraphRoute>().handle(call)
 				}
 			}
 		}
 	}
 
 
-	override fun RaptorFeatureSetupCompletion.completeSetup() {
+	override fun KtorRouteFeatureSetupCompletion.completeSetup() {
 		// FIXME scope to local and add global as option?!
 
-		val definitions = component<GraphRaptorComponent>()
-			?.definitions
-			?.toList()
-			?: return
+		route {
+			val definitions = componentRegistry.getSingle<GraphRaptorComponent>()
+				?.component
+				?.definitions
+				?.toList()
+				?: return@route
 
-		kodein {
-			bind() from singleton {
-				GraphRoute(
-					system = GraphSystem(definitions = definitions)
-				)
+			kodein {
+				bind() from singleton {
+					GraphRoute(
+						system = GraphSystem(definitions = definitions)
+					)
+				}
 			}
 		}
 	}
@@ -46,20 +47,21 @@ object GraphKtorFeature : KtorRouteFeature {
 
 
 @Raptor.Dsl3
-val RaptorConfigurable<RaptorFeatureComponent>.graphs: RaptorConfigurableCollection<GraphRaptorComponent>
-	get() = raptorComponentRegistry.configureAll()
+val RaptorComponentScope<RaptorFeatureComponent>.graphs: RaptorComponentScope.Collection<GraphRaptorComponent>
+	get() = raptorComponentSelection.map { registry.configureAll() }
 
 
 @Raptor.Dsl3
-fun RaptorConfigurable<KtorRouteRaptorComponent>.newGraph(
+fun RaptorComponentScope<KtorRouteRaptorComponent>.newGraph(
 	vararg tags: Any = emptyArray(),
-	configure: RaptorConfigurable<GraphRaptorComponent>.() -> Unit = {}
+	configure: RaptorComponentScope<GraphRaptorComponent>.() -> Unit = {}
 ) {
 	install(GraphKtorFeature)
 
-	// FIXME fail on duplicate
-	raptorComponentRegistry.register(
-		component = GraphRaptorComponent(raptorTags = tags.toHashSet()),
-		configure = configure
-	)
+	raptorComponentSelection {
+		registry.register(
+			component = GraphRaptorComponent(raptorTags = tags.toHashSet()),
+			configure = configure
+		)
+	}
 }

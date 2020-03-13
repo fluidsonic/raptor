@@ -3,6 +3,6 @@ package io.fluidsonic.raptor
 
 interface KtorServerFeature {
 
-	fun RaptorFeatureSetup.setup(target: RaptorConfigurable<KtorServerRaptorComponent>)
-	fun RaptorFeatureSetupCompletion.completeSetup() = Unit
+	fun KtorServerFeatureSetup.setup() = Unit
+	fun KtorServerFeatureSetupCompletion.completeSetup() = Unit
 }

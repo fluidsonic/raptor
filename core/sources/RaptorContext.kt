@@ -3,10 +3,8 @@ package io.fluidsonic.raptor
 import org.kodein.di.*
 
 
-interface RaptorContext {
+interface RaptorContext : RaptorScope {
 
-	val dkodein: DKodein
-
-	fun createScope(): RaptorScope
 	fun createTransaction(): RaptorTransaction
+	fun createTransactionKodein(config: Kodein.Builder.() -> Unit = {}): DKodein // FIXME refactor
 }

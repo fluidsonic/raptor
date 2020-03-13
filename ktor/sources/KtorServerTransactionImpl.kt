@@ -3,10 +3,16 @@ package io.fluidsonic.raptor
 
 internal class KtorServerTransactionImpl(
 	parentContext: KtorServerContextImpl
-) : KtorServerTransaction {
+) : KtorServerTransactionInternal {
 
 	override val context = KtorServerTransactionContextImpl(
-		dkodein = parentContext.dkodein, // FIXME create own
 		parentContext = parentContext
 	)
+
+
+	override fun createRouteTransaction(config: KtorRouteConfig) =
+		KtorRouteTransactionImpl(
+			config = config,
+			parent = this
+		)
 }

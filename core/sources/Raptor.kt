@@ -13,6 +13,7 @@ interface Raptor {
 
 	@DslMarker
 	@Retention(AnnotationRetention.SOURCE)
+	@Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY, AnnotationTarget.TYPEALIAS)
 	annotation class Dsl3
 
 
@@ -29,10 +30,10 @@ interface Raptor {
 
 @Raptor.Dsl3
 fun raptor(configure: RaptorSetup.() -> Unit): Raptor {
-	val registry = RaptorComponentRegistry()
-	val mainComponent = RaptorMainComponent()
+	val componentRegistry = RaptorComponentRegistryImpl()
+	val coreComponent = RaptorCoreFeatureComponent()
 
-	registry.register(mainComponent, configure = configure)
+	componentRegistry.register(coreComponent, configure = configure)
 
-	return RaptorImpl(config = mainComponent.complete(registry = registry))
+	return RaptorImpl(config = coreComponent.complete(componentRegistry = componentRegistry))
 }

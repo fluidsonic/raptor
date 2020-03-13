@@ -6,7 +6,6 @@ internal class RaptorTransactionImpl(
 ) : RaptorTransaction {
 
 	override val context = RaptorTransactionContextImpl(
-		dkodein = parentContext.dkodein, // FIXME create own
 		parentContext = parentContext
 	)
 }

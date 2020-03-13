@@ -6,11 +6,14 @@ import io.ktor.http.*
 import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.ktor.util.*
 import kotlinx.atomicfu.*
 import kotlinx.coroutines.*
-import org.kodein.di.*
 import org.slf4j.event.*
 import java.util.concurrent.*
+
+
+private val ktorServerAttributeKey = AttributeKey<KtorServerImpl>("Raptor: server")
 
 
 internal class KtorServerImpl(
@@ -22,23 +25,16 @@ internal class KtorServerImpl(
 	private val stateRef = atomic(State.initial)
 
 	val context = KtorServerContextImpl(
-		dkodein = Kodein.direct { import(config.kodeinModule) },
+		kodeinModule = config.kodeinModule,
 		parentContext = parentContext
 	)
 
 
 	suspend fun start() {
-		check(stateRef.compareAndSet(expect = State.initial, update = State.starting)) { "Cannot start RaptorServer unless it's in 'initial' state." }
+		check(stateRef.compareAndSet(expect = State.initial, update = State.starting)) { "Cannot start Ktor server unless it's in 'initial' state." }
 
-		try {
-			withContext(Dispatchers.Default) {
-				startEngineBlocking()
-			}
-		}
-		catch (e: Throwable) {
-			stateRef.value = State.stopped
-
-			throw e
+		withContext(Dispatchers.Default) {
+			startEngineBlocking()
 		}
 
 		stateRef.value = State.started
@@ -58,7 +54,7 @@ internal class KtorServerImpl(
 			}
 		}
 
-		engine.start(wait = true)
+		engine.start(wait = false)
 		subscription.dispose()
 
 		@Suppress("NAME_SHADOWING")
@@ -76,16 +72,13 @@ internal class KtorServerImpl(
 
 
 	suspend fun stop() {
-		check(stateRef.compareAndSet(expect = State.started, update = State.stopping)) { "Cannot start Raptor unless it's in 'started' state." }
+		check(stateRef.compareAndSet(expect = State.started, update = State.stopping)) { "Cannot start Ktor server unless it's in 'started' state." }
 
-		try {
-			withContext(Dispatchers.Default) {
-				stopEngineBlocking()
-			}
+		withContext(Dispatchers.Default) {
+			stopEngineBlocking()
 		}
-		finally {
-			stateRef.value = State.stopped
-		}
+
+		stateRef.value = State.stopped
 	}
 
 
@@ -96,6 +89,8 @@ internal class KtorServerImpl(
 
 	// FIXME rework
 	private fun Application.configure() {
+		attributes.put(ktorServerAttributeKey, this@KtorServerImpl)
+
 		install(CallLogging) {
 			level = Level.INFO
 		}
@@ -116,7 +111,7 @@ internal class KtorServerImpl(
 
 		install(XForwardedHeaderSupport)
 		install(EncryptionEnforcementKtorFeature)
-		install(RaptorTransactionKtorFeature(scope = context.createScope()))
+		install(RaptorTransactionKtorFeature(serverContext = this@KtorServerImpl.context))
 
 		config.customConfig(this)
 
@@ -134,9 +129,23 @@ internal class KtorServerImpl(
 
 			config.customConfig(this)
 
-			for (childConfig in config.children) {
-				configure(childConfig)
+			intercept(ApplicationCallPipeline.Setup) {
+				val parentTransaction = context.attributes.getOrNull(ktorServerTransactionAttributeKey)
+					?: return@intercept
+
+				val transaction = parentTransaction.createRouteTransaction(config = config)
+				call.attributes.put(ktorServerTransactionAttributeKey, transaction)
+
+				try {
+					proceed()
+				}
+				finally {
+					call.attributes.put(ktorServerTransactionAttributeKey, parentTransaction)
+				}
 			}
+
+			for (childConfig in config.children)
+				configure(childConfig)
 		}
 	}
 
@@ -150,3 +159,7 @@ internal class KtorServerImpl(
 		stopping
 	}
 }
+
+
+internal val RaptorKtorApplication.raptorKtorServer
+	get() = attributes[ktorServerAttributeKey]

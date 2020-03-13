@@ -16,17 +16,13 @@ class GraphRaptorComponent internal constructor(
 	companion object {
 
 		private val defaultDefinitions = listOf<RaptorGraphDefinition>(
-			AccessToken.graphDefinition(),
 			Cents.graphDefinition(),
 			Country.graphDefinition(),
 			Currency.graphDefinition(),
-			EmailAddress.graphDefinition(),
 			LocalDate.graphDefinition(),
 			LocalTime.graphDefinition(),
 			Money.graphDefinition(),
-			Password.graphDefinition(),
 			PreciseDuration.graphDefinition(),
-			PhoneNumber.graphDefinition(),
 			Timestamp.graphDefinitions(),
 			TimeZone.graphDefinition(),
 			Unit.graphDefinition(),
@@ -37,16 +33,16 @@ class GraphRaptorComponent internal constructor(
 
 
 @Raptor.Dsl3
-fun RaptorConfigurable<GraphRaptorComponent>.definitions(vararg definitions: RaptorGraphDefinition) {
+fun RaptorComponentScope<GraphRaptorComponent>.definitions(vararg definitions: RaptorGraphDefinition) {
 	definitions(definitions.asIterable())
 
 }
 
 
 @Raptor.Dsl3
-fun RaptorConfigurable<GraphRaptorComponent>.definitions(definitions: Iterable<RaptorGraphDefinition>) {
-	raptorComponentConfiguration {
-		this.definitions += definitions
+fun RaptorComponentScope<GraphRaptorComponent>.definitions(definitions: Iterable<RaptorGraphDefinition>) {
+	raptorComponentSelection {
+		component.definitions += definitions
 	}
 }
 

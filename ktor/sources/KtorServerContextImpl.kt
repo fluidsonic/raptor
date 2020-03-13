@@ -1,15 +1,25 @@
 package io.fluidsonic.raptor
 
 import org.kodein.di.*
+import org.kodein.di.erased.*
 
 
 internal class KtorServerContextImpl(
-	override val dkodein: DKodein,
+	kodeinModule: Kodein.Module,
 	parentContext: RaptorContext
 ) : KtorServerContext, RaptorContext by parentContext {
 
-	override fun createScope() =
-		KtorServerScopeImpl(context = this)
+	override val dkodein = Kodein.direct(allowSilentOverride = true) {
+		extend(parentContext.dkodein)
+		import(kodeinModule)
+
+		bind<KtorServerContext>() with instance(this@KtorServerContextImpl)
+		bind<KtorServerScope>() with instance(this@KtorServerContextImpl)
+	}
+
+
+	override val context
+		get() = this
 
 
 	override fun createTransaction() =

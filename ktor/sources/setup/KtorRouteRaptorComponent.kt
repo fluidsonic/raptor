@@ -5,28 +5,45 @@ import org.kodein.di.*
 
 
 class KtorRouteRaptorComponent internal constructor(
-	internal val featureSetup: RaptorFeatureSetup,
+	internal val globalFeatureSetup: RaptorFeatureSetup,
 	private val path: String,
-	override val raptorTags: Set<Any>
+	override val raptorTags: Set<Any>,
+	internal val serverComponent: KtorServerRaptorComponent
 ) : RaptorComponent.KodeinBoundary, RaptorComponent.Taggable {
 
 	private val kodeinConfigs = mutableListOf<Kodein.Builder.() -> Unit>()
 
 	internal val customConfigs = mutableListOf<Route.() -> Unit>()
+	internal val features = mutableSetOf<KtorRouteFeature>()
 	internal val routeComponents = mutableListOf<KtorRouteRaptorComponent>()
 	internal var wrapper: (Route.(next: Route.() -> Unit) -> Route)? = null
 
 
-	internal fun complete(): KtorRouteConfig {
+	internal fun complete(serverCompletion: KtorServerFeatureSetupCompletion): KtorRouteConfig {
 		// FIXME check/clean path
+
+		val completion = KtorRouteFeatureSetupCompletion(
+			componentRegistry = serverCompletion.server.componentRegistry.getSingle(this).registry,
+			serverCompletion = serverCompletion
+		)
+
+		for (feature in features)
+			with(feature) {
+				completion.completeSetup()
+			}
 
 		val kodeinModule = Kodein.Module(name = "raptor/server/route[path=$path]") { // FIXME server id
 			for (config in kodeinConfigs)
 				config()
+
+			for (config in completion.kodeinConfigs)
+				config()
 		}
 
 		val customConfig = customConfigs.flatten()
-		val children = routeComponents.map { it.complete() }
+		val children = routeComponents.map { routeComponent ->
+			routeComponent.complete(serverCompletion = serverCompletion)
+		}
 
 		return KtorRouteConfig(
 			children = children,
@@ -45,60 +62,64 @@ class KtorRouteRaptorComponent internal constructor(
 
 
 @Raptor.Dsl3
-fun RaptorConfigurable<KtorRouteRaptorComponent>.custom(configure: Route.() -> Unit) {
-	raptorComponentConfiguration {
-		customConfigs += configure
+fun RaptorComponentScope<KtorRouteRaptorComponent>.custom(configure: RaptorKtorRoute.() -> Unit) {
+	raptorComponentSelection {
+		component.customConfigs += configure
 	}
 }
 
 
 @Raptor.Dsl3
-fun RaptorConfigurable<KtorRouteRaptorComponent>.install(feature: KtorRouteFeature) {
-	val target = this
-
-	raptorComponentConfiguration {
-		with(feature) {
-			featureSetup.setup(target = target)
-		}
+fun RaptorComponentScope<KtorRouteRaptorComponent>.install(feature: KtorRouteFeature) {
+	raptorComponentSelection {
+		if (component.features.add(feature))
+			with(feature) {
+				registry.configureSingleOrCreate {
+					KtorRouteFeatureComponent(
+						globalFeatureSetup = component.globalFeatureSetup,
+						routeComponent = component,
+						serverComponent = component.serverComponent
+					)
+				}.setup()
+			}
 	}
 }
 
 
 @Raptor.Dsl3
-fun RaptorConfigurable<KtorRouteRaptorComponent>.newRoute(
+fun RaptorComponentScope<KtorRouteRaptorComponent>.newRoute(
 	path: String,
 	vararg tags: Any = emptyArray(),
-	configure: RaptorConfigurable<KtorRouteRaptorComponent>.() -> Unit
+	configure: RaptorComponentScope<KtorRouteRaptorComponent>.() -> Unit
 ) {
-	val registry = raptorComponentRegistry
-
-	raptorComponentConfiguration {
-		val component = KtorRouteRaptorComponent(
-			featureSetup = featureSetup,
+	raptorComponentSelection {
+		val routeComponent = KtorRouteRaptorComponent(
+			globalFeatureSetup = component.globalFeatureSetup,
 			path = path,
-			raptorTags = tags.toHashSet()
+			raptorTags = tags.toHashSet(),
+			serverComponent = component.serverComponent
 		)
-		routeComponents += component
+		component.routeComponents += routeComponent
 
-		registry.register(component, configure = configure)
+		registry.register(routeComponent, configure = configure, definesScope = true)
 	}
 }
 
 
 @Raptor.Dsl3
-val RaptorConfigurable<KtorRouteRaptorComponent>.routes: RaptorConfigurableCollection<KtorRouteRaptorComponent>
-	get() = raptorComponentRegistry.configureAll()
+val RaptorComponentScope<KtorRouteRaptorComponent>.routes: RaptorComponentScope.Collection<KtorRouteRaptorComponent>
+	get() = raptorComponentSelection.map { registry.configureAll() }
 
 
 @Raptor.Dsl3
-fun RaptorConfigurable<KtorRouteRaptorComponent>.wrap(wrapper: Route.(next: Route.() -> Unit) -> Route) {
-	raptorComponentConfiguration {
-		val previousWrapper = this.wrapper
+fun RaptorComponentScope<KtorRouteRaptorComponent>.wrap(wrapper: Route.(next: Route.() -> Unit) -> Route) {
+	raptorComponentSelection {
+		val previousWrapper = component.wrapper
 		if (previousWrapper != null)
-			this.wrapper = { next ->
+			component.wrapper = { next ->
 				previousWrapper { wrapper(next) }
 			}
 		else
-			this.wrapper = wrapper
+			component.wrapper = wrapper
 	}
 }

@@ -1,50 +1,57 @@
 package io.fluidsonic.raptor
 
+import com.typesafe.config.*
+import io.ktor.config.*
 import org.kodein.di.erased.*
 
 
-@Raptor.Dsl3
 object KtorRaptorFeature : RaptorFeature {
 
 	override fun RaptorFeatureSetup.setup() {
-		raptorComponentRegistry.register(KtorRaptorComponent(
-			featureSetup = this
-		))
+		raptorComponentSelection {
+			registry.register(KtorRaptorComponent(
+				globalFeatureSetup = this@setup // FIXME incorrect - multiplies
+			))
+		}
+
+		kodein {
+			// FIXME Rework this. We need a global config feature instead.
+			bind<ApplicationConfig>() with singleton {
+				HoconApplicationConfig(ConfigFactory.defaultApplication().resolve()!!)
+			}
+		}
 	}
 
 
 	override fun RaptorFeatureSetupCompletion.completeSetup() {
-		val config = component<KtorRaptorComponent>()?.complete() ?: return
+		val config = componentRegistry.getSingle<KtorRaptorComponent>()?.component?.complete(globalCompletion = this) ?: return
 
-		if (config.servers.isNotEmpty()) {
-			for (serverConfig in config.servers)
-				kodein {
-					bind<KtorServerImpl>(tag = serverConfig) with singleton {
-						KtorServerImpl(
-							config = serverConfig,
-							parentContext = instance()
-						)
-					}
-				}
-
-			onStart {
-				for (server in allInstances<KtorServerImpl>())
-					server.start()
+		kodein {
+			bind<KtorImpl>() with singleton {
+				KtorImpl(
+					config = config,
+					parentContext = instance()
+				)
 			}
+		}
 
-			onStop {
-				for (server in allInstances<KtorServerImpl>())
-					server.stop()
-			}
+		onStart {
+			instance<KtorImpl>().start()
+		}
+
+		onStop {
+			instance<KtorImpl>().stop()
 		}
 	}
 }
 
 
 @Raptor.Dsl3
-val RaptorConfigurable<RaptorFeatureComponent>.ktor: RaptorConfigurable<KtorRaptorComponent>
+val RaptorComponentScope<RaptorFeatureComponent>.ktor: RaptorComponentScope<KtorRaptorComponent>
 	get() {
-		install(KtorRaptorFeature) // FIXME check duplicates
+		install(KtorRaptorFeature)
 
-		return raptorComponentRegistry.configureSingle()
+		return raptorComponentSelection.map {
+			registry.configureSingle()
+		}
 	}

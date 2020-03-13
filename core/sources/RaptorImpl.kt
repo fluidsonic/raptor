@@ -2,7 +2,6 @@ package io.fluidsonic.raptor
 
 import io.fluidsonic.raptor.Raptor.*
 import kotlinx.atomicfu.*
-import org.kodein.di.*
 
 
 internal class RaptorImpl(
@@ -12,14 +11,14 @@ internal class RaptorImpl(
 	private val stateRef = atomic(State.initial)
 
 	override val context = RaptorContextImpl(
-		dkodein = Kodein.direct { import(config.kodeinModule) }
+		kodeinModule = config.kodeinModule
 	)
 
 
 	override suspend fun start() {
 		check(stateRef.compareAndSet(expect = State.initial, update = State.starting)) { "Cannot start Raptor unless it's in 'stopped' state." }
 
-		with(context.createScope()) {
+		with(context) {
 			for (callback in this@RaptorImpl.config.startCallbacks) // FIXME get rid of this@RaptorImpl.
 				callback()
 		}
@@ -35,7 +34,7 @@ internal class RaptorImpl(
 	override suspend fun stop() {
 		check(stateRef.compareAndSet(expect = State.started, update = State.stopping)) { "Cannot start Raptor unless it's in 'started' state." }
 
-		with(context.createScope()) {
+		with(context) {
 			for (callback in this@RaptorImpl.config.stopCallbacks) // FIXME get rid of this@RaptorImpl.
 				callback()
 		}
@@ -54,10 +53,6 @@ internal class RaptorImpl(
 //	private var modules: List<BakuModule<in Context, in Transaction>>? = null
 //	private val providerBasedBSONCodecRegistry = ProviderBasedBSONCodecRegistry<Context>()
 //
-//	val bsonCodecRegistry = CodecRegistries.fromRegistries(
-//		MongoClients.defaultCodecRegistry,
-//		providerBasedBSONCodecRegistry
-//	)!!
 //
 //
 //	private fun Application.configureModules() {

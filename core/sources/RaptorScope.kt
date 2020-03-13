@@ -7,14 +7,11 @@ import org.kodein.di.*
 interface RaptorScope : DKodeinAware {
 
 	val context: RaptorContext
-
-	override val dkodein: DKodein
-		get() = context.dkodein
 }
 
 
 @Raptor.Dsl3
 inline fun <Result> RaptorScope.withNewTransaction(block: RaptorTransactionScope.() -> Result): Result =
-	with(context.createTransaction().context.createScope()) {
+	with(context.createTransaction().context) {
 		block()
 	}

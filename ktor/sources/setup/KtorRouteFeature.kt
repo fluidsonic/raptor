@@ -3,6 +3,6 @@ package io.fluidsonic.raptor
 
 interface KtorRouteFeature {
 
-	fun RaptorFeatureSetup.setup(target: RaptorConfigurable<KtorRouteRaptorComponent>)
-	fun RaptorFeatureSetupCompletion.completeSetup() = Unit
+	fun KtorRouteFeatureSetup.setup()
+	fun KtorRouteFeatureSetupCompletion.completeSetup() = Unit
 }

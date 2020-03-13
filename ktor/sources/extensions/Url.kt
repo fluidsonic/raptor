@@ -7,13 +7,6 @@ fun Url.toBuilder(): URLBuilder =
 	URLBuilder().takeFrom(this)
 
 
-// FIXME how to support in Bson w/o Ktor?
-//fun Url.Companion.bsonDefinition() = bsonDefinition(
-//	parse = ::Url,
-//	serialize = Url::toString
-//)
-
-
 fun URLBuilder.appendParameters(parameters: Parameters) =
 	apply { this.parameters.appendAll(parameters) }
 
