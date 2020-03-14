@@ -1,5 +1,8 @@
 package io.fluidsonic.raptor
 
+import org.kodein.di.erased.*
+import kotlin.reflect.full.*
+
 
 inline class TypedId(val untyped: EntityId) {
 
@@ -11,11 +14,16 @@ inline class TypedId(val untyped: EntityId) {
 }
 
 
-internal fun TypedId.Companion.bsonDefinition(factoryProvider: EntityIdFactoryProvider) = bsonDefinition<TypedId> {
+internal fun TypedId.Companion.bsonDefinition() = bsonDefinition<TypedId> {
+	val factoryByType: Map<String, EntityId.Factory<*>> = instance<BsonConfig>()
+		.definitions
+		.mapNotNull { it.valueClass.companionObjectInstance as? EntityId.Factory<*> } // FIXME evil hack!
+		.associateBy { it.type }
+
 	decode {
 		readDocument {
 			val factory = readString("type").let { type ->
-				factoryProvider.idFactoryForType(type) ?: throw BsonException("ID type '$type' has not been registered with Raptor")
+				factoryByType[type] ?: throw BsonException("ID type '$type' has not been registered with Raptor")
 			}
 
 			readName("id")

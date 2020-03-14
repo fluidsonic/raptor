@@ -35,6 +35,24 @@ fun graphInterfaceDefinition(configure: GraphInterfaceDefinition.Builder.() -> U
 		.build()
 
 
+inline fun <reified Value : Any> graphInterfaceExtensionDefinition(
+	noinline configure: GraphInterfaceExtensionDefinition.Builder<Value>.() -> Unit
+) =
+	graphInterfaceExtensionDefinition(Value::class, configure = configure)
+
+
+fun <Value : Any> graphInterfaceExtensionDefinition(
+	valueClass: KClass<Value>,
+	configure: GraphInterfaceExtensionDefinition.Builder<Value>.() -> Unit
+) =
+	GraphInterfaceExtensionDefinition.Builder(
+			stackTrace = stackTrace(skipCount = 1),
+			valueClass = valueClass
+		)
+		.apply(configure)
+		.build()
+
+
 fun graphMutationDefinition(name: String, configure: GraphOperationDefinition.Builder.() -> Unit) =
 	GraphOperationDefinition.Builder(
 			name = name,
@@ -48,6 +66,24 @@ fun graphMutationDefinition(name: String, configure: GraphOperationDefinition.Bu
 fun graphObjectDefinition(configure: GraphObjectDefinition.Builder.() -> Unit) =
 	GraphObjectDefinition.Builder(
 			stackTrace = stackTrace(skipCount = 1)
+		)
+		.apply(configure)
+		.build()
+
+
+inline fun <reified Value : Any> graphObjectExtensionDefinition(
+	noinline configure: GraphObjectExtensionDefinition.Builder<Value>.() -> Unit
+) =
+	graphObjectExtensionDefinition(Value::class, configure = configure)
+
+
+fun <Value : Any> graphObjectExtensionDefinition(
+	valueClass: KClass<Value>,
+	configure: GraphObjectExtensionDefinition.Builder<Value>.() -> Unit
+) =
+	GraphObjectExtensionDefinition.Builder(
+			stackTrace = stackTrace(skipCount = 1),
+			valueClass = valueClass
 		)
 		.apply(configure)
 		.build()
@@ -645,6 +681,146 @@ class GraphInterfaceDefinition<Value : Any> internal constructor(
 }
 
 
+class GraphInterfaceExtensionDefinition<Value : Any> internal constructor(
+	internal val fields: List<GraphInterfaceDefinition.Field<Value, *>>,
+	stackTrace: List<StackTraceElement>,
+	internal val valueClass: KClass<Value>
+) : RaptorGraphDefinition(
+	stackTrace = stackTrace
+) {
+
+	override fun toString() =
+		toString("extension for interface Kotlin $valueClass")
+
+
+	class Builder<Value : Any> internal constructor(
+		private val stackTrace: List<StackTraceElement>,
+		private val valueClass: KClass<Value>
+	) {
+
+		private val fields = mutableListOf<GraphInterfaceDefinition.Field<Value, *>>()
+
+
+		// FIXME require at least one field
+		internal fun build() =
+			GraphInterfaceExtensionDefinition(
+				fields = fields,
+				stackTrace = stackTrace,
+				valueClass = valueClass
+			)
+
+
+		fun <FieldValue> field(
+			property: KProperty1<Value, FieldValue>,
+			configure: FieldBuilder<FieldValue>.() -> Unit = {}
+		) {
+			val name = property.name
+
+			if (fields.any { it.name === name })
+				error("Cannot define multiple fields named '$name'.")
+
+			fields += FieldBuilder<FieldValue>(
+				name = name,
+				valueType = property.returnType
+			)
+				.apply(configure)
+				.build()
+		}
+
+
+		fun <FieldValue> field(
+			function: KSuspendFunction2<Value, RaptorGraphScope, FieldValue>,
+			configure: FieldBuilder<FieldValue>.() -> Unit = {}
+		) {
+			val name = function.name
+
+			if (fields.any { it.name === name })
+				error("Cannot define multiple fields named '$name'.")
+
+			fields += FieldBuilder<FieldValue>(
+				name = name,
+				valueType = function.returnType
+			)
+				.apply(configure)
+				.build()
+		}
+
+
+		@OptIn(ExperimentalStdlibApi::class)
+		inline fun <reified FieldValue> field(
+			name: String,
+			@BuilderInference noinline configure: FieldBuilder<FieldValue>.() -> Unit
+		) =
+			field(name = name, valueType = typeOf<FieldValue>(), configure = configure)
+
+
+		fun <FieldValue> field(
+			name: String,
+			valueType: KType,
+			configure: FieldBuilder<FieldValue>.() -> Unit
+		) {
+			if (fields.any { it.name === name })
+				error("Cannot define multiple fields named '$name'.")
+
+			fields += FieldBuilder<FieldValue>(
+				name = name,
+				valueType = valueType
+			)
+				.apply(configure)
+				.build()
+		}
+
+
+		inner class FieldBuilder<FieldValue> internal constructor(
+			private val name: String,
+			private val valueType: KType
+		) {
+
+			private val arguments = mutableListOf<GraphArgumentDefinition<*>>()
+			private var description: String? = null
+			private var isNullable = valueType.isMarkedNullable
+
+
+			@OptIn(ExperimentalStdlibApi::class)
+			inline fun <reified ArgumentValue> argument(
+				noinline configure: GraphArgumentDefinition.Builder<ArgumentValue>.() -> Unit = {}
+			) =
+				argument(valueType = typeOf<ArgumentValue>(), configure = configure)
+
+
+			fun <ArgumentValue> argument(
+				valueType: KType,
+				configure: GraphArgumentDefinition.Builder<ArgumentValue>.() -> Unit = {}
+			): GraphArgumentDefinition<ArgumentValue> {
+				if (arguments.any { it.name === name })
+					error("Cannot define multiple arguments named '$name'.")
+
+				return GraphArgumentDefinition.Builder<ArgumentValue>(valueType = valueType)
+					.apply(configure)
+					.build()
+					.also { arguments += it }
+			}
+
+
+			internal fun build() =
+				GraphInterfaceDefinition.Field<Value, FieldValue>(
+					arguments = arguments,
+					description = description,
+					name = name,
+					valueType = valueType.withNullability(isNullable)
+				)
+
+
+			fun description(description: String) {
+				check(this.description === null) { "Cannot define the description more than once." }
+
+				this.description = description
+			}
+		}
+	}
+}
+
+
 class GraphObjectDefinition<Value : Any> internal constructor(
 	internal val description: String?,
 	internal val fields: List<Field<Value, *>>,
@@ -854,13 +1030,179 @@ class GraphObjectDefinition<Value : Any> internal constructor(
 	}
 
 
-	internal class Field<Parent : Any, Value>(
+	internal class Field<in Parent : Any, Value>(
 		val arguments: List<GraphArgumentDefinition<*>>,
 		val description: String?,
 		val name: String,
 		val resolve: (suspend RaptorGraphScope.(parent: Parent) -> Value)?,
 		val valueType: KType
 	)
+}
+
+
+class GraphObjectExtensionDefinition<Value : Any> internal constructor(
+	internal val fields: List<GraphObjectDefinition.Field<Value, *>>,
+	stackTrace: List<StackTraceElement>,
+	internal val valueClass: KClass<Value>
+) : RaptorGraphDefinition(
+	stackTrace = stackTrace
+) {
+
+	override fun toString() =
+		toString("extension for object of Kotlin $valueClass")
+
+
+	class Builder<Value : Any> internal constructor(
+		private val stackTrace: List<StackTraceElement>,
+		private val valueClass: KClass<Value>
+	) {
+
+		private val fields = mutableListOf<GraphObjectDefinition.Field<Value, *>>()
+
+
+		// FIXME require at least one field
+		internal fun build() =
+			GraphObjectExtensionDefinition(
+				fields = fields,
+				stackTrace = stackTrace,
+				valueClass = valueClass
+			)
+
+
+		fun <FieldValue> field(
+			property: KProperty1<Value, FieldValue>,
+			configure: FieldBuilder<FieldValue>.() -> Unit = {}
+		) {
+			val name = property.name
+
+			if (fields.any { it.name === name })
+				error("Cannot define multiple fields named '$name'.")
+
+			fields += FieldBuilder<FieldValue>(
+				name = name,
+				valueType = property.returnType,
+				implicitResolve = { property.get(it) }
+			)
+				.apply(configure)
+				.build()
+		}
+
+
+		fun <FieldValue> field(
+			function: KSuspendFunction2<Value, RaptorGraphScope, FieldValue>,
+			configure: FieldBuilder<FieldValue>.() -> Unit = {}
+		) {
+			val name = function.name
+
+			if (fields.any { it.name === name })
+				error("Cannot define multiple fields named '$name'.")
+
+			fields += FieldBuilder<FieldValue>(
+				name = name,
+				valueType = function.returnType,
+				implicitResolve = { function.invoke(it, this) }
+			)
+				.apply(configure)
+				.build()
+		}
+
+
+		@OptIn(ExperimentalStdlibApi::class)
+		inline fun <reified FieldValue> field(
+			name: String,
+			@BuilderInference noinline configure: FieldBuilder<FieldValue>.() -> Unit
+		) =
+			field(name = name, valueType = typeOf<FieldValue>(), configure = configure)
+
+
+		fun <FieldValue> field(
+			name: String,
+			valueType: KType,
+			configure: FieldBuilder<FieldValue>.() -> Unit
+		) {
+			if (fields.any { it.name === name })
+				error("Cannot define multiple fields named '$name'.")
+
+			fields += FieldBuilder<FieldValue>(
+				name = name,
+				valueType = valueType
+			)
+				.apply(configure)
+				.build()
+		}
+
+
+		inner class FieldBuilder<FieldValue> internal constructor(
+			private val name: String,
+			private val valueType: KType,
+			implicitResolve: (suspend RaptorGraphScope.(parent: Value) -> FieldValue?)? = null
+		) {
+
+			private val arguments = mutableListOf<GraphArgumentDefinition<*>>()
+			private var description: String? = null
+			private var isImplicitResolver = implicitResolve !== null
+			private var isNullable = valueType.isMarkedNullable
+			private var resolve: (suspend RaptorGraphScope.(parent: Value) -> FieldValue?)? = implicitResolve
+
+
+			@OptIn(ExperimentalStdlibApi::class)
+			inline fun <reified ArgumentValue> argument(
+				noinline configure: GraphArgumentDefinition.Builder<ArgumentValue>.() -> Unit = {}
+			) =
+				argument(valueType = typeOf<ArgumentValue>(), configure = configure)
+
+
+			fun <ArgumentValue> argument(
+				valueType: KType,
+				configure: GraphArgumentDefinition.Builder<ArgumentValue>.() -> Unit = {}
+			): GraphArgumentDefinition<ArgumentValue> {
+				if (arguments.any { it.name === name })
+					error("Cannot define multiple arguments named '$name'.")
+
+				return GraphArgumentDefinition.Builder<ArgumentValue>(valueType = valueType)
+					.apply(configure)
+					.build()
+					.also { arguments += it }
+			}
+
+
+			internal fun build() =
+				GraphObjectDefinition.Field(
+					arguments = arguments,
+					description = description,
+					name = name,
+					resolve = resolve,
+					valueType = valueType.withNullability(isNullable)
+				)
+
+
+			fun description(description: String) {
+				check(this.description === null) { "Cannot define the description more than once." }
+
+				this.description = description
+			}
+
+
+			@Suppress("UNCHECKED_CAST")
+			fun resolve(resolve: suspend RaptorGraphScope.(parent: Value) -> FieldValue) {
+				check(this.resolve === null && !this.isImplicitResolver) { "Cannot define multiple resolutions." }
+
+				this.isImplicitResolver = false
+				this.resolve = resolve
+			}
+
+
+			// remove once fixed: https://youtrack.jetbrains.com/issue/KT-36371
+			@Suppress("UNCHECKED_CAST")
+			fun resolveNullable(resolve: suspend RaptorGraphScope.(parent: Value) -> FieldValue?) {
+				check(this.resolve === null && !this.isImplicitResolver) { "Cannot define multiple resolutions." }
+
+				this.isImplicitResolver = false
+				this.isNullable = true
+				this.resolve = resolve
+			}
+		}
+	}
 }
 
 

@@ -10,11 +10,4 @@ internal class KtorRouteTransactionImpl(
 		config = config,
 		parent = parent.context
 	)
-
-
-	override fun createRouteTransaction(config: KtorRouteConfig) =
-		KtorRouteTransactionImpl(
-			config = config,
-			parent = this
-		)
 }

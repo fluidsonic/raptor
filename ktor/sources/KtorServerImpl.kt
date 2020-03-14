@@ -124,28 +124,29 @@ internal class KtorServerImpl(
 
 
 	private fun Route.configure(config: KtorRouteConfig) {
-		route(config.path) {
-			// FIXME kodein
+		val wrapper: (Route.(next: Route.() -> Unit) -> Unit) = config.wrapper ?: { it() }
+		wrapper {
+			route(config.path) {
+				config.customConfig(this)
 
-			config.customConfig(this)
+				intercept(ApplicationCallPipeline.Setup) {
+					val parentTransaction = context.attributes.getOrNull(ktorServerTransactionAttributeKey)
+						?: return@intercept
 
-			intercept(ApplicationCallPipeline.Setup) {
-				val parentTransaction = context.attributes.getOrNull(ktorServerTransactionAttributeKey)
-					?: return@intercept
+					val transaction = parentTransaction.createRouteTransaction(config = config)
+					call.attributes.put(ktorServerTransactionAttributeKey, transaction)
 
-				val transaction = parentTransaction.createRouteTransaction(config = config)
-				call.attributes.put(ktorServerTransactionAttributeKey, transaction)
-
-				try {
-					proceed()
+					try {
+						proceed()
+					}
+					finally {
+						call.attributes.put(ktorServerTransactionAttributeKey, parentTransaction)
+					}
 				}
-				finally {
-					call.attributes.put(ktorServerTransactionAttributeKey, parentTransaction)
-				}
+
+				for (childConfig in config.children)
+					configure(childConfig)
 			}
-
-			for (childConfig in config.children)
-				configure(childConfig)
 		}
 	}
 

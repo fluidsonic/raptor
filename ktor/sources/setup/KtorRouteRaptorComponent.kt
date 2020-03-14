@@ -16,7 +16,7 @@ class KtorRouteRaptorComponent internal constructor(
 	internal val customConfigs = mutableListOf<Route.() -> Unit>()
 	internal val features = mutableSetOf<KtorRouteFeature>()
 	internal val routeComponents = mutableListOf<KtorRouteRaptorComponent>()
-	internal var wrapper: (Route.(next: Route.() -> Unit) -> Route)? = null
+	internal var wrapper: (Route.(next: Route.() -> Unit) -> Unit)? = null
 
 
 	internal fun complete(
@@ -118,7 +118,7 @@ val RaptorComponentScope<KtorRouteRaptorComponent>.routes: RaptorComponentScope.
 
 
 @Raptor.Dsl3
-fun RaptorComponentScope<KtorRouteRaptorComponent>.wrap(wrapper: Route.(next: Route.() -> Unit) -> Route) {
+fun RaptorComponentScope<KtorRouteRaptorComponent>.wrap(wrapper: Route.(next: Route.() -> Unit) -> Unit) {
 	raptorComponentSelection {
 		val previousWrapper = component.wrapper
 		if (previousWrapper != null)

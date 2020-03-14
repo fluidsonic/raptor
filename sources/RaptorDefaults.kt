@@ -1,6 +1,7 @@
 package io.fluidsonic.raptor
 
 import io.ktor.http.*
+import org.kodein.di.erased.*
 
 
 @Raptor.Dsl3
@@ -14,10 +15,10 @@ fun RaptorComponentScope<RaptorCoreFeatureComponent>.installDefaults() {
 			EmailAddress.bsonDefinition(),
 			PasswordHash.bsonDefinition(),
 			PhoneNumber.bsonDefinition(),
+			TypedId.bsonDefinition(),
 			Url.bsonDefinition()
 		)
 	}
-
 
 	graphs {
 		definitions(
@@ -26,5 +27,9 @@ fun RaptorComponentScope<RaptorCoreFeatureComponent>.installDefaults() {
 			Password.graphDefinition(),
 			PhoneNumber.graphDefinition()
 		)
+	}
+
+	kodein {
+		bind() from singleton { PasswordHasher() }
 	}
 }

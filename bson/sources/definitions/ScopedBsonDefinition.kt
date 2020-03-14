@@ -5,7 +5,7 @@ import kotlin.reflect.*
 
 private class ScopedBsonDefinition<Value : Any>(
 	private val config: RaptorBsonDefinitionScope<Value>.() -> Unit,
-	private val valueClass: KClass<Value>
+	override val valueClass: KClass<Value>
 ) : RaptorBsonDefinition<Value> {
 
 	override fun codec(scope: BsonScope) =

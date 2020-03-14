@@ -50,25 +50,14 @@ internal class GraphSystemBuilder {
 
 		private val fieldDefinitionExtensionKey = FieldDefinitionExtensionKey()
 		private val interfaceDefinitionsByValueClass: MutableMap<KClass<*>, GraphInterfaceDefinition<*>> = mutableMapOf()
+		private val interfaceExtensionDefinitionsByValueClass: MutableMap<KClass<*>, MutableList<GraphInterfaceExtensionDefinition<*>>> = mutableMapOf()
 		private var isComplete = false
 		private val gqlTypes: MutableList<GType> = mutableListOf()
+		private val objectExtensionDefinitionsByValueClass: MutableMap<KClass<*>, MutableList<GraphObjectExtensionDefinition<*>>> = mutableMapOf()
 		private val operationDefinitionsByType: MutableMap<GraphOperation.Type, MutableMap<String, GraphOperationDefinition<*>>> = mutableMapOf()
 		private val typeDefinitionExtensionKey = TypeDefinitionExtensionKey()
 		private val typeDefinitionsByName: MutableMap<String, GraphNamedTypeDefinition<*>> = hashMapOf()
 		private val typeDefinitionsByValueClass: MutableMap<KClass<*>, GraphTypeDefinition<*>> = hashMapOf()
-
-
-		private fun applyAliasDefinition(definition: GraphAliasDefinition<*, *>) {
-			when (val referencedDefinition = typeDefinitionsByValueClass[definition.referencedValueClass]) {
-				null ->
-					error("No GraphQL type definition was provided for ${definition.referencedValueClass} referenced by ${definition.valueClass}:\n$definition")
-
-				is GraphAliasDefinition<*, *> ->
-					error("GraphQL alias ${definition.valueClass} cannot reference alias ${definition.referencedValueClass}:\n" +
-						"Alias: $definition\n" +
-						"Referenced alias: $referencedDefinition")
-			}
-		}
 
 
 		private fun applyEnumDefinition(definition: GraphEnumDefinition<*>) {
@@ -115,23 +104,52 @@ internal class GraphSystemBuilder {
 
 
 		private fun applyInterfaceDefinition(definition: GraphInterfaceDefinition<*>) {
-			gqlTypes += GInterfaceType(
-				description = definition.description,
-				fields = definition.fields.map { field ->
-					GFieldDefinition(
-						argumentDefinitions = field.arguments.map { argument ->
+			val definitionsByFieldName: MutableMap<String, RaptorGraphDefinition> = mutableMapOf()
+			val fields = mutableListOf<GFieldDefinition>()
+
+			for (fieldDefinition in definition.fields)
+				fields += GFieldDefinition(
+					argumentDefinitions = fieldDefinition.arguments.map { argument ->
+						GFieldArgumentDefinition(
+							defaultValue = argument.default,
+							description = null, // FIXME
+							name = argument.name!!, // FIXME
+							type = resolveTypeRef(argument.valueType, referee = definition)
+						)
+					},
+					description = fieldDefinition.description,
+					name = fieldDefinition.name,
+					type = resolveTypeRef(fieldDefinition.valueType, referee = definition)
+				)
+
+			for (extension in objectExtensionDefinitionsByValueClass[definition.valueClass].orEmpty())
+				for (fieldDefinition in extension.fields) {
+					definitionsByFieldName.put(fieldDefinition.name, extension)?.let { previousDefinition ->
+						error(
+							"An extension defines a duplicate field '${fieldDefinition.name}' on interface type '${definition.name}'.\n" +
+								"$extension\n" +
+								"Previous: $previousDefinition"
+						)
+					}
+
+					fields += GFieldDefinition(
+						argumentDefinitions = fieldDefinition.arguments.map { argument ->
 							GFieldArgumentDefinition(
 								defaultValue = argument.default,
 								description = null, // FIXME
 								name = argument.name!!, // FIXME
-								type = resolveTypeRef(argument.valueType, referee = definition)
+								type = resolveTypeRef(argument.valueType, referee = extension)
 							)
 						},
-						description = field.description,
-						name = field.name,
-						type = resolveTypeRef(field.valueType, referee = definition)
+						description = fieldDefinition.description,
+						name = fieldDefinition.name,
+						type = resolveTypeRef(fieldDefinition.valueType, referee = extension)
 					)
-				},
+				}
+
+			gqlTypes += GInterfaceType(
+				description = definition.description,
+				fields = fields,
 				name = definition.name
 			)
 		}
@@ -158,30 +176,66 @@ internal class GraphSystemBuilder {
 
 
 		private fun applyObjectDefinition(definition: GraphObjectDefinition<*>) {
-			gqlTypes += GObjectType(
-				description = definition.description,
-				fields = definition.fields.map { field ->
-					GFieldDefinition(
-						argumentDefinitions = field.arguments.map { argument ->
+			val definitionsByFieldName: MutableMap<String, RaptorGraphDefinition> = mutableMapOf()
+			val fields = mutableListOf<GFieldDefinition>()
+
+			for (fieldDefinition in definition.fields)
+				fields += GFieldDefinition(
+					argumentDefinitions = fieldDefinition.arguments.map { argument ->
+						GFieldArgumentDefinition(
+							defaultValue = argument.default,
+							description = null, // FIXME
+							name = argument.name!!, // FIXME
+							type = resolveTypeRef(argument.valueType, referee = definition),
+							extensions = mapOf(
+								typeDefinitionExtensionKey to resolveTypeDefinition(argument.valueType, referee = definition)
+							)
+						)
+					},
+					description = fieldDefinition.description,
+					name = fieldDefinition.name,
+					type = resolveTypeRef(fieldDefinition.valueType, referee = definition),
+					extensions = mapOf(
+						fieldDefinitionExtensionKey to fieldDefinition,
+						typeDefinitionExtensionKey to resolveTypeDefinition(fieldDefinition.valueType, referee = definition)
+					)
+				)
+
+			for (extension in objectExtensionDefinitionsByValueClass[definition.valueClass].orEmpty())
+				for (fieldDefinition in extension.fields) {
+					definitionsByFieldName.put(fieldDefinition.name, extension)?.let { previousDefinition ->
+						error(
+							"An extension defines a duplicate field '${fieldDefinition.name}' on interface type '${definition.name}'.\n" +
+								"$extension\n" +
+								"Previous: $previousDefinition"
+						)
+					}
+
+					fields += GFieldDefinition(
+						argumentDefinitions = fieldDefinition.arguments.map { argument ->
 							GFieldArgumentDefinition(
 								defaultValue = argument.default,
 								description = null, // FIXME
 								name = argument.name!!, // FIXME
-								type = resolveTypeRef(argument.valueType, referee = definition),
+								type = resolveTypeRef(argument.valueType, referee = extension),
 								extensions = mapOf(
-									typeDefinitionExtensionKey to resolveTypeDefinition(argument.valueType, referee = definition)
+									typeDefinitionExtensionKey to resolveTypeDefinition(argument.valueType, referee = extension)
 								)
 							)
 						},
-						description = field.description,
-						name = field.name,
-						type = resolveTypeRef(field.valueType, referee = definition),
+						description = fieldDefinition.description,
+						name = fieldDefinition.name,
+						type = resolveTypeRef(fieldDefinition.valueType, referee = extension),
 						extensions = mapOf(
-							fieldDefinitionExtensionKey to field,
-							typeDefinitionExtensionKey to resolveTypeDefinition(field.valueType, referee = definition)
+							fieldDefinitionExtensionKey to fieldDefinition,
+							typeDefinitionExtensionKey to resolveTypeDefinition(fieldDefinition.valueType, referee = definition)
 						)
 					)
-				},
+				}
+
+			gqlTypes += GObjectType(
+				description = definition.description,
+				fields = fields,
 				interfaces = interfaceTypeRefsForObjectValueClass(definition.valueClass),
 				kotlinType = definition.valueClass,
 				name = definition.name
@@ -252,19 +306,34 @@ internal class GraphSystemBuilder {
 		}
 
 
+		private fun checkAliasDefinition(definition: GraphAliasDefinition<*, *>) {
+			when (val referencedDefinition = typeDefinitionsByValueClass[definition.referencedValueClass]) {
+				null ->
+					error("No GraphQL type definition was provided for ${definition.referencedValueClass} referenced by ${definition.valueClass}:\n$definition")
+
+				is GraphAliasDefinition<*, *> ->
+					error("GraphQL alias ${definition.valueClass} cannot reference alias ${definition.referencedValueClass}:\n" +
+						"Alias: $definition\n" +
+						"Referenced alias: $referencedDefinition")
+			}
+		}
+
+
 		fun complete(): GraphSystem {
 			check(!isComplete) { "complete() can only be called once." }
 			isComplete = true
 
 			for (definition in typeDefinitionsByValueClass.values)
 				if (definition is GraphAliasDefinition<*, *>)
-					applyAliasDefinition(definition)
+					checkAliasDefinition(definition)
 
 			for (definition in typeDefinitionsByName.values)
 				applyNamedTypeDefinition(definition)
 
 			for ((operationType, definitionsByName) in operationDefinitionsByType)
 				applyOperationDefinitions(definitionsByName.values, operationType = operationType)
+
+			// FIXME error on extensions for non-existent types
 
 			return GraphSystem(
 				fieldDefinitionExtensionKey = fieldDefinitionExtensionKey,
@@ -297,6 +366,14 @@ internal class GraphSystemBuilder {
 
 		fun register(definition: RaptorGraphDefinition) {
 			when (definition) {
+				is GraphInterfaceExtensionDefinition<*> ->
+					interfaceExtensionDefinitionsByValueClass.getOrPut(definition.valueClass) { mutableListOf() }
+						.add(definition)
+
+				is GraphObjectExtensionDefinition<*> ->
+					objectExtensionDefinitionsByValueClass.getOrPut(definition.valueClass) { mutableListOf() }
+						.add(definition)
+
 				is GraphOperationDefinition<*> ->
 					registerOperation(definition = definition)
 

@@ -56,9 +56,11 @@ object BsonRaptorFeature : RaptorFeature {
 		)
 
 		kodein {
+			bind() from instance(config)
+
 			bind<BsonScope>() with singleton {
 				BsonScopeImpl(
-					config = config,
+					config = instance(),
 					scope = instance()
 				)
 			}

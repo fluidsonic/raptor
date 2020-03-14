@@ -6,5 +6,9 @@ internal interface KtorServerTransactionInternal : KtorServerTransaction {
 	override val context: KtorServerTransactionContextInternal
 
 
-	fun createRouteTransaction(config: KtorRouteConfig): KtorRouteTransactionImpl
+	fun createRouteTransaction(config: KtorRouteConfig) =
+		KtorRouteTransactionImpl(
+			config = config,
+			parent = this
+		)
 }
