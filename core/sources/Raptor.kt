@@ -29,9 +29,9 @@ interface Raptor {
 
 
 @Raptor.Dsl3
-fun raptor(configure: RaptorSetup.() -> Unit): Raptor {
+fun raptor(configure: RaptorCoreFeatureComponent.() -> Unit): Raptor {
 	val componentRegistry = RaptorComponentRegistryImpl()
-	val coreComponent = RaptorCoreFeatureComponent()
+	val coreComponent = RaptorCoreFeatureComponent(registry = componentRegistry)
 
 	componentRegistry.register(coreComponent, configure = configure)
 

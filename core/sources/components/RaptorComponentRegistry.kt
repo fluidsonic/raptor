@@ -3,9 +3,8 @@ package io.fluidsonic.raptor
 import kotlin.reflect.*
 
 
+// FIXME Do we still need this?
 interface RaptorComponentRegistry {
-
-	val parent: RaptorComponentRegistry?
 
 	fun <Component : RaptorComponent> getAll(clazz: KClass<Component>): List<RaptorComponentRegistration<Component>>
 
@@ -16,13 +15,13 @@ interface RaptorComponentRegistry {
 
 	interface Mutable : RaptorComponentRegistry {
 
-		override val parent: Mutable?
+		fun <Component : RaptorComponent> configureAll(clazz: KClass<Component>): RaptorComponentConfig<Component>
 
-		fun <Component : RaptorComponent> configureAll(clazz: KClass<Component>): RaptorComponentScope.Collection<Component>
+		fun <Component : RaptorComponent> configureSingle(clazz: KClass<Component>): RaptorComponentConfig<Component>
 
-		fun <Component : RaptorComponent> configureSingle(clazz: KClass<Component>): RaptorComponentScope<Component>
+		fun <Component : RaptorComponent> configureSingle(component: Component, clazz: KClass<Component>): RaptorComponentConfig<Component>
 
-		fun <Component : RaptorComponent> configureSingle(component: Component, clazz: KClass<Component>): RaptorComponentScope<Component>
+		fun createChild(): Mutable
 
 		override fun <Component : RaptorComponent> getAll(clazz: KClass<Component>): List<RaptorComponentRegistration.Mutable<Component>>
 
@@ -32,9 +31,8 @@ interface RaptorComponentRegistry {
 
 		fun <Component : RaptorComponent> register(
 			component: Component,
-			clazz: KClass<Component>,
-			definesScope: Boolean = false
-		): RaptorComponentScope<Component>
+			clazz: KClass<Component>
+		): RaptorComponentConfig<Component>
 	}
 }
 
@@ -72,7 +70,7 @@ inline fun <reified Component : RaptorComponent> RaptorComponentRegistry.Mutable
 
 
 inline fun <reified Component : RaptorComponent> RaptorComponentRegistry.Mutable.configureAll(
-	noinline configure: RaptorComponentScope<Component>.() -> Unit
+	noinline configure: Component.() -> Unit
 ) {
 	configureAll(Component::class, configure = configure)
 }
@@ -80,7 +78,7 @@ inline fun <reified Component : RaptorComponent> RaptorComponentRegistry.Mutable
 
 fun <Component : RaptorComponent> RaptorComponentRegistry.Mutable.configureAll(
 	clazz: KClass<Component>,
-	configure: RaptorComponentScope<Component>.() -> Unit
+	configure: Component.() -> Unit
 ) {
 	configureAll(clazz).invoke(configure)
 }
@@ -91,7 +89,7 @@ inline fun <reified Component : RaptorComponent> RaptorComponentRegistry.Mutable
 
 
 inline fun <reified Component : RaptorComponent> RaptorComponentRegistry.Mutable.configureSingle(
-	noinline configure: RaptorComponentScope<Component>.() -> Unit
+	noinline configure: Component.() -> Unit
 ) {
 	configureSingle(Component::class, configure = configure)
 }
@@ -99,7 +97,7 @@ inline fun <reified Component : RaptorComponent> RaptorComponentRegistry.Mutable
 
 fun <Component : RaptorComponent> RaptorComponentRegistry.Mutable.configureSingle(
 	clazz: KClass<Component>,
-	configure: RaptorComponentScope<Component>.() -> Unit
+	configure: Component.() -> Unit
 ) {
 	configureSingle(clazz).invoke(configure)
 }
@@ -107,20 +105,20 @@ fun <Component : RaptorComponent> RaptorComponentRegistry.Mutable.configureSingl
 
 inline fun <reified Component : RaptorComponent> RaptorComponentRegistry.Mutable.configureSingle(
 	component: Component
-): RaptorComponentScope<Component> =
+): RaptorComponentConfig<Component> =
 	configureSingle(component = component, clazz = Component::class)
 
 
 inline fun <reified Component : RaptorComponent> RaptorComponentRegistry.Mutable.configureSingleOrCreate(
 	create: () -> Component
-): RaptorComponentScope<Component> =
+): RaptorComponentConfig<Component> =
 	if (getSingle<Component>() !== null) configureSingle()
 	else register(create())
 
 
 inline fun <reified Component : RaptorComponent> RaptorComponentRegistry.Mutable.configureSingleOrCreate(
 	create: () -> Component,
-	noinline configure: RaptorComponentScope<Component>.() -> Unit
+	noinline configure: Component.() -> Unit
 ) {
 	if (getSingle<Component>() !== null) configureSingle(configure = configure)
 	else register(create(), configure = configure)
@@ -130,7 +128,7 @@ inline fun <reified Component : RaptorComponent> RaptorComponentRegistry.Mutable
 inline fun <Component : RaptorComponent> RaptorComponentRegistry.Mutable.configureSingleOrCreate(
 	clazz: KClass<Component>,
 	create: () -> Component
-): RaptorComponentScope<Component> =
+): RaptorComponentConfig<Component> =
 	if (getSingle(clazz) !== null) configureSingle(clazz = clazz)
 	else register(component = create(), clazz = clazz)
 
@@ -138,33 +136,27 @@ inline fun <Component : RaptorComponent> RaptorComponentRegistry.Mutable.configu
 inline fun <Component : RaptorComponent> RaptorComponentRegistry.Mutable.configureSingleOrCreate(
 	clazz: KClass<Component>,
 	create: () -> Component,
-	noinline configure: RaptorComponentScope<Component>.() -> Unit
+	noinline configure: Component.() -> Unit
 ) {
 	if (getSingle(clazz) !== null) configureSingle(clazz = clazz, configure = configure)
 	else register(component = create(), clazz = clazz, configure = configure)
 }
 
 
-inline fun <reified Component : RaptorComponent> RaptorComponentRegistry.Mutable.register(
-	component: Component,
-	definesScope: Boolean = false
-) =
+inline fun <reified Component : RaptorComponent> RaptorComponentRegistry.Mutable.register(component: Component) =
 	register(
 		component = component,
-		clazz = Component::class,
-		definesScope = definesScope
+		clazz = Component::class
 	)
 
 
 inline fun <reified Component : RaptorComponent> RaptorComponentRegistry.Mutable.register(
 	component: Component,
-	definesScope: Boolean = false,
-	noinline configure: RaptorComponentScope<Component>.() -> Unit
+	noinline configure: Component.() -> Unit
 ) {
 	register(
 		component = component,
 		clazz = Component::class,
-		definesScope = definesScope,
 		configure = configure
 	)
 }
@@ -173,12 +165,10 @@ inline fun <reified Component : RaptorComponent> RaptorComponentRegistry.Mutable
 fun <Component : RaptorComponent> RaptorComponentRegistry.Mutable.register(
 	component: Component,
 	clazz: KClass<Component>,
-	definesScope: Boolean = false,
-	configure: RaptorComponentScope<Component>.() -> Unit
+	configure: Component.() -> Unit
 ) {
 	register(
 		component = component,
-		clazz = clazz,
-		definesScope = definesScope
+		clazz = clazz
 	).invoke(configure)
 }

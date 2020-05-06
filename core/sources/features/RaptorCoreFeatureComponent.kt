@@ -4,7 +4,14 @@ import org.kodein.di.*
 import org.kodein.di.erased.*
 
 
-class RaptorCoreFeatureComponent internal constructor() : RaptorFeatureComponent() {
+class RaptorCoreFeatureComponent internal constructor(
+	registry: RaptorComponentRegistry.Mutable
+) : RaptorFeatureComponent(componentRegistry = registry) {
+
+	init {
+		registry.register(RaptorTransactionComponent())
+	}
+
 
 	internal fun complete(componentRegistry: RaptorComponentRegistry): RaptorConfig {
 		val completion = RaptorFeatureSetupCompletion(componentRegistry = componentRegistry)

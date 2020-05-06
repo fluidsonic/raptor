@@ -5,36 +5,21 @@ internal class RaptorComponentRegistrationImpl<out Component : RaptorComponent> 
 	override val component: Component,
 	override val containingRegistry: RaptorComponentRegistryImpl,
 	override val registry: RaptorComponentRegistryImpl
-) : RaptorComponentRegistration.Mutable<Component>, RaptorComponentScope.Collection<Component>, RaptorComponentScope.Selection.Collection<Component> {
+) : RaptorComponentRegistration.Mutable<Component>,
+	RaptorComponentConfig<Component> {
 
-	override val raptorComponentSelection: RaptorComponentScope.Selection.Collection<Component>
-		get() = this
-
-
-	override fun filter(predicate: RaptorComponentRegistration<Component>.() -> Boolean): RaptorComponentScope.Collection<Component> =
-		if (predicate(this)) this
-		else RaptorComponentScope.empty()
-
-
-	override fun invoke(configure: RaptorComponentRegistration.Mutable<Component>.() -> Unit) {
-		apply(configure)
+	override fun invoke(configure: Component.() -> Unit) {
+		configure(component)
 	}
-
-
-	override fun <Transformed : RaptorComponent> map(
-		transform: RaptorComponentRegistration.Mutable<Component>.() -> RaptorComponentScope<Transformed>
-	): RaptorComponentScope.Collection<Transformed> =
-		RaptorComponentScope.asCollection(transform(this))
 
 
 	class Collection<Component : RaptorComponent>(
 		private val registrations: MutableList<RaptorComponentRegistrationImpl<Component>> = mutableListOf()
 	) :
-		RaptorComponentScope.Collection<Component>,
-		RaptorComponentScope.Selection.Collection<Component>,
-		List<RaptorComponentRegistrationImpl<Component>> by registrations {
+		List<RaptorComponentRegistrationImpl<Component>> by registrations,
+		RaptorComponentConfig<Component> {
 
-		private val configurations: MutableList<RaptorComponentRegistration.Mutable<Component>.() -> Unit> = mutableListOf()
+		private val configurations: MutableList<Component.() -> Unit> = mutableListOf()
 
 
 		fun addComponent(
@@ -54,7 +39,7 @@ internal class RaptorComponentRegistrationImpl<out Component : RaptorComponent> 
 
 			val configurations = configurations
 
-			with(registration) {
+			with(registration.component) {
 				// We iterate over indices because the configurations we call may append more configurations.
 				for (index in configurations.indices)
 					configurations[index]()
@@ -64,83 +49,12 @@ internal class RaptorComponentRegistrationImpl<out Component : RaptorComponent> 
 		}
 
 
-		override fun filter(predicate: RaptorComponentRegistration<Component>.() -> Boolean): RaptorComponentScope.Collection<Component> =
-			Filtered(predicate = predicate, source = this)
-
-
-		override fun invoke(configure: RaptorComponentRegistration.Mutable<Component>.() -> Unit) {
+		override fun invoke(configure: Component.() -> Unit) {
 			configurations += configure
 
 			// We iterate over indices because the configuration we call may append more components.
 			for (index in registrations.indices)
-				registrations[index].apply(configure)
-		}
-
-
-		override fun <Transformed : RaptorComponent> map(
-			transform: RaptorComponentRegistration.Mutable<Component>.() -> RaptorComponentScope<Transformed>
-		): RaptorComponentScope.Collection<Transformed> =
-			Mapped(transform = transform, source = this)
-
-
-		override val raptorComponentSelection: RaptorComponentScope.Selection.Collection<Component>
-			get() = this
-
-
-		private class Filtered<Component : RaptorComponent>(
-			private val predicate: RaptorComponentRegistration<Component>.() -> Boolean,
-			private val source: RaptorComponentScope.Collection<Component>
-		) : RaptorComponentScope.Collection<Component>, RaptorComponentScope.Selection.Collection<Component> {
-
-			override fun filter(predicate: RaptorComponentRegistration<Component>.() -> Boolean): RaptorComponentScope.Collection<Component> =
-				Filtered(predicate = predicate, source = this)
-
-
-			override fun invoke(configure: RaptorComponentRegistration.Mutable<Component>.() -> Unit) {
-				source.raptorComponentSelection {
-					if (this@Filtered.predicate(this))
-						configure()
-				}
-			}
-
-
-			override fun <Transformed : RaptorComponent> map(
-				transform: RaptorComponentRegistration.Mutable<Component>.() -> RaptorComponentScope<Transformed>
-			): RaptorComponentScope.Collection<Transformed> =
-				Mapped(transform = transform, source = this)
-
-
-			override val raptorComponentSelection: RaptorComponentScope.Selection.Collection<Component>
-				get() = this
-		}
-
-
-		private class Mapped<SourceComponent : RaptorComponent, Component : RaptorComponent>(
-			private val transform: RaptorComponentRegistration.Mutable<SourceComponent>.() -> RaptorComponentScope<Component>,
-			private val source: RaptorComponentScope.Collection<SourceComponent>
-		) : RaptorComponentScope.Collection<Component>, RaptorComponentScope.Selection.Collection<Component> {
-
-			override fun filter(predicate: RaptorComponentRegistration<Component>.() -> Boolean): RaptorComponentScope.Collection<Component> =
-				Filtered(predicate = predicate, source = this)
-
-
-			override fun invoke(configure: RaptorComponentRegistration.Mutable<Component>.() -> Unit) {
-				source.raptorComponentSelection {
-					this@Mapped.transform(this).raptorComponentSelection {
-						configure()
-					}
-				}
-			}
-
-
-			override fun <Transformed : RaptorComponent> map(
-				transform: RaptorComponentRegistration.Mutable<Component>.() -> RaptorComponentScope<Transformed>
-			): RaptorComponentScope.Collection<Transformed> =
-				Mapped(transform = transform, source = this)
-
-
-			override val raptorComponentSelection: RaptorComponentScope.Selection.Collection<Component>
-				get() = this
+				registrations[index].component.apply(configure)
 		}
 	}
 }

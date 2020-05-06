@@ -8,11 +8,7 @@ import org.kodein.di.erased.*
 object KtorRaptorFeature : RaptorFeature {
 
 	override fun RaptorFeatureSetup.setup() {
-		raptorComponentSelection {
-			registry.register(KtorRaptorComponent(
-				globalFeatureSetup = this@setup // FIXME incorrect - multiplies
-			))
-		}
+		componentRegistry.register(KtorRaptorComponent(globalComponent = this))
 
 		kodein {
 			// FIXME Rework this. We need a global config feature instead.
@@ -47,9 +43,9 @@ object KtorRaptorFeature : RaptorFeature {
 
 
 @Raptor.Dsl3
-val RaptorComponentScope<RaptorFeatureComponent>.ktor: RaptorComponentScope<KtorRaptorComponent>
+val RaptorFeatureComponent.ktor: RaptorComponentConfig<KtorRaptorComponent>
 	get() {
 		install(KtorRaptorFeature)
 
-		return raptorComponentSelection.map { registry.configureSingle() }
+		return componentRegistry.configureSingle()
 	}

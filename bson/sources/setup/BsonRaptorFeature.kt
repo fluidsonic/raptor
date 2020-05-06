@@ -34,9 +34,7 @@ object BsonRaptorFeature : RaptorFeature {
 
 
 	override fun RaptorFeatureSetup.setup() {
-		raptorComponentSelection {
-			registry.register(BsonRaptorComponent())
-		}
+		componentRegistry.register(BsonRaptorComponent())
 
 		bson {
 			definitions(defaultDefinitions)
@@ -47,13 +45,7 @@ object BsonRaptorFeature : RaptorFeature {
 
 	override fun RaptorFeatureSetupCompletion.completeSetup() {
 		val component = componentRegistry.getSingle<BsonRaptorComponent>()?.component
-
-		val config = BsonConfig(
-			codecs = component?.codecs.orEmpty(),
-			definitions = component?.definitions.orEmpty(),
-			providers = component?.providers.orEmpty(),
-			registries = component?.registries.orEmpty()
-		)
+		val config = component?.complete() ?: BsonConfig.empty
 
 		kodein {
 			bind() from instance(config)
@@ -75,11 +67,9 @@ object BsonRaptorFeature : RaptorFeature {
 
 // FIXME is it okay to automatically register the feature?
 @Raptor.Dsl3
-val RaptorComponentScope<RaptorFeatureComponent>.bson: RaptorComponentScope<BsonRaptorComponent>
+val RaptorFeatureComponent.bson: RaptorComponentConfig<BsonRaptorComponent>
 	get() {
 		install(BsonRaptorFeature)
 
-		return raptorComponentSelection.map {
-			registry.configureSingle()
-		}
+		return componentRegistry.configureSingle()
 	}

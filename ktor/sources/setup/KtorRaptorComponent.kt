@@ -2,10 +2,11 @@ package io.fluidsonic.raptor
 
 
 class KtorRaptorComponent internal constructor(
-	internal val globalFeatureSetup: RaptorFeatureSetup
+	private val globalComponent: RaptorFeatureComponent
 ) : RaptorComponent {
 
-	internal val serverComponents: MutableList<KtorServerRaptorComponent> = mutableListOf()
+	private val componentRegistry = globalComponent.componentRegistry.createChild()
+	private val serverComponents: MutableList<KtorServerRaptorComponent> = mutableListOf()
 
 
 	internal fun complete(globalCompletion: RaptorFeatureSetupCompletion): KtorConfig? {
@@ -18,26 +19,24 @@ class KtorRaptorComponent internal constructor(
 
 		return KtorConfig(servers = servers)
 	}
-}
 
 
-@Raptor.Dsl3
-fun RaptorComponentScope<KtorRaptorComponent>.newServer(
-	vararg tags: Any = emptyArray(),
-	configure: RaptorComponentScope<KtorServerRaptorComponent>.() -> Unit = {}
-) {
-	raptorComponentSelection {
+	@Raptor.Dsl3
+	fun newServer(
+		vararg tags: Any = emptyArray(),
+		configure: KtorServerRaptorComponent.() -> Unit = {}
+	) {
 		val serverComponent = KtorServerRaptorComponent(
-			globalFeatureSetup = component.globalFeatureSetup,
+			globalComponent = globalComponent,
+			parentComponentRegistry = componentRegistry,
 			raptorTags = tags.toHashSet()
 		)
-		component.serverComponents += serverComponent
+		serverComponents += serverComponent
 
-		registry.register(serverComponent, configure = configure, definesScope = true)
+		componentRegistry.register(serverComponent, configure = configure)
 	}
+
+
+	@Raptor.Dsl3
+	val servers: RaptorComponentConfig<KtorServerRaptorComponent> = componentRegistry.configureAll()
 }
-
-
-@Raptor.Dsl3
-val RaptorComponentScope<KtorRaptorComponent>.servers
-	get() = raptorComponentSelection.map { registry.configureAll<KtorServerRaptorComponent>() }

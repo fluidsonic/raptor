@@ -13,6 +13,19 @@ class GraphRaptorComponent internal constructor(
 	internal val definitions = defaultDefinitions.toMutableList()
 
 
+	@Raptor.Dsl3
+	fun definitions(vararg definitions: RaptorGraphDefinition) {
+		definitions(definitions.asIterable())
+
+	}
+
+
+	@Raptor.Dsl3
+	fun definitions(definitions: Iterable<RaptorGraphDefinition>) {
+		this.definitions += definitions
+	}
+
+
 	companion object {
 
 		private val defaultDefinitions = listOf<RaptorGraphDefinition>(
@@ -30,19 +43,3 @@ class GraphRaptorComponent internal constructor(
 		)
 	}
 }
-
-
-@Raptor.Dsl3
-fun RaptorComponentScope<GraphRaptorComponent>.definitions(vararg definitions: RaptorGraphDefinition) {
-	definitions(definitions.asIterable())
-
-}
-
-
-@Raptor.Dsl3
-fun RaptorComponentScope<GraphRaptorComponent>.definitions(definitions: Iterable<RaptorGraphDefinition>) {
-	raptorComponentSelection {
-		component.definitions += definitions
-	}
-}
-

@@ -48,21 +48,27 @@ object GraphKtorFeature : KtorRouteFeature {
 
 // FIXME won't work as it won't go into child registries
 @Raptor.Dsl3
-val RaptorComponentScope<RaptorFeatureComponent>.graphs: RaptorComponentScope.Collection<GraphRaptorComponent>
-	get() = ktor.servers.routes.routes.raptorComponentSelection.map { registry.configureAll() } // FIXME HACK! must be recursive
+val RaptorFeatureComponent.graphs: RaptorComponentConfig<GraphRaptorComponent>
+	get() = RaptorComponentConfig.new { configure ->
+		ktor {
+			servers {
+				routes(recursive = true) {
+					componentRegistry.configureAll(configure)
+				}
+			}
+		}
+	}
 
 
 @Raptor.Dsl3
-fun RaptorComponentScope<KtorRouteRaptorComponent>.newGraph(
+fun KtorRouteRaptorComponent.newGraph(
 	vararg tags: Any = emptyArray(),
-	configure: RaptorComponentScope<GraphRaptorComponent>.() -> Unit = {}
+	configure: GraphRaptorComponent.() -> Unit = {}
 ) {
 	install(GraphKtorFeature)
 
-	raptorComponentSelection {
-		registry.register(
-			component = GraphRaptorComponent(raptorTags = tags.toHashSet()),
-			configure = configure
-		)
-	}
+	componentRegistry.register(
+		component = GraphRaptorComponent(raptorTags = tags.toHashSet()),
+		configure = configure
+	)
 }

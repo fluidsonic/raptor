@@ -3,18 +3,16 @@ package io.fluidsonic.raptor
 import kotlin.reflect.*
 
 
-internal class RaptorComponentRegistryImpl(
-	override val parent: RaptorComponentRegistry.Mutable? = null
-) : RaptorComponentRegistry.Mutable {
+internal class RaptorComponentRegistryImpl : RaptorComponentRegistry.Mutable {
 
 	private val registrationsByClass: MutableMap<KClass<out RaptorComponent>, RaptorComponentRegistrationImpl.Collection<*>> = hashMapOf()
 
 
-	override fun <Component : RaptorComponent> configureAll(clazz: KClass<Component>): RaptorComponentScope.Collection<Component> =
+	override fun <Component : RaptorComponent> configureAll(clazz: KClass<Component>): RaptorComponentConfig<Component> =
 		getOrCreateCollection(clazz)
 
 
-	override fun <Component : RaptorComponent> configureSingle(clazz: KClass<Component>): RaptorComponentScope<Component> =
+	override fun <Component : RaptorComponent> configureSingle(clazz: KClass<Component>): RaptorComponentConfig<Component> =
 		getOrCreateCollection(clazz)
 			.apply {
 				if (size > 1)
@@ -26,9 +24,13 @@ internal class RaptorComponentRegistryImpl(
 			}
 
 
-	override fun <Component : RaptorComponent> configureSingle(component: Component, clazz: KClass<Component>): RaptorComponentScope<Component> =
+	override fun <Component : RaptorComponent> configureSingle(component: Component, clazz: KClass<Component>): RaptorComponentConfig<Component> =
 		getCollection(clazz)?.firstOrNull { it.component === component }
 			?: error("Cannot get registration for component instance of ${component::class} that is not registered: $component")
+
+
+	override fun createChild(): RaptorComponentRegistry.Mutable =
+		RaptorComponentRegistryImpl()
 
 
 	override fun <Component : RaptorComponent> getAll(clazz: KClass<Component>): List<RaptorComponentRegistration.Mutable<Component>> =
@@ -66,12 +68,11 @@ internal class RaptorComponentRegistryImpl(
 
 	override fun <Component : RaptorComponent> register(
 		component: Component,
-		clazz: KClass<Component>,
-		definesScope: Boolean
-	): RaptorComponentScope<Component> =
+		clazz: KClass<Component>
+	): RaptorComponentConfig<Component> =
 		getOrCreateCollection(clazz).addComponent(
 			component = component,
-			containingRegistry = this,
-			registry = if (definesScope) RaptorComponentRegistryImpl(parent = this) else this
+			containingRegistry = this, // FIXME do we need this
+			registry = this // FIXME do we need this
 		)
 }

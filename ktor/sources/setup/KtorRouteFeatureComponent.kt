@@ -3,7 +3,19 @@ package io.fluidsonic.raptor
 
 @Raptor.Dsl3
 class KtorRouteFeatureComponent internal constructor(
-	internal val globalFeatureSetup: RaptorFeatureSetup,
-	internal val routeComponent: KtorRouteRaptorComponent,
-	internal val serverComponent: KtorServerRaptorComponent
-) : RaptorComponent
+	globalComponent: RaptorFeatureComponent,
+	routeComponent: KtorRouteRaptorComponent,
+	serverComponent: KtorServerRaptorComponent
+) : RaptorComponent {
+
+	@Raptor.Dsl3
+	val global = RaptorComponentConfig.of(globalComponent)
+
+
+	@Raptor.Dsl3
+	val route = RaptorComponentConfig.of(routeComponent)
+
+
+	@Raptor.Dsl3
+	val server = RaptorComponentConfig.of(serverComponent)
+}

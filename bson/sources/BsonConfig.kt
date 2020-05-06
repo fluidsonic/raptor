@@ -9,4 +9,15 @@ class BsonConfig(
 	val definitions: Collection<RaptorBsonDefinition<*>>,
 	val providers: Collection<CodecProvider>,
 	val registries: Collection<CodecRegistry>
-)
+) {
+
+	companion object {
+
+		val empty = BsonConfig(
+			codecs = emptyList(),
+			definitions = emptyList(),
+			providers = emptyList(),
+			registries = emptyList()
+		)
+	}
+}
