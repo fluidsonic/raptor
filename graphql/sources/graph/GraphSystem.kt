@@ -39,7 +39,10 @@ internal class GraphSystem(
 				return GraphInputContext(arguments = context.arguments).use {
 					with(scope) {
 						resolve(parent)?.let { resolvedValue ->
-							if (alias !== null) alias(resolvedValue) else resolvedValue
+							when {
+								alias !== null -> serializeAlias(value = resolvedValue, serialize = alias, typeRef = context.fieldDefinition.type)
+								else -> resolvedValue
+							}
 						}
 					}
 				}
@@ -117,3 +120,17 @@ internal fun GraphSystem(definitions: Collection<RaptorGraphDefinition>) =
 				add(definition)
 		}
 		.build()
+
+
+// FIXME Consolidate list handling
+private tailrec fun RaptorGraphScope.serializeAlias(value: Any, serialize: RaptorGraphScope.(value: Any) -> Any?, typeRef: GTypeRef): Any? =
+	when (typeRef) {
+		is GListTypeRef -> when (value) {
+			is Iterable<*> -> value.map { element ->
+				element?.let { serializeAlias(value = element, serialize = serialize, typeRef = typeRef.elementType) }
+			}
+			else -> value
+		}
+		is GNamedTypeRef -> serialize(value)
+		is GNonNullTypeRef -> serializeAlias(value = value, serialize = serialize, typeRef = typeRef.nullableRef)
+	}
