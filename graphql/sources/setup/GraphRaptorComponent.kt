@@ -33,6 +33,7 @@ class GraphRaptorComponent internal constructor(
 			Country.graphDefinition(),
 			Currency.graphDefinition(),
 			LocalDate.graphDefinition(),
+			LocalDateTime.graphDefinition(),
 			LocalTime.graphDefinition(),
 			Money.graphDefinition(),
 			PreciseDuration.graphDefinition(),

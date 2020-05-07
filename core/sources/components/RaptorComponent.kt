@@ -30,6 +30,45 @@ interface RaptorComponent {
 
 
 @Raptor.Dsl3
+fun <Component : RaptorComponent.Taggable> Component.withTag(
+	tag: Any
+) =
+	withTags(tag)
+
+
+@Raptor.Dsl3
+fun <Component : RaptorComponent.Taggable> Component.withTag(
+	tag: Any,
+	configure: Component.() -> Unit
+) {
+	withTag(tag).invoke(configure)
+}
+
+
+@Raptor.Dsl3
+fun <Component : RaptorComponent.Taggable> Component.withTags(
+	vararg tags: Any
+): RaptorComponentConfig<Component> {
+	@Suppress("NAME_SHADOWING")
+	val tags = tags.toList()
+
+	return RaptorComponentConfig.new {
+		if (raptorTags.containsAll(tags))
+			it()
+	}
+}
+
+
+@Raptor.Dsl3
+fun <Component : RaptorComponent.Taggable> Component.withTags(
+	vararg tags: Any,
+	configure: Component.() -> Unit
+) {
+	withTags(*tags).invoke(configure)
+}
+
+
+@Raptor.Dsl3
 fun <Component : RaptorComponent.Taggable> RaptorComponentConfig<Component>.withTag(
 	tag: Any
 ) =
@@ -50,7 +89,7 @@ fun <Component : RaptorComponent.Taggable> RaptorComponentConfig<Component>.with
 	vararg tags: Any
 ): RaptorComponentConfig<Component> {
 	@Suppress("NAME_SHADOWING")
-	val tags = tags.toHashSet()
+	val tags = tags.toList()
 
 	return RaptorComponentConfig.filter(this) { it.raptorTags.containsAll(tags) }
 }

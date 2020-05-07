@@ -17,6 +17,7 @@ object BsonRaptorFeature : RaptorFeature {
 		DayOfWeek.bsonDefinition(),
 		GeoCoordinate.bsonDefinition(),
 		LocalDate.bsonDefinition(),
+		LocalDateTime.bsonDefinition(),
 		LocalTime.bsonDefinition(),
 		Money.bsonDefinition(),
 		PreciseDuration.bsonDefinition(),

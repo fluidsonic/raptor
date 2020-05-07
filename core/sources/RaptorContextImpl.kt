@@ -9,7 +9,7 @@ internal class RaptorContextImpl(
 ) : RaptorContext {
 
 	override val dkodein = Kodein.direct {
-		import(kodeinModule)
+		import(kodeinModule, allowOverride = true) // FIXME add special facility for testing
 
 		bind<RaptorContext>() with instance(this@RaptorContextImpl)
 		bind<RaptorScope>() with instance(this@RaptorContextImpl)
