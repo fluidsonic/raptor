@@ -4,6 +4,17 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
+        <compositeConfiguration>
+          <compositeBuild compositeDefinitionSource="SCRIPT">
+            <builds>
+              <build path="$PROJECT_DIR$/../fluid-graphql" name="fluid-graphql">
+                <projects>
+                  <project path="$PROJECT_DIR$/../fluid-graphql" />
+                </projects>
+              </build>
+            </builds>
+          </compositeBuild>
+        </compositeConfiguration>
         <option name="delegatedBuild" value="false" />
         <option name="testRunner" value="PLATFORM" />
         <option name="distributionType" value="DEFAULT_WRAPPED" />
@@ -11,7 +22,16 @@
         <option name="gradleJvm" value="#JAVA_INTERNAL" />
         <option name="modules">
           <set>
+            <option value="$PROJECT_DIR$/../fluid-graphql" />
             <option value="$PROJECT_DIR$" />
+            <option value="$PROJECT_DIR$/modules/bson" />
+            <option value="$PROJECT_DIR$/modules/core" />
+            <option value="$PROJECT_DIR$/modules/default" />
+            <option value="$PROJECT_DIR$/modules/freemarker" />
+            <option value="$PROJECT_DIR$/modules/graphql" />
+            <option value="$PROJECT_DIR$/modules/ktor" />
+            <option value="$PROJECT_DIR$/modules/mongodb" />
+            <option value="$PROJECT_DIR$/modules/transactions" />
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />

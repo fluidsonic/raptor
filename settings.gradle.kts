@@ -1,9 +1,18 @@
-rootProject.name = "raptor"
+includeBuild("../fluid-graphql")
 
-include("bson", "core", "graphql", "ktor", "mongodb")
+file("modules")
+	.listFiles()
+	.filter(File::isDirectory)
+	.forEach { directory ->
+		val name = directory.name
 
-project(":bson").name = "raptor-bson"
-project(":core").name = "raptor-core"
-project(":graphql").name = "raptor-graphql"
-project(":ktor").name = "raptor-ktor"
-project(":mongodb").name = "raptor-mongodb"
+		include(name)
+
+		project(":$name").apply {
+			this.name = when (name) {
+				"default" -> "raptor"
+				else -> "raptor-$name"
+			}
+			this.projectDir = directory
+		}
+	}
