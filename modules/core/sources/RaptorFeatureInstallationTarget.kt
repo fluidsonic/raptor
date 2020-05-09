@@ -6,7 +6,7 @@ import kotlin.reflect.*
 interface RaptorFeatureInstallationTarget {
 
 	@RaptorDsl
-	fun <Feature : RaptorConfigurableFeature<RootComponent>, RootComponent : RaptorComponent<RootComponent>> install(
+	fun <Feature : RaptorConfigurableFeature<RootComponent>, RootComponent : RaptorComponent> install(
 		feature: Feature,
 		rootComponentType: KClass<RootComponent>,
 		configure: RootComponent.() -> Unit = {}

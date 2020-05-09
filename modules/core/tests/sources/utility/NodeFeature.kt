@@ -11,5 +11,5 @@ object NodeFeature : RaptorConfigurableFeature<NodeComponent> {
 
 
 	override fun RaptorFeatureInstallationScope.installConfigurable() =
-		NodeComponent(name = "root", registry = registry)
+		NodeComponent(name = "root", parentRegistry = registry)
 }

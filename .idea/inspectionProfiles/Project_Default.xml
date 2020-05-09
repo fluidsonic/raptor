@@ -67,20 +67,26 @@
       <option name="migratedIntoUserSpace" value="true" />
     </inspection_tool>
     <inspection_tool class="PackageDirectoryMismatch" enabled="false" level="WARNING" enabled_by_default="false" />
+    <inspection_tool class="PropertyName" enabled="true" level="WEAK WARNING" enabled_by_default="true">
+      <option name="namePattern" value="_?[a-z][A-Za-z\d]*" />
+    </inspection_tool>
     <inspection_tool class="SecurityAdvisoriesInspection" enabled="true" level="WARNING" enabled_by_default="true">
       <option name="optionConfiguration">
         <list>
+          <option value="barryvdh/laravel-debugbar" />
           <option value="behat/behat" />
           <option value="brianium/paratest" />
           <option value="codeception/codeception" />
           <option value="codedungeon/phpunit-result-printer" />
           <option value="composer/composer" />
+          <option value="doctrine/coding-standard" />
           <option value="filp/whoops" />
           <option value="friendsofphp/php-cs-fixer" />
           <option value="humbug/humbug" />
           <option value="infection/infection" />
           <option value="jakub-onderka/php-parallel-lint" />
           <option value="johnkary/phpunit-speedtrap" />
+          <option value="kalessil/production-dependencies-guard" />
           <option value="mikey179/vfsStream" />
           <option value="mockery/mockery" />
           <option value="mybuilder/phpunit-accelerator" />
@@ -88,6 +94,7 @@
           <option value="pdepend/pdepend" />
           <option value="phan/phan" />
           <option value="phing/phing" />
+          <option value="phpcompatibility/php-compatibility" />
           <option value="phpmd/phpmd" />
           <option value="phpro/grumphp" />
           <option value="phpspec/phpspec" />
@@ -111,8 +118,11 @@
           <option value="symfony/var-dumper" />
           <option value="vimeo/psalm" />
           <option value="wimg/php-compatibility" />
+          <option value="wp-coding-standards/wpcs" />
+          <option value="yiisoft/yii2-coding-standards" />
           <option value="yiisoft/yii2-debug" />
           <option value="yiisoft/yii2-gii" />
+          <option value="zendframework/zend-coding-standard" />
           <option value="zendframework/zend-debug" />
           <option value="zendframework/zend-test" />
         </list>

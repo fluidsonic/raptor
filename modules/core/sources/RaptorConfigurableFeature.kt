@@ -3,7 +3,7 @@ package io.fluidsonic.raptor
 import kotlin.reflect.*
 
 
-interface RaptorConfigurableFeature<RootComponent : RaptorComponent<RootComponent>> {
+interface RaptorConfigurableFeature<RootComponent : RaptorComponent> {
 
 	fun RaptorFeatureFinalizationScope.finalizeConfigurable(rootComponent: RootComponent) = Unit
 	fun RaptorFeatureInstallationScope.installConfigurable(): RootComponent
@@ -14,7 +14,7 @@ interface RaptorConfigurableFeature<RootComponent : RaptorComponent<RootComponen
 
 
 @RaptorDsl
-inline fun <Feature : RaptorConfigurableFeature<RootComponent>, reified RootComponent : RaptorComponent<RootComponent>> RaptorFeatureInstallationTarget.install(
+inline fun <Feature : RaptorConfigurableFeature<RootComponent>, reified RootComponent : RaptorComponent> RaptorFeatureInstallationTarget.install(
 	feature: Feature,
 	noinline configure: RootComponent.() -> Unit = {}
 ) {
@@ -23,12 +23,12 @@ inline fun <Feature : RaptorConfigurableFeature<RootComponent>, reified RootComp
 
 
 @RaptorDsl
-inline fun <reified Component : RaptorComponent<Component>> RaptorFeatureFinalizationScope.component(): Component =
+inline fun <reified Component : RaptorComponent> RaptorFeatureFinalizationScope.component(): Component =
 	component(Component::class)
 
 
 @RaptorDsl
-fun <Component : RaptorComponent<Component>> RaptorFeatureFinalizationScope.component(type: KClass<Component>): Component =
+fun <Component : RaptorComponent> RaptorFeatureFinalizationScope.component(type: KClass<Component>): Component =
 	components(type)
 		.also { components ->
 			when (components.size) {
@@ -44,5 +44,5 @@ fun <Component : RaptorComponent<Component>> RaptorFeatureFinalizationScope.comp
 
 
 @RaptorDsl
-inline fun <reified Component : RaptorComponent<Component>> RaptorFeatureFinalizationScope.components(): Collection<Component> =
+inline fun <reified Component : RaptorComponent> RaptorFeatureFinalizationScope.components(): Collection<Component> =
 	components(Component::class)

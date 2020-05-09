@@ -2,17 +2,31 @@ package io.fluidsonic.raptor
 
 
 @RaptorDsl
-interface RaptorComponentSet<Component : RaptorComponent<Component>> {
+interface RaptorComponentSet<out Component : RaptorComponent> {
 
 	@RaptorDsl
 	fun forEach(action: Component.() -> Unit)
 
 
+	// FIXME improve naming & nesting of ops
+	// FIXME unit-test
 	companion object {
 
-		// FIXME improve naming & nesting
 		@RaptorDsl
-		fun <Component : RaptorComponent<Component>, TransformedComponent : RaptorComponent<TransformedComponent>> map(
+		fun <Component : RaptorComponent> filter(
+			set: RaptorComponentSet<Component>,
+			filter: (component: Component) -> Boolean
+		): RaptorComponentSet<Component> =
+			RaptorComponentSet { action ->
+				set.forEach {
+					if (filter(this))
+						action()
+				}
+			}
+
+
+		@RaptorDsl
+		fun <Component : RaptorComponent, TransformedComponent : RaptorComponent> map(
 			set: RaptorComponentSet<Component>,
 			transform: Component.() -> RaptorComponentSet<TransformedComponent>
 		): RaptorComponentSet<TransformedComponent> {
@@ -35,19 +49,6 @@ interface RaptorComponentSet<Component : RaptorComponent<Component>> {
 					transforms[index].forEach(action)
 			}
 		}
-
-
-		// FIXME
-//		fun <Component : RaptorComponent<Component>> filter(config: RaptorComponentSet<Component>, filter: (component: Component) -> Boolean) =
-//			object : RaptorComponentSet<Component> {
-//
-//				override fun invoke(configure: Component.() -> Unit) {
-//					config {
-//						if (filter(this))
-//							configure()
-//					}
-//				}
-//			}
 //
 //
 //		fun <Component : RaptorComponent> new(configure: (configure: Component.() -> Unit) -> Unit) =
@@ -72,7 +73,7 @@ interface RaptorComponentSet<Component : RaptorComponent<Component>> {
 
 @RaptorDsl
 @Suppress("FunctionName")
-fun <Component : RaptorComponent<Component>> RaptorComponentSet(forEach: (action: Component.() -> Unit) -> Unit): RaptorComponentSet<Component> =
+fun <Component : RaptorComponent> RaptorComponentSet(forEach: (action: Component.() -> Unit) -> Unit): RaptorComponentSet<Component> =
 	object : RaptorComponentSet<Component> {
 
 		override fun forEach(action: Component.() -> Unit) {
@@ -82,5 +83,5 @@ fun <Component : RaptorComponent<Component>> RaptorComponentSet(forEach: (action
 
 
 @RaptorDsl
-operator fun <Component : RaptorComponent<Component>> RaptorComponentSet<Component>.invoke(action: Component.() -> Unit) =
+operator fun <Component : RaptorComponent> RaptorComponentSet<Component>.invoke(action: Component.() -> Unit) =
 	forEach(action)

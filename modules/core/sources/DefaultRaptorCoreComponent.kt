@@ -3,7 +3,10 @@ package io.fluidsonic.raptor
 import kotlin.reflect.*
 
 
-internal class DefaultRaptorCoreComponent : RaptorCoreComponent, RaptorFeatureFinalizationScope, RaptorFeatureInstallationScope {
+internal class DefaultRaptorCoreComponent : RaptorComponent.Base<RaptorCoreComponent>(),
+	RaptorCoreComponent,
+	RaptorFeatureFinalizationScope,
+	RaptorFeatureInstallationScope {
 
 	private val featureInstallations: MutableList<FeatureInstallation<*, *>> = mutableListOf()
 	private val properties: MutableMap<RaptorKey<*>, Any> = hashMapOf()
@@ -26,7 +29,7 @@ internal class DefaultRaptorCoreComponent : RaptorCoreComponent, RaptorFeatureFi
 	}
 
 
-	override fun <Component : RaptorComponent<Component>> components(type: KClass<Component>): Collection<Component> =
+	override fun <Component : RaptorComponent> components(type: KClass<Component>): Collection<Component> =
 		_registry.registeredComponents(type)
 
 
@@ -39,7 +42,7 @@ internal class DefaultRaptorCoreComponent : RaptorCoreComponent, RaptorFeatureFi
 
 
 	@Suppress("UNCHECKED_CAST")
-	override fun <Feature : RaptorConfigurableFeature<Component>, Component : RaptorComponent<Component>> install(
+	override fun <Feature : RaptorConfigurableFeature<Component>, Component : RaptorComponent> install(
 		feature: Feature,
 		rootComponentType: KClass<Component>,
 		configure: Component.() -> Unit
@@ -65,7 +68,7 @@ internal class DefaultRaptorCoreComponent : RaptorCoreComponent, RaptorFeatureFi
 		get() = _registry
 
 
-	private class FeatureInstallation<Feature : RaptorConfigurableFeature<RootComponent>, RootComponent : RaptorComponent<RootComponent>>(
+	private class FeatureInstallation<Feature : RaptorConfigurableFeature<RootComponent>, RootComponent : RaptorComponent>(
 		val feature: Feature
 	) {
 

@@ -3,17 +3,17 @@ package tests
 import io.fluidsonic.raptor.*
 
 
-class BasicComponent : RaptorComponent<BasicComponent> {
+class BasicComponent : RaptorComponent.Base<BasicComponent>() {
 
-	var text = ""
+	var _text = ""
 
 
 	override fun toString() =
-		"BasicComponent(text=$text)"
+		"BasicComponent(text=$_text)"
 }
 
 
 @RaptorDsl
 fun RaptorComponentSet<BasicComponent>.append(fragment: String) = forEach {
-	text += fragment
+	_text += fragment
 }

@@ -6,7 +6,7 @@ import io.fluidsonic.raptor.*
 object BasicConfigurableFeature : RaptorConfigurableFeature<BasicComponent> {
 
 	override fun RaptorFeatureFinalizationScope.finalizeConfigurable(rootComponent: BasicComponent) {
-		assign(BasicRaptorKey, rootComponent.text)
+		assign(BasicRaptorKey, rootComponent._text)
 	}
 
 

@@ -2,17 +2,31 @@ package io.fluidsonic.raptor
 
 
 @RaptorDsl
-interface RaptorComponent<Self : RaptorComponent<Self>> : RaptorComponentSet<Self> {
+interface RaptorComponent {
 
-	@RaptorDsl
-	@Suppress("UNCHECKED_CAST")
-	override fun forEach(action: Self.() -> Unit) {
-		(this as Self).action()
-	}
+	val extensions: RaptorExtensionSet
 
 
 	companion object
 
 
-	class Simple : RaptorComponent<Simple>
+	@RaptorDsl
+	abstract class Base<out Self : Typed<Self>> : Typed<Self> {
+
+		final override val extensions: RaptorExtensionSet = DefaultRaptorExtensionSet()
+
+
+		@RaptorDsl
+		@Suppress("UNCHECKED_CAST")
+		final override fun forEach(action: Self.() -> Unit) {
+			(this as Self).action()
+		}
+	}
+
+
+	@RaptorDsl
+	class Simple : Base<Simple>()
+
+
+	interface Typed<out Self : Typed<Self>> : RaptorComponent, RaptorComponentSet<Self>
 }

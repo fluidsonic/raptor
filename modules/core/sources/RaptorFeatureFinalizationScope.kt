@@ -10,7 +10,7 @@ interface RaptorFeatureFinalizationScope {
 	fun <Value : Any> assign(key: RaptorKey<Value>, value: Value)
 
 	@RaptorDsl
-	fun <Component : RaptorComponent<Component>> components(type: KClass<Component>): Collection<Component>
+	fun <Component : RaptorComponent> components(type: KClass<Component>): Collection<Component>
 
 
 	companion object

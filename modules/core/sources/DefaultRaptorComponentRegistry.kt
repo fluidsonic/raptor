@@ -5,29 +5,33 @@ import kotlin.reflect.*
 
 internal class DefaultRaptorComponentRegistry : RaptorComponentRegistry {
 
-	private val setsByType: MutableMap<KClass<out RaptorComponent<*>>, RegistrationSet<*>> = hashMapOf()
+	private val setsByType: MutableMap<KClass<out RaptorComponent>, RegistrationSet<*>> = hashMapOf()
 
 
-	override fun <Component : RaptorComponent<Component>> all(type: KClass<Component>): RaptorComponentSet<Component> =
+	override fun <Component : RaptorComponent> all(type: KClass<Component>): RaptorComponentSet<Component> =
 		getOrCreateSet(type)
 
 
+	override fun createChildRegistry(): RaptorComponentRegistry =
+		DefaultRaptorComponentRegistry()
+
+
 	@Suppress("UNCHECKED_CAST")
-	private fun <Component : RaptorComponent<Component>> getOrCreateSet(type: KClass<Component>) =
+	private fun <Component : RaptorComponent> getOrCreateSet(type: KClass<Component>) =
 		setsByType.getOrPut(type) { RegistrationSet<Component>() } as RegistrationSet<Component>
 
 
-	override fun <Component : RaptorComponent<Component>> register(component: Component, type: KClass<Component>) {
+	override fun <Component : RaptorComponent> register(component: Component, type: KClass<Component>) {
 		getOrCreateSet(type).add(component = component)
 	}
 
 
 	@Suppress("UNCHECKED_CAST")
-	fun <Component : RaptorComponent<Component>> registeredComponents(type: KClass<Component>) =
+	fun <Component : RaptorComponent> registeredComponents(type: KClass<Component>) =
 		setsByType[type]?.toList() as Collection<Component>
 
 
-	private class RegistrationSet<Component : RaptorComponent<Component>>(
+	private class RegistrationSet<Component : RaptorComponent>(
 		private val components: MutableList<Component> = mutableListOf()
 	) : RaptorComponentSet<Component>, List<Component> by components {
 
