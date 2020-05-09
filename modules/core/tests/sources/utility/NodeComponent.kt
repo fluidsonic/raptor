@@ -25,12 +25,11 @@ class NodeComponent(
 
 
 @RaptorDsl
-fun RaptorComponentSet<NodeComponent>.node(name: String) = RaptorComponentSet.map(this) {
-	val child = NodeComponent(name = name)
-
-	childComponentRegistry.register(NodeComponent.Key, child)
-
-	return@map child
+fun RaptorComponentSet<NodeComponent>.node(name: String) = withComponentAuthoring {
+	map {
+		NodeComponent(name = name)
+			.also { childComponentRegistry.register(NodeComponent.Key, it) }
+	}
 }
 
 
@@ -41,21 +40,25 @@ fun RaptorComponentSet<NodeComponent>.node(name: String, action: NodeComponent.(
 
 @RaptorDsl
 val RaptorComponentSet<NodeComponent>.nodes: RaptorComponentSet<NodeComponent>
-	get() = RaptorComponentSet.map(this) {
-		childComponentRegistry.configure(NodeComponent.Key)
+	get() = withComponentAuthoring {
+		map {
+			childComponentRegistry.configure(NodeComponent.Key)
+		}
 	}
 
 
 @RaptorDsl
 fun RaptorComponentSet<NodeComponent>.nodes(recursive: Boolean): RaptorComponentSet<NodeComponent> =
-	when (recursive) {
-		true -> RaptorComponentSet { action ->
-			nodes {
-				action()
-				nodes(recursive = true).configure(action)
+	withComponentAuthoring {
+		when (recursive) {
+			true -> componentSet { action ->
+				authoredSet.nodes {
+					action()
+					nodes(recursive = true).configure(action)
+				}
 			}
+			false -> authoredSet.nodes
 		}
-		false -> nodes
 	}
 
 

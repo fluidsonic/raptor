@@ -14,9 +14,11 @@ fun <Component : TaggableComponent> RaptorComponentSet<Component>.tags(vararg ta
 
 @RaptorDsl
 fun <Component : TaggableComponent> RaptorComponentSet<Component>.withTags(vararg tags: Any): RaptorComponentSet<Component> =
-	RaptorComponentSet.filter(this) { component ->
-		// https://youtrack.jetbrains.com/issue/KT-38835
-		component.extensions[TagsRaptorComponentExtensionKey]?.any { tags.contains(it) } ?: false
+	withComponentAuthoring {
+		filter { component ->
+			// https://youtrack.jetbrains.com/issue/KT-38835
+			component.extensions[TagsRaptorComponentExtensionKey]?.any { tags.contains(it) } ?: false
+		}
 	}
 
 
