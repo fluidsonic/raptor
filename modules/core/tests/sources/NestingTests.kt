@@ -18,6 +18,21 @@ class NestingTests {
 						node("z")
 					}
 				}
+
+				nodes {
+					if (name == "x")
+						node("x2")
+				}
+
+				nodes(recursive = false) {
+					if (name == "c")
+						node("c2")
+				}
+
+				nodes(recursive = true) {
+					if (name == "c")
+						node("c3")
+				}
 			}
 		}
 
@@ -26,14 +41,16 @@ class NestingTests {
 				Node("a", listOf(
 					Node("b", listOf(
 						Node("c", listOf(
-							Node("d")
+							Node("d"),
+							Node("c3")
 						))
 					))
 				)),
 				Node("x", listOf(
 					Node("y", listOf(
 						Node("z")
-					))
+					)),
+					Node("x2")
 				))
 			)),
 			raptor[RootNodeRaptorKey]

@@ -15,23 +15,20 @@ class BasicTests {
 				node("c")
 			}
 
-			install(object : RaptorFeature {
-
-				override fun RaptorFeatureInstallationScope.install() {
-					registry.all<NodeComponent> {
-						if (name == "c")
-							node("d")
-					}
+			install(NodeFeature) {
+				nodes {
+					if (name == "c")
+						node("d")
 				}
-			})
+			}
 		}
 
 		assertEquals(
-			Node(name = "root", children = listOf(
-				Node(name = "a"),
-				Node(name = "b"),
-				Node(name = "c", children = listOf(
-					Node(name = "d")
+			Node("root", listOf(
+				Node("a"),
+				Node("b"),
+				Node("c", listOf(
+					Node("d")
 				))
 			)),
 			raptor[RootNodeRaptorKey]
@@ -40,16 +37,18 @@ class BasicTests {
 
 
 	@Test
-	fun testConfigurableFeature() {
-		val raptor = raptor {
-			install(BasicConfigurableFeature) {
-				append("This ")
-				append("is ")
-				append("working!")
+	fun testConfigure() {
+		raptor {
+			val component = this
+
+			configure {
+				configure {
+					configure {
+						assertSame(expected = component, actual = this)
+					}
+				}
 			}
 		}
-
-		assertEquals(expected = "This is working!", actual = raptor[BasicRaptorKey])
 	}
 
 
@@ -57,80 +56,34 @@ class BasicTests {
 	fun testEmpty() {
 		val raptor = raptor {}
 
-		assertNull(actual = raptor[BasicRaptorKey])
-		assertTrue(raptor is DefaultRaptor)
-		// FIXME use Raptor.toString() instead?
-		assertTrue(raptor.properties.isEmpty())
+		assertNull(actual = raptor[TextRaptorPropertyKey])
+		assertEquals(
+			expected = "[raptor] -> (empty)",
+			actual = raptor.toString()
+		)
 	}
 
 
 	@Test
-	fun testForEach() {
-		val raptor = raptor {}
-
-		assertNull(actual = raptor[BasicRaptorKey])
-		assertTrue(raptor is DefaultRaptor)
-		// FIXME use Raptor.toString() instead?
-		assertTrue(raptor.properties.isEmpty())
-	}
-
-
-	@Test
-	fun testFeature() {
+	fun testGlobalConfigurationScope() {
 		val raptor = raptor {
-			install(BasicFeature)
+			install(TextCollectionFeature)
+
+			textCollection {
+				append("This ")
+				append("is ")
+			}
 
 			install(object : RaptorFeature {
 
 				override fun RaptorFeatureInstallationScope.install() {
-					registry.all<BasicComponent> {
-						append("This ")
-						append("is ")
-					}
-					registry.all<BasicComponent> {
+					textCollection {
 						append("working!")
 					}
 				}
 			})
 		}
 
-		assertEquals(expected = "This is working!", actual = raptor[BasicRaptorKey])
-	}
-
-
-	@Test
-	fun testFeatureIsInstalledOnlyOnce() {
-		var installCount = 0
-
-		raptor {
-			val feature = object : RaptorFeature {
-
-				override fun RaptorFeatureInstallationScope.install() {
-					installCount += 1
-				}
-			}
-
-			install(feature)
-			install(feature)
-			install(feature)
-		}
-
-		assertEquals(expected = 1, actual = installCount)
-	}
-
-
-	@Test
-	fun testMultipleFeatureConfiguartions() {
-		val raptor = raptor {
-			install(BasicConfigurableFeature) {
-				append("This ")
-				append("is ")
-			}
-			install(BasicConfigurableFeature) {
-				append("working!")
-			}
-		}
-
-		assertEquals(expected = "This is working!", actual = raptor[BasicRaptorKey])
+		assertEquals(expected = "This is working!", actual = raptor[TextRaptorPropertyKey])
 	}
 }

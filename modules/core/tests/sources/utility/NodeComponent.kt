@@ -4,31 +4,31 @@ import io.fluidsonic.raptor.*
 
 
 class NodeComponent(
-	val name: String,
-	parentRegistry: RaptorComponentRegistry
-) : RaptorComponent.Base<NodeComponent>(), TaggableComponent {
-
-	val _children: MutableList<NodeComponent> = mutableListOf()
-	val _registry = parentRegistry.createChildRegistry()
-
+	@RaptorDsl val name: String
+) : RaptorComponent.Base<NodeComponent>(), RaptorComponentContainer, TaggableComponent {
 
 	fun finalize(): Node = Node(
 		name = name,
-		children = _children.map(NodeComponent::finalize)
+		children = childComponentRegistry.many(Key).map(NodeComponent::finalize)
 	)
 
 
 	override fun toString() =
-		"NodeComponent(name=$name, children=$_children)"
+		"node ($name)"
+
+
+	object Key : RaptorComponentKey<NodeComponent> {
+
+		override fun toString() = "node"
+	}
 }
 
 
 @RaptorDsl
 fun RaptorComponentSet<NodeComponent>.node(name: String) = RaptorComponentSet.map(this) {
-	val child = NodeComponent(name = name, parentRegistry = _registry)
+	val child = NodeComponent(name = name)
 
-	_children += child
-	_registry.register(child)
+	childComponentRegistry.register(NodeComponent.Key, child)
 
 	return@map child
 }
@@ -36,13 +36,13 @@ fun RaptorComponentSet<NodeComponent>.node(name: String) = RaptorComponentSet.ma
 
 @RaptorDsl
 fun RaptorComponentSet<NodeComponent>.node(name: String, action: NodeComponent.() -> Unit) =
-	node(name).forEach(action)
+	node(name).configure(action)
 
 
 @RaptorDsl
 val RaptorComponentSet<NodeComponent>.nodes: RaptorComponentSet<NodeComponent>
 	get() = RaptorComponentSet.map(this) {
-		_registry.all()
+		childComponentRegistry.configure(NodeComponent.Key)
 	}
 
 
@@ -52,7 +52,7 @@ fun RaptorComponentSet<NodeComponent>.nodes(recursive: Boolean): RaptorComponent
 		true -> RaptorComponentSet { action ->
 			nodes {
 				action()
-				nodes(action)
+				nodes(recursive = true).configure(action)
 			}
 		}
 		false -> nodes
@@ -61,5 +61,5 @@ fun RaptorComponentSet<NodeComponent>.nodes(recursive: Boolean): RaptorComponent
 
 @RaptorDsl
 fun RaptorComponentSet<NodeComponent>.nodes(recursive: Boolean, action: NodeComponent.() -> Unit) {
-	nodes(recursive = recursive).forEach(action)
+	nodes(recursive = recursive).configure(action)
 }

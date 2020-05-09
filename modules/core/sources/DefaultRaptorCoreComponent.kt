@@ -1,92 +1,68 @@
 package io.fluidsonic.raptor
 
-import kotlin.reflect.*
-
 
 internal class DefaultRaptorCoreComponent : RaptorComponent.Base<RaptorCoreComponent>(),
 	RaptorCoreComponent,
 	RaptorFeatureFinalizationScope,
 	RaptorFeatureInstallationScope {
 
-	private val featureInstallations: MutableList<FeatureInstallation<*, *>> = mutableListOf()
-	private val properties: MutableMap<RaptorKey<*>, Any> = hashMapOf()
-	private val _registry = DefaultRaptorComponentRegistry()
+	private val featureKeys: MutableSet<FeatureKey<*, *>> = mutableSetOf()
+
+	override val componentRegistry = DefaultRaptorComponentRegistry()
+	override val propertyRegistry = DefaultRaptorPropertyRegistry()
 
 
 	init {
-		registry.register(this)
+		componentRegistry.register(Key, component = this)
 	}
-
-
-	override fun <Value : Any> assign(key: RaptorKey<Value>, value: Value) {
-		properties.putIfAbsent(key, value)?.let { existingValue ->
-			error(
-				"Cannot assign value to key '$key' as one has already been assigned.\n" +
-					"\tExisting value: $existingValue\n" +
-					"\tValue to be assigned: $value"
-			)
-		}
-	}
-
-
-	override fun <Component : RaptorComponent> components(type: KClass<Component>): Collection<Component> =
-		_registry.registeredComponents(type)
 
 
 	internal fun finalize(): Raptor {
-		for (installation in featureInstallations)
-			installation.performFinalize(scope = this)
+		componentRegistry.finalize()
 
-		return DefaultRaptor(properties = properties)
+		for (key in featureKeys)
+			componentRegistry.one(key).runFinalization(scope = this)
+
+		return DefaultRaptor(properties = propertyRegistry.toPropertySet())
 	}
 
 
 	@Suppress("UNCHECKED_CAST")
-	override fun <Feature : RaptorConfigurableFeature<Component>, Component : RaptorComponent> install(
+	override fun <Feature : RaptorConfigurableFeature<RootComponent>, RootComponent : RaptorComponent> install(
 		feature: Feature,
-		rootComponentType: KClass<Component>,
-		configure: Component.() -> Unit
+		configure: RootComponent.() -> Unit
 	) {
-		val installation = featureInstallations
-			.firstOrNull { it.feature == feature }
-			?.let { it as FeatureInstallation<Feature, Component> }
-			?: run {
-				FeatureInstallation(feature = feature)
-					.also { installation ->
-						featureInstallations += installation
+		val key = FeatureKey(feature)
 
-						installation.performInstall(scope = this)
-						registry.register(installation.rootComponent, type = rootComponentType)
-					}
+		featureKeys.add(key)
+
+		val component = componentRegistry.oneOrNull(key) ?: run {
+			DefaultRaptorFeatureInstallationComponent(feature, componentRegistry).also { component ->
+				componentRegistry.register(key, component)
+
+				component.runInstallation(scope = this)
 			}
+		}
 
-		installation.rootComponent.configure()
+		component.runConfiguration(configure)
 	}
 
 
-	override val registry: RaptorComponentRegistry
-		get() = _registry
+	override fun toString() =
+		"default core"
 
 
-	private class FeatureInstallation<Feature : RaptorConfigurableFeature<RootComponent>, RootComponent : RaptorComponent>(
+	private data class FeatureKey<Feature : RaptorConfigurableFeature<RootComponent>, RootComponent : RaptorComponent>(
 		val feature: Feature
-	) {
+	) : RaptorComponentKey<DefaultRaptorFeatureInstallationComponent<Feature, RootComponent>> {
 
-		lateinit var rootComponent: RootComponent
-			private set
-
-
-		fun performFinalize(scope: RaptorFeatureFinalizationScope) {
-			with(feature) {
-				scope.finalizeConfigurable(rootComponent = rootComponent)
-			}
-		}
+		override fun toString() =
+			feature.toString()
+	}
 
 
-		fun performInstall(scope: RaptorFeatureInstallationScope) {
-			with(feature) {
-				rootComponent = scope.installConfigurable()
-			}
-		}
+	private object Key : RaptorComponentKey<DefaultRaptorCoreComponent> {
+
+		override fun toString() = "core"
 	}
 }

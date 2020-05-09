@@ -1,35 +1,40 @@
 package io.fluidsonic.raptor
 
-import kotlin.reflect.*
-
 
 interface RaptorComponentRegistry {
 
-	fun <Component : RaptorComponent> all(type: KClass<Component>): RaptorComponentSet<Component>
-
-	fun createChildRegistry(): RaptorComponentRegistry
-
-	fun <Component : RaptorComponent> register(component: Component, type: KClass<Component>)
+	fun <Component : RaptorComponent> configure(key: RaptorComponentKey<Component>): RaptorComponentSet<Component>
+	fun isEmpty(): Boolean
+	fun <Component : RaptorComponent> oneOrNull(key: RaptorComponentKey<Component>): Component?
+	fun <Component : RaptorComponent> many(key: RaptorComponentKey<Component>): List<Component>
+	fun <Component : RaptorComponent> register(key: RaptorComponentKey<Component>, component: Component)
+	override fun toString(): String
 
 
 	companion object
+
+
+	object ChildRegistryComponentExtensionKey : RaptorComponentExtensionKey<RaptorComponentRegistry> {
+
+		override fun toString() = "child registry"
+	}
 }
 
 
-inline fun <reified Component : RaptorComponent> RaptorComponentRegistry.all(): RaptorComponentSet<Component> =
-	all(Component::class)
-
-
-inline fun <reified Component : RaptorComponent> RaptorComponentRegistry.all(noinline configure: Component.() -> Unit) {
-	all(type = Component::class, configure = configure)
+// https://kotlinlang.slack.com/archives/C0B9K7EP2/p1588740913072200
+fun <Component : RaptorComponent> RaptorComponentRegistry.configure(
+	key: RaptorComponentKey<Component>,
+	action: Component.() -> Unit
+) {
+	configure(key = key).configure(action)
 }
 
 
-fun <Component : RaptorComponent> RaptorComponentRegistry.all(type: KClass<Component>, configure: Component.() -> Unit) {
-	all(type).forEach(configure)
-}
+fun <Component : RaptorComponent> RaptorComponentRegistry.one(key: RaptorComponentKey<Component>): Component =
+	oneOrNull(key) ?: error("Expected a component to be registered for key '$key'.")
 
 
-inline fun <reified Component : RaptorComponent> RaptorComponentRegistry.register(component: Component) {
-	register(component = component, type = Component::class)
-}
+@RaptorDsl
+val RaptorComponentContainer.childComponentRegistry
+	get() = extensions[RaptorComponentRegistry.ChildRegistryComponentExtensionKey]
+		?: error("Cannot access the child component registry of a component that hasn't been registered yet.")

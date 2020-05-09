@@ -1,23 +1,24 @@
 package io.fluidsonic.raptor
 
 
-interface RaptorFeature : RaptorConfigurableFeature<RaptorComponent.Simple> {
+interface RaptorFeature : RaptorConfigurableFeature<RaptorComponent> {
 
 	fun RaptorFeatureFinalizationScope.finalize() = Unit
 	fun RaptorFeatureInstallationScope.install()
 
 
 	@Deprecated("Use .finalize()", level = DeprecationLevel.HIDDEN, replaceWith = ReplaceWith("finalize()"))
-	override fun RaptorFeatureFinalizationScope.finalizeConfigurable(rootComponent: RaptorComponent.Simple) {
+	override fun RaptorFeatureFinalizationScope.finalizeConfigurable() {
 		finalize()
 	}
 
 
 	@Deprecated("Use .install()", level = DeprecationLevel.HIDDEN, replaceWith = ReplaceWith("install()"))
-	override fun RaptorFeatureInstallationScope.installConfigurable(): RaptorComponent.Simple {
+	override fun RaptorFeatureInstallationScope.installConfigurable(): RaptorComponentKey<RaptorComponent> {
 		install()
 
-		return RaptorComponent.Simple()
+		return DefaultRaptorFeatureRootComponent.Key(feature = this@RaptorFeature)
+			.also { componentRegistry.register(it, DefaultRaptorFeatureRootComponent()) }
 	}
 
 

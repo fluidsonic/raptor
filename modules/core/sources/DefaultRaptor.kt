@@ -2,10 +2,22 @@ package io.fluidsonic.raptor
 
 
 internal class DefaultRaptor(
-	val properties: Map<RaptorKey<*>, Any>
+	private val properties: DefaultRaptorPropertySet
 ) : Raptor {
 
-	@Suppress("UNCHECKED_CAST")
-	override fun <Value : Any> get(key: RaptorKey<Value>) =
-		properties[key] as Value?
+	override fun <Value : Any> get(key: RaptorPropertyKey<Value>): Value? =
+		properties[key]
+
+
+	override fun toString() = buildString {
+		append("[raptor] ->")
+
+		if (properties.isEmpty()) {
+			append(" (empty)")
+			return@buildString
+		}
+
+		append("\n")
+		append(properties.toString().prependIndent("\t"))
+	}
 }

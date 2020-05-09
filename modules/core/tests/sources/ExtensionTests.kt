@@ -8,7 +8,14 @@ class ExtensionTests {
 
 	@Test
 	fun testExtension() {
-		val raptor = raptor {
+		raptor {
+			install(CounterFeature) {
+				extensions[AnyRaptorComponentExtensionKey] = "foo"
+			}
+
+			install(CounterFeature) {
+				assertEquals(expected = "foo", actual = extensions[AnyRaptorComponentExtensionKey])
+			}
 		}
 	}
 

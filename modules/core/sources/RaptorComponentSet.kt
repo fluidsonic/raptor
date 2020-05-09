@@ -5,7 +5,7 @@ package io.fluidsonic.raptor
 interface RaptorComponentSet<out Component : RaptorComponent> {
 
 	@RaptorDsl
-	fun forEach(action: Component.() -> Unit)
+	fun configure(action: Component.() -> Unit)
 
 
 	// FIXME improve naming & nesting of ops
@@ -18,7 +18,7 @@ interface RaptorComponentSet<out Component : RaptorComponent> {
 			filter: (component: Component) -> Boolean
 		): RaptorComponentSet<Component> =
 			RaptorComponentSet { action ->
-				set.forEach {
+				set.configure {
 					if (filter(this))
 						action()
 				}
@@ -33,20 +33,20 @@ interface RaptorComponentSet<out Component : RaptorComponent> {
 			val actions: MutableList<TransformedComponent.() -> Unit> = mutableListOf()
 			val transforms: MutableList<RaptorComponentSet<TransformedComponent>> = mutableListOf()
 
-			set.forEach {
+			set.configure {
 				val transformed = transform()
 
 				transforms += transformed
 
 				for (index in actions.indices)
-					transformed.forEach(actions[index])
+					transformed.configure(actions[index])
 			}
 
 			return RaptorComponentSet { action ->
 				actions += action
 
 				for (index in transforms.indices)
-					transforms[index].forEach(action)
+					transforms[index].configure(action)
 			}
 		}
 //
@@ -76,7 +76,7 @@ interface RaptorComponentSet<out Component : RaptorComponent> {
 fun <Component : RaptorComponent> RaptorComponentSet(forEach: (action: Component.() -> Unit) -> Unit): RaptorComponentSet<Component> =
 	object : RaptorComponentSet<Component> {
 
-		override fun forEach(action: Component.() -> Unit) {
+		override fun configure(action: Component.() -> Unit) {
 			forEach(action)
 		}
 	}
@@ -84,4 +84,4 @@ fun <Component : RaptorComponent> RaptorComponentSet(forEach: (action: Component
 
 @RaptorDsl
 operator fun <Component : RaptorComponent> RaptorComponentSet<Component>.invoke(action: Component.() -> Unit) =
-	forEach(action)
+	configure(action)

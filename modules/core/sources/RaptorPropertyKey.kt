@@ -1,7 +1,7 @@
 package io.fluidsonic.raptor
 
 
-interface RaptorKey<Value : Any> {
+interface RaptorPropertyKey<Value : Any> {
 
 	companion object
 }

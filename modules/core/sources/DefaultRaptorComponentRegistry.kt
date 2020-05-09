@@ -1,37 +1,108 @@
 package io.fluidsonic.raptor
 
-import kotlin.reflect.*
-
 
 internal class DefaultRaptorComponentRegistry : RaptorComponentRegistry {
 
-	private val setsByType: MutableMap<KClass<out RaptorComponent>, RegistrationSet<*>> = hashMapOf()
+	private var isFinalized = false
+	private val setsByKey: MutableMap<RaptorComponentKey<*>, RegistrationSet<*>> = hashMapOf()
 
 
-	override fun <Component : RaptorComponent> all(type: KClass<Component>): RaptorComponentSet<Component> =
-		getOrCreateSet(type)
+	override fun <Component : RaptorComponent> configure(key: RaptorComponentKey<Component>): RaptorComponentSet<Component> {
+		checkMutable { "Cannot confiure a component during finalization." }
+
+		return getOrCreateSet(key)
+	}
 
 
-	override fun createChildRegistry(): RaptorComponentRegistry =
-		DefaultRaptorComponentRegistry()
+	private inline fun checkMutable(message: () -> String) {
+		if (isFinalized)
+			error(message())
+	}
 
 
-	@Suppress("UNCHECKED_CAST")
-	private fun <Component : RaptorComponent> getOrCreateSet(type: KClass<Component>) =
-		setsByType.getOrPut(type) { RegistrationSet<Component>() } as RegistrationSet<Component>
+	fun finalize() {
+		checkMutable { "Cannot finalize a registry that has already been finalized." }
 
-
-	override fun <Component : RaptorComponent> register(component: Component, type: KClass<Component>) {
-		getOrCreateSet(type).add(component = component)
+		isFinalized = true
 	}
 
 
 	@Suppress("UNCHECKED_CAST")
-	fun <Component : RaptorComponent> registeredComponents(type: KClass<Component>) =
-		setsByType[type]?.toList() as Collection<Component>
+	private fun <Component : RaptorComponent> getOrCreateSet(key: RaptorComponentKey<Component>) =
+		setsByKey.getOrPut(key) { RegistrationSet<Component>() } as RegistrationSet<Component>
 
 
-	private class RegistrationSet<Component : RaptorComponent>(
+	@Suppress("UNCHECKED_CAST")
+	private fun <Component : RaptorComponent> getSet(key: RaptorComponentKey<Component>) =
+		setsByKey[key] as RegistrationSet<Component>?
+
+
+	override fun isEmpty() =
+		setsByKey.values.all { it.isEmpty() }
+
+
+	override fun <Component : RaptorComponent> many(key: RaptorComponentKey<Component>): List<Component> =
+		getSet(key)?.toList().orEmpty()
+
+
+	override fun <Component : RaptorComponent> oneOrNull(key: RaptorComponentKey<Component>): Component? =
+		getSet(key)
+			?.also { set ->
+				check(set.size <= 1) {
+					"Expected a single component for key '$key' but ${set.size} have been registered:\n\t" +
+						set.joinToString("\n\t")
+				}
+			}
+			?.firstOrNull()
+
+
+	override fun <Component : RaptorComponent> register(key: RaptorComponentKey<Component>, component: Component) {
+		checkMutable { "Cannot register a component during finalization." }
+
+		getOrCreateSet(key).add(component = component)
+
+		if (component is RaptorComponentContainer)
+			component.extensions[RaptorComponentRegistry.ChildRegistryComponentExtensionKey] = DefaultRaptorComponentRegistry()
+	}
+
+
+	override fun toString() = buildString {
+		val entries = setsByKey.entries
+			.filter { (_, set) -> set.isNotEmpty() }
+
+		append("[component registry] ->")
+
+		if (entries.isEmpty()) {
+			append(" (empty)")
+			return@buildString
+		}
+
+		append("\n")
+		entries
+			.map { (key, set) ->
+				key.toString() to set.toString()
+			}
+			.sortedBy { (key) -> key }
+			.forEachIndexed { index, (key, set) ->
+				if (index > 0)
+					append("\n")
+
+				append("[$key]".prependIndent("\t"))
+				append(" ->")
+
+				if (set.contains('\n')) {
+					append("\n")
+					append(set.prependIndent("\t\t"))
+				}
+				else {
+					append(" ")
+					append(set)
+				}
+			}
+	}
+
+
+	private inner class RegistrationSet<Component : RaptorComponent>(
 		private val components: MutableList<Component> = mutableListOf()
 	) : RaptorComponentSet<Component>, List<Component> by components {
 
@@ -59,13 +130,45 @@ internal class DefaultRaptorComponentRegistry : RaptorComponentRegistry {
 		}
 
 
-		override fun forEach(action: Component.() -> Unit) {
+		override fun configure(action: Component.() -> Unit) {
+			checkMutable { "Cannot confiure a component during finalization." }
+
 			configurations += action
 
 			// We iterate over indices because the configuration we invoke may append more components.
 			// Components added while iterating will be configured immediately so we don't have to do that here.
 			for (index in components.indices)
 				components[index].apply(action)
+		}
+
+
+		override fun toString() = buildString {
+			components.forEachIndexed { index, component ->
+				if (index > 0)
+					append("\n")
+
+				append(component.toString().prependIndent("\t").trimStart())
+
+				val childComponentRegistry = (component as? RaptorComponentContainer)?.childComponentRegistry
+					?.takeUnless { it.isEmpty() }
+
+				val extensions = component.extensions.toString().ifEmpty { null }
+
+				if (extensions != null || childComponentRegistry != null) {
+					append(" -> \n")
+
+					if (extensions != null) {
+						append(extensions.prependIndent("\t"))
+					}
+
+					if (childComponentRegistry != null) {
+						if (extensions != null)
+							append("\n")
+
+						append(childComponentRegistry.toString().prependIndent("\t"))
+					}
+				}
+			}
 		}
 	}
 }
