@@ -5,7 +5,7 @@ import org.kodein.di.erased.*
 
 
 @Raptor.Dsl3
-fun RaptorCoreFeatureComponent.installDefaults() {
+fun RaptorCoreComponent.installDefaults() {
 	install(BsonRaptorFeature)
 	install(KtorRaptorFeature)
 	install(MongoRaptorFeature)

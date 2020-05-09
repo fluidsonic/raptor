@@ -11,9 +11,3 @@ interface RaptorDependencyInjectableComponent : RaptorComponent
 fun RaptorDependencyInjectableComponent.kodein(configuration: Kodein.Builder.() -> Unit)
 
 fun
-
-interface KodeinBoundary : RaptorComponent {
-
-	@Raptor.Dsl3
-	fun kodein(configure: Kodein.Builder.() -> Unit)
-}

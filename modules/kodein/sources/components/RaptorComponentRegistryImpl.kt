@@ -30,7 +30,7 @@ internal class RaptorComponentRegistryImpl : RaptorComponentRegistry.Mutable {
 
 
 	override fun createChild(): RaptorComponentRegistry.Mutable =
-		RaptorComponentRegistryImpl()
+		DefaultRaptorComponentRegistry()
 
 
 	override fun <Component : RaptorComponent> getAll(clazz: KClass<Component>): List<RaptorComponentRegistration.Mutable<Component>> =

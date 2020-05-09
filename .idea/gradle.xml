@@ -29,7 +29,9 @@
             <option value="$PROJECT_DIR$/modules/default" />
             <option value="$PROJECT_DIR$/modules/freemarker" />
             <option value="$PROJECT_DIR$/modules/graphql" />
+            <option value="$PROJECT_DIR$/modules/kodein" />
             <option value="$PROJECT_DIR$/modules/ktor" />
+            <option value="$PROJECT_DIR$/modules/lifecycle" />
             <option value="$PROJECT_DIR$/modules/mongodb" />
             <option value="$PROJECT_DIR$/modules/transactions" />
           </set>

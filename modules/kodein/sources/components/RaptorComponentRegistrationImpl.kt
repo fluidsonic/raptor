@@ -3,8 +3,8 @@ package io.fluidsonic.raptor
 
 internal class RaptorComponentRegistrationImpl<out Component : RaptorComponent> private constructor(
 	override val component: Component,
-	override val containingRegistry: RaptorComponentRegistryImpl,
-	override val registry: RaptorComponentRegistryImpl
+	override val containingRegistry: DefaultRaptorComponentRegistry,
+	override val registry: DefaultRaptorComponentRegistry
 ) : RaptorComponentRegistration.Mutable<Component>,
 	RaptorComponentSet<Component> {
 
@@ -24,8 +24,8 @@ internal class RaptorComponentRegistrationImpl<out Component : RaptorComponent> 
 
 		fun addComponent(
 			component: Component,
-			containingRegistry: RaptorComponentRegistryImpl,
-			registry: RaptorComponentRegistryImpl
+			containingRegistry: DefaultRaptorComponentRegistry,
+			registry: DefaultRaptorComponentRegistry
 		): RaptorComponentRegistrationImpl<Component> {
 			if (registrations.any { it.component === component })
 				error("Cannot register component of ${component::class} since it has already been registered: $component")

@@ -19,7 +19,7 @@ internal class RaptorImpl(
 		check(stateRef.compareAndSet(expect = State.initial, update = State.starting)) { "Cannot start Raptor unless it's in 'stopped' state." }
 
 		with(context) {
-			for (callback in this@RaptorImpl.config.startCallbacks) // FIXME get rid of this@RaptorImpl.
+			for (callback in this@DefaultRaptor.config.startCallbacks) // FIXME get rid of this@RaptorImpl.
 				callback()
 		}
 
@@ -35,7 +35,7 @@ internal class RaptorImpl(
 		check(stateRef.compareAndSet(expect = State.started, update = State.stopping)) { "Cannot start Raptor unless it's in 'started' state." }
 
 		with(context) {
-			for (callback in this@RaptorImpl.config.stopCallbacks) // FIXME get rid of this@RaptorImpl.
+			for (callback in this@DefaultRaptor.config.stopCallbacks) // FIXME get rid of this@RaptorImpl.
 				callback()
 		}
 

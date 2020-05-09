@@ -1,10 +1,29 @@
-package kodein
+package io.fluidsonic.raptor
 
-import io.fluidsonic.raptor.*
+import org.kodein.di.*
 
-interface Taggable : RaptorComponent {
 
-	val raptorTags: Set<Any> // FIXME move to registration?
+@Raptor.Dsl3
+interface RaptorComponent {
+
+	interface KodeinBoundary : RaptorComponent {
+
+		@Raptor.Dsl3
+		fun kodein(configure: Kodein.Builder.() -> Unit)
+	}
+
+
+	interface Taggable : RaptorComponent {
+
+		val raptorTags: Set<Any> // FIXME move to registration?
+	}
+
+
+	interface TransactionBoundary<out Transaction : RaptorTransaction> : KodeinBoundary {
+
+		@Raptor.Dsl3
+		val transactions: RaptorComponentSet<RaptorTransactionComponent>
+	}
 }
 
 
@@ -80,4 +99,9 @@ fun <Component : RaptorComponent.Taggable> RaptorComponentSet<Component>.withTag
 	configure: Component.() -> Unit
 ) {
 	withTags(*tags).invoke(configure)
+}
+
+
+fun <X> c() where X : RaptorComponent, X : RaptorComponentSet<RaptorComponent> {
+
 }
