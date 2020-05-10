@@ -8,7 +8,4 @@ interface RaptorTransactionCreationScope {
 
 	@RaptorDsl
 	val propertyRegistry: RaptorTransactionPropertyRegistry
-
-
-	companion object
 }

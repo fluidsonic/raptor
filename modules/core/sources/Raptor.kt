@@ -13,7 +13,7 @@ interface Raptor {
 
 
 operator fun <Value : Any> Raptor.get(key: RaptorPropertyKey<out Value>): Value? =
-	properties[key]
+	context[key]
 
 
 val Raptor.properties

@@ -7,6 +7,7 @@ internal class DefaultRaptorCoreComponent : RaptorComponent.Base<RaptorCoreCompo
 	RaptorFeatureInstallationScope {
 
 	private val featureKeys: MutableSet<FeatureKey<*, *>> = mutableSetOf()
+	private val onFinalizationCompletedActions: MutableList<RaptorFeatureFinalizationScope.CompletedScope.() -> Unit> = mutableListOf()
 
 	override val componentRegistry = DefaultRaptorComponentRegistry()
 	override val propertyRegistry = DefaultRaptorPropertyRegistry()
@@ -23,9 +24,15 @@ internal class DefaultRaptorCoreComponent : RaptorComponent.Base<RaptorCoreCompo
 		for (key in featureKeys)
 			componentRegistry.one(key).runFinalization(scope = this)
 
-		return DefaultRaptor(
+		val raptor = DefaultRaptor(
 			context = DefaultRaptorContext(properties = propertyRegistry.toSet())
 		)
+
+		val completedScope = FinalizationCompletedScope(context = raptor.context)
+		for (action in onFinalizationCompletedActions.toList())
+			completedScope.action()
+
+		return raptor
 	}
 
 
@@ -50,6 +57,11 @@ internal class DefaultRaptorCoreComponent : RaptorComponent.Base<RaptorCoreCompo
 	}
 
 
+	override fun onCompleted(action: RaptorFeatureFinalizationScope.CompletedScope.() -> Unit) {
+		onFinalizationCompletedActions += action
+	}
+
+
 	override fun toString() =
 		"default core"
 
@@ -61,6 +73,11 @@ internal class DefaultRaptorCoreComponent : RaptorComponent.Base<RaptorCoreCompo
 		override fun toString() =
 			feature.toString()
 	}
+
+
+	private class FinalizationCompletedScope(
+		override val context: RaptorContext
+	) : RaptorFeatureFinalizationScope.CompletedScope
 
 
 	private object Key : RaptorComponentKey<DefaultRaptorCoreComponent> {

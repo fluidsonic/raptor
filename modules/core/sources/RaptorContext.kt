@@ -14,5 +14,9 @@ interface RaptorContext {
 }
 
 
+operator fun <Value : Any> RaptorContext.get(key: RaptorPropertyKey<out Value>): Value? =
+	properties[key]
+
+
 val RaptorContext.root: RaptorContext
 	get() = parent?.root ?: this

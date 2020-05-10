@@ -62,6 +62,40 @@ class BasicTests {
 
 
 	@Test
+	fun testFinalizationCompletion() {
+		raptor {
+			install(object : RaptorFeature {
+
+				override fun RaptorFeatureFinalizationScope.finalize() {
+					propertyRegistry.register(CountRaptorPropertyKey, 1)
+
+					onCompleted {
+						assertEquals(expected = "bar", actual = context[TextRaptorPropertyKey])
+					}
+				}
+
+
+				override fun RaptorFeatureInstallationScope.install() = Unit
+			})
+
+			install(object : RaptorFeature {
+
+				override fun RaptorFeatureFinalizationScope.finalize() {
+					propertyRegistry.register(TextRaptorPropertyKey, "bar")
+
+					onCompleted {
+						assertEquals(expected = 1, actual = context[CountRaptorPropertyKey])
+					}
+				}
+
+
+				override fun RaptorFeatureInstallationScope.install() = Unit
+			})
+		}
+	}
+
+
+	@Test
 	fun testGlobalConfigurationScope() {
 		val raptor = raptor {
 			install(TextCollectionFeature)

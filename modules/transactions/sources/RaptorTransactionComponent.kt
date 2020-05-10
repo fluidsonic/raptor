@@ -8,7 +8,7 @@ class RaptorTransactionComponent internal constructor() : RaptorComponent.Base<R
 
 
 	internal fun finalize() =
-		DefaultRaptorTransactionFactory(onCreateActions)
+		DefaultRaptorTransactionFactory(configurations = onCreateActions.toList())
 
 
 	override fun toString() = "transaction"
