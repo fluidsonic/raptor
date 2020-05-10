@@ -1,7 +1,6 @@
 package tests
 
 import io.fluidsonic.raptor.*
-import org.junit.jupiter.api.Test
 import org.kodein.di.*
 import org.kodein.di.erased.*
 import kotlin.test.*
@@ -75,7 +74,7 @@ class KodeinTests {
 		val raptor = raptor {}
 
 		assertEquals(
-			expected = "You must install RaptorKodeinFeature to use Kodein.",
+			expected = "You must install RaptorKodeinFeature for enabling Kodein functionality.",
 			actual = assertFails {
 				raptor.kodein
 			}.message

@@ -62,41 +62,34 @@ class BasicTests {
 
 
 	@Test
-	fun testFinalizationCompletion() {
-		raptor {
+	fun testLazyContext() {
+		lateinit var lazyContext: RaptorContext
+
+		val raptor = raptor {
 			install(object : RaptorFeature {
 
-				override fun RaptorFeatureFinalizationScope.finalize() {
+				override fun RaptorFeatureConfigurationEndScope.onConfigurationEnded() {
 					propertyRegistry.register(CountRaptorPropertyKey, 1)
 
-					onCompleted {
-						assertEquals(expected = "bar", actual = context[TextRaptorPropertyKey])
-					}
+					lazyContext = this.lazyContext
+
+					assertEquals(
+						expected = "This context cannot be used until the configuration of all components and features has completed.",
+						actual = assertFails { lazyContext.properties }.message
+					)
 				}
 
 
-				override fun RaptorFeatureInstallationScope.install() = Unit
-			})
-
-			install(object : RaptorFeature {
-
-				override fun RaptorFeatureFinalizationScope.finalize() {
-					propertyRegistry.register(TextRaptorPropertyKey, "bar")
-
-					onCompleted {
-						assertEquals(expected = 1, actual = context[CountRaptorPropertyKey])
-					}
-				}
-
-
-				override fun RaptorFeatureInstallationScope.install() = Unit
+				override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() = Unit
 			})
 		}
+
+		assertSame(expected = raptor.context.properties, actual = lazyContext.properties)
 	}
 
 
 	@Test
-	fun testGlobalConfigurationScope() {
+	fun testTopLevelConfigurationScope() {
 		val raptor = raptor {
 			install(TextCollectionFeature)
 
@@ -107,7 +100,7 @@ class BasicTests {
 
 			install(object : RaptorFeature {
 
-				override fun RaptorFeatureInstallationScope.install() {
+				override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
 					textCollection {
 						append("working!")
 					}

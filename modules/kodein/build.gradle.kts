@@ -5,7 +5,7 @@ fluidJvmLibraryVariant(JvmTarget.jdk8) {
 }
 
 dependencies {
-	api(project(":raptor-core"))
+	api(project(":raptor"))
 	api("org.kodein.di:kodein-di-erased-jvm:6.5.5")
 	implementation(project(":raptor-transactions")) // FIXME provided + existence check?
 }

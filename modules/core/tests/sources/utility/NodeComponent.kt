@@ -5,11 +5,11 @@ import io.fluidsonic.raptor.*
 
 class NodeComponent(
 	@RaptorDsl val name: String
-) : RaptorComponent.Base<NodeComponent>(), TaggableComponent {
+) : RaptorComponent.Default<NodeComponent>(), TaggableComponent {
 
-	fun finalize(): Node = Node(
+	fun toNode(): Node = Node(
 		name = name,
-		children = componentRegistry.many(Key).map(NodeComponent::finalize)
+		children = componentRegistry.many(Key).map(NodeComponent::toNode)
 	)
 
 

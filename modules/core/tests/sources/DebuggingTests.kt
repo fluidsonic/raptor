@@ -63,7 +63,7 @@ class DebuggingTests {
 
 			install(object : RaptorFeature {
 
-				override fun RaptorFeatureFinalizationScope.finalize() {
+				override fun RaptorFeatureConfigurationEndScope.onConfigurationEnded() {
 					assertEquals(
 						expected = """
 							[component registry] ->
@@ -71,9 +71,6 @@ class DebuggingTests {
 								[counter] ->
 									counter (1) -> 
 										[any] -> counter extension
-								[counter feature] -> default feature component
-								[debugging tests feature] -> default feature component
-								[debugging tests feature root] -> default feature root component
 								[dummy] ->
 									dummy (z)
 									dummy (1) -> 
@@ -91,10 +88,7 @@ class DebuggingTests {
 															node (a2)
 												node (b)
 												node (c)
-								[node feature] -> default feature component
 								[text collection] -> text collection (foo)
-								[text collection feature] -> default feature component
-								[text collection feature root] -> default feature root component
 						""".trimIndent(),
 						actual = componentRegistry.toString()
 					)
@@ -117,7 +111,7 @@ class DebuggingTests {
 				}
 
 
-				override fun RaptorFeatureInstallationScope.install() {
+				override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
 					componentRegistry.register(DummyComponent.Key, DummyComponent("z"))
 					componentRegistry.register(DummyComponent.Key, DummyComponent("1").apply {
 						extensions[AnyRaptorComponentExtensionKey] = "dummy extension"

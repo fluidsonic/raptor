@@ -5,7 +5,7 @@ fluidJvmLibraryVariant(JvmTarget.jdk8) {
 }
 
 dependencies {
-	api(project(":raptor-core"))
+	api(project(":raptor"))
 
 	api("org.freemarker:freemarker:2.3.30")
 }

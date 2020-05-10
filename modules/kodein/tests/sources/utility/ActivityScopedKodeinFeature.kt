@@ -7,7 +7,7 @@ import org.kodein.di.erased.*
 
 object ActivityScopedKodeinFeature : RaptorFeature {
 
-	override fun RaptorFeatureFinalizationScope.finalize() {
+	override fun RaptorFeatureConfigurationEndScope.onConfigurationEnded() {
 		propertyRegistry.register(ActivityScopedKodeinFactoryRaptorPropertyKey, kodeinFactory(
 			name = "activity-scoped",
 			component = componentRegistry.one(ActivityScopedKodeinComponent.Key)
@@ -15,7 +15,7 @@ object ActivityScopedKodeinFeature : RaptorFeature {
 	}
 
 
-	override fun RaptorFeatureInstallationScope.install() {
+	override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
 		componentRegistry.register(ActivityScopedKodeinComponent.Key, ActivityScopedKodeinComponent())
 	}
 
@@ -32,7 +32,7 @@ fun RaptorContext.createKodein(activity: Activity): Kodein = // FIXME
 	properties[ActivityScopedKodeinFactoryRaptorPropertyKey]?.createKodein(context = this) {
 		bind() from instance(activity)
 	}
-		?: error("You must install ActivityScopedKodeinFeature to create activity-scoped Kodein instances.")
+		?: error("You must install ActivityScopedKodeinFeature for enabling activity-scoped Kodein functionality.")
 
 
 fun RaptorTransaction.createKodein(activity: Activity): Kodein =

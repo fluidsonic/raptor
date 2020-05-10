@@ -3,17 +3,18 @@ package tests
 import io.fluidsonic.raptor.*
 
 
-class TextCollectionComponent : RaptorComponent.Base<TextCollectionComponent>() {
+class TextCollectionComponent : RaptorComponent.Default<TextCollectionComponent>() {
 
 	var _text = ""
 
 
-	fun finalize() =
-		_text
-
-
 	override fun toString() =
 		"text collection ($_text)"
+
+
+	override fun RaptorComponentConfigurationEndScope.onConfigurationEnded() {
+		propertyRegistry.register(TextRaptorPropertyKey, _text)
+	}
 
 
 	object Key : RaptorComponentKey<TextCollectionComponent> {
@@ -30,5 +31,5 @@ fun RaptorComponentSet<TextCollectionComponent>.append(fragment: String) = confi
 
 
 @RaptorDsl
-val RaptorGlobalConfigurationScope.textCollection
+val RaptorTopLevelConfigurationScope.textCollection
 	get() = componentRegistry.configure(TextCollectionComponent.Key)

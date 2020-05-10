@@ -3,13 +3,14 @@ package tests
 import io.fluidsonic.raptor.*
 
 
-class StartableComponent : RaptorComponent.Base<StartableComponent>() {
+class StartableComponent : RaptorComponent.Default<StartableComponent>() {
 
 	var delayInMilliseconds = 0L
 
 
-	fun finalize() =
-		Startable(delayInMilliseconds = delayInMilliseconds)
+	override fun RaptorComponentConfigurationEndScope.onConfigurationEnded() {
+		propertyRegistry.register(StartableRaptorPropertyKey, Startable(delayInMilliseconds = delayInMilliseconds))
+	}
 
 
 	override fun toString() = "startable"

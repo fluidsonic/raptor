@@ -3,7 +3,7 @@ package tests
 import io.fluidsonic.raptor.*
 
 
-class RequestComponent : RaptorComponent.Base<RequestComponent>(), RaptorTransactionGeneratingComponent {
+class RequestComponent : RaptorComponent.Default<RequestComponent>(), RaptorTransactionGeneratingComponent {
 
 	object Key : RaptorComponentKey<RequestComponent> {
 
@@ -13,5 +13,5 @@ class RequestComponent : RaptorComponent.Base<RequestComponent>(), RaptorTransac
 
 
 @RaptorDsl
-val RaptorGlobalConfigurationScope.requests
+val RaptorTopLevelConfigurationScope.requests
 	get() = componentRegistry.configure(RequestComponent.Key)

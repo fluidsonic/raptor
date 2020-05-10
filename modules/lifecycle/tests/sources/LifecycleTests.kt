@@ -4,7 +4,6 @@ import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.RaptorLifecycle.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.*
-import org.junit.jupiter.api.Test
 import kotlin.test.*
 
 
@@ -127,7 +126,7 @@ class LifecycleTests {
 		val raptor = raptor {}
 
 		assertEquals(
-			expected = "You must install RaptorLifecycleFeature to control the lifecycle.",
+			expected = "You must install RaptorLifecycleFeature for enabling lifecycle functionality.",
 			actual = assertFails {
 				raptor.lifecycle
 			}.message

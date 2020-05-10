@@ -5,12 +5,12 @@ import io.fluidsonic.raptor.*
 
 object RequestFeature : RaptorFeature {
 
-	override fun RaptorFeatureFinalizationScope.finalize() {
+	override fun RaptorFeatureConfigurationEndScope.onConfigurationEnded() {
 		propertyRegistry.register(RequestTransactionFactoryRaptorPropertyKey, transactionFactory(componentRegistry.one(RequestComponent.Key)))
 	}
 
 
-	override fun RaptorFeatureInstallationScope.install() {
+	override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
 		componentRegistry.register(RequestComponent.Key, RequestComponent())
 	}
 
@@ -23,7 +23,7 @@ fun RaptorContext.createTransaction(request: Request): RaptorTransaction =
 	properties[RequestTransactionFactoryRaptorPropertyKey]?.createTransaction(context = this) {
 		propertyRegistry.register(RequestRaptorPropertyKey, request)
 	}
-		?: error("You must install RequestFeature to create request-scoped transactions.")
+		?: error("You must install RequestFeature for enabling request-scoped transaction functionality.")
 
 
 fun RaptorTransaction.createTransaction(request: Request): RaptorTransaction =

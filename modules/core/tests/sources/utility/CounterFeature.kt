@@ -3,18 +3,15 @@ package tests
 import io.fluidsonic.raptor.*
 
 
-object CounterFeature : RaptorConfigurableFeature<CounterComponent> {
+object CounterFeature : RaptorFeature.WithRootComponent<CounterComponent> {
 
-	override fun RaptorFeatureFinalizationScope.finalizeConfigurable() {
-		propertyRegistry.register(CountRaptorPropertyKey, componentRegistry.one(CounterComponent.Key).finalize())
-	}
-
-
-	override fun RaptorFeatureInstallationScope.installConfigurable(): RaptorComponentKey<CounterComponent> {
+	override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
 		componentRegistry.register(CounterComponent.Key, CounterComponent())
-
-		return CounterComponent.Key
 	}
+
+
+	override val RaptorFeatureConfigurationStartScope.rootComponentKey: RaptorComponentKey<out CounterComponent>
+		get() = CounterComponent.Key
 
 
 	override fun toString() =

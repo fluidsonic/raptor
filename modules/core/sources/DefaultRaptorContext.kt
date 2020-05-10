@@ -17,7 +17,7 @@ internal class DefaultRaptorContext(
 		this
 
 
-	override fun toString() = buildString {
+	override fun toString(): String = buildString {
 		append("[context] ->")
 
 		if (context.properties.isEmpty()) {

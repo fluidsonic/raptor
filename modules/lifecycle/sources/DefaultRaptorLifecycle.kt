@@ -5,13 +5,12 @@ import kotlinx.atomicfu.*
 
 
 internal class DefaultRaptorLifecycle(
-	private val onStartActions: List<suspend RaptorLifecycleStartScope.() -> Unit>,
-	private val onStopActions: List<suspend RaptorLifecycleStopScope.() -> Unit>
+	override val context: RaptorContext,
+	private val startActions: List<suspend RaptorLifecycleStartScope.() -> Unit>,
+	private val stopActions: List<suspend RaptorLifecycleStopScope.() -> Unit>
 ) : RaptorLifecycle, RaptorLifecycleStartScope, RaptorLifecycleStopScope {
 
 	private val stateRef = atomic(State.stopped)
-
-	override lateinit var context: RaptorContext
 
 
 	override suspend fun start() {
@@ -19,7 +18,7 @@ internal class DefaultRaptorLifecycle(
 			"Lifecycle can only be started when stopped but it's ${stateRef.value}."
 		}
 
-		for (action in onStartActions)
+		for (action in startActions)
 			action()
 
 		stateRef.value = State.started
@@ -35,7 +34,7 @@ internal class DefaultRaptorLifecycle(
 			"Lifecycle can only be stopped when started but it's ${stateRef.value}."
 		}
 
-		for (action in onStopActions)
+		for (action in stopActions)
 			action()
 
 		stateRef.value = State.stopped

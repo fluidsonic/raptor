@@ -1,7 +1,6 @@
 package tests
 
 import io.fluidsonic.raptor.*
-import org.junit.jupiter.api.Test
 import tests.utility.*
 import kotlin.test.*
 
@@ -168,7 +167,7 @@ class TransactionTests {
 		val raptor = raptor {}
 
 		assertEquals(
-			expected = "You must install RaptorTransactionFeature to use transactions.",
+			expected = "You must install RaptorTransactionFeature for enabling transaction functionality.",
 			actual = assertFails {
 				raptor.createTransaction()
 			}.message

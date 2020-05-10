@@ -3,7 +3,7 @@ package tests
 import io.fluidsonic.raptor.*
 
 
-class ActivityScopedKodeinComponent : RaptorComponent.Base<ActivityScopedKodeinComponent>(), RaptorKodeinGeneratingComponent {
+class ActivityScopedKodeinComponent : RaptorComponent.Default<ActivityScopedKodeinComponent>(), RaptorKodeinGeneratingComponent {
 
 	object Key : RaptorComponentKey<ActivityScopedKodeinComponent> {
 
@@ -13,5 +13,5 @@ class ActivityScopedKodeinComponent : RaptorComponent.Base<ActivityScopedKodeinC
 
 
 @RaptorDsl
-val RaptorGlobalConfigurationScope.activities
+val RaptorTopLevelConfigurationScope.activities
 	get() = componentRegistry.configure(ActivityScopedKodeinComponent.Key)

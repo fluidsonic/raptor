@@ -5,7 +5,7 @@ internal class DefaultRaptorTransactionBuilder(
 	override val context: RaptorContext
 ) : RaptorTransactionConfigurationScope {
 
-	override val propertyRegistry = RaptorPropertyRegistry.default(parentProperties = context.properties)
+	override val propertyRegistry = RaptorPropertyRegistry.default(parent = context.properties)
 
 
 	fun build() =

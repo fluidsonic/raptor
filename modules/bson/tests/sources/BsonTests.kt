@@ -83,7 +83,7 @@ class BsonTests {
 		}
 
 		assertEquals(
-			expected = "You must install BsonRaptorFeature to access the BSON configuration.",
+			expected = "You must install BsonRaptorFeature for enabling BSON functionality.",
 			actual = assertFails {
 				raptor.context.bsonConfiguration
 			}.message

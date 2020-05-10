@@ -6,18 +6,19 @@ fluidJvmLibraryVariant(JvmTarget.jdk8) {
 }
 
 dependencies {
-	api(project(":raptor-core"))
-
+	api(project(":raptor-configuration"))
+	api(project(":raptor"))
+	api(project(":raptor-lifecycle"))
+	api(project(":raptor-transactions"))
 	api(ktor("auth-jwt"))
 	api(ktor("server-netty"))
-
 	implementation("ch.qos.logback:logback-classic:1.2.3")
 }
 
 tasks {
 	withType<KotlinCompile> {
 		kotlinOptions {
-			freeCompilerArgs = freeCompilerArgs + "-Xopt-in=io.ktor.util.KtorExperimentalAPI"
+			freeCompilerArgs = freeCompilerArgs + " -Xopt-in=io.ktor.util.KtorExperimentalAPI"
 		}
 	}
 }

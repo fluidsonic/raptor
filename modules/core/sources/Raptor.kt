@@ -21,5 +21,5 @@ val Raptor.properties
 
 
 @RaptorDsl
-fun raptor(configure: RaptorCoreComponent.() -> Unit): Raptor =
-	DefaultRaptorCoreComponent().apply(configure).finalize()
+fun raptor(configure: RaptorRootComponent.() -> Unit): Raptor =
+	DefaultRaptorRootComponent().apply(configure).endConfiguration()

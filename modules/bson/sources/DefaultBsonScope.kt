@@ -3,7 +3,6 @@ package io.fluidsonic.raptor
 import org.bson.codecs.configuration.*
 
 
-// FIXME what about Kodein?
 internal class DefaultBsonScope(
 	configuration: BsonConfiguration,
 	scope: RaptorScope

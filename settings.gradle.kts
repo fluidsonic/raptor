@@ -10,7 +10,7 @@ file("modules")
 
 		project(":$name").apply {
 			this.name = when (name) {
-				"default" -> "raptor"
+				"core" -> "raptor"
 				else -> "raptor-$name"
 			}
 			this.projectDir = directory

@@ -3,14 +3,9 @@ package tests
 import io.fluidsonic.raptor.*
 
 
-object StartableFeature : RaptorConfigurableFeature<StartableComponent> {
+object StartableFeature : RaptorFeature.WithRootComponent<StartableComponent> {
 
-	override fun RaptorFeatureFinalizationScope.finalizeConfigurable() {
-		propertyRegistry.register(StartableRaptorPropertyKey, componentRegistry.one(StartableComponent.Key).finalize())
-	}
-
-
-	override fun RaptorFeatureInstallationScope.installConfigurable(): RaptorComponentKey<StartableComponent> {
+	override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
 		componentRegistry.register(StartableComponent.Key, StartableComponent())
 
 		lifecycle.onStart {
@@ -20,7 +15,9 @@ object StartableFeature : RaptorConfigurableFeature<StartableComponent> {
 		lifecycle.onStop {
 			context[StartableRaptorPropertyKey]!!.stop()
 		}
-
-		return StartableComponent.Key
 	}
+
+
+	override val RaptorFeatureConfigurationStartScope.rootComponentKey: RaptorComponentKey<out StartableComponent>
+		get() = StartableComponent.Key
 }

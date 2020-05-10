@@ -5,7 +5,7 @@ fluidJvmLibraryVariant(JvmTarget.jdk8) {
 }
 
 dependencies {
-	api(project(":raptor-core"))
+	api(project(":raptor"))
 	implementation(kotlinx("atomicfu", "0.14.3", prefixName = false))
 
 	testImplementation(kotlinx("coroutines-test", "1.3.6"))

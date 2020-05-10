@@ -15,7 +15,7 @@ internal class DefaultRaptorKeyValueSet(
 		valuesByKey.isEmpty()
 
 
-	override fun toString() = buildString {
+	override fun toString(): String = buildString {
 		append("[$elementName set] ->")
 
 		if (valuesByKey.isEmpty()) {
