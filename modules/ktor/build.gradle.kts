@@ -18,7 +18,7 @@ dependencies {
 tasks {
 	withType<KotlinCompile> {
 		kotlinOptions {
-			freeCompilerArgs = freeCompilerArgs + " -Xopt-in=io.ktor.util.KtorExperimentalAPI"
+			freeCompilerArgs = freeCompilerArgs + "-Xopt-in=io.ktor.util.KtorExperimentalAPI"
 		}
 	}
 }

@@ -10,6 +10,9 @@ class KtorRouteRaptorComponent internal constructor(
 	internal val serverComponentRegistry: RaptorComponentRegistry
 ) : RaptorComponent.Default<KtorRouteRaptorComponent>(), RaptorTransactionGeneratingComponent {
 
+	// FIXME ok not to specify parent?
+	private val propertyRegistry = RaptorPropertyRegistry.default() // FIXME actually use!
+
 	internal val customConfigurations = mutableListOf<Route.() -> Unit>()
 	internal val features = mutableSetOf<KtorRouteFeature>()
 	internal var wrapper: (Route.(next: Route.() -> Unit) -> Unit)? = null
@@ -47,7 +50,8 @@ class KtorRouteRaptorComponent internal constructor(
 	override fun RaptorComponentConfigurationStartScope.onConfigurationStarted() {
 		scopes = Scopes(
 			globalScope = globalScope,
-			routeComponentRegistry = componentRegistry,
+			propertyRegistry = propertyRegistry,
+			route = this@KtorRouteRaptorComponent,
 			serverComponentRegistry = serverComponentRegistry
 		)
 	}
@@ -61,13 +65,14 @@ class KtorRouteRaptorComponent internal constructor(
 
 	internal class Scopes(
 		private val globalScope: RaptorTopLevelConfigurationScope,
-		routeComponentRegistry: RaptorComponentRegistry,
+		propertyRegistry: RaptorPropertyRegistry,
+		override val route: KtorRouteRaptorComponent,
 		serverComponentRegistry: RaptorComponentRegistry
 	) : KtorRouteFeatureConfigurationEndScope,
 		KtorRouteFeatureConfigurationStartScope {
 
-		private val routeScope = RouteScope(componentRegistry = routeComponentRegistry)
-		private val serverScope = ServerScope(componentRegistry = serverComponentRegistry)
+		private val routeScope = RouteScope(componentRegistry = route.componentRegistry, propertyRegistry = propertyRegistry)
+		private val serverScope = ServerScope(componentRegistry = serverComponentRegistry, propertyRegistry = propertyRegistry)
 
 
 		override fun global(configuration: RaptorTopLevelConfigurationScope.() -> Unit) {
@@ -86,12 +91,14 @@ class KtorRouteRaptorComponent internal constructor(
 
 
 		private class RouteScope(
-			override val componentRegistry: RaptorComponentRegistry
+			override val componentRegistry: RaptorComponentRegistry,
+			override val propertyRegistry: RaptorPropertyRegistry
 		) : KtorRouteFeatureConfigurationEndScope.RouteScope
 
 
 		private class ServerScope(
-			override val componentRegistry: RaptorComponentRegistry
+			override val componentRegistry: RaptorComponentRegistry,
+			override val propertyRegistry: RaptorPropertyRegistry
 		) : KtorRouteFeatureConfigurationEndScope.ServerScope
 	}
 }

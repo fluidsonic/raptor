@@ -1,7 +1,7 @@
 includeBuild("../fluid-graphql")
 
 file("modules")
-	.listFiles()
+	.listFiles()!!
 	.filter(File::isDirectory)
 	.forEach { directory ->
 		val name = directory.name

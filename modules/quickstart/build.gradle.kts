@@ -6,5 +6,6 @@ fluidJvmLibraryVariant(JvmTarget.jdk8) {
 
 dependencies {
 	api(project(":raptor-graphql"))
+	api(project(":raptor-kodein"))
 	api(project(":raptor-mongodb"))
 }

@@ -4,13 +4,15 @@ import io.ktor.http.*
 import org.kodein.di.erased.*
 
 
-@Raptor.Dsl3
+@RaptorDsl
 fun RaptorRootComponent.installDefaults() {
 	install(BsonRaptorFeature)
 	install(KtorRaptorFeature)
-	install(MongoRaptorFeature)
 
 	bson {
+		includeDefaultCodecs()
+		includeMongoClientDefaultCodecs()
+
 		definitions(
 			EmailAddress.bsonDefinition(),
 			PasswordHash.bsonDefinition(),

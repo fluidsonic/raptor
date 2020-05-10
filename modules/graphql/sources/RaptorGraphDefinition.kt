@@ -1,6 +1,7 @@
 package io.fluidsonic.raptor
 
 import io.fluidsonic.graphql.*
+import io.fluidsonic.stdlib.*
 import kotlin.reflect.*
 import kotlin.reflect.full.*
 
@@ -13,24 +14,24 @@ import kotlin.reflect.full.*
 
 fun graphEnumDefinition(configure: GraphEnumDefinition.Builder.() -> Unit) =
 	GraphEnumDefinition.Builder(
-			stackTrace = stackTrace(skipCount = 1)
-		)
+		stackTrace = stackTrace(skipCount = 1)
+	)
 		.apply(configure)
 		.build()
 
 
 fun graphInputObjectDefinition(configure: GraphInputObjectDefinition.Builder.() -> Unit) =
 	GraphInputObjectDefinition.Builder(
-			stackTrace = stackTrace(skipCount = 1)
-		)
+		stackTrace = stackTrace(skipCount = 1)
+	)
 		.apply(configure)
 		.build()
 
 
 fun graphInterfaceDefinition(configure: GraphInterfaceDefinition.Builder.() -> Unit) =
 	GraphInterfaceDefinition.Builder(
-			stackTrace = stackTrace(skipCount = 1)
-		)
+		stackTrace = stackTrace(skipCount = 1)
+	)
 		.apply(configure)
 		.build()
 
@@ -46,27 +47,27 @@ fun <Value : Any> graphInterfaceExtensionDefinition(
 	configure: GraphInterfaceExtensionDefinition.Builder<Value>.() -> Unit
 ) =
 	GraphInterfaceExtensionDefinition.Builder(
-			stackTrace = stackTrace(skipCount = 1),
-			valueClass = valueClass
-		)
+		stackTrace = stackTrace(skipCount = 1),
+		valueClass = valueClass
+	)
 		.apply(configure)
 		.build()
 
 
 fun graphMutationDefinition(name: String, configure: GraphOperationDefinition.Builder.() -> Unit) =
 	GraphOperationDefinition.Builder(
-			name = name,
-			type = GraphOperation.Type.mutation,
-			stackTrace = stackTrace(skipCount = 1)
-		)
+		name = name,
+		type = GraphOperation.Type.mutation,
+		stackTrace = stackTrace(skipCount = 1)
+	)
 		.apply(configure)
 		.build()
 
 
 fun graphObjectDefinition(configure: GraphObjectDefinition.Builder.() -> Unit) =
 	GraphObjectDefinition.Builder(
-			stackTrace = stackTrace(skipCount = 1)
-		)
+		stackTrace = stackTrace(skipCount = 1)
+	)
 		.apply(configure)
 		.build()
 
@@ -82,35 +83,35 @@ fun <Value : Any> graphObjectExtensionDefinition(
 	configure: GraphObjectExtensionDefinition.Builder<Value>.() -> Unit
 ) =
 	GraphObjectExtensionDefinition.Builder(
-			stackTrace = stackTrace(skipCount = 1),
-			valueClass = valueClass
-		)
+		stackTrace = stackTrace(skipCount = 1),
+		valueClass = valueClass
+	)
 		.apply(configure)
 		.build()
 
 
 fun graphQueryDefinition(name: String, configure: GraphOperationDefinition.Builder.() -> Unit) =
 	GraphOperationDefinition.Builder(
-			name = name,
-			type = GraphOperation.Type.query,
-			stackTrace = stackTrace(skipCount = 1)
-		)
+		name = name,
+		type = GraphOperation.Type.query,
+		stackTrace = stackTrace(skipCount = 1)
+	)
 		.apply(configure)
 		.build()
 
 
 fun graphScalarDefinition(configure: GraphScalarDefinition.Builder.() -> Unit) =
 	GraphScalarDefinition.Builder(
-			stackTrace = stackTrace(skipCount = 1)
-		)
+		stackTrace = stackTrace(skipCount = 1)
+	)
 		.apply(configure)
 		.build()
 
 
 fun graphAliasDefinition(configure: GraphAliasDefinition.Builder.() -> Unit) =
 	GraphAliasDefinition.Builder(
-			stackTrace = stackTrace(skipCount = 1)
-		)
+		stackTrace = stackTrace(skipCount = 1)
+	)
 		.apply(configure)
 		.build()
 

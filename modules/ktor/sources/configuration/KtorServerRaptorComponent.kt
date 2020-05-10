@@ -8,6 +8,9 @@ class KtorServerRaptorComponent internal constructor(
 	internal val globalScope: RaptorTopLevelConfigurationScope
 ) : RaptorComponent.Default<KtorServerRaptorComponent>(), RaptorTransactionGeneratingComponent {
 
+	// FIXME ok not to specify parent?
+	private val propertyRegistry = RaptorPropertyRegistry.default() // FIXME actually use!
+
 	internal val customConfigurations: MutableList<Application.() -> Unit> = mutableListOf()
 	internal val features: MutableList<KtorServerFeature> = mutableListOf()
 
@@ -51,6 +54,7 @@ class KtorServerRaptorComponent internal constructor(
 	override fun RaptorComponentConfigurationStartScope.onConfigurationStarted() {
 		Scopes(
 			globalScope = globalScope,
+			propertyRegistry = propertyRegistry,
 			serverComponentRegistry = componentRegistry
 		)
 	}
@@ -64,11 +68,12 @@ class KtorServerRaptorComponent internal constructor(
 
 	internal class Scopes(
 		private val globalScope: RaptorTopLevelConfigurationScope,
+		propertyRegistry: RaptorPropertyRegistry,
 		serverComponentRegistry: RaptorComponentRegistry
 	) : KtorServerFeatureConfigurationEndScope,
 		KtorServerFeatureConfigurationStartScope {
 
-		private val serverScope = ServerScope(componentRegistry = serverComponentRegistry)
+		private val serverScope = ServerScope(componentRegistry = serverComponentRegistry, propertyRegistry = propertyRegistry)
 
 
 		override fun global(configuration: RaptorTopLevelConfigurationScope.() -> Unit) {
@@ -82,7 +87,8 @@ class KtorServerRaptorComponent internal constructor(
 
 
 		private class ServerScope(
-			override val componentRegistry: RaptorComponentRegistry
+			override val componentRegistry: RaptorComponentRegistry,
+			override val propertyRegistry: RaptorPropertyRegistry
 		) : KtorServerFeatureConfigurationEndScope.ServerScope
 	}
 }
