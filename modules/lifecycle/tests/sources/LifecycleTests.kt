@@ -120,4 +120,17 @@ class LifecycleTests {
 		advanceTimeBy(600)
 		assertEquals(expected = State.stopped, actual = lifecycle.state)
 	}
+
+
+	@Test
+	fun testLifecycleWithoutInstallationFails() {
+		val raptor = raptor {}
+
+		assertEquals(
+			expected = "You must install RaptorLifecycleFeature in order to control the lifecycle.",
+			actual = assertFails {
+				raptor.lifecycle
+			}.message
+		)
+	}
 }

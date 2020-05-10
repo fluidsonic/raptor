@@ -3,5 +3,5 @@ package io.fluidsonic.raptor
 import org.kodein.di.*
 
 
-@Raptor.Dsl3
+@RaptorDsl
 typealias RaptorKodeinBuilder = Kodein.Builder
