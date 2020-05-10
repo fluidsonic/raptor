@@ -3,51 +3,17 @@ package io.fluidsonic.raptor
 
 internal class DefaultRaptorPropertyRegistry : RaptorPropertyRegistry {
 
-	private val valuesByKey: MutableMap<RaptorPropertyKey<*>, Any> = hashMapOf()
+	private val delegate = RaptorKeyValueRegistry.default(elementName = "property")
 
 
-	override fun <Value : Any> register(key: RaptorPropertyKey<Value>, value: Value) {
-		valuesByKey.putIfAbsent(key, value)?.let { existingValue ->
-			error(
-				"Cannot assign value to key '$key' as one has already been assigned.\n" +
-					"\tExisting value: $existingValue\n" +
-					"\tValue to be assigned: $value"
-			)
-		}
-	}
+	override fun <Value : Any> register(key: RaptorPropertyKey<in Value>, value: Value) =
+		delegate.register(key, value)
 
 
-	fun toPropertySet() =
-		DefaultRaptorPropertySet(valuesByKey = valuesByKey.toMap())
+	override fun toSet() =
+		DefaultRaptorPropertySet(delegate = delegate.toSet())
 
 
-	override fun toString() = buildString {
-		append("[property registry] ->")
-
-		if (valuesByKey.isEmpty()) {
-			append(" (empty)")
-			return@buildString
-		}
-
-		append("\n")
-		valuesByKey.entries
-			.map { (key, value) -> key.toString() to value.toString() }
-			.sortedBy { (key) -> key }
-			.forEachIndexed { index, (key, value) ->
-				if (index > 0)
-					append("\n")
-
-				append("[$key]".prependIndent("\t"))
-				append(" ->")
-
-				if (value.contains("\n")) {
-					append("\n")
-					append(value.prependIndent("\t\t"))
-				}
-				else {
-					append(" ")
-					append(value)
-				}
-			}
-	}
+	override fun toString() =
+		delegate.toString()
 }

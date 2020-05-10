@@ -56,11 +56,8 @@ class BasicTests {
 	fun testEmpty() {
 		val raptor = raptor {}
 
-		assertNull(actual = raptor[TextRaptorPropertyKey])
-		assertEquals(
-			expected = "[raptor] -> (empty)",
-			actual = raptor.toString()
-		)
+		assertNull(raptor[TextRaptorPropertyKey])
+		assertTrue(raptor.properties.isEmpty())
 	}
 
 

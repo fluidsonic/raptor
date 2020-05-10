@@ -1,8 +1,7 @@
 package io.fluidsonic.raptor
 
 
-// FIXME Make toString() (or name) mandatory?
-interface RaptorPropertyKey<Value : Any> {
+interface RaptorPropertyKey<Value : Any> : RaptorKey<Value> {
 
 	companion object
 }

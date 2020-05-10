@@ -7,11 +7,11 @@ internal class DefaultRaptorComponentExtensionSet : RaptorComponentExtensionSet 
 
 
 	@Suppress("UNCHECKED_CAST")
-	override fun <Value : Any> get(key: RaptorComponentExtensionKey<Value>): Value? =
+	override fun <Value : Any> get(key: RaptorComponentExtensionKey<out Value>): Value? =
 		valuesByKey[key] as Value?
 
 
-	override fun <Value : Any> set(key: RaptorComponentExtensionKey<Value>, value: Value) {
+	override fun <Value : Any> set(key: RaptorComponentExtensionKey<in Value>, value: Value) {
 		valuesByKey.putIfAbsent(key, value)?.let { existingValue ->
 			error(
 				"Cannot assign value to extension key '$key' as one has already been assigned.\n" +

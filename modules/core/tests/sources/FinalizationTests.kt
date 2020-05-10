@@ -21,7 +21,7 @@ class FinalizationTests {
 					}
 
 					assertFails {
-						componentRegistry.register(object : RaptorComponentKey<TextCollectionComponent> {}, TextCollectionComponent())
+						componentRegistry.register(DummyComponent.Key, DummyComponent())
 					}
 
 					assertFails {

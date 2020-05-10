@@ -7,7 +7,7 @@ internal class DefaultRaptorComponentRegistry : RaptorComponentRegistry {
 	private val setsByKey: MutableMap<RaptorComponentKey<*>, RegistrationSet<*>> = hashMapOf()
 
 
-	override fun <Component : RaptorComponent> configure(key: RaptorComponentKey<Component>): RaptorComponentSet<Component> {
+	override fun <Component : RaptorComponent> configure(key: RaptorComponentKey<out Component>): RaptorComponentSet<Component> {
 		checkMutable { "Cannot confiure a component during finalization." }
 
 		return getOrCreateSet(key)
@@ -41,11 +41,11 @@ internal class DefaultRaptorComponentRegistry : RaptorComponentRegistry {
 		setsByKey.values.all { it.isEmpty() }
 
 
-	override fun <Component : RaptorComponent> many(key: RaptorComponentKey<Component>): List<Component> =
+	override fun <Component : RaptorComponent> many(key: RaptorComponentKey<out Component>): List<Component> =
 		getSet(key)?.toList().orEmpty()
 
 
-	override fun <Component : RaptorComponent> oneOrNull(key: RaptorComponentKey<Component>): Component? =
+	override fun <Component : RaptorComponent> oneOrNull(key: RaptorComponentKey<out Component>): Component? =
 		getSet(key)
 			?.also { set ->
 				check(set.size <= 1) {
@@ -56,7 +56,7 @@ internal class DefaultRaptorComponentRegistry : RaptorComponentRegistry {
 			?.firstOrNull()
 
 
-	override fun <Component : RaptorComponent> register(key: RaptorComponentKey<Component>, component: Component) {
+	override fun <Component : RaptorComponent> register(key: RaptorComponentKey<in Component>, component: Component) {
 		checkMutable { "Cannot register a component during finalization." }
 
 		getOrCreateSet(key).add(component = component)

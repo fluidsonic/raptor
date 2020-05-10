@@ -23,7 +23,9 @@ internal class DefaultRaptorCoreComponent : RaptorComponent.Base<RaptorCoreCompo
 		for (key in featureKeys)
 			componentRegistry.one(key).runFinalization(scope = this)
 
-		return DefaultRaptor(properties = propertyRegistry.toPropertySet())
+		return DefaultRaptor(
+			context = DefaultRaptorContext(properties = propertyRegistry.toSet())
+		)
 	}
 
 

@@ -11,7 +11,10 @@ class DebuggingTests {
 		val raptor = raptor {}
 
 		assertEquals(
-			expected = "[raptor] -> (empty)",
+			expected = """
+				[raptor] ->
+					[context] -> (empty)
+			""".trimIndent(),
 			actual = raptor.toString()
 		)
 	}
@@ -145,9 +148,10 @@ class DebuggingTests {
 		assertEquals(
 			expected = """
 				[raptor] ->
-					[property set] ->
-						[count] -> 1
-						[text] -> foo
+					[context] ->
+						[property set] ->
+							[count] -> 1
+							[text] -> foo
 			""".trimIndent(),
 			actual = raptor.toString()
 		)

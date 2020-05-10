@@ -3,8 +3,8 @@ package io.fluidsonic.raptor
 
 interface RaptorComponentExtensionSet {
 
-	operator fun <Value : Any> get(key: RaptorComponentExtensionKey<Value>): Value?
-	operator fun <Value : Any> set(key: RaptorComponentExtensionKey<Value>, value: Value)
+	operator fun <Value : Any> get(key: RaptorComponentExtensionKey<out Value>): Value?
+	operator fun <Value : Any> set(key: RaptorComponentExtensionKey<in Value>, value: Value)
 
 
 	companion object

@@ -3,12 +3,21 @@ package io.fluidsonic.raptor
 
 interface Raptor {
 
-	operator fun <Value : Any> get(key: RaptorPropertyKey<Value>): Value?
+	val context: RaptorContext
+
 	override fun toString(): String
 
 
 	companion object
 }
+
+
+operator fun <Value : Any> Raptor.get(key: RaptorPropertyKey<out Value>): Value? =
+	properties[key]
+
+
+val Raptor.properties
+	get() = context.properties
 
 
 @RaptorDsl

@@ -2,45 +2,18 @@ package io.fluidsonic.raptor
 
 
 internal class DefaultRaptorPropertySet(
-	private val valuesByKey: Map<RaptorPropertyKey<*>, Any>
-) {
+	private val delegate: RaptorKeyValueSet
+) : RaptorPropertySet {
 
 	@Suppress("UNCHECKED_CAST")
-	operator fun <Value : Any> get(key: RaptorPropertyKey<Value>): Value? =
-		valuesByKey[key] as Value?
+	override operator fun <Value : Any> get(key: RaptorPropertyKey<out Value>): Value? =
+		delegate[key]
 
 
-	fun isEmpty() =
-		valuesByKey.isEmpty()
+	override fun isEmpty() =
+		delegate.isEmpty()
 
 
-	override fun toString() = buildString {
-		append("[property set] ->")
-
-		if (valuesByKey.isEmpty()) {
-			append(" (empty)")
-			return@buildString
-		}
-
-		append("\n")
-		valuesByKey.entries
-			.map { (key, value) -> key.toString() to value.toString() }
-			.sortedBy { (key) -> key }
-			.forEachIndexed { index, (key, value) ->
-				if (index > 0)
-					append("\n")
-
-				append("[$key]".prependIndent("\t"))
-				append(" ->")
-
-				if (value.contains("\n")) {
-					append("\n")
-					append(value.prependIndent("\t\t"))
-				}
-				else {
-					append(" ")
-					append(value)
-				}
-			}
-	}
+	override fun toString() =
+		delegate.toString()
 }

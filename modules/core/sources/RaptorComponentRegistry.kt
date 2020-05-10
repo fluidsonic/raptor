@@ -3,15 +3,19 @@ package io.fluidsonic.raptor
 
 interface RaptorComponentRegistry {
 
-	fun <Component : RaptorComponent> configure(key: RaptorComponentKey<Component>): RaptorComponentSet<Component>
+	fun <Component : RaptorComponent> configure(key: RaptorComponentKey<out Component>): RaptorComponentSet<Component>
 	fun isEmpty(): Boolean
-	fun <Component : RaptorComponent> oneOrNull(key: RaptorComponentKey<Component>): Component?
-	fun <Component : RaptorComponent> many(key: RaptorComponentKey<Component>): List<Component>
-	fun <Component : RaptorComponent> register(key: RaptorComponentKey<Component>, component: Component)
+	fun <Component : RaptorComponent> oneOrNull(key: RaptorComponentKey<out Component>): Component?
+	fun <Component : RaptorComponent> many(key: RaptorComponentKey<out Component>): List<Component>
+	fun <Component : RaptorComponent> register(key: RaptorComponentKey<in Component>, component: Component)
 	override fun toString(): String
 
 
-	companion object
+	companion object {
+
+		fun default(): RaptorComponentRegistry =
+			DefaultRaptorComponentRegistry()
+	}
 
 
 	object ChildRegistryComponentExtensionKey : RaptorComponentExtensionKey<RaptorComponentRegistry> {
