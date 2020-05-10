@@ -1,7 +1,7 @@
 package io.fluidsonic.raptor
 
 
-interface RaptorComponentConfigurationEndScope {
+interface RaptorComponentConfigurationEndScope : RaptorConfigurationEndScope {
 
 	@RaptorDsl
 	val lazyContext: RaptorContext

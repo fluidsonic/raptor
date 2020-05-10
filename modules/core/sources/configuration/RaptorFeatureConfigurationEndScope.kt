@@ -2,7 +2,7 @@ package io.fluidsonic.raptor
 
 
 @RaptorDsl
-interface RaptorFeatureConfigurationEndScope {
+interface RaptorFeatureConfigurationEndScope : RaptorConfigurationEndScope {
 
 	@RaptorDsl
 	val componentRegistry: RaptorComponentRegistry

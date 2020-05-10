@@ -6,7 +6,6 @@ import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
-import org.kodein.di.erased.*
 
 
 internal class GraphRoute(
@@ -18,6 +17,7 @@ internal class GraphRoute(
 		// FIXME require JSON header
 		// FIXME error handling
 		// FIXME rewrite
+		// FIXME disallow mutation for GET
 
 		val scope = RaptorGraphScopeImpl(
 			parent = call.dkodein.instance()
@@ -69,5 +69,11 @@ internal class GraphRoute(
 		}
 
 		call.respondText(JsonSerializer.default.serializeValue(result), contentType = ContentType.Application.Json.withCharset(Charsets.UTF_8))
+	}
+
+
+	object PropertyKey : RaptorPropertyKey<GraphRoute> {
+
+		override fun toString() = "graph route"
 	}
 }

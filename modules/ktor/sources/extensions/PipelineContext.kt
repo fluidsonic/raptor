@@ -4,7 +4,7 @@ import io.ktor.application.*
 import io.ktor.util.pipeline.*
 
 
-val PipelineContext<Unit, ApplicationCall>.raptorContext: KtorServerTransactionContext
+val PipelineContext<Unit, ApplicationCall>.raptorContext: RaptorTransactionContext
 	get() = raptorKtorServerTransaction.context
 
 

@@ -3,5 +3,5 @@ package io.fluidsonic.raptor
 import io.ktor.application.*
 
 
-val ApplicationCall.raptorContext: KtorServerContext
+val ApplicationCall.raptorContext: RaptorContext
 	get() = raptorKtorServerTransaction.context

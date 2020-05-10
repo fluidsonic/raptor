@@ -20,6 +20,6 @@ fun RaptorComponentSet<RaptorKodeinGeneratingComponent>.kodein(configuration: Ra
 // FIXME throw if feature not installed?
 @RaptorDsl
 @Suppress("unused")
-fun RaptorFeatureConfigurationEndScope.kodeinFactory(name: String, component: RaptorKodeinGeneratingComponent): RaptorKodeinFactory =
+fun RaptorConfigurationEndScope.kodeinFactory(name: String, component: RaptorKodeinGeneratingComponent): RaptorKodeinFactory =
 	component.componentRegistry.oneOrNull(KodeinFactoryRaptorComponent.Key)?.toFactory(name = name)
 		?: DefaultRaptorKodeinFactory(module = Kodein.Module(name) {})

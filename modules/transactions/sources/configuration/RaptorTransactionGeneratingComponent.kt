@@ -20,6 +20,6 @@ val RaptorComponentSet<RaptorTransactionGeneratingComponent>.transactions: Rapto
 // FIXME throw if feature not installed?
 @RaptorDsl
 @Suppress("unused")
-fun RaptorFeatureConfigurationEndScope.transactionFactory(component: RaptorTransactionGeneratingComponent): RaptorTransactionFactory =
+fun RaptorConfigurationEndScope.transactionFactory(component: RaptorTransactionGeneratingComponent): RaptorTransactionFactory =
 	component.componentRegistry.oneOrNull(RaptorTransactionComponent.Key)?.toFactory()
 		?: DefaultRaptorTransactionFactory(configurations = emptyList())

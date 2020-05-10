@@ -53,10 +53,10 @@ class BsonTests {
 
 		assertEquals(expected = emptyList(), actual = configuration.codecs)
 		assertEquals(
-			expected = listOf(countryDefinition) + BsonDefaults.definitions + centsDefinition,
+			expected = listOf(countryDefinition) + RaptorBsonDefaults.definitions + centsDefinition,
 			actual = configuration.definitions
 		)
-		assertEquals(expected = BsonDefaults.providers, actual = configuration.providers)
+		assertEquals(expected = RaptorBsonDefaults.providers, actual = configuration.providers)
 		assertEquals(expected = emptyList(), actual = configuration.registries)
 	}
 

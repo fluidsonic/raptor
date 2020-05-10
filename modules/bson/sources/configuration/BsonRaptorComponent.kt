@@ -64,8 +64,8 @@ fun RaptorComponentSet<BsonRaptorComponent>.includeDefaultCodecs() = configure {
 
 	includesDefaultCodecs = true
 
-	definitions(BsonDefaults.definitions)
-	providers(BsonDefaults.providers)
+	definitions(RaptorBsonDefaults.definitions)
+	providers(RaptorBsonDefaults.providers)
 }
 
 
