@@ -10,6 +10,30 @@ import kotlin.test.*
 class KodeinTests {
 
 	@Test
+	fun testCustomKodeinGeneration() {
+		val raptor = raptor {
+			install(ActivityScopedKodeinFeature)
+			install(RaptorKodeinFeature)
+
+			kodein {
+				bind() from instance("bar")
+			}
+
+			activities {
+				kodein {
+					bind("per-activity") from instance("scoped!")
+				}
+			}
+		}
+
+		val dkodein = raptor.createKodein(Activity(id = "foo")).kodein.direct
+		assertEquals(expected = "bar", actual = dkodein.instance())
+		assertEquals(expected = "scoped!", actual = dkodein.instance("per-activity"))
+		assertEquals(expected = "foo", actual = dkodein.instance<Activity>().id)
+	}
+
+
+	@Test
 	fun testKodein() {
 		val raptor = raptor {
 			install(RaptorKodeinFeature)

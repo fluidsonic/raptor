@@ -30,10 +30,6 @@ fun RaptorContext.createTransaction(): RaptorTransaction =
 		?: error("You must install ${RaptorTransactionFeature::class.simpleName} in order to use transactions.")
 
 
-operator fun <Value : Any> RaptorContext.get(key: RaptorTransactionPropertyKey<out Value>) =
-	(this as? RaptorTransactionContext)?.properties?.get(key) // FIXME breaks if someone wraps it
-
-
 inline fun <Result> RaptorContext.withNewTransaction(block: RaptorTransactionScope.() -> Result): Result =
 	with(createTransaction().asScope()) {
 		block()

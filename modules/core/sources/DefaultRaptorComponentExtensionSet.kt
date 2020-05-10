@@ -24,7 +24,15 @@ internal class DefaultRaptorComponentExtensionSet : RaptorComponentExtensionSet 
 
 	override fun toString() = buildString {
 		val valuesByKey = valuesByKey
-			.filterKeys { it != RaptorComponentRegistry.ChildRegistryComponentExtensionKey }
+			.filterKeys { key ->
+				when (key) {
+					RaptorComponentRegistry.ChildRegistryComponentExtensionKey ->
+						false
+
+					else ->
+						true
+				}
+			}
 			.map { (key, value) -> key.toString() to value.toString() }
 			.sortedBy { (key) -> key }
 			.ifEmpty { return@buildString }

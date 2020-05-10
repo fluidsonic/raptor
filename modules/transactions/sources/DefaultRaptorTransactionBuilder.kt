@@ -3,9 +3,9 @@ package io.fluidsonic.raptor
 
 internal class DefaultRaptorTransactionBuilder(
 	override val context: RaptorContext
-) : RaptorTransactionCreationScope {
+) : RaptorTransactionConfigurationScope {
 
-	override val propertyRegistry = RaptorTransactionPropertyRegistry.default(parentProperties = context.properties)
+	override val propertyRegistry = RaptorPropertyRegistry.default(parentProperties = context.properties)
 
 
 	fun build() =

@@ -3,7 +3,7 @@ package tests.utility
 import io.fluidsonic.raptor.*
 
 
-object IdRaptorTransactionPropertyKey : RaptorTransactionPropertyKey<String> {
+object IdRaptorPropertyKey : RaptorPropertyKey<String> {
 
 	override fun toString() = "id"
 }

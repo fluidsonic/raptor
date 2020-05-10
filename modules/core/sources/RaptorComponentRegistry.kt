@@ -3,6 +3,8 @@ package io.fluidsonic.raptor
 
 interface RaptorComponentRegistry {
 
+	val parent: RaptorComponentRegistry?
+
 	fun <Component : RaptorComponent> configure(key: RaptorComponentKey<out Component>): RaptorComponentSet<Component>
 	fun isEmpty(): Boolean
 	fun <Component : RaptorComponent> oneOrNull(key: RaptorComponentKey<out Component>): Component?
@@ -13,8 +15,8 @@ interface RaptorComponentRegistry {
 
 	companion object {
 
-		fun default(): RaptorComponentRegistry =
-			DefaultRaptorComponentRegistry()
+		fun default(parent: RaptorComponentRegistry? = null): RaptorComponentRegistry =
+			DefaultRaptorComponentRegistry(parent = parent)
 	}
 
 
@@ -45,7 +47,11 @@ inline fun <Component : RaptorComponent> RaptorComponentRegistry.oneOrRegister(
 	oneOrNull(key) ?: create().also { register(key, it) }
 
 
+val RaptorComponentRegistry.root: RaptorComponentRegistry
+	get() = parent?.root ?: this
+
+
 @RaptorDsl
-val RaptorComponentContainer.childComponentRegistry
+val RaptorComponent.componentRegistry
 	get() = extensions[RaptorComponentRegistry.ChildRegistryComponentExtensionKey]
 		?: error("Cannot access the child component registry of a component that hasn't been registered yet.")

@@ -1,7 +1,9 @@
 package io.fluidsonic.raptor
 
 
-internal class DefaultRaptorComponentRegistry : RaptorComponentRegistry {
+internal class DefaultRaptorComponentRegistry(
+	override val parent: RaptorComponentRegistry? = null
+) : RaptorComponentRegistry {
 
 	private var isFinalized = false
 	private val setsByKey: MutableMap<RaptorComponentKey<*>, RegistrationSet<*>> = hashMapOf()
@@ -61,8 +63,7 @@ internal class DefaultRaptorComponentRegistry : RaptorComponentRegistry {
 
 		getOrCreateSet(key).add(component = component)
 
-		if (component is RaptorComponentContainer)
-			component.extensions[RaptorComponentRegistry.ChildRegistryComponentExtensionKey] = DefaultRaptorComponentRegistry()
+		component.extensions[RaptorComponentRegistry.ChildRegistryComponentExtensionKey] = DefaultRaptorComponentRegistry(parent = this)
 	}
 
 
@@ -149,23 +150,21 @@ internal class DefaultRaptorComponentRegistry : RaptorComponentRegistry {
 
 				append(component.toString().prependIndent("\t").trimStart())
 
-				val childComponentRegistry = (component as? RaptorComponentContainer)?.childComponentRegistry
-					?.takeUnless { it.isEmpty() }
-
+				val componentRegistry = component.componentRegistry.takeUnless { it.isEmpty() }
 				val extensions = component.extensions.toString().ifEmpty { null }
 
-				if (extensions != null || childComponentRegistry != null) {
+				if (extensions != null || componentRegistry != null) {
 					append(" -> \n")
 
 					if (extensions != null) {
 						append(extensions.prependIndent("\t"))
 					}
 
-					if (childComponentRegistry != null) {
+					if (componentRegistry != null) {
 						if (extensions != null)
 							append("\n")
 
-						append(childComponentRegistry.toString().prependIndent("\t"))
+						append(componentRegistry.toString().prependIndent("\t"))
 					}
 				}
 			}

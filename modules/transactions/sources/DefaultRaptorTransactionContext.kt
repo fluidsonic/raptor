@@ -3,7 +3,7 @@ package io.fluidsonic.raptor
 
 internal class DefaultRaptorTransactionContext(
 	override val parent: RaptorContext,
-	override val properties: RaptorTransactionPropertySet
+	override val properties: RaptorPropertySet
 ) : RaptorTransactionContext, RaptorTransactionScope {
 
 	override val context: RaptorTransactionContext

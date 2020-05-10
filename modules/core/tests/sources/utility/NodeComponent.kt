@@ -5,11 +5,11 @@ import io.fluidsonic.raptor.*
 
 class NodeComponent(
 	@RaptorDsl val name: String
-) : RaptorComponent.Base<NodeComponent>(), RaptorComponentContainer, TaggableComponent {
+) : RaptorComponent.Base<NodeComponent>(), TaggableComponent {
 
 	fun finalize(): Node = Node(
 		name = name,
-		children = childComponentRegistry.many(Key).map(NodeComponent::finalize)
+		children = componentRegistry.many(Key).map(NodeComponent::finalize)
 	)
 
 
@@ -28,7 +28,7 @@ class NodeComponent(
 fun RaptorComponentSet<NodeComponent>.node(name: String) = withComponentAuthoring {
 	map {
 		NodeComponent(name = name)
-			.also { childComponentRegistry.register(NodeComponent.Key, it) }
+			.also { componentRegistry.register(NodeComponent.Key, it) }
 	}
 }
 
@@ -42,7 +42,7 @@ fun RaptorComponentSet<NodeComponent>.node(name: String, action: NodeComponent.(
 val RaptorComponentSet<NodeComponent>.nodes: RaptorComponentSet<NodeComponent>
 	get() = withComponentAuthoring {
 		map {
-			childComponentRegistry.configure(NodeComponent.Key)
+			componentRegistry.configure(NodeComponent.Key)
 		}
 	}
 

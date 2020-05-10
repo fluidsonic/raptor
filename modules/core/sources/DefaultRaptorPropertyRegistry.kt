@@ -1,7 +1,9 @@
 package io.fluidsonic.raptor
 
 
-internal class DefaultRaptorPropertyRegistry : RaptorPropertyRegistry {
+internal class DefaultRaptorPropertyRegistry(
+	private val parentProperties: RaptorPropertySet? = null
+) : RaptorPropertyRegistry {
 
 	private val delegate = RaptorKeyValueRegistry.default(elementName = "property")
 
@@ -11,7 +13,10 @@ internal class DefaultRaptorPropertyRegistry : RaptorPropertyRegistry {
 
 
 	override fun toSet() =
-		DefaultRaptorPropertySet(delegate = delegate.toSet())
+		DefaultRaptorPropertySet(
+			delegate = delegate.toSet(),
+			parent = parentProperties
+		)
 
 
 	override fun toString() =
