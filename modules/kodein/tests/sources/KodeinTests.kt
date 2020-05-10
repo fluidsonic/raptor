@@ -71,11 +71,11 @@ class KodeinTests {
 
 
 	@Test
-	fun testKodeinWithoutInstallationFails() {
+	fun testWithoutInstallationFails() {
 		val raptor = raptor {}
 
 		assertEquals(
-			expected = "You must install RaptorKodeinFeature in order to use Kodein.",
+			expected = "You must install RaptorKodeinFeature to use Kodein.",
 			actual = assertFails {
 				raptor.kodein
 			}.message

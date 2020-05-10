@@ -27,7 +27,7 @@ inline fun <Result> Raptor.withNewTransaction(block: RaptorTransactionScope.() -
 
 fun RaptorContext.createTransaction(): RaptorTransaction =
 	properties[DefaultRaptorTransactionFactory.PropertyKey]?.createTransaction(context = this)
-		?: error("You must install ${RaptorTransactionFeature::class.simpleName} in order to use transactions.")
+		?: error("You must install ${RaptorTransactionFeature::class.simpleName} to use transactions.")
 
 
 inline fun <Result> RaptorContext.withNewTransaction(block: RaptorTransactionScope.() -> Result): Result =

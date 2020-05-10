@@ -1,7 +1,6 @@
 package io.fluidsonic.raptor
 
 import org.kodein.di.erased.*
-import kotlin.reflect.full.*
 
 
 inline class TypedId(val untyped: EntityId) {
@@ -15,7 +14,7 @@ inline class TypedId(val untyped: EntityId) {
 
 
 internal fun TypedId.Companion.bsonDefinition() = bsonDefinition<TypedId> {
-	val factoryByType: Map<String, EntityId.Factory<*>> = instance<BsonConfig>()
+	val factoryByType: Map<String, EntityId.Factory<*>> = instance<BsonConfiguration>()
 		.definitions
 		.mapNotNull { it.valueClass.companionObjectInstance as? EntityId.Factory<*> } // FIXME evil hack!
 		.associateBy { it.type }

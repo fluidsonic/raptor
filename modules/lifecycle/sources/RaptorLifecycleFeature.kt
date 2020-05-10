@@ -22,4 +22,4 @@ object RaptorLifecycleFeature : RaptorFeature {
 
 val Raptor.lifecycle: RaptorLifecycle
 	get() = properties[DefaultRaptorLifecycle.PropertyKey]
-		?: error("You must install ${RaptorLifecycleFeature::class.simpleName} in order to control the lifecycle.")
+		?: error("You must install ${RaptorLifecycleFeature::class.simpleName} to control the lifecycle.")

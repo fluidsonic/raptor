@@ -4,7 +4,8 @@ import org.bson.codecs.*
 import org.bson.codecs.configuration.*
 
 
-class BsonConfig(
+// FIXME find a different way that maintains order
+class BsonConfiguration(
 	val codecs: Collection<Codec<*>>,
 	val definitions: Collection<RaptorBsonDefinition<*>>,
 	val providers: Collection<CodecProvider>,
@@ -13,11 +14,17 @@ class BsonConfig(
 
 	companion object {
 
-		val empty = BsonConfig(
+		val empty = BsonConfiguration(
 			codecs = emptyList(),
 			definitions = emptyList(),
 			providers = emptyList(),
 			registries = emptyList()
 		)
+	}
+
+
+	internal object PropertyKey : RaptorPropertyKey<BsonConfiguration> {
+
+		override fun toString() = "bson"
 	}
 }

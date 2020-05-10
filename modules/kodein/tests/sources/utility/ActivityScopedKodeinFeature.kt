@@ -32,7 +32,7 @@ fun RaptorContext.createKodein(activity: Activity): Kodein = // FIXME
 	properties[ActivityScopedKodeinFactoryRaptorPropertyKey]?.createKodein(context = this) {
 		bind() from instance(activity)
 	}
-		?: error("You must install the ActivityScopedKodeinFeature to create activity-scoped Kodein instances.")
+		?: error("You must install ActivityScopedKodeinFeature to create activity-scoped Kodein instances.")
 
 
 fun RaptorTransaction.createKodein(activity: Activity): Kodein =

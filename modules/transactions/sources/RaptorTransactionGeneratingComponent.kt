@@ -2,7 +2,7 @@ package io.fluidsonic.raptor
 
 
 @RaptorDsl
-interface RaptorTransactionGeneratingComponent : RaptorComponent {// FIXME make all containers?!
+interface RaptorTransactionGeneratingComponent : RaptorComponent {
 
 	companion object
 }
@@ -17,6 +17,7 @@ val RaptorComponentSet<RaptorTransactionGeneratingComponent>.transactions: Rapto
 	}
 
 
+// FIXME throw if feature not installed?
 @RaptorDsl
 @Suppress("unused")
 fun RaptorFeatureFinalizationScope.transactionFactory(component: RaptorTransactionGeneratingComponent): RaptorTransactionFactory =

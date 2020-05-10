@@ -127,7 +127,7 @@ class LifecycleTests {
 		val raptor = raptor {}
 
 		assertEquals(
-			expected = "You must install RaptorLifecycleFeature in order to control the lifecycle.",
+			expected = "You must install RaptorLifecycleFeature to control the lifecycle.",
 			actual = assertFails {
 				raptor.lifecycle
 			}.message

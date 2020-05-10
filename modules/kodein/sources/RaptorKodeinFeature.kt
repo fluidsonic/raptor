@@ -23,7 +23,7 @@ val Raptor.kodein: Kodein
 
 val RaptorContext.kodein: Kodein
 	get() = properties[DefaultKodeinRaptorPropertyKey]
-		?: error("You must install ${RaptorKodeinFeature::class.simpleName} in order to use Kodein.")
+		?: error("You must install ${RaptorKodeinFeature::class.simpleName} to use Kodein.")
 
 
 val RaptorTransaction.kodein: Kodein

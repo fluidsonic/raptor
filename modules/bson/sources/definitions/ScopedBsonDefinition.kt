@@ -9,7 +9,7 @@ private class ScopedBsonDefinition<Value : Any>(
 ) : RaptorBsonDefinition<Value> {
 
 	override fun codec(scope: BsonScope) =
-		BsonDefinitionScopeImpl(scope = scope, valueClass = valueClass).apply(config).codec()
+		DefaultBsonDefinitionScope(scope = scope, valueClass = valueClass).apply(config).codec()
 }
 
 

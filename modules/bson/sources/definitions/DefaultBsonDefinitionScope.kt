@@ -4,7 +4,7 @@ import org.bson.*
 import kotlin.reflect.*
 
 
-internal class BsonDefinitionScopeImpl<Value : Any>(
+internal class DefaultBsonDefinitionScope<Value : Any>(
 	scope: BsonScope,
 	val valueClass: KClass<Value>
 ) : RaptorBsonDefinitionScope<Value>, BsonScope by scope {

@@ -23,7 +23,7 @@ fun RaptorContext.createTransaction(request: Request): RaptorTransaction =
 	properties[RequestTransactionFactoryRaptorPropertyKey]?.createTransaction(context = this) {
 		propertyRegistry.register(RequestRaptorPropertyKey, request)
 	}
-		?: error("You must install the RequestFeature to create request-scoped transactions.")
+		?: error("You must install RequestFeature to create request-scoped transactions.")
 
 
 fun RaptorTransaction.createTransaction(request: Request): RaptorTransaction =

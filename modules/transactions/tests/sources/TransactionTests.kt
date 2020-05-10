@@ -168,7 +168,7 @@ class TransactionTests {
 		val raptor = raptor {}
 
 		assertEquals(
-			expected = "You must install RaptorTransactionFeature in order to use transactions.",
+			expected = "You must install RaptorTransactionFeature to use transactions.",
 			actual = assertFails {
 				raptor.createTransaction()
 			}.message
