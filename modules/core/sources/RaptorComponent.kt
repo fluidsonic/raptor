@@ -1,6 +1,7 @@
 package io.fluidsonic.raptor
 
 
+// FIXME Make toString() mandatory?
 @RaptorDsl
 interface RaptorComponent {
 

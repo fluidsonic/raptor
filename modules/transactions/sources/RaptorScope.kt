@@ -1,16 +1,15 @@
 package io.fluidsonic.raptor
 
-import org.kodein.di.*
 
-
-@Raptor.Dsl3
-interface RaptorScope : DKodeinAware {
+interface RaptorScope {
 
 	val context: RaptorContext
+
+
+	companion object
 }
 
 
-@Raptor.Dsl3
 inline fun <Result> RaptorScope.withNewTransaction(block: RaptorTransactionScope.() -> Result): Result =
 	with(context.createTransaction().context) {
 		block()

@@ -34,6 +34,13 @@ fun <Component : RaptorComponent> RaptorComponentRegistry.one(key: RaptorCompone
 	oneOrNull(key) ?: error("Expected a component to be registered for key '$key'.")
 
 
+inline fun <Component : RaptorComponent> RaptorComponentRegistry.oneOrRegister(
+	key: RaptorComponentKey<Component>,
+	create: () -> Component
+): Component =
+	oneOrNull(key) ?: create().also { register(key, it) }
+
+
 @RaptorDsl
 val RaptorComponentContainer.childComponentRegistry
 	get() = extensions[RaptorComponentRegistry.ChildRegistryComponentExtensionKey]
