@@ -1,11 +1,11 @@
 package io.fluidsonic.raptor
 
 
-internal class DefaultRaptorTransactionContext(
+internal class RaptorKtorRouteContext(
 	override val parent: RaptorContext,
 	override val properties: RaptorPropertySet
-) : RaptorTransactionContext {
+) : RaptorContext {
 
-	override fun toString() =
+	override fun toString(): String =
 		TODO() // FIXME
 }

@@ -1,7 +1,7 @@
 package io.fluidsonic.raptor
 
 
-internal class RaptorConfigurationComponent : RaptorComponent.Default<RaptorConfigurationComponent>() {
+class RaptorConfigurationComponent : RaptorComponent.Default<RaptorConfigurationComponent>() {
 
 	internal val configurations: MutableList<RaptorConfiguration> = mutableListOf()
 
@@ -24,5 +24,13 @@ internal class RaptorConfigurationComponent : RaptorComponent.Default<RaptorConf
 	internal object Key : RaptorComponentKey<RaptorConfigurationComponent> {
 
 		override fun toString() = "configuration"
+	}
+}
+
+
+@RaptorDsl
+fun RaptorComponentSet<RaptorConfigurationComponent>.append(configuration: RaptorConfiguration) {
+	configure {
+		configurations += configuration
 	}
 }

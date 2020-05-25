@@ -50,7 +50,10 @@ fun RaptorComponentSet<RaptorTransactionComponent>.kodein(configuration: RaptorK
 				val factory = context[factoryPropertyKey]
 					?: error("Cannot find factory.")
 
-				propertyRegistry.register(KodeinRaptorPropertyKey, factory.createKodein(context = context))
+				val kodein = factory.createKodein(context = context)
+
+				propertyRegistry.register(DKodeinRaptorPropertyKey, kodein.direct)
+				propertyRegistry.register(KodeinRaptorPropertyKey, kodein)
 			}
 		}
 	}

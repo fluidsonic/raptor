@@ -7,6 +7,7 @@ internal class KtorRouteConfiguration(
 	val children: List<KtorRouteConfiguration>,
 	val customConfigurations: List<RaptorKtorRouteConfigurationScope.() -> Unit>,
 	val path: String,
-	val transactionFactory: RaptorTransactionFactory?, // FIXME use
+	val properties: RaptorPropertySet,
+	val transactionFactory: RaptorTransactionFactory?,
 	val wrapper: (RaptorKtorRouteConfigurationScope.(next: Route.() -> Unit) -> Unit)?
 )

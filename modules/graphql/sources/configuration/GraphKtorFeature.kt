@@ -17,6 +17,7 @@ object GraphKtorFeature : KtorRouteFeature {
 		route {
 			custom {
 				get {
+					val r = raptorContext
 					checkNotNull(raptorContext[GraphRoute.PropertyKey]).handle(call)
 				}
 

@@ -11,7 +11,7 @@ class KtorRouteRaptorComponent internal constructor(
 ) : RaptorComponent.Default<KtorRouteRaptorComponent>(), RaptorTransactionGeneratingComponent {
 
 	// FIXME ok not to specify parent?
-	private val propertyRegistry = RaptorPropertyRegistry.default() // FIXME actually use!
+	private val propertyRegistry = RaptorPropertyRegistry.default()
 
 	internal val customConfigurations = mutableListOf<Route.() -> Unit>()
 	internal val features = mutableSetOf<KtorRouteFeature>()
@@ -33,6 +33,7 @@ class KtorRouteRaptorComponent internal constructor(
 			children = children,
 			customConfigurations = customConfigurations.toList(),
 			path = path,
+			properties = this@KtorRouteRaptorComponent.propertyRegistry.toSet(),
 			transactionFactory = transactionFactory(this@KtorRouteRaptorComponent),
 			wrapper = wrapper
 		)

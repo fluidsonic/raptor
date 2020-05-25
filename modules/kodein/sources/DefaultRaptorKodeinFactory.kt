@@ -18,10 +18,4 @@ internal class DefaultRaptorKodeinFactory(
 			configuration()
 		}
 	}
-
-
-	object PropertyKey : RaptorPropertyKey<DefaultRaptorKodeinFactory> {
-
-		override fun toString() = "kodein factory"
-	}
 }

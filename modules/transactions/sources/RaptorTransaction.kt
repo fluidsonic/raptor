@@ -14,10 +14,6 @@ fun RaptorTransaction.createTransaction(): RaptorTransaction =
 	context.createTransaction()
 
 
-fun RaptorTransaction.asScope(): RaptorTransactionScope =
-	context.asScope()
-
-
 operator fun <Value : Any> RaptorTransaction.get(key: RaptorPropertyKey<out Value>) =
 	properties[key]
 

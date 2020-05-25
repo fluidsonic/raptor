@@ -2,7 +2,7 @@ package io.fluidsonic.raptor
 
 
 @RaptorDsl
-interface RaptorTopLevelConfigurationScope {
+interface RaptorTopLevelConfigurationScope : RaptorFeatureInstallCheckScope {
 
 	@RaptorDsl
 	val componentRegistry: RaptorComponentRegistry

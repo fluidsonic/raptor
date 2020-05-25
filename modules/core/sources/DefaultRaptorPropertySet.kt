@@ -2,17 +2,16 @@ package io.fluidsonic.raptor
 
 
 internal class DefaultRaptorPropertySet(
-	private val delegate: RaptorKeyValueSet,
-	private val parent: RaptorPropertySet? = null
+	private val delegate: RaptorKeyValueSet
 ) : RaptorPropertySet {
 
 	@Suppress("UNCHECKED_CAST")
 	override operator fun <Value : Any> get(key: RaptorPropertyKey<out Value>): Value? =
-		delegate[key] ?: parent?.get(key)
+		delegate[key]
 
 
 	override fun isEmpty() =
-		delegate.isEmpty() && (parent?.isEmpty() ?: true)
+		delegate.isEmpty()
 
 
 	override fun toString() =

@@ -1,12 +1,28 @@
 package io.fluidsonic.raptor
 
+import org.kodein.di.erased.*
+
 
 object RaptorConfigurationFeature : RaptorFeature {
 
+	override val id = raptorConfigurationFeatureId
+
+
 	override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
 		componentRegistry.register(RaptorConfigurationComponent.Key, RaptorConfigurationComponent())
+
+		ifInstalled(raptorKodeinFeatureId) {
+			kodein {
+				bind<RaptorConfiguration>() with singleton {
+					instance<RaptorContext>().configuration
+				}
+			}
+		}
 	}
 }
+
+
+const val raptorConfigurationFeatureId: RaptorFeatureId = "raptor.configuration"
 
 
 val Raptor.configuration: RaptorConfiguration
@@ -19,8 +35,5 @@ val RaptorContext.configuration: RaptorConfiguration
 
 
 @RaptorDsl
-fun RaptorTopLevelConfigurationScope.configuration(configuration: RaptorConfiguration) {
-	componentRegistry.configure(RaptorConfigurationComponent.Key) {
-		configurations += configuration
-	}
-}
+val RaptorTopLevelConfigurationScope.configuration: RaptorComponentSet<RaptorConfigurationComponent>
+	get() = componentRegistry.configure(RaptorConfigurationComponent.Key)

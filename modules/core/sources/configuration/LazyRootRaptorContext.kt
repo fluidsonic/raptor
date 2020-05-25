@@ -6,8 +6,8 @@ internal class LazyRootRaptorContext : RaptorContext {
 	private var delegate: RaptorContext? = null
 
 
-	override fun asScope() =
-		requireDelegate().asScope()
+	override val context: RaptorContext
+		get() = requireDelegate()
 
 
 	override val parent: RaptorContext?

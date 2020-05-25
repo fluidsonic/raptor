@@ -3,6 +3,9 @@ package io.fluidsonic.raptor
 
 object KtorRaptorFeature : RaptorFeature {
 
+	override val id = raptorKtorFeatureId
+
+
 	override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
 		install(RaptorConfigurationFeature)
 		install(RaptorLifecycleFeature)
@@ -24,6 +27,9 @@ object KtorRaptorFeature : RaptorFeature {
 		}
 	}
 }
+
+
+const val raptorKtorFeatureId: RaptorFeatureId = "raptor.ktor"
 
 
 @RaptorDsl

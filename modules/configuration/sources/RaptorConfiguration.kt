@@ -24,15 +24,31 @@ interface RaptorConfiguration {
 	interface Value {
 
 		fun configuration(): RaptorConfiguration
-		fun configurationList(): RaptorConfiguration
-		fun stringList(): List<String>
+		fun configurationList(): List<RaptorConfiguration>
 		fun string(): String
+		fun stringList(): List<String>
 	}
 }
 
 
+fun RaptorConfiguration.configuration(path: String) =
+	value(path).configuration()
+
+
+fun RaptorConfiguration.configurationList(path: String) =
+	value(path).configurationList()
+
+
 operator fun RaptorConfiguration.get(path: String): RaptorConfiguration.Value? =
 	valueOrNull(path)
+
+
+fun RaptorConfiguration.string(path: String) =
+	value(path).string()
+
+
+fun RaptorConfiguration.stringList(path: String) =
+	value(path).stringList()
 
 
 fun RaptorConfiguration.value(path: String) =

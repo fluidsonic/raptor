@@ -10,7 +10,7 @@ interface RaptorPropertyRegistry {
 
 	companion object {
 
-		fun default(parent: RaptorPropertySet? = null): RaptorPropertyRegistry =
-			DefaultRaptorPropertyRegistry(parent = parent)
+		fun default(): RaptorPropertyRegistry =
+			DefaultRaptorPropertyRegistry()
 	}
 }

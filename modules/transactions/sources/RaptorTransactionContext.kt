@@ -1,9 +1,12 @@
 package io.fluidsonic.raptor
 
 
-interface RaptorTransactionContext : RaptorContext {
+interface RaptorTransactionContext : RaptorContext, RaptorTransactionScope {
 
-	override fun asScope(): RaptorTransactionScope
+	override val context: RaptorTransactionContext
+		get() = this
+
+
 	override fun toString(): String
 
 

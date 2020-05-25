@@ -3,6 +3,9 @@ package io.fluidsonic.raptor
 
 object RaptorTransactionFeature : RaptorFeature {
 
+	override val id = raptorTransactionFeatureId
+
+
 	override fun RaptorFeatureConfigurationEndScope.onConfigurationEnded() {
 		propertyRegistry.register(DefaultRaptorTransactionFactory.PropertyKey, componentRegistry.one(RaptorTransactionComponent.Key).toFactory())
 	}
@@ -15,6 +18,9 @@ object RaptorTransactionFeature : RaptorFeature {
 
 	override fun toString() = "transaction feature"
 }
+
+
+const val raptorTransactionFeatureId: RaptorFeatureId = "raptor.transaction"
 
 
 fun Raptor.createTransaction(): RaptorTransaction =
@@ -30,11 +36,7 @@ fun RaptorContext.createTransaction(): RaptorTransaction =
 		?: error("You must install ${RaptorTransactionFeature::class.simpleName} for enabling transaction functionality.")
 
 
-inline fun <Result> RaptorContext.withNewTransaction(block: RaptorTransactionScope.() -> Result): Result =
-	with(createTransaction().asScope()) {
+inline fun <Result> RaptorScope.withNewTransaction(block: RaptorTransactionScope.() -> Result): Result =
+	with(context.createTransaction().context) {
 		block()
 	}
-
-
-inline fun <Result> RaptorScope.withNewTransaction(block: RaptorTransactionScope.() -> Result): Result =
-	context.withNewTransaction(block)

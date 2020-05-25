@@ -134,7 +134,15 @@ internal class KtorServer(
 						val parentTransaction = context.attributes.getOrNull(ktorServerTransactionAttributeKey)
 							?: return@intercept
 
-						val transaction = transactionFactory.createTransaction(context = parentTransaction.context)
+						val parentContext = parentTransaction.context
+
+						val transaction = transactionFactory.createTransaction(
+							context = RaptorKtorRouteContext(
+								parent = parentTransaction.context,
+								properties = configuration.properties.withFallback(parentContext.properties)
+							)
+						)
+
 						call.attributes.put(ktorServerTransactionAttributeKey, transaction)
 
 						try {

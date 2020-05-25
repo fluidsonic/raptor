@@ -133,7 +133,7 @@ class TransactionTests {
 			install(RaptorTransactionFeature)
 		}
 
-		raptor.context.asScope().withNewTransaction {
+		raptor.context.withNewTransaction {
 			@Suppress("USELESS_IS_CHECK")
 			assertTrue(this is RaptorTransactionScope)
 		}

@@ -1,12 +1,14 @@
 package io.fluidsonic.raptor
 
 
-interface RaptorContext {
+interface RaptorContext : RaptorScope {
 
 	val parent: RaptorContext?
 	val properties: RaptorPropertySet
 
-	fun asScope(): RaptorScope
+	override val context: RaptorContext
+		get() = this
+
 	override fun toString(): String
 
 

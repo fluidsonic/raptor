@@ -5,8 +5,8 @@ import org.bson.codecs.configuration.*
 
 internal class DefaultBsonScope(
 	configuration: BsonConfiguration,
-	scope: RaptorScope
-) : BsonScope, RaptorScope by scope {
+	context: RaptorContext
+) : BsonScope, RaptorScope by context {
 
 	// FIXME This doesn't maintain order between definitions, codecs & registries. How to handle overrides?
 	override val codecRegistry = CodecRegistries.fromRegistries(

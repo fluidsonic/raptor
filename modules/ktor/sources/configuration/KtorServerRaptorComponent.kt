@@ -30,6 +30,7 @@ class KtorServerRaptorComponent internal constructor(
 					children = it,
 					customConfigurations = emptyList(),
 					path = "",
+					properties = RaptorPropertySet.empty(),
 					transactionFactory = null,
 					wrapper = null
 				)

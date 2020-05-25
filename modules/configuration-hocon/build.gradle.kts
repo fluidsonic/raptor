@@ -5,6 +5,6 @@ fluidJvmLibraryVariant(JvmTarget.jdk8) {
 }
 
 dependencies {
-	api(project(":raptor"))
-	compileOnly(project(":raptor-kodein"))
+	api(project(":raptor-configuration"))
+	implementation("com.typesafe:config:1.4.0") // FIXME api?
 }

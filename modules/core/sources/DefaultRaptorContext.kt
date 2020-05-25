@@ -2,19 +2,11 @@ package io.fluidsonic.raptor
 
 
 internal class DefaultRaptorContext(
-	override val properties: DefaultRaptorPropertySet
-) : RaptorContext, RaptorScope {
-
-	override val context: RaptorContext
-		get() = this
-
+	override val properties: RaptorPropertySet
+) : RaptorContext {
 
 	override val parent: RaptorContext?
 		get() = null
-
-
-	override fun asScope(): RaptorScope =
-		this
 
 
 	override fun toString(): String = buildString {
