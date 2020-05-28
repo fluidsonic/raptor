@@ -4,12 +4,11 @@
 package io.fluidsonic.raptor
 
 
-fun Unit.graphDefinition() = graphScalarDefinition {
-	conversion<Unit> {
-		// outputOnly() // FIXME
+@Suppress("unused")
+fun Unit.graphDefinition(): GraphScalarDefinition<Unit> = graphScalarDefinition<Unit> {
+	// outputOnly() // FIXME
 
-		parseInt { TODO() }
-		parseJson<Any> { TODO() }
-		serializeJson { 42 } // FIXME
-	}
+	parseInt { TODO() }
+	parseJson<Any> { TODO() }
+	serializeJson { 42 } // FIXME
 }

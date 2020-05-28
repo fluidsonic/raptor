@@ -3,9 +3,19 @@ package io.fluidsonic.raptor
 import org.bson.*
 
 
-fun BsonWriter.write(name: String, boolean: Boolean) {
+// FIXME consistency
+
+fun BsonWriter.write(name: String, value: Boolean) {
 	writeName(name)
-	writeBoolean(boolean)
+	writeBoolean(value)
+}
+
+
+fun BsonWriter.write(name: String, value: Boolean?, preserveNull: Boolean = false) {
+	if (value == null && !preserveNull)
+		return
+
+	write(name = name, value = value)
 }
 
 

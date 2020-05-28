@@ -9,13 +9,11 @@ inline class Password(val value: String) {
 
 	companion object {
 
-		fun graphDefinition() = graphScalarDefinition {
-			conversion {
-				parseString(::Password)
+		fun graphDefinition(): GraphScalarDefinition<Password> = graphScalarDefinition {
+			parseString(::Password)
 
-				parseJson(::Password)
-				serializeJson(Password::value)
-			}
+			parseJson(::Password)
+			serializeJson(Password::value)
 		}
 	}
 }

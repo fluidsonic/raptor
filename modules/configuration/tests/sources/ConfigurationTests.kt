@@ -15,9 +15,9 @@ class ConfigurationTests {
 		val raptor = raptor {
 			install(RaptorConfigurationFeature)
 
-			configuration(configurationA)
-			configuration(configurationB)
-			configuration(configurationC)
+			configuration.append(configurationA)
+			configuration.append(configurationB)
+			configuration.append(configurationC)
 		}
 
 		assertSame(expected = "a", actual = raptor.configuration.value("a").string())
@@ -32,7 +32,9 @@ class ConfigurationTests {
 		val raptor = raptor {
 			install(RaptorConfigurationFeature)
 
-			configuration(configuration)
+			configuration {
+				append(configuration)
+			}
 		}
 
 		assertSame(expected = "bar", actual = raptor.configuration.value("foo").string())

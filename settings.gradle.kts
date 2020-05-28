@@ -1,4 +1,5 @@
 includeBuild("../fluid-graphql")
+includeBuild("../fluid-stdlib")
 
 file("modules")
 	.listFiles()!!

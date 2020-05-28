@@ -6,11 +6,9 @@ package io.fluidsonic.raptor
 import io.fluidsonic.time.*
 
 
-fun Timestamp.Companion.graphDefinitions() = graphScalarDefinition {
-	conversion {
-		parseString(::parse)
+fun Timestamp.Companion.graphDefinitions(): GraphScalarDefinition<Timestamp> = graphScalarDefinition {
+	parseString(::parse)
 
-		parseJson(::parse)
-		serializeJson(Timestamp::toString)
-	}
+	parseJson(::parse)
+	serializeJson(Timestamp::toString)
 }

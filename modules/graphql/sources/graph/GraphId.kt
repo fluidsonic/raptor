@@ -9,22 +9,20 @@ inline class GraphId(val value: String) {
 
 	companion object {
 
-		fun graphDefinition() = graphScalarDefinition {
+		fun graphDefinition(): GraphScalarDefinition<GraphId> = graphScalarDefinition {
 			name("Id")
 
-			conversion {
-				parseInt { GraphId(it.toString()) }
-				parseString(::GraphId)
+			parseInt { GraphId(it.toString()) }
+			parseString(::GraphId)
 
-				parseJson<Any> { value ->
-					when (value) {
-						is Int -> GraphId(value.toString())
-						is String -> GraphId(value)
-						else -> null
-					}
+			parseJson<Any> { value ->
+				when (value) {
+					is Int -> GraphId(value.toString())
+					is String -> GraphId(value)
+					else -> null
 				}
-				serializeJson(GraphId::value)
 			}
+			serializeJson(GraphId::value)
 		}
 	}
 }

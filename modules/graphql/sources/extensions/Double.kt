@@ -4,11 +4,9 @@
 package io.fluidsonic.raptor
 
 
-fun Double.Companion.graphDefinition() = graphScalarDefinition {
-	conversion {
-		parseFloat(::identity)
+fun Double.Companion.graphDefinition(): GraphScalarDefinition<Double> = graphScalarDefinition {
+	parseFloat(::identity)
 
-		parseJson<Number> { it.toDouble() } // FIXME truncation
-		serializeJson(::identity)
-	}
+	parseJson(Number::toDouble) // FIXME truncation
+	serializeJson(::identity)
 }

@@ -6,11 +6,9 @@ package io.fluidsonic.raptor
 import io.fluidsonic.time.*
 
 
-fun LocalTime.Companion.graphDefinition() = graphScalarDefinition {
-	conversion {
-		parseString(::parse)
+fun LocalTime.Companion.graphDefinition(): GraphScalarDefinition<LocalTime> = graphScalarDefinition {
+	parseString(::parse)
 
-		parseJson(::parse)
-		serializeJson(LocalTime::toString)
-	}
+	parseJson(::parse)
+	serializeJson(LocalTime::toString)
 }

@@ -25,7 +25,7 @@ class SingleValueConfiguration(
 			TODO()
 
 
-		override fun configurationList(): RaptorConfiguration =
+		override fun configurationList(): List<RaptorConfiguration> =
 			TODO()
 
 

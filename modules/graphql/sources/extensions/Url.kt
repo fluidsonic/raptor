@@ -6,11 +6,9 @@ package io.fluidsonic.raptor
 import io.ktor.http.*
 
 
-fun Url.Companion.graphDefinition() = graphScalarDefinition {
-	conversion {
-		parseString(::Url)
+fun Url.Companion.graphDefinition(): GraphScalarDefinition<Url> = graphScalarDefinition {
+	parseString(::Url)
 
-		parseJson<String>(::Url)
-		serializeJson(Url::toString)
-	}
+	parseJson<String>(::Url)
+	serializeJson(Url::toString)
 }

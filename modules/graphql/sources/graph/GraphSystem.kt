@@ -33,7 +33,7 @@ internal class GraphSystem(
 					.let { it as? GraphAliasDefinition<Any, Any> }
 					?.serialize
 
-				val resolve = definition.resolve as (suspend RaptorGraphScope.(Any) -> Any?)?
+				val resolve = definition.resolver as (suspend RaptorGraphScope.(Any) -> Any?)?
 					?: TODO() // FIXME default resolver
 
 				return GraphInputContext(arguments = context.arguments).use {

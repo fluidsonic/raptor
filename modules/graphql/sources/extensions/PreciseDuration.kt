@@ -6,11 +6,9 @@ package io.fluidsonic.raptor
 import io.fluidsonic.time.*
 
 
-fun PreciseDuration.Companion.graphDefinition() = graphScalarDefinition {
-	conversion {
-		parseString(::parse)
+fun PreciseDuration.Companion.graphDefinition(): GraphScalarDefinition<PreciseDuration> = graphScalarDefinition {
+	parseString(::parse)
 
-		parseJson(::parse)
-		serializeJson(PreciseDuration::toString)
-	}
+	parseJson(::parse)
+	serializeJson(PreciseDuration::toString)
 }

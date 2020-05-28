@@ -8,13 +8,11 @@ inline class AccessToken(val value: String) {
 
 	companion object {
 
-		fun graphDefinition() = graphScalarDefinition {
-			conversion {
-				parseString(::AccessToken)
+		fun graphDefinition(): GraphScalarDefinition<AccessToken> = graphScalarDefinition {
+			parseString(::AccessToken)
 
-				parseJson(::AccessToken)
-				serializeJson(AccessToken::value)
-			}
+			parseJson(::AccessToken)
+			serializeJson(AccessToken::value)
 		}
 	}
 }

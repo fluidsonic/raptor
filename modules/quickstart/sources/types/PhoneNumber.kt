@@ -14,13 +14,11 @@ inline class PhoneNumber(val value: String) {
 		)
 
 
-		fun graphDefinition() = graphScalarDefinition {
-			conversion {
-				parseString(::PhoneNumber)
+		fun graphDefinition(): GraphScalarDefinition<PhoneNumber> = graphScalarDefinition {
+			parseString(::PhoneNumber)
 
-				parseJson(::PhoneNumber)
-				serializeJson(PhoneNumber::value)
-			}
+			parseJson(::PhoneNumber)
+			serializeJson(PhoneNumber::value)
 		}
 	}
 }

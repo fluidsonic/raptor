@@ -141,12 +141,12 @@ fun <Id : EntityId> EntityId.Factory<Id>.bsonDefinition() = bsonDefinition(idCla
 }
 
 
-
-fun <Id : EntityId> EntityId.Factory<Id>.graphDefinition() = graphAliasDefinition {
-	conversion(idClass, GraphId::class) {
-		parse { parse(it.value) ?: error("\"${it.value}\" is not a valid '$graphName'.") } // FIXME graph error
-		serialize { GraphId(it.serialize()) }
-	}
+fun <Id : EntityId> EntityId.Factory<Id>.graphDefinition() = graphAliasDefinition(
+	valueClass = idClass,
+	referencedValueClass = GraphId::class
+) {
+	parse { parse(it.value) ?: error("\"${it.value}\" is not a valid '$graphName'.") } // FIXME graph error
+	serialize { GraphId(it.serialize()) }
 }
 
 

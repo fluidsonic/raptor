@@ -18,13 +18,11 @@ inline class EmailAddress(val value: String) {
 		)
 
 
-		fun graphDefinition() = graphScalarDefinition {
-			conversion {
-				parseString(::EmailAddress)
+		fun graphDefinition(): GraphScalarDefinition<EmailAddress> = graphScalarDefinition {
+			parseString(::EmailAddress)
 
-				parseJson(::EmailAddress)
-				serializeJson(EmailAddress::value)
-			}
+			parseJson(::EmailAddress)
+			serializeJson(EmailAddress::value)
 		}
 	}
 }

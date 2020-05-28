@@ -54,7 +54,7 @@ internal class GraphSystemBuilder {
 		private var isComplete = false
 		private val gqlTypes: MutableList<GType> = mutableListOf()
 		private val objectExtensionDefinitionsByValueClass: MutableMap<KClass<*>, MutableList<GraphObjectExtensionDefinition<*>>> = mutableMapOf()
-		private val operationDefinitionsByType: MutableMap<GraphOperation.Type, MutableMap<String, GraphOperationDefinition<*>>> = mutableMapOf()
+		private val operationDefinitionsByType: MutableMap<RaptorGraphOperationType, MutableMap<String, GraphOperationDefinition<*>>> = mutableMapOf()
 		private val typeDefinitionExtensionKey = TypeDefinitionExtensionKey()
 		private val typeDefinitionsByName: MutableMap<String, GraphNamedTypeDefinition<*>> = hashMapOf()
 		private val typeDefinitionsByValueClass: MutableMap<KClass<*>, GraphTypeDefinition<*>> = hashMapOf()
@@ -95,7 +95,7 @@ internal class GraphSystemBuilder {
 				parseValue = { arguments ->
 					GraphInputContext(arguments = arguments).useBlocking {
 						with(definition) {
-							with(environment as RaptorGraphScope) { construct() }
+							with(environment as RaptorGraphScope) { factory() }
 						}
 					}
 				}
@@ -243,7 +243,7 @@ internal class GraphSystemBuilder {
 		}
 
 
-		private fun applyOperationDefinitions(definitions: Collection<GraphOperationDefinition<*>>, operationType: GraphOperation.Type) {
+		private fun applyOperationDefinitions(definitions: Collection<GraphOperationDefinition<*>>, operationType: RaptorGraphOperationType) {
 			gqlTypes += GObjectType(
 				fields = definitions.map { definition ->
 					GFieldDefinition(

@@ -47,7 +47,10 @@ interface BsonScope : RaptorScope {
 		readValuesOfType(`class`, container = mutableListOf())
 
 
-	fun <Value, Container> BsonReader.readValuesOfType(`class`: KClass<Value>, container: Container): Container where Value : Any, Container : MutableCollection<Value> {
+	fun <Value, Container> BsonReader.readValuesOfType(
+		`class`: KClass<Value>,
+		container: Container
+	): Container where Value : Any, Container : MutableCollection<Value> {
 		readArrayWithValues {
 			container.add(readValueOfType(`class`))
 		}
@@ -69,7 +72,10 @@ interface BsonScope : RaptorScope {
 	}
 
 
-	fun <Value, Container> BsonReader.readValuesOfTypeOrNull(`class`: KClass<Value>, container: Container): Container? where Value : Any, Container : MutableCollection<Value> {
+	fun <Value, Container> BsonReader.readValuesOfTypeOrNull(
+		`class`: KClass<Value>,
+		container: Container
+	): Container? where Value : Any, Container : MutableCollection<Value> {
 		expectValue("readValuesOfTypeOrNull")
 
 		if (currentBsonType == BsonType.NULL) {

@@ -6,11 +6,9 @@ package io.fluidsonic.raptor
 import io.fluidsonic.stdlib.*
 
 
-fun Currency.Companion.graphDefinition() = graphScalarDefinition {
-	conversion {
-		parseString(::byCode)
+fun Currency.Companion.graphDefinition(): GraphScalarDefinition<Currency> = graphScalarDefinition {
+	parseString(::byCode)
 
-		parseJson(::byCode)
-		serializeJson(Currency::code)
-	}
+	parseJson(::byCode)
+	serializeJson(Currency::code)
 }

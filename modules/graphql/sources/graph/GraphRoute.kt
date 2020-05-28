@@ -43,8 +43,8 @@ internal class GraphRoute(
 
 		val rootResolver = GRootResolver<RaptorGraphScope> {
 			when (operationType) {
-				GOperationType.mutation -> GraphOperation.Mutation
-				GOperationType.query -> GraphOperation.Query
+				GOperationType.mutation -> Unit
+				GOperationType.query -> Unit
 				GOperationType.subscription -> error("Subscriptions are not supported.")
 			}
 		}

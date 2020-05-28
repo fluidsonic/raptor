@@ -7,11 +7,9 @@ import io.fluidsonic.stdlib.*
 
 
 // FIXME don't serialize as ID
-fun Country.Companion.graphDefinition() = graphScalarDefinition {
-	conversion {
-		parseString(::byCode)
+fun Country.Companion.graphDefinition(): GraphScalarDefinition<Country> = graphScalarDefinition {
+	parseString(::byCode)
 
-		parseJson(::byCode)
-		serializeJson(Country::code)
-	}
+	parseJson(::byCode)
+	serializeJson(Country::code)
 }
