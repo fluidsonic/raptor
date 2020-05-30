@@ -19,8 +19,8 @@ internal class GraphRoute(
 		// FIXME rewrite
 		// FIXME disallow mutation for GET
 
-		val scope = RaptorGraphScopeImpl(
-			context = call.raptorContext as RaptorTransactionContext // FIXME nope.
+		val context = DefaultRaptorGraphContext(
+			parent = call.raptorContext as RaptorTransactionContext // FIXME nope.
 		)
 		val schema = system.schema
 
@@ -55,11 +55,11 @@ internal class GraphRoute(
 				.execute(
 					schema = schema,
 					rootResolver = rootResolver,
-					environment = scope,
+					environment = context,
 					operationName = operationName,
 					variableValues = variables,
-					defaultResolver = system.createFieldResolver(scope = scope), // FIXME why do I have to pass the scope?
-					nodeInputCoercion = system.createNodeInputCoercion(scope = scope) // FIXME why do I have to pass the scope?
+					defaultResolver = system.createFieldResolver(),
+					nodeInputCoercion = system.createNodeInputCoercion()
 				)
 		}
 		catch (e: GError) { // FIXME other errors

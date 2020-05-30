@@ -49,6 +49,7 @@ internal class GraphSystemBuilder {
 	private class Build {
 
 		private val fieldDefinitionExtensionKey = FieldDefinitionExtensionKey()
+		private var optionalArgumentDirective: GDirective? = null
 		private val interfaceDefinitionsByValueClass: MutableMap<KClass<*>, GraphInterfaceDefinition<*>> = mutableMapOf()
 		private val interfaceExtensionDefinitionsByValueClass: MutableMap<KClass<*>, MutableList<GraphInterfaceExtensionDefinition<*>>> = mutableMapOf()
 		private var isComplete = false
@@ -58,6 +59,7 @@ internal class GraphSystemBuilder {
 		private val typeDefinitionExtensionKey = TypeDefinitionExtensionKey()
 		private val typeDefinitionsByName: MutableMap<String, GraphNamedTypeDefinition<*>> = hashMapOf()
 		private val typeDefinitionsByValueClass: MutableMap<KClass<*>, GraphTypeDefinition<*>> = hashMapOf()
+		private val valueTypeExtensionKey = ValueTypeExtensionKey()
 
 
 		private fun applyEnumDefinition(definition: GraphEnumDefinition<*>) {
@@ -83,10 +85,12 @@ internal class GraphSystemBuilder {
 					GInputObjectArgumentDefinition(
 						defaultValue = argument.default,
 						description = null, // FIXME
+						directives = directivesForArgument(argument),
 						name = argument.name!!, // FIXME
 						type = resolveTypeRef(argument.valueType, referee = definition),
 						extensions = mapOf(
-							typeDefinitionExtensionKey to resolveTypeDefinition(argument.valueType, referee = definition)
+							typeDefinitionExtensionKey to resolveTypeDefinition(argument.valueType, referee = definition),
+							valueTypeExtensionKey to argument.valueType
 						)
 					)
 				},
@@ -113,6 +117,7 @@ internal class GraphSystemBuilder {
 						GFieldArgumentDefinition(
 							defaultValue = argument.default,
 							description = null, // FIXME
+							directives = directivesForArgument(argument),
 							name = argument.name!!, // FIXME
 							type = resolveTypeRef(argument.valueType, referee = definition)
 						)
@@ -137,6 +142,7 @@ internal class GraphSystemBuilder {
 							GFieldArgumentDefinition(
 								defaultValue = argument.default,
 								description = null, // FIXME
+								directives = directivesForArgument(argument),
 								name = argument.name!!, // FIXME
 								type = resolveTypeRef(argument.valueType, referee = extension)
 							)
@@ -185,10 +191,12 @@ internal class GraphSystemBuilder {
 						GFieldArgumentDefinition(
 							defaultValue = argument.default,
 							description = null, // FIXME
+							directives = directivesForArgument(argument),
 							name = argument.name!!, // FIXME
 							type = resolveTypeRef(argument.valueType, referee = definition),
 							extensions = mapOf(
-								typeDefinitionExtensionKey to resolveTypeDefinition(argument.valueType, referee = definition)
+								typeDefinitionExtensionKey to resolveTypeDefinition(argument.valueType, referee = definition),
+								valueTypeExtensionKey to argument.valueType
 							)
 						)
 					},
@@ -216,10 +224,12 @@ internal class GraphSystemBuilder {
 							GFieldArgumentDefinition(
 								defaultValue = argument.default,
 								description = null, // FIXME
+								directives = directivesForArgument(argument),
 								name = argument.name!!, // FIXME
 								type = resolveTypeRef(argument.valueType, referee = extension),
 								extensions = mapOf(
-									typeDefinitionExtensionKey to resolveTypeDefinition(argument.valueType, referee = extension)
+									typeDefinitionExtensionKey to resolveTypeDefinition(argument.valueType, referee = extension),
+									valueTypeExtensionKey to argument.valueType
 								)
 							)
 						},
@@ -251,10 +261,12 @@ internal class GraphSystemBuilder {
 							GFieldArgumentDefinition(
 								defaultValue = argument.default,
 								description = null, // FIXME
+								directives = directivesForArgument(argument),
 								name = argument.name!!, // FIXME
 								type = resolveTypeRef(argument.valueType, referee = definition),
 								extensions = mapOf(
-									typeDefinitionExtensionKey to resolveTypeDefinition(argument.valueType, referee = definition)
+									typeDefinitionExtensionKey to resolveTypeDefinition(argument.valueType, referee = definition),
+									valueTypeExtensionKey to argument.valueType
 								)
 							)
 						},
@@ -333,14 +345,35 @@ internal class GraphSystemBuilder {
 			for ((operationType, definitionsByName) in operationDefinitionsByType)
 				applyOperationDefinitions(definitionsByName.values, operationType = operationType)
 
+			val definitions = gqlTypes.toMutableList<GTypeSystemDefinition>()
+
+			optionalArgumentDirective?.let { directive ->
+				definitions += GDirectiveDefinition(
+					description = "An argument with this directive does not require a value. " +
+						"Providing no value may lead to a different behavior than providing a null value.",
+					name = directive.name,
+					locations = setOf(GDirectiveLocation.ARGUMENT_DEFINITION)
+				)
+			}
+
 			// FIXME error on extensions for non-existent types
 
 			return GraphSystem(
 				fieldDefinitionExtensionKey = fieldDefinitionExtensionKey,
-				schema = GSchema(GDocument(definitions = gqlTypes)),
-				typeDefinitionExtensionKey = typeDefinitionExtensionKey
+				schema = GSchema(GDocument(definitions = definitions)),
+				typeDefinitionExtensionKey = typeDefinitionExtensionKey,
+				valueTypeExtensionKey = valueTypeExtensionKey
 			)
 		}
+
+
+		private fun directivesForArgument(argument: GraphArgumentDefinition<*>) =
+			if (argument.valueType.classifier == Maybe::class)
+				listOf(optionalArgumentDirective ?: GDirective(name = "optional").also {
+					optionalArgumentDirective = it
+				})
+			else
+				emptyList()
 
 
 		private fun interfaceTypeRefsForObjectValueClass(valueClass: KClass<*>): List<GNamedTypeRef> {
@@ -380,6 +413,9 @@ internal class GraphSystemBuilder {
 				is GraphTypeDefinition<*> ->
 					registerType(definition = definition)
 			}
+
+			for (additionalDefinition in definition.additionalDefinitions)
+				register(additionalDefinition)
 		}
 
 
@@ -443,7 +479,7 @@ internal class GraphSystemBuilder {
 
 		private fun resolveTypeDefinition(valueClassRef: KType, referee: RaptorGraphDefinition): GraphTypeDefinition<*> =
 			when (val classifier = valueClassRef.classifier) {
-				Collection::class, List::class, Set::class -> resolveTypeDefinition(valueClassRef.arguments.first(), referee = referee)
+				Collection::class, List::class, Maybe::class, Set::class -> resolveTypeDefinition(valueClassRef.arguments.first(), referee = referee)
 				is KClass<*> -> resolveTypeDefinition(classifier, referee = referee)
 				is KTypeParameter -> error("A type parameter '$valueClassRef' is not representable in GraphQL:\n$referee")
 				else -> error("The type reference '$valueClassRef' is not representable in GraphQL:\n$referee")
@@ -461,7 +497,10 @@ internal class GraphSystemBuilder {
 		private fun resolveTypeRef(valueClass: KClass<*>, referee: RaptorGraphDefinition): GNamedTypeRef =
 			when (val definition = typeDefinitionsByValueClass[valueClass]) {
 				is GraphAliasDefinition<*, *> ->
-					resolveTypeRef(definition.referencedValueClass, referee = definition)
+					if (definition.isId)
+						GIdTypeRef
+					else
+						resolveTypeRef(definition.referencedValueClass, referee = definition)
 
 				is GraphNamedTypeDefinition<*> ->
 					GNamedTypeRef(definition.name)
@@ -475,6 +514,7 @@ internal class GraphSystemBuilder {
 		// FIXME support other collection types & find generic approach?
 		private fun resolveTypeRef(valueClassRef: KType, referee: RaptorGraphDefinition): GTypeRef {
 			val typeRef = when (val classifier = valueClassRef.classifier) {
+				Maybe::class -> return resolveTypeRef(valueClassRef.arguments.first(), referee = referee)
 				Collection::class, List::class, Set::class -> GListTypeRef(resolveTypeRef(valueClassRef.arguments.first(), referee = referee))
 				is KClass<*> -> resolveTypeRef(classifier, referee = referee)
 				is KTypeParameter -> error("A type parameter '$valueClassRef' is not representable in GraphQL:\n$referee")

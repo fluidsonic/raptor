@@ -58,7 +58,7 @@ class RaptorGraphObjectExtensionDefinitionBuilder<Value : Any> internal construc
 
 	@RaptorDsl
 	fun <FieldValue> field(
-		function: KSuspendFunction2<Value, RaptorGraphScope, FieldValue>,
+		function: KSuspendFunction2<Value, RaptorGraphContext, FieldValue>,
 		configure: FieldBuilder<FieldValue>.() -> Unit = {}
 	) {
 		val name = function.name
@@ -69,7 +69,7 @@ class RaptorGraphObjectExtensionDefinitionBuilder<Value : Any> internal construc
 		fields += FieldBuilder<FieldValue>(
 			name = name,
 			valueType = function.returnType,
-			implicitResolver = { function.invoke(it, this) }
+			implicitResolver = { function.invoke(it, context) }
 		)
 			.apply(configure)
 			.build()

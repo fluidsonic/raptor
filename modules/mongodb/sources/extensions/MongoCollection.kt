@@ -2,6 +2,7 @@ package io.fluidsonic.raptor
 
 import com.mongodb.client.model.*
 import com.mongodb.client.model.Filters.*
+import com.mongodb.client.result.*
 import io.fluidsonic.mongo.*
 import io.fluidsonic.stdlib.*
 import org.bson.*
@@ -14,15 +15,28 @@ private val bsonDecoderContext = DecoderContext.builder().build()!!
 
 // FIXME move to fluid-mongo?
 
-suspend fun MongoCollection<*>.deleteOneById(id: Any?, options: DeleteOptions = DeleteOptions()) =
+suspend fun MongoCollection<*>.deleteOneById(id: Any?, options: DeleteOptions = DeleteOptions()): DeleteResult =
 	deleteOne(filter = eq("_id", id), options = options)
 
 
-suspend fun <TDocument : Any> MongoCollection<TDocument>.findOneById(id: Any?) =
-	find(filter = eq("_id", id)).firstOrNull()
+fun <TDocument : Any> MongoCollection<TDocument>.findById(ids: Iterable<*>): FindFlow<TDocument> =
+	findById(ids = ids, resultClass = documentClass)
 
 
-suspend fun <TResult : Any> MongoCollection<*>.findOneById(id: Any?, resultClass: KClass<out TResult>) =
+fun <TResult : Any> MongoCollection<*>.findById(ids: Iterable<*>, resultClass: KClass<out TResult>): FindFlow<TResult> {
+	val collection = (ids as? Collection<*>) ?: ids.toList()
+	if (collection.isEmpty())
+		return FindFlow.empty()
+
+	return find(filter = `in`("_id", collection), resultClass = resultClass)
+}
+
+
+suspend fun <TDocument : Any> MongoCollection<TDocument>.findOneById(id: Any?): TDocument? =
+	findOneById(id = id, resultClass = documentClass)
+
+
+suspend fun <TResult : Any> MongoCollection<*>.findOneById(id: Any?, resultClass: KClass<out TResult>): TResult? =
 	find(filter = eq("_id", id), resultClass = resultClass).firstOrNull()
 
 
@@ -50,7 +64,7 @@ suspend fun <TResult : Any> MongoCollection<*>.findOneFieldById(id: Any?, fieldN
 suspend fun <TDocument : Any> MongoCollection<TDocument>.findOneByIdAndDelete(
 	id: Any?,
 	options: FindOneAndDeleteOptions = FindOneAndDeleteOptions()
-) =
+): TDocument? =
 	findOneAndDelete(
 		filter = eq("_id", id),
 		options = options
@@ -61,7 +75,7 @@ suspend fun <TDocument : Any> MongoCollection<TDocument>.findOneByIdAndUpdate(
 	id: Any?,
 	update: Bson,
 	options: FindOneAndUpdateOptions = FindOneAndUpdateOptions()
-) =
+): TDocument? =
 	findOneAndUpdate(
 		filter = eq("_id", id),
 		update = update,
@@ -69,9 +83,17 @@ suspend fun <TDocument : Any> MongoCollection<TDocument>.findOneByIdAndUpdate(
 	)
 
 
-suspend fun <TDocument : Any> MongoCollection<TDocument>.replaceOneById(id: Any?, replacement: TDocument, options: ReplaceOptions = ReplaceOptions()) =
+suspend fun <TDocument : Any> MongoCollection<TDocument>.replaceOneById(
+	id: Any?,
+	replacement: TDocument,
+	options: ReplaceOptions = ReplaceOptions()
+): UpdateResult =
 	replaceOne(filter = eq("_id", id), replacement = replacement, options = options)
 
 
-suspend fun <TDocument : Any> MongoCollection<TDocument>.updateOneById(id: Any?, update: Bson, options: UpdateOptions = UpdateOptions()) =
+suspend fun <TDocument : Any> MongoCollection<TDocument>.updateOneById(
+	id: Any?,
+	update: Bson,
+	options: UpdateOptions = UpdateOptions()
+): UpdateResult =
 	updateOne(filter = eq("_id", id), update = update, options = options)

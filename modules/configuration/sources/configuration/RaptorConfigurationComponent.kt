@@ -13,7 +13,7 @@ class RaptorConfigurationComponent : RaptorComponent.Default<RaptorConfiguration
 		propertyRegistry.register(ConfigurationRaptorPropertyKey, when (configurations.size) {
 			0 -> RaptorConfiguration.empty
 			1 -> configurations.single()
-			else -> RaptorConfiguration.lookup(configurations.toList())
+			else -> RaptorConfiguration.lookup(configurations.toList().reversed())
 		})
 	}
 

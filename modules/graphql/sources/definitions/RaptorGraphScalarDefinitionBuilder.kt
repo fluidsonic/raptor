@@ -6,13 +6,14 @@ import kotlin.reflect.*
 @RaptorDsl
 class RaptorGraphScalarDefinitionBuilder<Value : Any> internal constructor(
 	private val stackTrace: List<StackTraceElement>,
-	private val valueClass: KClass<Value>,
-	private val defaultName: (() -> String?)? = null
+	valueClass: KClass<Value>,
+	defaultName: (() -> String?)? = null
+) : RaptorGraphNamedTypeDefinitionBuilder<Value, GraphScalarDefinition<Value>>(
+	defaultName = defaultName,
+	valueClass = valueClass
 ) {
 
-	private var description: String? = null
 	private var jsonInputClass: KClass<*>? = null
-	private var name: String? = null
 	private var parseBoolean: (RaptorGraphScope.(input: Boolean) -> Value?)? = null
 	private var parseFloat: (RaptorGraphScope.(input: Double) -> Value?)? = null
 	private var parseObject: (RaptorGraphScope.(input: Map<String, *>) -> Value?)? = null
@@ -22,12 +23,7 @@ class RaptorGraphScalarDefinitionBuilder<Value : Any> internal constructor(
 	private var serializeJson: (RaptorGraphScope.(value: Value) -> Any)? = null
 
 
-	init {
-		checkGraphCompatibility(valueClass)
-	}
-
-
-	internal fun build(): GraphScalarDefinition<Value> {
+	override fun build(description: String?, name: String): GraphScalarDefinition<Value> {
 		checkNotNull(parseBoolean ?: parseFloat ?: parseInt ?: parseObject ?: parseString) {
 			"At least one GraphQL value parsing function must be defined: parseBoolean/Int/Float/String { … }"
 		}
@@ -35,7 +31,7 @@ class RaptorGraphScalarDefinitionBuilder<Value : Any> internal constructor(
 		return GraphScalarDefinition(
 			description = description,
 			jsonInputClass = checkNotNull(jsonInputClass),
-			name = name ?: defaultName?.invoke() ?: valueClass.defaultGraphName(),
+			name = name,
 			parseBoolean = parseBoolean,
 			parseFloat = parseFloat,
 			parseObject = parseObject,
@@ -48,22 +44,6 @@ class RaptorGraphScalarDefinitionBuilder<Value : Any> internal constructor(
 			stackTrace = stackTrace,
 			valueClass = valueClass
 		)
-	}
-
-
-	@RaptorDsl
-	fun description(description: String) {
-		check(this.description === null) { "Cannot define multiple descriptions." }
-
-		this.description = description
-	}
-
-
-	@RaptorDsl
-	fun name(name: String) {
-		check(this.name === null) { "Cannot define multiple names." }
-
-		this.name = name
 	}
 
 

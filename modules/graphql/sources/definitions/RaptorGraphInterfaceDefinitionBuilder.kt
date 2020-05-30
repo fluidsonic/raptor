@@ -7,37 +7,26 @@ import kotlin.reflect.full.*
 @RaptorDsl
 class RaptorGraphInterfaceDefinitionBuilder<Value : Any> internal constructor(
 	private val stackTrace: List<StackTraceElement>,
-	private val valueClass: KClass<Value>,
-	private val defaultName: (() -> String?)? = null
+	valueClass: KClass<Value>,
+	defaultName: (() -> String?)? = null
+) : RaptorGraphStructuredTypeDefinitionBuilder<Value, GraphInterfaceDefinition<Value>>(
+	defaultName = defaultName,
+	valueClass = valueClass
 ) {
 
-	private var description: String? = null
 	private val fields = mutableListOf<GraphInterfaceDefinition.Field<Value, *>>()
-	private var name: String? = null
 
 
-	init {
-		checkGraphCompatibility(valueClass)
-	}
-
-
-	internal fun build() =
+	override fun build(description: String?, name: String, nestedDefinitions: List<GraphNamedTypeDefinition<*>>) =
 		GraphInterfaceDefinition(
 			description = description,
 			fields = fields.ifEmpty { null }
 				?: error("At least one field must be defined: field(…) { … }"),
-			name = name ?: defaultName?.invoke() ?: valueClass.defaultGraphName(),
+			name = name,
+			nestedDefinitions = nestedDefinitions,
 			stackTrace = stackTrace,
 			valueClass = valueClass
 		)
-
-
-	@RaptorDsl
-	fun description(description: String) {
-		check(this.description === null) { "Cannot define multiple descriptions." }
-
-		this.description = description
-	}
 
 
 	@OptIn(ExperimentalStdlibApi::class)
@@ -59,7 +48,7 @@ class RaptorGraphInterfaceDefinitionBuilder<Value : Any> internal constructor(
 
 	@RaptorDsl
 	fun <FieldValue> field(
-		function: KSuspendFunction2<Value, RaptorGraphScope, FieldValue>,
+		function: KSuspendFunction2<Value, RaptorGraphContext, FieldValue>,
 		configure: FieldBuilder<FieldValue>.() -> Unit = {}
 	) =
 		field(name = function.name, valueType = function.returnType, configure = configure)
@@ -80,14 +69,6 @@ class RaptorGraphInterfaceDefinitionBuilder<Value : Any> internal constructor(
 		)
 			.apply(configure)
 			.build()
-	}
-
-
-	@RaptorDsl
-	fun name(name: String) {
-		check(this.name === null) { "Cannot define multiple names." }
-
-		this.name = name
 	}
 
 

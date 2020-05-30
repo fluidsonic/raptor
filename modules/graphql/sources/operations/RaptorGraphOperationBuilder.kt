@@ -13,11 +13,11 @@ class RaptorGraphOperationBuilder<Input : Any, Output> internal constructor(
 	private val stackTrace: List<StackTraceElement>
 ) {
 
+	internal val additionalDefinitions: MutableList<GraphNamedTypeDefinition<*>> = mutableListOf()
 	internal var outputObjectDefinition: GraphObjectDefinition<*>? = null
 
 	private val argumentsContainer = RaptorGraphArgumentDefinitionBuilder.ContainerImpl()
 	private var description: String? = null
-	private var inputObjectDefinition: GraphInputObjectDefinition<*>? = null
 	private var inputFactory: (RaptorGraphScope.() -> Input)? = null
 	private var name: String? = null
 
@@ -25,7 +25,7 @@ class RaptorGraphOperationBuilder<Input : Any, Output> internal constructor(
 	internal fun build(): GraphOperationDefinition<Output> {
 		@Suppress("UNCHECKED_CAST")
 		if (inputFactory == null && inputClass == Unit::class)
-			inputFactory = { Unit } as RaptorGraphScope.() -> Input
+			inputFactory = { Unit as Input }
 
 		val arguments = argumentsContainer.arguments
 		val description = description
@@ -36,6 +36,7 @@ class RaptorGraphOperationBuilder<Input : Any, Output> internal constructor(
 		val operation = operation
 
 		return RaptorGraphOperationDefinitionBuilder<Output>(
+			additionalDefinitions = additionalDefinitions,
 			name = name,
 			type = operation.type,
 			stackTrace = stackTrace,
@@ -73,14 +74,15 @@ class RaptorGraphOperationBuilder<Input : Any, Output> internal constructor(
 	fun inputObject(configure: RaptorGraphInputObjectDefinitionBuilder<Input>.() -> Unit) {
 		check(inputFactory === null) { "Cannot define multiple inputs." }
 
-		// FIXME how to register type definition?
-		inputObjectDefinition = RaptorGraphInputObjectDefinitionBuilder<Input>(
+		val definition = RaptorGraphInputObjectDefinitionBuilder<Input>(
 			stackTrace = stackTrace(skipCount = 1),
 			valueClass = inputClass,
 			defaultName = operation::defaultInputObjectName
 		)
 			.apply(configure)
 			.build()
+
+		additionalDefinitions += definition
 
 		val input by argumentsContainer.argument<Input>(valueType = inputClass.starProjectedType) {
 			// FIXME configurable name & description
@@ -108,13 +110,15 @@ class RaptorGraphOperationBuilder<Input : Any, Output> internal constructor(
 fun <Output : Any> RaptorGraphOperationBuilder<*, Output>.outputObject(configure: RaptorGraphObjectDefinitionBuilder<Output>.() -> Unit) {
 	check(outputObjectDefinition === null) { "Cannot define multiple outputs." }
 
-	// FIXME how to register type definition?
 	@Suppress("UNCHECKED_CAST")
-	outputObjectDefinition = RaptorGraphObjectDefinitionBuilder<Output>(
+	val definition = RaptorGraphObjectDefinitionBuilder<Output>(
 		stackTrace = stackTrace(skipCount = 1),
 		valueClass = outputType.classifier as KClass<Output>,
 		defaultName = operation::defaultOutputObjectName
 	)
 		.apply(configure)
 		.build()
+
+	additionalDefinitions += definition
+	outputObjectDefinition = definition
 }

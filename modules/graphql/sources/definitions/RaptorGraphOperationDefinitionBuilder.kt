@@ -6,6 +6,7 @@ import kotlin.reflect.full.*
 
 @RaptorDsl
 class RaptorGraphOperationDefinitionBuilder<Value> internal constructor(
+	private val additionalDefinitions: List<GraphNamedTypeDefinition<*>>,
 	private val name: String,
 	private val type: RaptorGraphOperationType,
 	private val stackTrace: List<StackTraceElement>,
@@ -14,7 +15,7 @@ class RaptorGraphOperationDefinitionBuilder<Value> internal constructor(
 ) : RaptorGraphArgumentDefinitionBuilder.ContainerInternal by argumentsContainer {
 
 	private var description: String? = null
-	private var isNullable = false
+	private var isNullable = valueType.isMarkedNullable
 	private var resolver: (suspend RaptorGraphScope.() -> Value)? = null
 
 
@@ -27,6 +28,7 @@ class RaptorGraphOperationDefinitionBuilder<Value> internal constructor(
 		val resolver = checkNotNull(resolver) { "The resolver must be defined: resolver { … }" }
 
 		return GraphOperationDefinition(
+			additionalDefinitions = additionalDefinitions,
 			field = GraphObjectDefinition.Field(
 				arguments = argumentsContainer.arguments,
 				description = description,

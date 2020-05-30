@@ -6,10 +6,16 @@ interface RaptorContext : RaptorScope {
 	val parent: RaptorContext?
 	val properties: RaptorPropertySet
 
-	override val context: RaptorContext
-		get() = this
 
 	override fun toString(): String
+
+
+	fun asScope(): RaptorScope =
+		this
+
+
+	override val context: RaptorContext
+		get() = this
 
 
 	companion object

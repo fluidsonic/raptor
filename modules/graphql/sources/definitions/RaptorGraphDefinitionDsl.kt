@@ -1,8 +1,11 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.graphql.*
 import io.fluidsonic.stdlib.*
 import kotlin.reflect.*
-import kotlin.reflect.full.*
+
+// FIXME Allow nested definitions in structured definitions & reuse in RaptorGraphOperationBuilder.
+// FIXME Can also improve automatic name generation.
 
 
 @RaptorDsl
@@ -23,6 +26,7 @@ fun <Value : Any, ReferencedValue : Any> graphAliasDefinition(
 	configure: RaptorGraphAliasDefinitionBuilder<Value, ReferencedValue>.() -> Unit
 ): GraphAliasDefinition<Value, ReferencedValue> =
 	RaptorGraphAliasDefinitionBuilder(
+		isId = false,
 		referencedValueClass = referencedValueClass,
 		stackTrace = stackTrace(skipCount = 1),
 		valueClass = valueClass
@@ -52,6 +56,31 @@ fun <Value : Enum<Value>> graphEnumDefinition(
 		stackTrace = stackTrace(skipCount = 1),
 		valueClass = valueClass,
 		values = values
+	)
+		.apply(configure)
+		.build()
+
+
+@RaptorDsl
+inline fun <reified Value : Any> graphIdDefinition(
+	@BuilderInference noinline configure: RaptorGraphAliasDefinitionBuilder<Value, String>.() -> Unit
+): GraphAliasDefinition<Value, String> =
+	graphIdDefinition(
+		valueClass = Value::class,
+		configure = configure
+	)
+
+
+@RaptorDsl
+fun <Value : Any> graphIdDefinition(
+	valueClass: KClass<Value>,
+	configure: RaptorGraphAliasDefinitionBuilder<Value, String>.() -> Unit
+): GraphAliasDefinition<Value, String> =
+	RaptorGraphAliasDefinitionBuilder(
+		isId = true,
+		referencedValueClass = String::class,
+		stackTrace = stackTrace(skipCount = 1),
+		valueClass = valueClass
 	)
 		.apply(configure)
 		.build()
@@ -175,6 +204,7 @@ fun <Value> graphOperationDefinition(
 	configure: RaptorGraphOperationDefinitionBuilder<Value>.() -> Unit
 ): GraphOperationDefinition<Value> =
 	RaptorGraphOperationDefinitionBuilder<Value>(
+		additionalDefinitions = emptyList(),
 		name = name,
 		type = type,
 		stackTrace = stackTrace(skipCount = 1),
@@ -204,30 +234,20 @@ fun <Value : Any> graphScalarDefinition(
 		.build()
 
 
-internal fun checkGraphCompatibility(clazz: KClass<*>, root: KType = clazz.starProjectedType) {
-	when (clazz) {
-		Any::class, Nothing::class ->
-			error("'$clazz' is not representable in GraphQL.\nFull type: $root")
-	}
-
-	if (clazz.typeParameters.isNotEmpty())
-		error("Star-projected '${clazz.qualifiedName}' is not representable in GraphQL.\nFull type: $root")
-}
-
-
-internal fun checkGraphCompatibility(type: KType, root: KType = type) {
-	when (val classifier = type.classifier) {
-		Collection::class, List::class, Set::class -> checkGraphCompatibility(type.arguments.first(), root = root)
-		is KClass<*> -> checkGraphCompatibility(classifier, root = root)
-		is KTypeParameter -> error("Type parameter '$classifier' is not representable in GraphQL.\nFull type: $root")
-		else -> error("Type classifier '$classifier' is not representable in GraphQL.\nFull type: $root")
+internal fun checkGraphCompatibility(clazz: KClass<*>) {
+	check(GSpecification.isRepresentable(clazz)) {
+		error("Kotlin type is not representable in GraphQL: $clazz")
 	}
 }
 
 
-internal fun checkGraphCompatibility(typeProjection: KTypeProjection, root: KType) {
-	when (val type = typeProjection.type) {
-		null -> error("Star projections are not representable in GraphQL.\nFull type$root")
-		else -> checkGraphCompatibility(type, root = root)
+internal fun checkGraphCompatibility(type: KType, isMaybeAllowed: Boolean = false) {
+	val isRepresentable = if (isMaybeAllowed && type.classifier == Maybe::class)
+		GSpecification.isRepresentable(type.arguments.first())
+	else
+		GSpecification.isRepresentable(type)
+
+	check(isRepresentable) {
+		error("Kotlin type is not representable in GraphQL: $type")
 	}
 }

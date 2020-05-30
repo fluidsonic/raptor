@@ -57,7 +57,7 @@ class RaptorGraphInterfaceExtensionDefinitionBuilder<Value : Any> internal const
 
 	@RaptorDsl
 	fun <FieldValue> field(
-		function: KSuspendFunction2<Value, RaptorGraphScope, FieldValue>,
+		function: KSuspendFunction2<Value, RaptorGraphContext, FieldValue>,
 		configure: FieldBuilder<FieldValue>.() -> Unit = {}
 	) {
 		val name = function.name

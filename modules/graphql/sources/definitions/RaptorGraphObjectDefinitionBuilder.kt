@@ -7,37 +7,26 @@ import kotlin.reflect.full.*
 @RaptorDsl
 class RaptorGraphObjectDefinitionBuilder<Value : Any> internal constructor(
 	private val stackTrace: List<StackTraceElement>,
-	private val valueClass: KClass<Value>,
-	private val defaultName: (() -> String?)? = null
+	valueClass: KClass<Value>,
+	defaultName: (() -> String?)? = null
+) : RaptorGraphStructuredTypeDefinitionBuilder<Value, GraphObjectDefinition<Value>>(
+	defaultName = defaultName,
+	valueClass = valueClass
 ) {
 
-	private var description: String? = null
 	private val fields: MutableList<GraphObjectDefinition.Field<Value, *>> = mutableListOf()
-	private var name: String? = null
 
 
-	init {
-		checkGraphCompatibility(valueClass)
-	}
-
-
-	internal fun build() =
+	override fun build(description: String?, name: String, nestedDefinitions: List<GraphNamedTypeDefinition<*>>) =
 		GraphObjectDefinition(
 			description = description,
 			fields = fields.ifEmpty { null }
 				?: error("At least one field must be defined: field(…) { … }"),
-			name = name ?: defaultName?.invoke() ?: valueClass.defaultGraphName(),
+			name = name,
+			nestedDefinitions = nestedDefinitions,
 			stackTrace = stackTrace,
 			valueClass = valueClass
 		)
-
-
-	@RaptorDsl
-	fun description(description: String) {
-		check(this.description === null) { "Cannot define multiple descriptions." }
-
-		this.description = description
-	}
 
 
 	@OptIn(ExperimentalStdlibApi::class)
@@ -71,7 +60,7 @@ class RaptorGraphObjectDefinitionBuilder<Value : Any> internal constructor(
 
 	@RaptorDsl
 	fun <FieldValue> field(
-		function: KSuspendFunction2<Value, RaptorGraphScope, FieldValue>,
+		function: KSuspendFunction2<Value, RaptorGraphContext, FieldValue>,
 		configure: FieldBuilder<FieldValue>.() -> Unit = {}
 	) {
 		val name = function.name
@@ -82,7 +71,7 @@ class RaptorGraphObjectDefinitionBuilder<Value : Any> internal constructor(
 		fields += FieldBuilder<FieldValue>(
 			name = name,
 			valueType = function.returnType,
-			implicitResolver = { function.invoke(it, this) }
+			implicitResolver = { function.invoke(it, context) }
 		)
 			.apply(configure)
 			.build()
@@ -104,14 +93,6 @@ class RaptorGraphObjectDefinitionBuilder<Value : Any> internal constructor(
 		)
 			.apply(configure)
 			.build()
-	}
-
-
-	@RaptorDsl
-	fun name(name: String) {
-		check(this.name === null) { "Cannot define multiple names." }
-
-		this.name = name
 	}
 
 

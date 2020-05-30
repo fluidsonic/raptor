@@ -5,6 +5,7 @@ import kotlin.reflect.*
 
 @RaptorDsl
 class RaptorGraphAliasDefinitionBuilder<Value : Any, ExternalValue : Any> internal constructor(
+	private var isId: Boolean,
 	private val referencedValueClass: KClass<ExternalValue>,
 	private val stackTrace: List<StackTraceElement>,
 	private val valueClass: KClass<Value>
@@ -16,11 +17,14 @@ class RaptorGraphAliasDefinitionBuilder<Value : Any, ExternalValue : Any> intern
 	init {
 		checkGraphCompatibility(valueClass)
 		checkGraphCompatibility(referencedValueClass)
+
+		check(!isId || referencedValueClass == String::class) { "An ID alias must reference value class String." }
 	}
 
 
 	internal fun build() =
 		GraphAliasDefinition(
+			isId = isId,
 			parse = checkNotNull(parse) { "Parsing must be defined: parse { … }" },
 			referencedValueClass = referencedValueClass,
 			serialize = checkNotNull(serialize) { "Serializing must be defined: serialize { … }" },

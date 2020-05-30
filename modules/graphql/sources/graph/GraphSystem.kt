@@ -1,29 +1,31 @@
 package io.fluidsonic.raptor
 
 import io.fluidsonic.graphql.*
+import io.fluidsonic.graphql.ifNull
+import io.fluidsonic.stdlib.*
 import org.slf4j.*
+import kotlin.reflect.*
 
 
 internal class GraphSystem(
 	val fieldDefinitionExtensionKey: FieldDefinitionExtensionKey,
 	val schema: GSchema,
-	val typeDefinitionExtensionKey: TypeDefinitionExtensionKey
+	val typeDefinitionExtensionKey: TypeDefinitionExtensionKey,
+	val valueTypeExtensionKey: ValueTypeExtensionKey
 ) {
 
-	fun createNodeInputCoercion(scope: RaptorGraphScope): GNodeInputCoercion<RaptorGraphScope> =
-		NodeInputCoercion(scope = scope)
+	fun createNodeInputCoercion(): GNodeInputCoercion<RaptorGraphContext> =
+		NodeInputCoercion()
 
 
-	fun createFieldResolver(scope: RaptorGraphScope): GFieldResolver<RaptorGraphScope, Any> =
-		FieldResolver(scope = scope)
+	fun createFieldResolver(): GFieldResolver<RaptorGraphContext, Any> =
+		FieldResolver()
 
 
 	// FIXME use decorator for default instead of re-implementing default behavior
-	private inner class FieldResolver(
-		private val scope: RaptorGraphScope
-	) : GFieldResolver<Any, Any> {
+	private inner class FieldResolver : GFieldResolver<RaptorGraphContext, Any> {
 
-		override suspend fun resolveField(parent: Any, context: GFieldResolverContext<Any>): Any? {
+		override suspend fun resolveField(parent: Any, context: GFieldResolverContext<RaptorGraphContext>): Any? {
 			try {
 				val definition = context.fieldDefinition[fieldDefinitionExtensionKey]
 					?: error("Cannot resolve non-existent field '${context.fieldDefinition.name}' of GraphQL type '${context.parentTypeDefinition.name}'.")
@@ -37,7 +39,7 @@ internal class GraphSystem(
 					?: TODO() // FIXME default resolver
 
 				return GraphInputContext(arguments = context.arguments).use {
-					with(scope) {
+					with(context.environment.asScope()) {
 						resolve(parent)?.let { resolvedValue ->
 							when {
 								alias !== null -> serializeAlias(value = resolvedValue, serialize = alias, typeRef = context.fieldDefinition.type)
@@ -68,11 +70,9 @@ internal class GraphSystem(
 	}
 
 
-	private inner class NodeInputCoercion(
-		private val scope: RaptorGraphScope
-	) : GNodeInputCoercion.Decorator<RaptorGraphScope> {
+	private inner class NodeInputCoercion : GNodeInputCoercion.Decorator<RaptorGraphContext> {
 
-		override val decorated = GNodeInputCoercion.default<RaptorGraphScope>()
+		override val decorated = GNodeInputCoercion.default<RaptorGraphContext>()
 
 
 		override fun coerceValue(
@@ -81,35 +81,45 @@ internal class GraphSystem(
 			parentType: GCompositeType?,
 			field: GFieldDefinition?,
 			argument: GArgumentDefinition,
-			context: GNodeInputCoercionContext<RaptorGraphScope>
+			context: GNodeInputCoercionContext<RaptorGraphContext>
 		): Any? {
-			val coercedValue = super.coerceValue(value, typeRef, parentType, field, argument, context)
-				?: return null
+			val valueType = argument[valueTypeExtensionKey]
+			val expectsMaybe = valueType?.classifier == Maybe::class && typeRef == argument.type // FIXME also support for variables
 
-			if (typeRef !is GNamedTypeRef)
-				return coercedValue
+			if (expectsMaybe && value == null)
+				return Maybe.nothing
 
-			val typeDefinition = argument[typeDefinitionExtensionKey]
-				.ifNull {
-					return decorated.coerceValue(
-						value = value,
-						typeRef = typeRef,
-						parentType = parentType,
-						field = field,
-						argument = argument,
-						context = context
-					)
-				}
-				.let { it as? GraphAliasDefinition<Any, Any> }
-				?: return coercedValue
+			var coercedValue = super.coerceValue(value, typeRef, parentType, field, argument, context)
+			if (coercedValue != null && typeRef is GNamedTypeRef) {
+				@Suppress("UNCHECKED_CAST")
+				val aliasDefinition = argument[typeDefinitionExtensionKey]
+					.ifNull {
+						return decorated.coerceValue(
+							value = value,
+							typeRef = typeRef,
+							parentType = parentType,
+							field = field,
+							argument = argument,
+							context = context
+						)
+					}
+					as? GraphAliasDefinition<Any, Any>
 
-			return typeDefinition.parse(scope, coercedValue)
+				if (aliasDefinition != null)
+					coercedValue = aliasDefinition.parse(context.environment, coercedValue)
+			}
+
+			if (expectsMaybe)
+				coercedValue = Maybe.of(coercedValue)
+
+			return coercedValue
 		}
 	}
 
 
 	class FieldDefinitionExtensionKey : GNode.ExtensionKey<GraphObjectDefinition.Field<*, *>>
 	class TypeDefinitionExtensionKey : GNode.ExtensionKey<GraphTypeDefinition<*>>
+	class ValueTypeExtensionKey : GNode.ExtensionKey<KType>
 }
 
 

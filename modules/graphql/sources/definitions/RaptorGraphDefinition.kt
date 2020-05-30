@@ -6,6 +6,7 @@ import kotlin.reflect.*
 
 // FIXME Raptor prefixes
 sealed class RaptorGraphDefinition(
+	internal val additionalDefinitions: List<RaptorGraphDefinition>,
 	internal val stackTrace: List<StackTraceElement>
 ) {
 
@@ -15,10 +16,12 @@ sealed class RaptorGraphDefinition(
 
 
 sealed class GraphNamedTypeDefinition<Value : Any>(
+	additionalDefinitions: List<RaptorGraphDefinition>,
 	internal val name: String,
 	stackTrace: List<StackTraceElement>,
 	valueClass: KClass<Value>
 ) : GraphTypeDefinition<Value>(
+	additionalDefinitions = additionalDefinitions,
 	stackTrace = stackTrace,
 	valueClass = valueClass
 ) {
@@ -28,26 +31,30 @@ sealed class GraphNamedTypeDefinition<Value : Any>(
 
 
 sealed class GraphTypeDefinition<Value : Any>(
+	additionalDefinitions: List<RaptorGraphDefinition>,
 	stackTrace: List<StackTraceElement>,
 	internal val valueClass: KClass<Value>
 ) : RaptorGraphDefinition(
+	additionalDefinitions = additionalDefinitions,
 	stackTrace = stackTrace
 )
 
 
 class GraphAliasDefinition<Value : Any, ReferencedValue : Any> internal constructor(
-	val parse: RaptorGraphScope.(input: ReferencedValue) -> Value?,
-	val referencedValueClass: KClass<ReferencedValue>,
-	val serialize: RaptorGraphScope.(value: Value) -> ReferencedValue,
+	internal val isId: Boolean,
+	internal val parse: RaptorGraphScope.(input: ReferencedValue) -> Value?,
+	internal val referencedValueClass: KClass<ReferencedValue>,
+	internal val serialize: RaptorGraphScope.(value: Value) -> ReferencedValue,
 	stackTrace: List<StackTraceElement>,
 	valueClass: KClass<Value>
 ) : GraphTypeDefinition<Value>(
+	additionalDefinitions = emptyList(),
 	stackTrace = stackTrace,
 	valueClass = valueClass
 ) {
 
 	override fun toString() =
-		toString("alias ${valueClass.qualifiedName} -> ${referencedValueClass.qualifiedName}")
+		toString("${if (isId) "id" else "alias"} ${valueClass.qualifiedName} -> ${referencedValueClass.qualifiedName}")
 }
 
 
@@ -93,6 +100,7 @@ class GraphEnumDefinition<Value : Enum<Value>> internal constructor(
 	valueClass: KClass<Value>,
 	internal val values: List<Value>
 ) : GraphNamedTypeDefinition<Value>(
+	additionalDefinitions = emptyList(),
 	name = name,
 	stackTrace = stackTrace,
 	valueClass = valueClass
@@ -111,9 +119,11 @@ class GraphInputObjectDefinition<Value : Any> internal constructor(
 	internal val description: String?,
 	internal val factory: RaptorGraphScope.() -> Value,
 	name: String,
+	nestedDefinitions: List<GraphNamedTypeDefinition<*>>,
 	stackTrace: List<StackTraceElement>,
 	valueClass: KClass<Value>
 ) : GraphNamedTypeDefinition<Value>(
+	additionalDefinitions = nestedDefinitions,
 	name = name,
 	stackTrace = stackTrace,
 	valueClass = valueClass
@@ -128,9 +138,11 @@ class GraphInterfaceDefinition<Value : Any> internal constructor(
 	internal val description: String?,
 	internal val fields: List<Field<Value, *>>,
 	name: String,
+	nestedDefinitions: List<GraphNamedTypeDefinition<*>>,
 	stackTrace: List<StackTraceElement>,
 	valueClass: KClass<Value>
 ) : GraphNamedTypeDefinition<Value>(
+	additionalDefinitions = nestedDefinitions,
 	name = name,
 	stackTrace = stackTrace,
 	valueClass = valueClass
@@ -154,6 +166,7 @@ class GraphInterfaceExtensionDefinition<Value : Any> internal constructor(
 	stackTrace: List<StackTraceElement>,
 	internal val valueClass: KClass<Value>
 ) : RaptorGraphDefinition(
+	additionalDefinitions = emptyList(),
 	stackTrace = stackTrace
 ) {
 
@@ -166,9 +179,11 @@ class GraphObjectDefinition<Value : Any> internal constructor(
 	internal val description: String?,
 	internal val fields: List<Field<Value, *>>,
 	name: String,
+	nestedDefinitions: List<GraphNamedTypeDefinition<*>>,
 	stackTrace: List<StackTraceElement>,
 	valueClass: KClass<Value>
 ) : GraphNamedTypeDefinition<Value>(
+	additionalDefinitions = nestedDefinitions,
 	name = name,
 	stackTrace = stackTrace,
 	valueClass = valueClass
@@ -193,6 +208,7 @@ class GraphObjectExtensionDefinition<Value : Any> internal constructor(
 	stackTrace: List<StackTraceElement>,
 	internal val valueClass: KClass<Value>
 ) : RaptorGraphDefinition(
+	additionalDefinitions = emptyList(),
 	stackTrace = stackTrace
 ) {
 
@@ -202,10 +218,12 @@ class GraphObjectExtensionDefinition<Value : Any> internal constructor(
 
 
 class GraphOperationDefinition<Value> internal constructor(
+	additionalDefinitions: List<GraphNamedTypeDefinition<*>>,
 	internal val field: GraphObjectDefinition.Field<Unit, Value>,
 	stackTrace: List<StackTraceElement>,
 	internal val type: RaptorGraphOperationType
 ) : RaptorGraphDefinition(
+	additionalDefinitions = additionalDefinitions,
 	stackTrace = stackTrace
 ) {
 
@@ -228,6 +246,7 @@ class GraphScalarDefinition<Value : Any> internal constructor(
 	stackTrace: List<StackTraceElement>,
 	valueClass: KClass<Value>
 ) : GraphNamedTypeDefinition<Value>(
+	additionalDefinitions = emptyList(),
 	name = name,
 	stackTrace = stackTrace,
 	valueClass = valueClass

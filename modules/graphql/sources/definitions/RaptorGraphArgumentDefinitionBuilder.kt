@@ -1,6 +1,7 @@
 package io.fluidsonic.raptor
 
 import io.fluidsonic.graphql.*
+import io.fluidsonic.stdlib.*
 import kotlin.reflect.*
 
 
@@ -10,11 +11,12 @@ class RaptorGraphArgumentDefinitionBuilder<Value> internal constructor(
 ) {
 
 	private var default: GValue? = null
+	private val isMaybe = valueType.classifier == Maybe::class
 	private var name: String? = null
 
 
 	init {
-		checkGraphCompatibility(valueType)
+		checkGraphCompatibility(valueType, isMaybeAllowed = true)
 	}
 
 
@@ -28,6 +30,7 @@ class RaptorGraphArgumentDefinitionBuilder<Value> internal constructor(
 
 	@RaptorDsl
 	private fun default(default: GValue) {
+		check(!isMaybe) { "An optional argument of type '$valueType' cannot have a default value." }
 		check(this.default === null) { "Cannot define multiple defaults." }
 
 		this.default = default
@@ -109,13 +112,11 @@ class RaptorGraphArgumentDefinitionBuilder<Value> internal constructor(
 		override fun <ArgumentValue> argument(
 			valueType: KType,
 			configure: RaptorGraphArgumentDefinitionBuilder<ArgumentValue>.() -> Unit
-		): GraphArgumentDefinition<ArgumentValue> {
-
-			return RaptorGraphArgumentDefinitionBuilder<ArgumentValue>(valueType = valueType)
+		): GraphArgumentDefinition<ArgumentValue> =
+			RaptorGraphArgumentDefinitionBuilder<ArgumentValue>(valueType = valueType)
 				.apply(configure)
 				.build()
 				.also(this::add)
-		}
 	}
 }
 

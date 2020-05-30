@@ -10,7 +10,7 @@ inline class GraphId(val value: String) {
 	companion object {
 
 		fun graphDefinition(): GraphScalarDefinition<GraphId> = graphScalarDefinition {
-			name("Id")
+			name("ID")
 
 			parseInt { GraphId(it.toString()) }
 			parseString(::GraphId)

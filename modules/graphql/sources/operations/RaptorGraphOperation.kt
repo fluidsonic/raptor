@@ -39,6 +39,14 @@ sealed class RaptorGraphOperation<Input : Any, Output> {
 }
 
 
+suspend fun <Output> RaptorGraphOperation<Unit, Output>.execute(context: RaptorGraphContext): Output =
+	execute(context = context, input = Unit)
+
+
+suspend fun <Input : Any, Output> RaptorGraphOperation<Input, Output>.execute(context: RaptorGraphContext, input: Input): Output =
+	context.asScope().execute(input)
+
+
 @RaptorDsl
 abstract class RaptorGraphMutation<Input : Any, Output> : RaptorGraphOperation<Input, Output>() {
 
