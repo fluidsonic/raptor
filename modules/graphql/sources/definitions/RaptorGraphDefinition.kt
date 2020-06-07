@@ -70,17 +70,17 @@ class GraphArgumentDefinition<Value> internal constructor(
 		private set
 
 
-	operator fun provideDelegate(thisRef: Any?, property: KProperty<*>): Reference<Value> {
+	operator fun provideDelegate(thisRef: Any?, property: KProperty<*>?): Reference<Value> {
 		check(!isProvided) { "Cannot delegate multiple variables to the same argument." }
 
-		val name = name ?: property.name
+		val name = name ?: property?.name ?: error("An argument name must be defined: name(…)")
 
 		this.isProvided = true
 		this.name = name
 
 		return object : Reference<Value> {
 
-			override fun getValue(thisRef: Any?, property: KProperty<*>): Value =
+			override fun getValue(thisRef: Any?, property: KProperty<*>?): Value =
 				GraphInputContext.current.argument(name)
 		}
 	}
@@ -88,7 +88,7 @@ class GraphArgumentDefinition<Value> internal constructor(
 
 	interface Reference<out Value> {
 
-		operator fun getValue(thisRef: Any?, property: KProperty<*>): Value
+		operator fun getValue(thisRef: Any?, property: KProperty<*>?): Value
 	}
 }
 

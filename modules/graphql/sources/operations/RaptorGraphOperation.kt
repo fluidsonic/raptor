@@ -47,6 +47,7 @@ suspend fun <Input : Any, Output> RaptorGraphOperation<Input, Output>.execute(co
 	context.asScope().execute(input)
 
 
+// FIXME check that subclass name doesn't end in Query
 @RaptorDsl
 abstract class RaptorGraphMutation<Input : Any, Output> : RaptorGraphOperation<Input, Output>() {
 
@@ -59,6 +60,7 @@ abstract class RaptorGraphMutation<Input : Any, Output> : RaptorGraphOperation<I
 }
 
 
+// FIXME check that subclass name doesn't end in Mutation
 @RaptorDsl
 abstract class RaptorGraphQuery<Input : Any, Output> : RaptorGraphOperation<Input, Output>() {
 
@@ -79,9 +81,30 @@ inline fun <reified Input : Any, reified Output> RaptorGraphOperation<Input, Out
 	define(inputClass = Input::class, outputType = typeOf<Output>(), configure = configure)
 
 
+@OptIn(ExperimentalStdlibApi::class)
+@RaptorDsl
+inline fun <reified Input : Any, reified Output> RaptorGraphOperation<Input, Output>.define(
+	inputArgumentName: String,
+	configure: RaptorGraphOperationBuilder<Input, Output>.() -> Unit = {}
+): GraphOperationDefinition<Output> =
+	define(inputClass = Input::class, outputType = typeOf<Output>()) {
+		input {
+			// https://youtrack.jetbrains.com/issue/KT-39434
+			val inputArgument = argument<Input> {
+				name(inputArgumentName)
+			}
+			val inputDelegate = inputArgument.provideDelegate(thisRef = null, property = null)
+
+			factory { inputDelegate.getValue(thisRef = null, property = null) }
+		}
+
+		configure()
+	}
+
+
 // FIXME validate KTypes
 @RaptorDsl
-fun <Input : Any, Output> RaptorGraphOperation<Input, Output>.define(
+inline fun <Input : Any, Output> RaptorGraphOperation<Input, Output>.define(
 	inputClass: KClass<Input>,
 	outputType: KType,
 	configure: RaptorGraphOperationBuilder<Input, Output>.() -> Unit

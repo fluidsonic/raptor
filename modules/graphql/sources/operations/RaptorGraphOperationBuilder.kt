@@ -6,7 +6,7 @@ import kotlin.reflect.full.*
 
 
 @RaptorDsl
-class RaptorGraphOperationBuilder<Input : Any, Output> internal constructor(
+class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi internal constructor(
 	private val inputClass: KClass<Input>,
 	internal val operation: RaptorGraphOperation<Input, Output>,
 	internal val outputType: KType,
@@ -22,6 +22,7 @@ class RaptorGraphOperationBuilder<Input : Any, Output> internal constructor(
 	private var name: String? = null
 
 
+	@PublishedApi
 	internal fun build(): GraphOperationDefinition<Output> {
 		@Suppress("UNCHECKED_CAST")
 		if (inputFactory == null && inputClass == Unit::class)
