@@ -13,8 +13,8 @@ interface RaptorTopLevelConfigurationScope : RaptorFeatureInstallCheckScope {
 
 
 	@RaptorDsl
-	fun <Feature : RaptorFeature.WithRootComponent<RootComponent>, RootComponent : RaptorComponent> install(
+	fun <Feature : RaptorFeature.Configurable<ConfigurationScope>, ConfigurationScope : Any> install(
 		feature: Feature,
-		configuration: RootComponent.() -> Unit
+		configuration: ConfigurationScope.() -> Unit
 	)
 }

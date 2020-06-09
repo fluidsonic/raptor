@@ -12,8 +12,8 @@ interface RaptorFeature {
 	companion object
 
 
-	interface WithRootComponent<out RootComponent : RaptorComponent> : RaptorFeature {
+	interface Configurable<out ConfigurationScope : Any> : RaptorFeature {
 
-		val RaptorFeatureConfigurationStartScope.rootComponentKey: RaptorComponentKey<out RootComponent>
+		fun RaptorTopLevelConfigurationScope.configure(action: ConfigurationScope.() -> Unit)
 	}
 }

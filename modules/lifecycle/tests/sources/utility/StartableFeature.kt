@@ -3,7 +3,12 @@ package tests
 import io.fluidsonic.raptor.*
 
 
-object StartableFeature : RaptorFeature.WithRootComponent<StartableComponent> {
+object StartableFeature : RaptorFeature.Configurable<StartableComponent> {
+
+	override fun RaptorTopLevelConfigurationScope.configure(action: StartableComponent.() -> Unit) {
+		componentRegistry.configure(key = StartableComponent.Key, action = action)
+	}
+
 
 	override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
 		componentRegistry.register(StartableComponent.Key, StartableComponent())
@@ -16,8 +21,4 @@ object StartableFeature : RaptorFeature.WithRootComponent<StartableComponent> {
 			context[StartableRaptorPropertyKey]!!.stop()
 		}
 	}
-
-
-	override val RaptorFeatureConfigurationStartScope.rootComponentKey: RaptorComponentKey<out StartableComponent>
-		get() = StartableComponent.Key
 }

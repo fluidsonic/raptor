@@ -12,6 +12,11 @@
                   <project path="$PROJECT_DIR$/../fluid-graphql" />
                 </projects>
               </build>
+              <build path="$PROJECT_DIR$/../fluid-stdlib" name="fluid-stdlib">
+                <projects>
+                  <project path="$PROJECT_DIR$/../fluid-stdlib" />
+                </projects>
+              </build>
             </builds>
           </compositeBuild>
         </compositeConfiguration>
@@ -19,13 +24,14 @@
         <option name="testRunner" value="PLATFORM" />
         <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
-        <option name="gradleJvm" value="#JAVA_INTERNAL" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/../fluid-graphql" />
+            <option value="$PROJECT_DIR$/../fluid-stdlib" />
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/modules/bson" />
             <option value="$PROJECT_DIR$/modules/configuration" />
+            <option value="$PROJECT_DIR$/modules/configuration-hocon" />
             <option value="$PROJECT_DIR$/modules/core" />
             <option value="$PROJECT_DIR$/modules/freemarker" />
             <option value="$PROJECT_DIR$/modules/graphql" />
@@ -38,7 +44,6 @@
           </set>
         </option>
         <option name="resolveModulePerSourceSet" value="false" />
-        <option name="useQualifiedModuleNames" value="true" />
       </GradleProjectSettings>
     </option>
   </component>

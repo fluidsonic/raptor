@@ -47,23 +47,6 @@ internal class DefaultRaptorRootComponent : RaptorComponent.Default<RaptorRootCo
 
 
 	override fun install(feature: RaptorFeature) {
-		installIfNeeded(feature = feature, rootComponentKey = null)
-	}
-
-
-	override fun <Feature : RaptorFeature.WithRootComponent<RootComponent>, RootComponent : RaptorComponent> install(
-		feature: Feature,
-		configuration: RootComponent.() -> Unit
-	) {
-		val rootComponentKey = with(feature) { rootComponentKey }
-
-		installIfNeeded(feature = feature, rootComponentKey = rootComponentKey)
-
-		componentRegistry.configure(rootComponentKey, configuration)
-	}
-
-
-	private fun installIfNeeded(feature: RaptorFeature, rootComponentKey: RaptorComponentKey<*>?) {
 		if (!features.add(feature))
 			return
 
@@ -75,12 +58,17 @@ internal class DefaultRaptorRootComponent : RaptorComponent.Default<RaptorRootCo
 			onConfigurationStarted()
 		}
 
-		if (rootComponentKey != null)
-			checkNotNull(componentRegistry.oneOrNull(rootComponentKey)) {
-				"Feature of type '${feature::class.qualifiedName}' must register its root component with key '$rootComponentKey' in 'onConfigurationStarted()'."
-			}
-
 		id?.let(this::applyLazyFeatureConfigurations)
+	}
+
+
+	override fun <Feature : RaptorFeature.Configurable<ConfigurationScope>, ConfigurationScope : Any> install(
+		feature: Feature,
+		configuration: ConfigurationScope.() -> Unit
+	) {
+		install(feature = feature)
+
+		with(feature) { configure(configuration) }
 	}
 
 

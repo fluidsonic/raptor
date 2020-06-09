@@ -20,7 +20,7 @@ class ConfigurationTests {
 			configuration.append(configurationC)
 		}
 
-		assertSame(expected = "a", actual = raptor.configuration.value("a").string())
+		assertSame(expected = "c", actual = raptor.configuration.value("a").string())
 		assertSame(expected = "b", actual = raptor.configuration.value("b").string())
 	}
 

@@ -8,7 +8,9 @@ import org.bson.conversions.*
 // FIXME add DSL for filter
 // FIXME add Updates.* methods
 @RaptorDsl
-class RaptorMongoUpdateBuilder @PublishedApi internal constructor() {
+class RaptorMongoUpdateBuilder @PublishedApi internal constructor(
+	private val upsert: Boolean = false
+) {
 
 	private var filter: Bson? = null
 	private val updates: MutableList<Bson> = mutableListOf()
@@ -18,8 +20,21 @@ class RaptorMongoUpdateBuilder @PublishedApi internal constructor() {
 	internal fun build() =
 		RaptorMongoUpdate(
 			filter = filter ?: error("A filter must be defined: filter(…)"),
-			changes = updates
+			changes = updates,
+			upsert = upsert
 		)
+
+
+	@RaptorDsl
+	fun addEachToSet(fieldName: String, value: Collection<*>) {
+		updates += Updates.addEachToSet(fieldName, value as? List<*> ?: value.toList())
+	}
+
+
+	@RaptorDsl
+	fun addToSet(fieldName: String, value: Any?) {
+		updates += Updates.addToSet(fieldName, value)
+	}
 
 
 	@RaptorDsl
@@ -27,6 +42,18 @@ class RaptorMongoUpdateBuilder @PublishedApi internal constructor() {
 		check(this.filter == null) { "Cannot define multiple filters." }
 
 		this.filter = filter
+	}
+
+
+	@RaptorDsl
+	fun pullAll(fieldName: String, value: Collection<*>) {
+		updates += Updates.pullAll(fieldName, value as? List<*> ?: value.toList())
+	}
+
+
+	@RaptorDsl
+	fun set(fieldName: String, value: Any?) {
+		updates += Updates.set(fieldName, value)
 	}
 
 

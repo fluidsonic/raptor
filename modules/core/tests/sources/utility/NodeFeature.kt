@@ -3,7 +3,12 @@ package tests
 import io.fluidsonic.raptor.*
 
 
-object NodeFeature : RaptorFeature.WithRootComponent<NodeComponent> {
+object NodeFeature : RaptorFeature.Configurable<NodeComponent> {
+
+	override fun RaptorTopLevelConfigurationScope.configure(action: NodeComponent.() -> Unit) {
+		componentRegistry.configure(key = NodeComponent.Key, action = action)
+	}
+
 
 	override fun RaptorFeatureConfigurationEndScope.onConfigurationEnded() {
 		propertyRegistry.register(RootNodeRaptorKey, componentRegistry.one(NodeComponent.Key).toNode())
@@ -13,10 +18,6 @@ object NodeFeature : RaptorFeature.WithRootComponent<NodeComponent> {
 	override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
 		componentRegistry.register(NodeComponent.Key, NodeComponent(name = "root"))
 	}
-
-
-	override val RaptorFeatureConfigurationStartScope.rootComponentKey: RaptorComponentKey<out NodeComponent>
-		get() = NodeComponent.Key
 
 
 	override fun toString() =

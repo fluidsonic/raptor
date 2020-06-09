@@ -5,9 +5,14 @@ import org.kodein.di.erased.*
 
 
 // FIXME name order
-object BsonRaptorFeature : RaptorFeature.WithRootComponent<BsonRaptorComponent> {
+object BsonRaptorFeature : RaptorFeature.Configurable<BsonRaptorComponent> {
 
 	override val id: RaptorFeatureId = raptorBsonFeatureId
+
+
+	override fun RaptorTopLevelConfigurationScope.configure(action: BsonRaptorComponent.() -> Unit) {
+		componentRegistry.configure(key = BsonRaptorComponent.Key, action = action)
+	}
 
 
 	override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
@@ -32,10 +37,6 @@ object BsonRaptorFeature : RaptorFeature.WithRootComponent<BsonRaptorComponent> 
 			}
 		}
 	}
-
-
-	override val RaptorFeatureConfigurationStartScope.rootComponentKey: RaptorComponentKey<out BsonRaptorComponent>
-		get() = BsonRaptorComponent.Key
 }
 
 
