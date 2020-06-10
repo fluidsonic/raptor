@@ -474,20 +474,20 @@ internal class GraphSystemBuilder {
 
 		private fun resolveTypeDefinition(valueClass: KClass<*>, referee: RaptorGraphDefinition): GraphTypeDefinition<*> =
 			typeDefinitionsByValueClass[valueClass]
-				?: error("GraphQL type definition was not provided for $valueClass referenced by:\n$referee")
+				?: error("GraphQL type definition was not provided for $valueClass referenced by:\n$referee\n---")
 
 
 		private fun resolveTypeDefinition(valueClassRef: KType, referee: RaptorGraphDefinition): GraphTypeDefinition<*> =
 			when (val classifier = valueClassRef.classifier) {
 				Collection::class, List::class, Maybe::class, Set::class -> resolveTypeDefinition(valueClassRef.arguments.first(), referee = referee)
 				is KClass<*> -> resolveTypeDefinition(classifier, referee = referee)
-				is KTypeParameter -> error("A type parameter '$valueClassRef' is not representable in GraphQL:\n$referee")
-				else -> error("The type reference '$valueClassRef' is not representable in GraphQL:\n$referee")
+				is KTypeParameter -> error("A type parameter '$valueClassRef' is not representable in GraphQL:\n$referee\n---")
+				else -> error("The type reference '$valueClassRef' is not representable in GraphQL:\n$referee\n---")
 			}
 
 
 		private fun resolveTypeDefinition(valueClassProjection: KTypeProjection, referee: RaptorGraphDefinition): GraphTypeDefinition<*> {
-			val type = valueClassProjection.type ?: error("A star projection cannot be represented in GraphQL:\n$referee")
+			val type = valueClassProjection.type ?: error("A star projection cannot be represented in GraphQL:\n$referee\n---")
 			// FIXME check variance
 
 			return resolveTypeDefinition(type, referee = referee)
@@ -506,7 +506,7 @@ internal class GraphSystemBuilder {
 					GNamedTypeRef(definition.name)
 
 				null ->
-					error("GraphQL type definition was not provided for $valueClass referenced by:\n$referee")
+					error("GraphQL type definition was not provided for $valueClass referenced by:\n$referee\n---")
 			}
 
 
@@ -517,8 +517,8 @@ internal class GraphSystemBuilder {
 				Maybe::class -> return resolveTypeRef(valueClassRef.arguments.first(), referee = referee)
 				Collection::class, List::class, Set::class -> GListTypeRef(resolveTypeRef(valueClassRef.arguments.first(), referee = referee))
 				is KClass<*> -> resolveTypeRef(classifier, referee = referee)
-				is KTypeParameter -> error("A type parameter '$valueClassRef' is not representable in GraphQL:\n$referee")
-				else -> error("The type reference '$valueClassRef' is not representable in GraphQL:\n$referee")
+				is KTypeParameter -> error("A type parameter '$valueClassRef' is not representable in GraphQL:\n$referee\n---")
+				else -> error("The type reference '$valueClassRef' is not representable in GraphQL:\n$referee\n---")
 			}
 
 			return if (valueClassRef.isMarkedNullable) typeRef else GNonNullTypeRef(typeRef)
@@ -526,7 +526,7 @@ internal class GraphSystemBuilder {
 
 
 		private fun resolveTypeRef(valueClassProjection: KTypeProjection, referee: RaptorGraphDefinition): GTypeRef {
-			val type = valueClassProjection.type ?: error("A star projection cannot be represented in GraphQL:\n$referee")
+			val type = valueClassProjection.type ?: error("A star projection cannot be represented in GraphQL:\n$referee\n---")
 			// FIXME check variance
 
 			return resolveTypeRef(type, referee = referee)
