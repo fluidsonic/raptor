@@ -6,7 +6,7 @@ internal class DefaultRaptorTransactionFactory(
 ) : RaptorTransactionFactory {
 
 	override fun createTransaction(context: RaptorContext, configuration: RaptorTransactionConfigurationScope.() -> Unit) =
-		DefaultRaptorTransactionBuilder(context = context)
+		DefaultRaptorTransactionBuilder(parentContext = context)
 			.apply {
 				for (staticConfiguration in configurations)
 					staticConfiguration()

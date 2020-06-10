@@ -10,7 +10,10 @@ import io.ktor.util.*
 import kotlinx.atomicfu.*
 import kotlinx.coroutines.*
 import org.slf4j.event.*
+import java.io.*
+import java.security.*
 import java.util.concurrent.*
+import kotlin.text.toCharArray
 
 
 private val ktorServerAttributeKey = AttributeKey<KtorServer>("Raptor: server")
@@ -21,7 +24,39 @@ internal class KtorServer(
 	parentContext: RaptorContext
 ) {
 
-	private var engine = embeddedServer(Netty, commandLineEnvironment(arrayOf()))
+	private var engine = embeddedServer(Netty, applicationEngineEnvironment {
+		for (connector in configuration.connectors)
+			when (connector) {
+				is KtorServerConfiguration.Connector.Http ->
+					connector {
+						host = connector.host
+						port = connector.port
+					}
+
+				is KtorServerConfiguration.Connector.Https -> {
+					val keyStore = KeyStore.getInstance("JKS").apply {
+						FileInputStream(connector.keyStoreFile).use {
+							load(it, connector.keyStorePassword.toCharArray())
+						}
+
+						requireNotNull(getKey(connector.keyAlias, connector.privateKeyPassword.toCharArray()) == null) {
+							"The specified key ${connector.keyAlias} doesn't exist in the key store ${connector.keyStoreFile}"
+						}
+					}
+
+					sslConnector(
+						keyAlias = connector.keyAlias,
+						keyStore = keyStore,
+						keyStorePassword = { connector.keyStorePassword.toCharArray() },
+						privateKeyPassword = { connector.privateKeyPassword.toCharArray() }
+					) {
+						host = connector.host
+						keyStorePath = connector.keyStoreFile
+						port = connector.port
+					}
+				}
+			}
+	})
 	private val stateRef = atomic(State.initial)
 
 	// FIXME Support child context w/o Transaction, e.g. for Kodein.

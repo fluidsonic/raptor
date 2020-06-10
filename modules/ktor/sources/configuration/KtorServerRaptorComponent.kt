@@ -1,6 +1,7 @@
 package io.fluidsonic.raptor
 
 import io.ktor.application.*
+import java.io.*
 
 
 // FIXME taggable
@@ -11,6 +12,7 @@ class KtorServerRaptorComponent internal constructor(
 	// FIXME ok not to specify parent?
 	private val propertyRegistry = RaptorPropertyRegistry.default() // FIXME actually use!
 
+	internal val connectors: MutableList<KtorServerConfiguration.Connector> = mutableListOf()
 	internal val customConfigurations: MutableList<Application.() -> Unit> = mutableListOf()
 	internal val features: MutableList<KtorServerFeature> = mutableListOf()
 
@@ -37,6 +39,7 @@ class KtorServerRaptorComponent internal constructor(
 			}
 
 		return KtorServerConfiguration(
+			connectors = connectors.toList(),
 			customConfigurations = customConfigurations.toList(),
 			rootRouteConfiguration = rootRouteConfiguration,
 			transactionFactory = transactionFactory(this@KtorServerRaptorComponent)
@@ -99,6 +102,42 @@ class KtorServerRaptorComponent internal constructor(
 fun RaptorComponentSet<KtorServerRaptorComponent>.custom(configuration: RaptorKtorConfigurationScope.() -> Unit) {
 	configure {
 		customConfigurations += configuration
+	}
+}
+
+
+@RaptorDsl
+fun RaptorComponentSet<KtorServerRaptorComponent>.httpConnector(
+	host: String = "0.0.0.0",
+	port: Int = 80
+) {
+	configure {
+		connectors += KtorServerConfiguration.Connector.Http(
+			host = host,
+			port = port
+		)
+	}
+}
+
+
+@RaptorDsl
+fun RaptorComponentSet<KtorServerRaptorComponent>.httpsConnector(
+	host: String = "0.0.0.0",
+	port: Int = 443,
+	keyAlias: String,
+	keyStoreFile: File,
+	keyStorePassword: String,
+	privateKeyPassword: String
+) {
+	configure {
+		connectors += KtorServerConfiguration.Connector.Https(
+			host = host,
+			port = port,
+			keyAlias = keyAlias,
+			keyStoreFile = keyStoreFile,
+			keyStorePassword = keyStorePassword,
+			privateKeyPassword = privateKeyPassword
+		)
 	}
 }
 

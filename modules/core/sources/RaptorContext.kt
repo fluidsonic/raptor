@@ -19,6 +19,9 @@ interface RaptorContext : RaptorScope {
 
 
 	companion object
+
+
+	interface Lazy : RaptorContext
 }
 
 

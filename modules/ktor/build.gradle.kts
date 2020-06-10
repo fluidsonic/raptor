@@ -6,7 +6,6 @@ fluidJvmLibraryVariant(JvmTarget.jdk8) {
 }
 
 dependencies {
-	api(project(":raptor-configuration"))
 	api(project(":raptor"))
 	api(project(":raptor-lifecycle"))
 	api(project(":raptor-transactions"))

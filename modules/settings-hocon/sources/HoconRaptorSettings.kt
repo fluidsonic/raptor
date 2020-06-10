@@ -3,9 +3,9 @@ package io.fluidsonic.raptor
 import com.typesafe.config.*
 
 
-internal class HoconRaptorConfiguration private constructor(
+internal class HoconRaptorSettings private constructor(
 	private val hocon: Config
-) : RaptorConfiguration {
+) : RaptorSettings {
 
 	constructor(resourcePath: String) :
 		this(ConfigFactory.load(resourcePath))
@@ -15,7 +15,7 @@ internal class HoconRaptorConfiguration private constructor(
 		hocon.hasPath(path)
 
 
-	override fun valueOrNull(path: String): RaptorConfiguration.Value? =
+	override fun valueOrNull(path: String): RaptorSettings.Value? =
 		if (hocon.hasPath(path)) Value(hocon = hocon, path = path)
 		else null
 
@@ -23,14 +23,14 @@ internal class HoconRaptorConfiguration private constructor(
 	private class Value(
 		private val hocon: Config,
 		private val path: String
-	) : RaptorConfiguration.Value {
+	) : RaptorSettings.Value {
 
-		override fun configuration() =
-			HoconRaptorConfiguration(hocon = hocon.getConfig(path))
+		override fun settings() =
+			HoconRaptorSettings(hocon = hocon.getConfig(path))
 
 
-		override fun configurationList() =
-			hocon.getConfigList(path).map(::HoconRaptorConfiguration)
+		override fun settingsList() =
+			hocon.getConfigList(path).map(::HoconRaptorSettings)
 
 
 		override fun string(): String =
@@ -41,3 +41,7 @@ internal class HoconRaptorConfiguration private constructor(
 			hocon.getStringList(path)
 	}
 }
+
+
+fun RaptorSettings.Companion.hocon(resourcePath: String): RaptorSettings =
+	HoconRaptorSettings(resourcePath = resourcePath)

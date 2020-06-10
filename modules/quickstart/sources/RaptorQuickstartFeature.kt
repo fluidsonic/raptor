@@ -11,7 +11,6 @@ object RaptorQuickstartFeature : RaptorFeature {
 
 	override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
 		install(BsonRaptorFeature)
-		install(RaptorConfigurationFeature)
 		install(RaptorKodeinFeature)
 		install(KtorRaptorFeature)
 

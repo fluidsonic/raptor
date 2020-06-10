@@ -3,10 +3,10 @@ package tests
 import io.fluidsonic.raptor.*
 
 
-class SingleValueConfiguration(
+class SingleValueSettings(
 	private val path: String,
 	value: String
-) : RaptorConfiguration {
+) : RaptorSettings {
 
 	private val value = Value(value)
 
@@ -15,17 +15,17 @@ class SingleValueConfiguration(
 		path == this.path
 
 
-	override fun valueOrNull(path: String): RaptorConfiguration.Value? =
+	override fun valueOrNull(path: String): RaptorSettings.Value? =
 		value.takeIf { path == this.path }
 
 
-	private class Value(private val string: String) : RaptorConfiguration.Value {
+	private class Value(private val string: String) : RaptorSettings.Value {
 
-		override fun configuration(): RaptorConfiguration =
+		override fun settings(): RaptorSettings =
 			TODO()
 
 
-		override fun configurationList(): List<RaptorConfiguration> =
+		override fun settingsList(): List<RaptorSettings> =
 			TODO()
 
 

@@ -6,5 +6,4 @@ fluidJvmLibraryVariant(JvmTarget.jdk8) {
 
 dependencies {
 	api(project(":raptor"))
-	compileOnly(project(":raptor-kodein"))
 }

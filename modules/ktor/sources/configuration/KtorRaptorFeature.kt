@@ -7,7 +7,6 @@ object KtorRaptorFeature : RaptorFeature {
 
 
 	override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
-		install(RaptorConfigurationFeature)
 		install(RaptorLifecycleFeature)
 		install(RaptorTransactionFeature)
 

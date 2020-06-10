@@ -8,9 +8,9 @@ class ConfigurationTests {
 
 	@Test
 	fun testMultipleConfigurations() {
-		val configurationA = SingleValueConfiguration(path = "a", value = "a")
-		val configurationB = SingleValueConfiguration(path = "b", value = "b")
-		val configurationC = SingleValueConfiguration(path = "a", value = "c")
+		val configurationA = SingleValueSettings(path = "a", value = "a")
+		val configurationB = SingleValueSettings(path = "b", value = "b")
+		val configurationC = SingleValueSettings(path = "a", value = "c")
 
 		val raptor = raptor {
 			install(RaptorConfigurationFeature)
@@ -27,7 +27,7 @@ class ConfigurationTests {
 
 	@Test
 	fun testSingleConfiguration() {
-		val configuration = SingleValueConfiguration(path = "foo", value = "bar")
+		val configuration = SingleValueSettings(path = "foo", value = "bar")
 
 		val raptor = raptor {
 			install(RaptorConfigurationFeature)
@@ -47,7 +47,7 @@ class ConfigurationTests {
 			install(RaptorConfigurationFeature)
 		}
 
-		assertSame(expected = EmptyRaptorConfiguration, actual = raptor.configuration)
+		assertSame(expected = EmptyRaptorSettings, actual = raptor.configuration)
 	}
 
 

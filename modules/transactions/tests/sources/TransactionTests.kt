@@ -34,7 +34,7 @@ class TransactionTests {
 			requests {
 				transactions {
 					onCreate {
-						val parentId = context[IdRaptorPropertyKey]
+						val parentId = parentContext[IdRaptorPropertyKey]
 
 						propertyRegistry.register(IdRaptorPropertyKey, if (parentId != null) "request in $parentId" else "request")
 					}
@@ -71,7 +71,7 @@ class TransactionTests {
 
 			transactions {
 				onCreate {
-					when (val context = context) {
+					when (val context = parentContext) {
 						is RaptorTransactionContext -> when (context[IdRaptorPropertyKey]) {
 							"root" -> propertyRegistry.register(IdRaptorPropertyKey, "level 1")
 							"level 1" -> Unit

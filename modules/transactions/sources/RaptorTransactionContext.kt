@@ -14,5 +14,11 @@ interface RaptorTransactionContext : RaptorContext, RaptorTransactionScope {
 		get() = this
 
 
+	override val parent: RaptorContext
+
+
 	companion object
+
+
+	interface Lazy : RaptorTransactionContext, RaptorContext.Lazy
 }

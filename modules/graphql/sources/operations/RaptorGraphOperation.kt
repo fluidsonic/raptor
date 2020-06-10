@@ -4,7 +4,6 @@ import io.fluidsonic.stdlib.*
 import kotlin.reflect.*
 
 
-@RaptorDsl
 sealed class RaptorGraphOperation<Input : Any, Output> {
 
 	internal abstract val defaultNameSuffixToRemove: String
@@ -48,7 +47,6 @@ suspend fun <Input : Any, Output> RaptorGraphOperation<Input, Output>.execute(co
 
 
 // FIXME check that subclass name doesn't end in Query
-@RaptorDsl
 abstract class RaptorGraphMutation<Input : Any, Output> : RaptorGraphOperation<Input, Output>() {
 
 	final override val defaultNameSuffixToRemove
@@ -61,7 +59,6 @@ abstract class RaptorGraphMutation<Input : Any, Output> : RaptorGraphOperation<I
 
 
 // FIXME check that subclass name doesn't end in Mutation
-@RaptorDsl
 abstract class RaptorGraphQuery<Input : Any, Output> : RaptorGraphOperation<Input, Output>() {
 
 	final override val defaultNameSuffixToRemove

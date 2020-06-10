@@ -70,4 +70,10 @@ class RaptorMongoUpdateBuilder @PublishedApi internal constructor(
 		if (maybeValue.hasValue())
 			setOrUnsetIfNull(fieldName = fieldName, value = maybeValue.get())
 	}
+
+
+	@RaptorDsl
+	fun unset(fieldName: String) {
+		updates += Updates.unset(fieldName)
+	}
 }

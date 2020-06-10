@@ -1,7 +1,7 @@
 package io.fluidsonic.raptor
 
 
-internal class LazyRootRaptorContext : RaptorContext {
+internal class LazyRootRaptorContext : RaptorContext.Lazy {
 
 	private var delegate: RaptorContext? = null
 

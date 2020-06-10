@@ -44,13 +44,13 @@ fun RaptorComponentSet<RaptorTransactionComponent>.kodein(configuration: RaptorK
 			val factoryPropertyKey = kodeinComponent.factoryPropertyKey
 
 			onCreate {
-				if (context.parent != null) // FIXME includeNested
+				if (parentContext.parent != null) // FIXME includeNested
 					return@onCreate
 
-				val factory = context[factoryPropertyKey]
+				val factory = parentContext[factoryPropertyKey]
 					?: error("Cannot find factory.")
 
-				val kodein = factory.createKodein(context = context)
+				val kodein = factory.createKodein(context = lazyContext)
 
 				propertyRegistry.register(DKodeinRaptorPropertyKey, kodein.direct)
 				propertyRegistry.register(KodeinRaptorPropertyKey, kodein)
