@@ -20,7 +20,7 @@ internal class GraphRoute(
 		// FIXME disallow mutation for GET
 
 		val context = DefaultRaptorGraphContext(
-			parent = call.raptorContext as RaptorTransactionContext // FIXME nope.
+			parent = call.raptorContext
 		)
 		val schema = system.schema
 

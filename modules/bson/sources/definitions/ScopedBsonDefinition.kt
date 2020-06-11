@@ -16,9 +16,11 @@ private class ScopedBsonDefinition<Value : Any>(
 // FIXME rn?
 // FIXME DslMarker
 // FIXME add @BuilderInference once compiler errors are fixed
+@RaptorDsl
 inline fun <reified Value : Any> bsonDefinition(noinline config: RaptorBsonDefinitionScope<Value>.() -> Unit) =
 	bsonDefinition(valueClass = Value::class, config = config)
 
 
+@RaptorDsl
 fun <Value : Any> bsonDefinition(valueClass: KClass<Value>, config: RaptorBsonDefinitionScope<Value>.() -> Unit): RaptorBsonDefinition<Value> =
 	ScopedBsonDefinition(config = config, valueClass = valueClass)
