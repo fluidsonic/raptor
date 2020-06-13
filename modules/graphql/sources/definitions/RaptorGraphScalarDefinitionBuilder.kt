@@ -5,11 +5,11 @@ import kotlin.reflect.*
 
 @RaptorDsl
 class RaptorGraphScalarDefinitionBuilder<Value : Any> internal constructor(
+	name: String,
 	private val stackTrace: List<StackTraceElement>,
-	valueClass: KClass<Value>,
-	defaultName: (() -> String?)? = null
+	valueClass: KClass<Value>
 ) : RaptorGraphNamedTypeDefinitionBuilder<Value, GraphScalarDefinition<Value>>(
-	defaultName = defaultName,
+	name = name,
 	valueClass = valueClass
 ) {
 
@@ -23,7 +23,7 @@ class RaptorGraphScalarDefinitionBuilder<Value : Any> internal constructor(
 	private var serializeJson: (RaptorGraphScope.(value: Value) -> Any)? = null
 
 
-	override fun build(description: String?, name: String): GraphScalarDefinition<Value> {
+	override fun build(description: String?): GraphScalarDefinition<Value> {
 		checkNotNull(parseBoolean ?: parseFloat ?: parseInt ?: parseObject ?: parseString) {
 			"At least one GraphQL value parsing function must be defined: parseBoolean/Int/Float/String { … }"
 		}

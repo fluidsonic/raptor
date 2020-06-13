@@ -1,23 +1,25 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.stdlib.*
 import kotlin.reflect.*
 import kotlin.reflect.full.*
 
 
 @RaptorDsl
 class RaptorGraphObjectDefinitionBuilder<Value : Any> internal constructor(
+	name: String,
 	private val stackTrace: List<StackTraceElement>,
-	valueClass: KClass<Value>,
-	defaultName: (() -> String?)? = null
+	valueClass: KClass<Value>
 ) : RaptorGraphStructuredTypeDefinitionBuilder<Value, GraphObjectDefinition<Value>>(
-	defaultName = defaultName,
+	name = name,
 	valueClass = valueClass
 ) {
 
 	private val fields: MutableList<GraphObjectDefinition.Field<Value, *>> = mutableListOf()
+	private var hasInputObject = false
 
 
-	override fun build(description: String?, name: String, nestedDefinitions: List<GraphNamedTypeDefinition<*>>) =
+	override fun build(description: String?, nestedDefinitions: List<GraphNamedTypeDefinition<*>>) =
 		GraphObjectDefinition(
 			description = description,
 			fields = fields.ifEmpty { null }
@@ -93,6 +95,27 @@ class RaptorGraphObjectDefinitionBuilder<Value : Any> internal constructor(
 		)
 			.apply(configure)
 			.build()
+	}
+
+
+	@RaptorDsl
+	fun inputObject(
+		name: String = RaptorGraphDefinition.defaultName,
+		configure: RaptorGraphInputObjectDefinitionBuilder<Value>.() -> Unit
+	) {
+		check(!hasInputObject) { "Cannot define multiple input objects for object '${this.name}'." }
+
+		hasInputObject = true
+
+		nestedDefinitions += RaptorGraphInputObjectDefinitionBuilder(
+			name = when (name) {
+				RaptorGraphDefinition.defaultName -> "${this.name}Input"
+				else -> name
+			},
+			stackTrace = stackTrace(skipCount = 1),
+			valueClass = valueClass
+		)
+			.apply(configure)
 	}
 
 

@@ -12,6 +12,29 @@ sealed class RaptorGraphDefinition(
 
 	protected fun toString(details: String) =
 		"$details\n" + stackTrace.joinToString(separator = "\n") { "\tat $it" }
+
+
+	companion object {
+
+		var defaultName = "<default>"
+
+
+		internal fun resolveName(
+			name: String,
+			defaultNamePrefix: String? = null,
+			valueClass: KClass<*>
+		) =
+			resolveName(name) { defaultNamePrefix.orEmpty() + valueClass.defaultGraphName() }
+
+
+		internal inline fun resolveName(
+			name: String,
+			defaultName: () -> String
+		) = when (name) {
+			RaptorGraphDefinition.defaultName -> defaultName()
+			else -> name
+		}
+	}
 }
 
 
@@ -25,6 +48,10 @@ sealed class GraphNamedTypeDefinition<Value : Any>(
 	stackTrace = stackTrace,
 	valueClass = valueClass
 ) {
+
+	internal abstract val isInput: Boolean
+	internal abstract val isOutput: Boolean
+
 
 	companion object
 }
@@ -106,6 +133,14 @@ class GraphEnumDefinition<Value : Enum<Value>> internal constructor(
 	valueClass = valueClass
 ) {
 
+	override val isInput: Boolean
+		get() = true
+
+
+	override val isOutput: Boolean
+		get() = true
+
+
 	override fun toString() =
 		toString("enum '$name' ${valueClass.qualifiedName}")
 
@@ -129,6 +164,14 @@ class GraphInputObjectDefinition<Value : Any> internal constructor(
 	valueClass = valueClass
 ) {
 
+	override val isInput: Boolean
+		get() = true
+
+
+	override val isOutput: Boolean
+		get() = false
+
+
 	override fun toString() =
 		toString("input '$name' ${valueClass.qualifiedName}")
 }
@@ -147,6 +190,14 @@ class GraphInterfaceDefinition<Value : Any> internal constructor(
 	stackTrace = stackTrace,
 	valueClass = valueClass
 ) {
+
+	override val isInput: Boolean
+		get() = false
+
+
+	override val isOutput: Boolean
+		get() = true
+
 
 	override fun toString() =
 		toString("interface '$name' ${valueClass.qualifiedName}")
@@ -188,6 +239,14 @@ class GraphObjectDefinition<Value : Any> internal constructor(
 	stackTrace = stackTrace,
 	valueClass = valueClass
 ) {
+
+	override val isInput: Boolean
+		get() = false
+
+
+	override val isOutput: Boolean
+		get() = true
+
 
 	override fun toString() =
 		toString("type '$name' ${valueClass.qualifiedName}")
@@ -251,6 +310,14 @@ class GraphScalarDefinition<Value : Any> internal constructor(
 	stackTrace = stackTrace,
 	valueClass = valueClass
 ) {
+
+	override val isInput: Boolean
+		get() = true
+
+
+	override val isOutput: Boolean
+		get() = true
+
 
 	override fun toString() =
 		toString("scalar '$name' ${valueClass.qualifiedName}")

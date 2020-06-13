@@ -7,6 +7,7 @@ import kotlin.reflect.full.*
 
 @RaptorDsl
 class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi internal constructor(
+	name: String,
 	private val inputClass: KClass<Input>,
 	internal val operation: RaptorGraphOperation<Input, Output>,
 	internal val outputType: KType,
@@ -19,7 +20,12 @@ class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi internal co
 	private val argumentsContainer = RaptorGraphArgumentDefinitionBuilder.ContainerImpl()
 	private var description: String? = null
 	private var inputFactory: (RaptorGraphScope.() -> Input)? = null
-	private var name: String? = null
+
+	private val name = when (name) {
+		RaptorGraphDefinition.defaultName -> operation.defaultName()
+			?: error("Cannot derive name from operation ${operation::class}. It must be defined explicitly: define(name = …)")
+		else -> name
+	}
 
 
 	@PublishedApi
@@ -31,9 +37,6 @@ class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi internal co
 		val arguments = argumentsContainer.arguments
 		val description = description
 		val inputFactory = checkNotNull(inputFactory) { "The input must be defined: input { … } or inputObject { … }" }
-		val name = name
-			?: operation.defaultName()
-			?: error("Cannot derive name from operation ${operation::class}. It must be defined explicitly: define { name(\"…\") }")
 		val operation = operation
 
 		return RaptorGraphOperationDefinitionBuilder<Output>(
@@ -61,6 +64,14 @@ class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi internal co
 	}
 
 
+	private fun defaultInputObjectName() =
+		name.capitalize() + "Input"
+
+
+	internal fun defaultOutputObjectName() =
+		name.capitalize() + "Output"
+
+
 	@RaptorDsl
 	fun input(configure: InputBuilder.() -> Unit) {
 		check(inputFactory === null) { "Cannot define multiple inputs." }
@@ -72,13 +83,16 @@ class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi internal co
 
 
 	@RaptorDsl
-	fun inputObject(configure: RaptorGraphInputObjectDefinitionBuilder<Input>.() -> Unit) {
+	fun inputObject(
+		name: String = RaptorGraphDefinition.defaultName,
+		configure: RaptorGraphInputObjectDefinitionBuilder<Input>.() -> Unit
+	) {
 		check(inputFactory === null) { "Cannot define multiple inputs." }
 
-		val definition = RaptorGraphInputObjectDefinitionBuilder<Input>(
+		val definition = RaptorGraphInputObjectDefinitionBuilder(
+			name = RaptorGraphDefinition.resolveName(name, defaultName = this::defaultInputObjectName),
 			stackTrace = stackTrace(skipCount = 1),
-			valueClass = inputClass,
-			defaultName = operation::defaultInputObjectName
+			valueClass = inputClass
 		)
 			.apply(configure)
 			.build()
@@ -108,14 +122,17 @@ class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi internal co
 
 
 @RaptorDsl
-fun <Output : Any> RaptorGraphOperationBuilder<*, Output>.outputObject(configure: RaptorGraphObjectDefinitionBuilder<Output>.() -> Unit) {
+fun <Output : Any> RaptorGraphOperationBuilder<*, Output>.outputObject(
+	name: String = RaptorGraphDefinition.defaultName,
+	configure: RaptorGraphObjectDefinitionBuilder<Output>.() -> Unit
+) {
 	check(outputObjectDefinition === null) { "Cannot define multiple outputs." }
 
 	@Suppress("UNCHECKED_CAST")
-	val definition = RaptorGraphObjectDefinitionBuilder<Output>(
+	val definition = RaptorGraphObjectDefinitionBuilder(
+		name = RaptorGraphDefinition.resolveName(name, defaultName = this::defaultOutputObjectName),
 		stackTrace = stackTrace(skipCount = 1),
-		valueClass = outputType.classifier as KClass<Output>,
-		defaultName = operation::defaultOutputObjectName
+		valueClass = outputType.classifier as KClass<Output>
 	)
 		.apply(configure)
 		.build()

@@ -4,12 +4,11 @@ import kotlin.reflect.*
 
 
 abstract class RaptorGraphNamedTypeDefinitionBuilder<Value : Any, Definition : GraphNamedTypeDefinition<Value>> internal constructor(
-	private val defaultName: (() -> String?)? = null,
+	protected val name: String,
 	protected val valueClass: KClass<Value>
 ) {
 
 	private var description: String? = null
-	private var name: String? = null
 
 
 	init {
@@ -17,14 +16,11 @@ abstract class RaptorGraphNamedTypeDefinitionBuilder<Value : Any, Definition : G
 	}
 
 
-	protected abstract fun build(description: String?, name: String): Definition
+	protected abstract fun build(description: String?): Definition
 
 
-	internal fun build(defaultNamePrefix: String? = null) =
-		build(
-			description = description?.ifEmpty { null },
-			name = name ?: defaultName?.invoke() ?: (defaultNamePrefix.orEmpty() + valueClass.defaultGraphName())
-		)
+	internal fun build() =
+		build(description = description?.ifEmpty { null })
 
 
 	@RaptorDsl
@@ -32,13 +28,5 @@ abstract class RaptorGraphNamedTypeDefinitionBuilder<Value : Any, Definition : G
 		check(this.description === null) { "Cannot define multiple descriptions." }
 
 		this.description = description
-	}
-
-
-	@RaptorDsl
-	fun name(name: String) {
-		check(this.name === null) { "Cannot define multiple names." }
-
-		this.name = name
 	}
 }

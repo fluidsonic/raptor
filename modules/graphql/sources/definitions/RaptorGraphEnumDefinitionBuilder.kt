@@ -6,16 +6,16 @@ import kotlin.reflect.*
 // FIXME customize value definitions
 @RaptorDsl
 class RaptorGraphEnumDefinitionBuilder<Value : Enum<Value>> internal constructor(
+	name: String,
 	private val stackTrace: List<StackTraceElement>,
 	valueClass: KClass<Value>,
-	private val values: List<Value>,
-	defaultName: (() -> String?)? = null
+	private val values: List<Value>
 ) : RaptorGraphNamedTypeDefinitionBuilder<Value, GraphEnumDefinition<Value>>(
-	defaultName = defaultName,
+	name = name,
 	valueClass = valueClass
 ) {
 
-	override fun build(description: String?, name: String) =
+	override fun build(description: String?) =
 		GraphEnumDefinition(
 			description = description,
 			name = name,

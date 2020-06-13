@@ -37,9 +37,11 @@ fun <Value : Any, ReferencedValue : Any> graphAliasDefinition(
 
 @RaptorDsl
 inline fun <reified Value : Enum<Value>> graphEnumDefinition(
+	name: String = RaptorGraphDefinition.defaultName,
 	@BuilderInference noinline configure: RaptorGraphEnumDefinitionBuilder<Value>.() -> Unit = {}
 ): GraphEnumDefinition<Value> =
 	graphEnumDefinition(
+		name = name,
 		valueClass = Value::class,
 		values = enumValues<Value>().toList(),
 		configure = configure
@@ -48,11 +50,13 @@ inline fun <reified Value : Enum<Value>> graphEnumDefinition(
 
 @RaptorDsl
 fun <Value : Enum<Value>> graphEnumDefinition(
+	name: String = RaptorGraphDefinition.defaultName,
 	valueClass: KClass<Value>,
 	values: List<Value>, // FIXME validate
 	configure: RaptorGraphEnumDefinitionBuilder<Value>.() -> Unit = {}
 ): GraphEnumDefinition<Value> =
 	RaptorGraphEnumDefinitionBuilder(
+		name = RaptorGraphDefinition.resolveName(name, valueClass = valueClass),
 		stackTrace = stackTrace(skipCount = 1),
 		valueClass = valueClass,
 		values = values
@@ -62,17 +66,17 @@ fun <Value : Enum<Value>> graphEnumDefinition(
 
 
 @RaptorDsl
-inline fun <reified Value : Any> graphIdDefinition(
+inline fun <reified Value : Any> graphIdAliasDefinition(
 	@BuilderInference noinline configure: RaptorGraphAliasDefinitionBuilder<Value, String>.() -> Unit
 ): GraphAliasDefinition<Value, String> =
-	graphIdDefinition(
+	graphIdAliasDefinition(
 		valueClass = Value::class,
 		configure = configure
 	)
 
 
 @RaptorDsl
-fun <Value : Any> graphIdDefinition(
+fun <Value : Any> graphIdAliasDefinition(
 	valueClass: KClass<Value>,
 	configure: RaptorGraphAliasDefinitionBuilder<Value, String>.() -> Unit
 ): GraphAliasDefinition<Value, String> =
@@ -88,17 +92,24 @@ fun <Value : Any> graphIdDefinition(
 
 @RaptorDsl
 inline fun <reified Value : Any> graphInputObjectDefinition(
+	name: String = RaptorGraphDefinition.defaultName,
 	@BuilderInference noinline configure: RaptorGraphInputObjectDefinitionBuilder<Value>.() -> Unit
 ): GraphInputObjectDefinition<Value> =
-	graphInputObjectDefinition(valueClass = Value::class, configure = configure)
+	graphInputObjectDefinition(
+		name = name,
+		valueClass = Value::class,
+		configure = configure
+	)
 
 
 @RaptorDsl
 fun <Value : Any> graphInputObjectDefinition(
+	name: String = RaptorGraphDefinition.defaultName,
 	valueClass: KClass<Value>,
 	configure: RaptorGraphInputObjectDefinitionBuilder<Value>.() -> Unit
 ): GraphInputObjectDefinition<Value> =
 	RaptorGraphInputObjectDefinitionBuilder(
+		name = RaptorGraphDefinition.resolveName(name, valueClass = valueClass),
 		stackTrace = stackTrace(skipCount = 1),
 		valueClass = valueClass
 	)
@@ -108,17 +119,24 @@ fun <Value : Any> graphInputObjectDefinition(
 
 @RaptorDsl
 inline fun <reified Value : Any> graphInterfaceDefinition(
+	name: String = RaptorGraphDefinition.defaultName,
 	@BuilderInference noinline configure: RaptorGraphInterfaceDefinitionBuilder<Value>.() -> Unit
 ): GraphInterfaceDefinition<Value> =
-	graphInterfaceDefinition(valueClass = Value::class, configure = configure)
+	graphInterfaceDefinition(
+		name = name,
+		valueClass = Value::class,
+		configure = configure
+	)
 
 
 @RaptorDsl
 fun <Value : Any> graphInterfaceDefinition(
+	name: String = RaptorGraphDefinition.defaultName,
 	valueClass: KClass<Value>,
 	configure: RaptorGraphInterfaceDefinitionBuilder<Value>.() -> Unit
 ): GraphInterfaceDefinition<Value> =
 	RaptorGraphInterfaceDefinitionBuilder(
+		name = RaptorGraphDefinition.resolveName(name, valueClass = valueClass),
 		stackTrace = stackTrace(skipCount = 1),
 		valueClass = valueClass
 	)
@@ -130,7 +148,10 @@ fun <Value : Any> graphInterfaceDefinition(
 inline fun <reified Value : Any> graphInterfaceExtensionDefinition(
 	@BuilderInference noinline configure: RaptorGraphInterfaceExtensionDefinitionBuilder<Value>.() -> Unit
 ): GraphInterfaceExtensionDefinition<Value> =
-	graphInterfaceExtensionDefinition(valueClass = Value::class, configure = configure)
+	graphInterfaceExtensionDefinition(
+		valueClass = Value::class,
+		configure = configure
+	)
 
 
 @RaptorDsl
@@ -148,17 +169,24 @@ fun <Value : Any> graphInterfaceExtensionDefinition(
 
 @RaptorDsl
 inline fun <reified Value : Any> graphObjectDefinition(
+	name: String = RaptorGraphDefinition.defaultName,
 	@BuilderInference noinline configure: RaptorGraphObjectDefinitionBuilder<Value>.() -> Unit
 ): GraphObjectDefinition<Value> =
-	graphObjectDefinition(valueClass = Value::class, configure = configure)
+	graphObjectDefinition(
+		name = name,
+		valueClass = Value::class,
+		configure = configure
+	)
 
 
 @RaptorDsl
 fun <Value : Any> graphObjectDefinition(
+	name: String = RaptorGraphDefinition.defaultName,
 	valueClass: KClass<Value>,
 	configure: RaptorGraphObjectDefinitionBuilder<Value>.() -> Unit
 ): GraphObjectDefinition<Value> =
 	RaptorGraphObjectDefinitionBuilder(
+		name = RaptorGraphDefinition.resolveName(name, valueClass = valueClass),
 		stackTrace = stackTrace(skipCount = 1),
 		valueClass = valueClass
 	)
@@ -170,7 +198,10 @@ fun <Value : Any> graphObjectDefinition(
 inline fun <reified Value : Any> graphObjectExtensionDefinition(
 	@BuilderInference noinline configure: RaptorGraphObjectExtensionDefinitionBuilder<Value>.() -> Unit
 ): GraphObjectExtensionDefinition<Value> =
-	graphObjectExtensionDefinition(valueClass = Value::class, configure = configure)
+	graphObjectExtensionDefinition(
+		valueClass = Value::class,
+		configure = configure
+	)
 
 
 @RaptorDsl
@@ -193,7 +224,12 @@ inline fun <reified Value> graphOperationDefinition(
 	type: RaptorGraphOperationType,
 	@BuilderInference noinline configure: RaptorGraphOperationDefinitionBuilder<Value>.() -> Unit
 ): GraphOperationDefinition<Value> =
-	graphOperationDefinition(name = name, type = type, valueType = typeOf<Value>(), configure = configure)
+	graphOperationDefinition(
+		name = name,
+		type = type,
+		valueType = typeOf<Value>(),
+		configure = configure
+	)
 
 
 @RaptorDsl
@@ -216,17 +252,24 @@ fun <Value> graphOperationDefinition(
 
 @RaptorDsl
 inline fun <reified Value : Any> graphScalarDefinition(
+	name: String = RaptorGraphDefinition.defaultName,
 	@BuilderInference noinline configure: RaptorGraphScalarDefinitionBuilder<Value>.() -> Unit
 ): GraphScalarDefinition<Value> =
-	graphScalarDefinition(valueClass = Value::class, configure = configure)
+	graphScalarDefinition(
+		name = name,
+		valueClass = Value::class,
+		configure = configure
+	)
 
 
 @RaptorDsl
 fun <Value : Any> graphScalarDefinition(
+	name: String = RaptorGraphDefinition.defaultName,
 	valueClass: KClass<Value>,
 	configure: RaptorGraphScalarDefinitionBuilder<Value>.() -> Unit
 ): GraphScalarDefinition<Value> =
 	RaptorGraphScalarDefinitionBuilder(
+		name = RaptorGraphDefinition.resolveName(name, valueClass = valueClass),
 		stackTrace = stackTrace(skipCount = 1),
 		valueClass = valueClass
 	)

@@ -48,17 +48,19 @@ internal class GraphSystemBuilder {
 
 	private class Build {
 
+		private val aliasDefinitions: MutableList<GraphAliasDefinition<*, *>> = mutableListOf()
 		private val fieldDefinitionExtensionKey = FieldDefinitionExtensionKey()
 		private var optionalArgumentDirective: GDirective? = null
+		private val inputTypeDefinitionsByValueClass: MutableMap<KClass<*>, GraphTypeDefinition<*>> = hashMapOf()
 		private val interfaceDefinitionsByValueClass: MutableMap<KClass<*>, GraphInterfaceDefinition<*>> = mutableMapOf()
 		private val interfaceExtensionDefinitionsByValueClass: MutableMap<KClass<*>, MutableList<GraphInterfaceExtensionDefinition<*>>> = mutableMapOf()
 		private var isComplete = false
 		private val gqlTypes: MutableList<GType> = mutableListOf()
 		private val objectExtensionDefinitionsByValueClass: MutableMap<KClass<*>, MutableList<GraphObjectExtensionDefinition<*>>> = mutableMapOf()
 		private val operationDefinitionsByType: MutableMap<RaptorGraphOperationType, MutableMap<String, GraphOperationDefinition<*>>> = mutableMapOf()
+		private val outputTypeDefinitionsByValueClass: MutableMap<KClass<*>, GraphTypeDefinition<*>> = hashMapOf()
 		private val typeDefinitionExtensionKey = TypeDefinitionExtensionKey()
 		private val typeDefinitionsByName: MutableMap<String, GraphNamedTypeDefinition<*>> = hashMapOf()
-		private val typeDefinitionsByValueClass: MutableMap<KClass<*>, GraphTypeDefinition<*>> = hashMapOf()
 		private val valueTypeExtensionKey = ValueTypeExtensionKey()
 
 
@@ -87,9 +89,13 @@ internal class GraphSystemBuilder {
 						description = null, // FIXME
 						directives = directivesForArgument(argument),
 						name = argument.name!!, // FIXME
-						type = resolveTypeRef(argument.valueType, referee = definition),
+						type = resolveTypeRef(argument.valueType, referee = definition, typeDefinitionsByValueClass = inputTypeDefinitionsByValueClass),
 						extensions = mapOf(
-							typeDefinitionExtensionKey to resolveTypeDefinition(argument.valueType, referee = definition),
+							typeDefinitionExtensionKey to resolveTypeDefinition(
+								argument.valueType,
+								referee = definition,
+								typeDefinitionsByValueClass = inputTypeDefinitionsByValueClass
+							),
 							valueTypeExtensionKey to argument.valueType
 						)
 					)
@@ -119,12 +125,12 @@ internal class GraphSystemBuilder {
 							description = null, // FIXME
 							directives = directivesForArgument(argument),
 							name = argument.name!!, // FIXME
-							type = resolveTypeRef(argument.valueType, referee = definition)
+							type = resolveTypeRef(argument.valueType, referee = definition, typeDefinitionsByValueClass = outputTypeDefinitionsByValueClass)
 						)
 					},
 					description = fieldDefinition.description,
 					name = fieldDefinition.name,
-					type = resolveTypeRef(fieldDefinition.valueType, referee = definition)
+					type = resolveTypeRef(fieldDefinition.valueType, referee = definition, typeDefinitionsByValueClass = outputTypeDefinitionsByValueClass)
 				)
 
 			for (extension in objectExtensionDefinitionsByValueClass[definition.valueClass].orEmpty())
@@ -144,12 +150,12 @@ internal class GraphSystemBuilder {
 								description = null, // FIXME
 								directives = directivesForArgument(argument),
 								name = argument.name!!, // FIXME
-								type = resolveTypeRef(argument.valueType, referee = extension)
+								type = resolveTypeRef(argument.valueType, referee = extension, typeDefinitionsByValueClass = outputTypeDefinitionsByValueClass)
 							)
 						},
 						description = fieldDefinition.description,
 						name = fieldDefinition.name,
-						type = resolveTypeRef(fieldDefinition.valueType, referee = extension)
+						type = resolveTypeRef(fieldDefinition.valueType, referee = extension, typeDefinitionsByValueClass = outputTypeDefinitionsByValueClass)
 					)
 				}
 
@@ -193,19 +199,27 @@ internal class GraphSystemBuilder {
 							description = null, // FIXME
 							directives = directivesForArgument(argument),
 							name = argument.name!!, // FIXME
-							type = resolveTypeRef(argument.valueType, referee = definition),
+							type = resolveTypeRef(argument.valueType, referee = definition, typeDefinitionsByValueClass = inputTypeDefinitionsByValueClass),
 							extensions = mapOf(
-								typeDefinitionExtensionKey to resolveTypeDefinition(argument.valueType, referee = definition),
+								typeDefinitionExtensionKey to resolveTypeDefinition(
+									argument.valueType,
+									referee = definition,
+									typeDefinitionsByValueClass = inputTypeDefinitionsByValueClass
+								),
 								valueTypeExtensionKey to argument.valueType
 							)
 						)
 					},
 					description = fieldDefinition.description,
 					name = fieldDefinition.name,
-					type = resolveTypeRef(fieldDefinition.valueType, referee = definition),
+					type = resolveTypeRef(fieldDefinition.valueType, referee = definition, typeDefinitionsByValueClass = outputTypeDefinitionsByValueClass),
 					extensions = mapOf(
 						fieldDefinitionExtensionKey to fieldDefinition,
-						typeDefinitionExtensionKey to resolveTypeDefinition(fieldDefinition.valueType, referee = definition)
+						typeDefinitionExtensionKey to resolveTypeDefinition(
+							fieldDefinition.valueType,
+							referee = definition,
+							typeDefinitionsByValueClass = outputTypeDefinitionsByValueClass
+						)
 					)
 				)
 
@@ -226,19 +240,27 @@ internal class GraphSystemBuilder {
 								description = null, // FIXME
 								directives = directivesForArgument(argument),
 								name = argument.name!!, // FIXME
-								type = resolveTypeRef(argument.valueType, referee = extension),
+								type = resolveTypeRef(argument.valueType, referee = extension, typeDefinitionsByValueClass = inputTypeDefinitionsByValueClass),
 								extensions = mapOf(
-									typeDefinitionExtensionKey to resolveTypeDefinition(argument.valueType, referee = extension),
+									typeDefinitionExtensionKey to resolveTypeDefinition(
+										argument.valueType,
+										referee = extension,
+										typeDefinitionsByValueClass = inputTypeDefinitionsByValueClass
+									),
 									valueTypeExtensionKey to argument.valueType
 								)
 							)
 						},
 						description = fieldDefinition.description,
 						name = fieldDefinition.name,
-						type = resolveTypeRef(fieldDefinition.valueType, referee = extension),
+						type = resolveTypeRef(fieldDefinition.valueType, referee = extension, typeDefinitionsByValueClass = outputTypeDefinitionsByValueClass),
 						extensions = mapOf(
 							fieldDefinitionExtensionKey to fieldDefinition,
-							typeDefinitionExtensionKey to resolveTypeDefinition(fieldDefinition.valueType, referee = definition)
+							typeDefinitionExtensionKey to resolveTypeDefinition(
+								fieldDefinition.valueType,
+								referee = definition,
+								typeDefinitionsByValueClass = outputTypeDefinitionsByValueClass
+							)
 						)
 					)
 				}
@@ -263,19 +285,27 @@ internal class GraphSystemBuilder {
 								description = null, // FIXME
 								directives = directivesForArgument(argument),
 								name = argument.name!!, // FIXME
-								type = resolveTypeRef(argument.valueType, referee = definition),
+								type = resolveTypeRef(argument.valueType, referee = definition, typeDefinitionsByValueClass = inputTypeDefinitionsByValueClass),
 								extensions = mapOf(
-									typeDefinitionExtensionKey to resolveTypeDefinition(argument.valueType, referee = definition),
+									typeDefinitionExtensionKey to resolveTypeDefinition(
+										argument.valueType,
+										referee = definition,
+										typeDefinitionsByValueClass = inputTypeDefinitionsByValueClass
+									),
 									valueTypeExtensionKey to argument.valueType
 								)
 							)
 						},
 						description = definition.field.description,
 						name = definition.field.name,
-						type = resolveTypeRef(definition.field.valueType, referee = definition),
+						type = resolveTypeRef(definition.field.valueType, referee = definition, typeDefinitionsByValueClass = outputTypeDefinitionsByValueClass),
 						extensions = mapOf(
 							fieldDefinitionExtensionKey to definition.field,
-							typeDefinitionExtensionKey to resolveTypeDefinition(definition.field.valueType, referee = definition)
+							typeDefinitionExtensionKey to resolveTypeDefinition(
+								definition.field.valueType,
+								referee = definition,
+								typeDefinitionsByValueClass = outputTypeDefinitionsByValueClass
+							)
 						)
 					)
 				},
@@ -318,26 +348,12 @@ internal class GraphSystemBuilder {
 		}
 
 
-		private fun checkAliasDefinition(definition: GraphAliasDefinition<*, *>) {
-			when (val referencedDefinition = typeDefinitionsByValueClass[definition.referencedValueClass]) {
-				null ->
-					error("No GraphQL type definition was provided for ${definition.referencedValueClass} referenced by ${definition.valueClass}:\n$definition")
-
-				is GraphAliasDefinition<*, *> ->
-					error("GraphQL alias ${definition.valueClass} cannot reference alias ${definition.referencedValueClass}:\n" +
-						"Alias: $definition\n" +
-						"Referenced alias: $referencedDefinition")
-			}
-		}
-
-
 		fun complete(): GraphSystem {
 			check(!isComplete) { "complete() can only be called once." }
 			isComplete = true
 
-			for (definition in typeDefinitionsByValueClass.values)
-				if (definition is GraphAliasDefinition<*, *>)
-					checkAliasDefinition(definition)
+			for (definition in aliasDefinitions)
+				resolveAlias(definition)
 
 			for (definition in typeDefinitionsByName.values)
 				applyNamedTypeDefinition(definition)
@@ -410,12 +426,20 @@ internal class GraphSystemBuilder {
 				is GraphOperationDefinition<*> ->
 					registerOperation(definition = definition)
 
-				is GraphTypeDefinition<*> ->
+				is GraphNamedTypeDefinition<*> ->
 					registerType(definition = definition)
+
+				is GraphAliasDefinition<*, *> ->
+					registerAlias(definition = definition)
 			}
 
 			for (additionalDefinition in definition.additionalDefinitions)
 				register(additionalDefinition)
+		}
+
+
+		private fun registerAlias(definition: GraphAliasDefinition<*, *>) {
+			aliasDefinitions += definition
 		}
 
 
@@ -429,7 +453,7 @@ internal class GraphSystemBuilder {
 				error(
 					"More than one GraphQL ${definition.type} operation definition has been provided with name '$name':\n" +
 						"1st: $existingDefinition\n" +
-						"2nd: $definition"
+						"2nd: $definition\n---"
 				)
 			}
 
@@ -437,70 +461,143 @@ internal class GraphSystemBuilder {
 		}
 
 
-		private fun registerType(definition: GraphTypeDefinition<*>) {
-			typeDefinitionsByValueClass[definition.valueClass]?.let { existingDefinition ->
-				error(
-					"More than one GraphQL type definition has been provided for ${definition.valueClass}:\n" +
-						"1st: $existingDefinition\n" +
-						"2nd: $definition"
-				)
-			}
-
-			if (definition is GraphNamedTypeDefinition<*>) {
-				when (definition.name) {
-					GSpecification.defaultMutationTypeName,
-					GSpecification.defaultQueryTypeName,
-					GSpecification.defaultSubscriptionTypeName ->
-						error("GraphQL type definition must not use the operation type name '${definition.name}':\n$definition")
-				}
-
-				typeDefinitionsByName[definition.name]?.let { existingDefinition ->
+		private fun registerType(definition: GraphNamedTypeDefinition<*>) {
+			if (definition.isInput)
+				inputTypeDefinitionsByValueClass[definition.valueClass]?.let { existingDefinition ->
 					error(
-						"More than one GraphQL type definition has been provided with type name '${definition.name}':\n" +
+						"More than one GraphQL input type definition has been provided for ${definition.valueClass}:\n" +
 							"1st: $existingDefinition\n" +
-							"2nd: $definition"
+							"2nd: $definition\n---"
+					)
+				}
+			if (definition.isOutput)
+				outputTypeDefinitionsByValueClass[definition.valueClass]?.let { existingDefinition ->
+					error(
+						"More than one GraphQL output type definition has been provided for ${definition.valueClass}:\n" +
+							"1st: $existingDefinition\n" +
+							"2nd: $definition\n---"
 					)
 				}
 
-				typeDefinitionsByName[definition.name] = definition
+			when (definition.name) {
+				GSpecification.defaultMutationTypeName,
+				GSpecification.defaultQueryTypeName,
+				GSpecification.defaultSubscriptionTypeName ->
+					error("GraphQL type definition must not use the operation type name '${definition.name}':\n$definition")
 			}
+
+			typeDefinitionsByName[definition.name]?.let { existingDefinition ->
+				error(
+					"More than one GraphQL type definition has been provided with type name '${definition.name}':\n" +
+						"1st: $existingDefinition\n" +
+						"2nd: $definition\n---"
+				)
+			}
+
+			typeDefinitionsByName[definition.name] = definition
 
 			if (definition is GraphInterfaceDefinition<*>)
 				interfaceDefinitionsByValueClass[definition.valueClass] = definition
 
-			typeDefinitionsByValueClass[definition.valueClass] = definition
+			if (definition.isInput)
+				inputTypeDefinitionsByValueClass[definition.valueClass] = definition
+			if (definition.isOutput)
+				outputTypeDefinitionsByValueClass[definition.valueClass] = definition
 		}
 
 
-		private fun resolveTypeDefinition(valueClass: KClass<*>, referee: RaptorGraphDefinition): GraphTypeDefinition<*> =
+		private fun resolveAlias(definition: GraphAliasDefinition<*, *>) {
+			val referencedInputTypeDefinition = inputTypeDefinitionsByValueClass[definition.referencedValueClass]
+			val referencedOutputTypeDefinition = outputTypeDefinitionsByValueClass[definition.referencedValueClass]
+
+			if (referencedInputTypeDefinition == null && referencedOutputTypeDefinition == null)
+				error("No GraphQL type definition was provided for ${definition.referencedValueClass} referenced by ${definition.valueClass}:\n$definition")
+
+			if (referencedInputTypeDefinition != null) {
+				if (referencedInputTypeDefinition is GraphAliasDefinition<*, *>)
+					error("GraphQL alias ${definition.valueClass} cannot reference alias ${definition.referencedValueClass}:\n" +
+						"Alias: $definition\n" +
+						"Referenced alias: $referencedInputTypeDefinition")
+
+				inputTypeDefinitionsByValueClass[definition.valueClass]?.let { existingDefinition ->
+					error(
+						"More than one GraphQL input type definition has been provided for ${definition.valueClass}:\n" +
+							"1st: $existingDefinition\n" +
+							"2nd: $definition\n---"
+					)
+				}
+
+				inputTypeDefinitionsByValueClass[definition.valueClass] = definition
+			}
+
+			if (referencedOutputTypeDefinition != null) {
+				if (referencedOutputTypeDefinition is GraphAliasDefinition<*, *>)
+					error("GraphQL alias ${definition.valueClass} cannot reference alias ${definition.referencedValueClass}:\n" +
+						"Alias: $definition\n" +
+						"Referenced alias: $referencedOutputTypeDefinition")
+
+				outputTypeDefinitionsByValueClass[definition.valueClass]?.let { existingDefinition ->
+					error(
+						"More than one GraphQL output type definition has been provided for ${definition.valueClass}:\n" +
+							"1st: $existingDefinition\n" +
+							"2nd: $definition\n---"
+					)
+				}
+
+				outputTypeDefinitionsByValueClass[definition.valueClass] = definition
+			}
+		}
+
+
+		private fun resolveTypeDefinition(
+			valueClass: KClass<*>,
+			referee: RaptorGraphDefinition,
+			typeDefinitionsByValueClass: Map<KClass<*>, GraphTypeDefinition<*>>
+		): GraphTypeDefinition<*> =
 			typeDefinitionsByValueClass[valueClass]
 				?: error("GraphQL type definition was not provided for $valueClass referenced by:\n$referee\n---")
 
 
-		private fun resolveTypeDefinition(valueClassRef: KType, referee: RaptorGraphDefinition): GraphTypeDefinition<*> =
+		private fun resolveTypeDefinition(
+			valueClassRef: KType,
+			referee: RaptorGraphDefinition,
+			typeDefinitionsByValueClass: Map<KClass<*>, GraphTypeDefinition<*>>
+		): GraphTypeDefinition<*> =
 			when (val classifier = valueClassRef.classifier) {
-				Collection::class, List::class, Maybe::class, Set::class -> resolveTypeDefinition(valueClassRef.arguments.first(), referee = referee)
-				is KClass<*> -> resolveTypeDefinition(classifier, referee = referee)
+				Collection::class, List::class, Maybe::class, Set::class -> resolveTypeDefinition(
+					valueClassRef.arguments.first(),
+					referee = referee,
+					typeDefinitionsByValueClass = typeDefinitionsByValueClass
+				)
+				is KClass<*> -> resolveTypeDefinition(classifier, referee = referee, typeDefinitionsByValueClass = typeDefinitionsByValueClass)
 				is KTypeParameter -> error("A type parameter '$valueClassRef' is not representable in GraphQL:\n$referee\n---")
 				else -> error("The type reference '$valueClassRef' is not representable in GraphQL:\n$referee\n---")
 			}
 
 
-		private fun resolveTypeDefinition(valueClassProjection: KTypeProjection, referee: RaptorGraphDefinition): GraphTypeDefinition<*> {
+		private fun resolveTypeDefinition(
+			valueClassProjection: KTypeProjection,
+			referee: RaptorGraphDefinition,
+			typeDefinitionsByValueClass: Map<KClass<*>, GraphTypeDefinition<*>>
+		): GraphTypeDefinition<*> {
 			val type = valueClassProjection.type ?: error("A star projection cannot be represented in GraphQL:\n$referee\n---")
 			// FIXME check variance
 
-			return resolveTypeDefinition(type, referee = referee)
+			return resolveTypeDefinition(type, referee = referee, typeDefinitionsByValueClass = typeDefinitionsByValueClass)
 		}
 
 
-		private fun resolveTypeRef(valueClass: KClass<*>, referee: RaptorGraphDefinition): GNamedTypeRef =
+		private fun resolveTypeRef(
+			valueClass: KClass<*>,
+			referee: RaptorGraphDefinition,
+			typeDefinitionsByValueClass: Map<KClass<*>, GraphTypeDefinition<*>>
+		): GNamedTypeRef =
 			when (val definition = typeDefinitionsByValueClass[valueClass]) {
 				is GraphAliasDefinition<*, *> ->
 					if (definition.isId)
 						GIdTypeRef
 					else
-						resolveTypeRef(definition.referencedValueClass, referee = definition)
+						resolveTypeRef(definition.referencedValueClass, referee = definition, typeDefinitionsByValueClass = typeDefinitionsByValueClass)
 
 				is GraphNamedTypeDefinition<*> ->
 					GNamedTypeRef(definition.name)
@@ -512,11 +609,23 @@ internal class GraphSystemBuilder {
 
 		// FIXME 'Set' won't work like this
 		// FIXME support other collection types & find generic approach?
-		private fun resolveTypeRef(valueClassRef: KType, referee: RaptorGraphDefinition): GTypeRef {
+		private fun resolveTypeRef(
+			valueClassRef: KType,
+			referee: RaptorGraphDefinition,
+			typeDefinitionsByValueClass: Map<KClass<*>, GraphTypeDefinition<*>>
+		): GTypeRef {
 			val typeRef = when (val classifier = valueClassRef.classifier) {
-				Maybe::class -> return resolveTypeRef(valueClassRef.arguments.first(), referee = referee)
-				Collection::class, List::class, Set::class -> GListTypeRef(resolveTypeRef(valueClassRef.arguments.first(), referee = referee))
-				is KClass<*> -> resolveTypeRef(classifier, referee = referee)
+				Maybe::class -> return resolveTypeRef(
+					valueClassRef.arguments.first(),
+					referee = referee,
+					typeDefinitionsByValueClass = typeDefinitionsByValueClass
+				)
+				Collection::class, List::class, Set::class -> GListTypeRef(resolveTypeRef(
+					valueClassRef.arguments.first(),
+					referee = referee,
+					typeDefinitionsByValueClass = typeDefinitionsByValueClass
+				))
+				is KClass<*> -> resolveTypeRef(classifier, referee = referee, typeDefinitionsByValueClass = typeDefinitionsByValueClass)
 				is KTypeParameter -> error("A type parameter '$valueClassRef' is not representable in GraphQL:\n$referee\n---")
 				else -> error("The type reference '$valueClassRef' is not representable in GraphQL:\n$referee\n---")
 			}
@@ -525,11 +634,15 @@ internal class GraphSystemBuilder {
 		}
 
 
-		private fun resolveTypeRef(valueClassProjection: KTypeProjection, referee: RaptorGraphDefinition): GTypeRef {
+		private fun resolveTypeRef(
+			valueClassProjection: KTypeProjection,
+			referee: RaptorGraphDefinition,
+			typeDefinitionsByValueClass: Map<KClass<*>, GraphTypeDefinition<*>>
+		): GTypeRef {
 			val type = valueClassProjection.type ?: error("A star projection cannot be represented in GraphQL:\n$referee\n---")
 			// FIXME check variance
 
-			return resolveTypeRef(type, referee = referee)
+			return resolveTypeRef(type, referee = referee, typeDefinitionsByValueClass = typeDefinitionsByValueClass)
 		}
 	}
 }

@@ -5,12 +5,12 @@ import kotlin.reflect.*
 
 @RaptorDsl
 class RaptorGraphInputObjectDefinitionBuilder<Value : Any> internal constructor(
+	name: String,
 	private val stackTrace: List<StackTraceElement>,
 	valueClass: KClass<Value>,
-	defaultName: (() -> String?)? = null,
 	private val argumentContainer: RaptorGraphArgumentDefinitionBuilder.ContainerImpl = RaptorGraphArgumentDefinitionBuilder.ContainerImpl()
 ) : RaptorGraphStructuredTypeDefinitionBuilder<Value, GraphInputObjectDefinition<Value>>(
-	defaultName = defaultName,
+	name = name,
 	valueClass = valueClass
 ),
 	RaptorGraphArgumentDefinitionBuilder.Container by argumentContainer {
@@ -18,7 +18,7 @@ class RaptorGraphInputObjectDefinitionBuilder<Value : Any> internal constructor(
 	private var factory: (RaptorGraphScope.() -> Value)? = null
 
 
-	override fun build(description: String?, name: String, nestedDefinitions: List<GraphNamedTypeDefinition<*>>) =
+	override fun build(description: String?, nestedDefinitions: List<GraphNamedTypeDefinition<*>>) =
 		GraphInputObjectDefinition(
 			arguments = argumentContainer.arguments.ifEmpty { null }
 				?: error("At least one argument must be defined: argument<…>(…) { … }"),

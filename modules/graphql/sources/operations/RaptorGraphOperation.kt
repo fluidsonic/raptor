@@ -13,25 +13,10 @@ sealed class RaptorGraphOperation<Input : Any, Output> {
 
 	abstract suspend fun RaptorGraphScope.execute(input: Input): Output
 
-
-	internal fun defaultInputObjectName() =
-		this::class.simpleName
-			?.removeSuffix(defaultNameSuffixToRemove)
-			?.capitalize()
-			?.plus("Input")
-
-
 	internal fun defaultName() =
 		this::class.simpleName
 			?.removeSuffix(defaultNameSuffixToRemove)
 			?.decapitalize()
-
-
-	internal fun defaultOutputObjectName() =
-		this::class.simpleName
-			?.removeSuffix(defaultNameSuffixToRemove)
-			?.capitalize()
-			?.plus("Output")
 
 
 	companion object
@@ -73,18 +58,20 @@ abstract class RaptorGraphQuery<Input : Any, Output> : RaptorGraphOperation<Inpu
 @OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
 inline fun <reified Input : Any, reified Output> RaptorGraphOperation<Input, Output>.define(
+	name: String = RaptorGraphDefinition.defaultName,
 	noinline configure: RaptorGraphOperationBuilder<Input, Output>.() -> Unit
 ): GraphOperationDefinition<Output> =
-	define(inputClass = Input::class, outputType = typeOf<Output>(), configure = configure)
+	define(name = name, inputClass = Input::class, outputType = typeOf<Output>(), configure = configure)
 
 
 @OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
 inline fun <reified Input : Any, reified Output> RaptorGraphOperation<Input, Output>.define(
+	name: String = RaptorGraphDefinition.defaultName,
 	inputArgumentName: String,
 	configure: RaptorGraphOperationBuilder<Input, Output>.() -> Unit = {}
 ): GraphOperationDefinition<Output> =
-	define(inputClass = Input::class, outputType = typeOf<Output>()) {
+	define(name = name, inputClass = Input::class, outputType = typeOf<Output>()) {
 		input {
 			// https://youtrack.jetbrains.com/issue/KT-39434
 			val inputArgument = argument<Input> {
@@ -102,11 +89,13 @@ inline fun <reified Input : Any, reified Output> RaptorGraphOperation<Input, Out
 // FIXME validate KTypes
 @RaptorDsl
 inline fun <Input : Any, Output> RaptorGraphOperation<Input, Output>.define(
+	name: String = RaptorGraphDefinition.defaultName,
 	inputClass: KClass<Input>,
 	outputType: KType,
 	configure: RaptorGraphOperationBuilder<Input, Output>.() -> Unit
 ): GraphOperationDefinition<Output> =
 	RaptorGraphOperationBuilder(
+		name = name,
 		inputClass = inputClass,
 		operation = this,
 		outputType = outputType,
@@ -117,5 +106,7 @@ inline fun <Input : Any, Output> RaptorGraphOperation<Input, Output>.define(
 
 
 @RaptorDsl
-inline fun <reified Output> RaptorGraphOperation<Unit, Output>.define(): GraphOperationDefinition<Output> =
-	define {}
+inline fun <reified Output> RaptorGraphOperation<Unit, Output>.define(
+	name: String = RaptorGraphDefinition.defaultName
+): GraphOperationDefinition<Output> =
+	define(name = name) {}

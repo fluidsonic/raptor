@@ -141,7 +141,7 @@ fun <Id : EntityId> EntityId.Factory<Id>.bsonDefinition() = bsonDefinition(idCla
 }
 
 
-fun <Id : EntityId> EntityId.Factory<Id>.graphDefinition() = graphIdDefinition(valueClass = idClass) {
+fun <Id : EntityId> EntityId.Factory<Id>.graphDefinition() = graphIdAliasDefinition(valueClass = idClass) {
 	parse { parse(it) ?: error("\"$it\" is not a valid '$graphName'.") } // FIXME graph error
 	serialize { it.serialize() }
 }

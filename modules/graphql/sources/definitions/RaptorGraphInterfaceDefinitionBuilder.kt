@@ -6,18 +6,18 @@ import kotlin.reflect.full.*
 
 @RaptorDsl
 class RaptorGraphInterfaceDefinitionBuilder<Value : Any> internal constructor(
+	name: String,
 	private val stackTrace: List<StackTraceElement>,
-	valueClass: KClass<Value>,
-	defaultName: (() -> String?)? = null
+	valueClass: KClass<Value>
 ) : RaptorGraphStructuredTypeDefinitionBuilder<Value, GraphInterfaceDefinition<Value>>(
-	defaultName = defaultName,
+	name = name,
 	valueClass = valueClass
 ) {
 
-	private val fields = mutableListOf<GraphInterfaceDefinition.Field<Value, *>>()
+	private val fields: MutableList<GraphInterfaceDefinition.Field<Value, *>> = mutableListOf()
 
 
-	override fun build(description: String?, name: String, nestedDefinitions: List<GraphNamedTypeDefinition<*>>) =
+	override fun build(description: String?, nestedDefinitions: List<GraphNamedTypeDefinition<*>>) =
 		GraphInterfaceDefinition(
 			description = description,
 			fields = fields.ifEmpty { null }

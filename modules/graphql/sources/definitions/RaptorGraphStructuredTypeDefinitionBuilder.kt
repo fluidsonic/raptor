@@ -5,24 +5,23 @@ import kotlin.reflect.*
 
 
 abstract class RaptorGraphStructuredTypeDefinitionBuilder<Value : Any, Definition : GraphNamedTypeDefinition<Value>> internal constructor(
-	defaultName: (() -> String?)? = null,
+	name: String,
 	valueClass: KClass<Value>
 ) : RaptorGraphNamedTypeDefinitionBuilder<Value, Definition>(
-	defaultName = defaultName,
+	name = name,
 	valueClass = valueClass
 ) {
 
-	private val nestedDefinitions: MutableList<RaptorGraphNamedTypeDefinitionBuilder<*, *>> = mutableListOf()
+	protected val nestedDefinitions: MutableList<RaptorGraphNamedTypeDefinitionBuilder<*, *>> = mutableListOf()
 
 
-	protected abstract fun build(description: String?, name: String, nestedDefinitions: List<GraphNamedTypeDefinition<*>>): Definition
+	protected abstract fun build(description: String?, nestedDefinitions: List<GraphNamedTypeDefinition<*>>): Definition
 
 
-	final override fun build(description: String?, name: String) =
+	final override fun build(description: String?) =
 		build(
 			description = description,
-			name = name,
-			nestedDefinitions = nestedDefinitions.map { it.build(defaultNamePrefix = name) }
+			nestedDefinitions = nestedDefinitions.map { it.build() }
 		)
 
 
@@ -35,11 +34,14 @@ abstract class RaptorGraphStructuredTypeDefinitionBuilder<Value : Any, Definitio
 	@RaptorDsl
 	inner class NestedBuilder internal constructor() {
 
+		// FIXME use global names (graphEnumDefinition) or else users may accidentally use the wrong one!
 		@RaptorDsl
 		inline fun <reified Value : Enum<Value>> enumDefinition(
+			name: String = RaptorGraphDefinition.defaultName,
 			@BuilderInference noinline configure: RaptorGraphEnumDefinitionBuilder<Value>.() -> Unit = {}
 		) {
 			enumDefinition(
+				name = name,
 				valueClass = Value::class,
 				values = enumValues<Value>().toList(),
 				configure = configure
@@ -49,11 +51,17 @@ abstract class RaptorGraphStructuredTypeDefinitionBuilder<Value : Any, Definitio
 
 		@RaptorDsl
 		fun <Value : Enum<Value>> enumDefinition(
+			name: String = RaptorGraphDefinition.defaultName,
 			valueClass: KClass<Value>,
 			values: List<Value>, // FIXME validate
 			configure: RaptorGraphEnumDefinitionBuilder<Value>.() -> Unit = {}
 		) {
 			nestedDefinitions += RaptorGraphEnumDefinitionBuilder(
+				name = RaptorGraphDefinition.resolveName(
+					name,
+					defaultNamePrefix = this@RaptorGraphStructuredTypeDefinitionBuilder.name,
+					valueClass = valueClass
+				),
 				stackTrace = stackTrace(skipCount = 1),
 				valueClass = valueClass,
 				values = values
@@ -64,18 +72,29 @@ abstract class RaptorGraphStructuredTypeDefinitionBuilder<Value : Any, Definitio
 
 		@RaptorDsl
 		inline fun <reified Value : Any> inputObjectDefinition(
+			name: String = RaptorGraphDefinition.defaultName,
 			@BuilderInference noinline configure: RaptorGraphInputObjectDefinitionBuilder<Value>.() -> Unit
 		) {
-			inputObjectDefinition(valueClass = Value::class, configure = configure)
+			inputObjectDefinition(
+				name = name,
+				valueClass = Value::class,
+				configure = configure
+			)
 		}
 
 
 		@RaptorDsl
 		fun <Value : Any> inputObjectDefinition(
+			name: String = RaptorGraphDefinition.defaultName,
 			valueClass: KClass<Value>,
 			configure: RaptorGraphInputObjectDefinitionBuilder<Value>.() -> Unit
 		) {
 			nestedDefinitions += RaptorGraphInputObjectDefinitionBuilder(
+				name = RaptorGraphDefinition.resolveName(
+					name,
+					defaultNamePrefix = this@RaptorGraphStructuredTypeDefinitionBuilder.name,
+					valueClass = valueClass
+				),
 				stackTrace = stackTrace(skipCount = 1),
 				valueClass = valueClass
 			)
@@ -85,18 +104,29 @@ abstract class RaptorGraphStructuredTypeDefinitionBuilder<Value : Any, Definitio
 
 		@RaptorDsl
 		inline fun <reified Value : Any> interfaceDefinition(
+			name: String = RaptorGraphDefinition.defaultName,
 			@BuilderInference noinline configure: RaptorGraphInterfaceDefinitionBuilder<Value>.() -> Unit
 		) {
-			interfaceDefinition(valueClass = Value::class, configure = configure)
+			interfaceDefinition(
+				name = name,
+				valueClass = Value::class,
+				configure = configure
+			)
 		}
 
 
 		@RaptorDsl
 		fun <Value : Any> interfaceDefinition(
+			name: String = RaptorGraphDefinition.defaultName,
 			valueClass: KClass<Value>,
 			configure: RaptorGraphInterfaceDefinitionBuilder<Value>.() -> Unit
 		) {
 			nestedDefinitions += RaptorGraphInterfaceDefinitionBuilder(
+				name = RaptorGraphDefinition.resolveName(
+					name,
+					defaultNamePrefix = this@RaptorGraphStructuredTypeDefinitionBuilder.name,
+					valueClass = valueClass
+				),
 				stackTrace = stackTrace(skipCount = 1),
 				valueClass = valueClass
 			)
@@ -106,18 +136,29 @@ abstract class RaptorGraphStructuredTypeDefinitionBuilder<Value : Any, Definitio
 
 		@RaptorDsl
 		inline fun <reified Value : Any> objectDefinition(
+			name: String = RaptorGraphDefinition.defaultName,
 			@BuilderInference noinline configure: RaptorGraphObjectDefinitionBuilder<Value>.() -> Unit
 		) {
-			objectDefinition(valueClass = Value::class, configure = configure)
+			objectDefinition(
+				name = name,
+				valueClass = Value::class,
+				configure = configure
+			)
 		}
 
 
 		@RaptorDsl
 		fun <Value : Any> objectDefinition(
+			name: String = RaptorGraphDefinition.defaultName,
 			valueClass: KClass<Value>,
 			configure: RaptorGraphObjectDefinitionBuilder<Value>.() -> Unit
 		) {
 			nestedDefinitions += RaptorGraphObjectDefinitionBuilder(
+				name = RaptorGraphDefinition.resolveName(
+					name,
+					defaultNamePrefix = this@RaptorGraphStructuredTypeDefinitionBuilder.name,
+					valueClass = valueClass
+				),
 				stackTrace = stackTrace(skipCount = 1),
 				valueClass = valueClass
 			)
@@ -127,18 +168,29 @@ abstract class RaptorGraphStructuredTypeDefinitionBuilder<Value : Any, Definitio
 
 		@RaptorDsl
 		inline fun <reified Value : Any> scalarDefinition(
+			name: String = RaptorGraphDefinition.defaultName,
 			@BuilderInference noinline configure: RaptorGraphScalarDefinitionBuilder<Value>.() -> Unit
 		) {
-			scalarDefinition(valueClass = Value::class, configure = configure)
+			scalarDefinition(
+				name = name,
+				valueClass = Value::class,
+				configure = configure
+			)
 		}
 
 
 		@RaptorDsl
 		fun <Value : Any> scalarDefinition(
+			name: String = RaptorGraphDefinition.defaultName,
 			valueClass: KClass<Value>,
 			configure: RaptorGraphScalarDefinitionBuilder<Value>.() -> Unit
 		) {
 			nestedDefinitions += RaptorGraphScalarDefinitionBuilder(
+				name = RaptorGraphDefinition.resolveName(
+					name,
+					defaultNamePrefix = this@RaptorGraphStructuredTypeDefinitionBuilder.name,
+					valueClass = valueClass
+				),
 				stackTrace = stackTrace(skipCount = 1),
 				valueClass = valueClass
 			)
