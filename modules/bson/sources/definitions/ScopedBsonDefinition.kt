@@ -16,6 +16,7 @@ private class ScopedBsonDefinition<Value : Any>(
 // FIXME rn?
 // FIXME DslMarker
 // FIXME add @BuilderInference once compiler errors are fixed
+// FIXME add support for nested codecs
 @RaptorDsl
 inline fun <reified Value : Any> bsonDefinition(noinline config: RaptorBsonDefinitionScope<Value>.() -> Unit) =
 	bsonDefinition(valueClass = Value::class, config = config)

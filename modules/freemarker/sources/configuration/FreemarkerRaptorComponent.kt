@@ -7,7 +7,8 @@ import kotlin.reflect.*
 
 class FreemarkerRaptorComponent : RaptorComponent.Default<FreemarkerRaptorComponent>() {
 
-	internal val templateLoaders = mutableListOf<TemplateLoader>()
+	internal val objectWrappers: MutableMap<KClass<*>, RaptorFreemarkerObjectWrapper<*>> = hashMapOf()
+	internal val templateLoaders: MutableList<TemplateLoader> = mutableListOf()
 
 
 	override fun RaptorComponentConfigurationEndScope.onConfigurationEnded() {
@@ -19,6 +20,10 @@ class FreemarkerRaptorComponent : RaptorComponent.Default<FreemarkerRaptorCompon
 			templateExceptionHandler = TemplateExceptionHandler.RETHROW_HANDLER
 			templateLoader = MultiTemplateLoader(templateLoaders.toTypedArray())
 			templateUpdateDelayMilliseconds = Long.MAX_VALUE
+			urlEscapingCharset = Charsets.UTF_8.name()
+
+			if (objectWrappers.isNotEmpty())
+				objectWrapper = DelegatingFreemarkerObjectWrapper(objectWrappers)
 		})
 	}
 
@@ -33,6 +38,25 @@ class FreemarkerRaptorComponent : RaptorComponent.Default<FreemarkerRaptorCompon
 @RaptorDsl
 val RaptorTopLevelConfigurationScope.freemarker: RaptorComponentSet<FreemarkerRaptorComponent>
 	get() = componentRegistry.configure(FreemarkerRaptorComponent.Key)
+
+
+@RaptorDsl
+inline fun <reified Value : Any> RaptorComponentSet<FreemarkerRaptorComponent>.objectWrapper(
+	wrapper: RaptorFreemarkerObjectWrapper<Value>
+) {
+	objectWrapper(valueClass = Value::class, wrapper = wrapper)
+}
+
+
+@RaptorDsl
+fun <Value : Any> RaptorComponentSet<FreemarkerRaptorComponent>.objectWrapper(
+	valueClass: KClass<out Value>,
+	wrapper: RaptorFreemarkerObjectWrapper<Value>
+) {
+	configure {
+		objectWrappers[valueClass] = wrapper // FIXME catch duplicates
+	}
+}
 
 
 @RaptorDsl

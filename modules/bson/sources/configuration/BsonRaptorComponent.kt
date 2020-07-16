@@ -45,6 +45,7 @@ fun RaptorComponentSet<BsonRaptorComponent>.codecs(codecs: Iterable<Codec<*>>) =
 }
 
 
+// FIXME can be confused with global bsonDefinition()
 @RaptorDsl
 fun RaptorComponentSet<BsonRaptorComponent>.definitions(vararg definitions: RaptorBsonDefinition<*>) {
 	definitions(definitions.asIterable())

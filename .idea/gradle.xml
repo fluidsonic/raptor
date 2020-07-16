@@ -30,8 +30,6 @@
             <option value="$PROJECT_DIR$/../fluid-stdlib" />
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/modules/bson" />
-            <option value="$PROJECT_DIR$/modules/configuration" />
-            <option value="$PROJECT_DIR$/modules/configuration-hocon" />
             <option value="$PROJECT_DIR$/modules/core" />
             <option value="$PROJECT_DIR$/modules/freemarker" />
             <option value="$PROJECT_DIR$/modules/graphql" />
@@ -40,6 +38,8 @@
             <option value="$PROJECT_DIR$/modules/lifecycle" />
             <option value="$PROJECT_DIR$/modules/mongodb" />
             <option value="$PROJECT_DIR$/modules/quickstart" />
+            <option value="$PROJECT_DIR$/modules/settings" />
+            <option value="$PROJECT_DIR$/modules/settings-hocon" />
             <option value="$PROJECT_DIR$/modules/transactions" />
           </set>
         </option>

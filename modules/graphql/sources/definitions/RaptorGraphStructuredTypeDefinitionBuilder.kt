@@ -121,6 +121,7 @@ abstract class RaptorGraphStructuredTypeDefinitionBuilder<Value : Any, Definitio
 			valueClass: KClass<Value>,
 			configure: RaptorGraphInterfaceDefinitionBuilder<Value>.() -> Unit
 		) {
+			// FIXME building lazily removes definition-site from the stack trace for errors thrown by the builder
 			nestedDefinitions += RaptorGraphInterfaceDefinitionBuilder(
 				name = RaptorGraphDefinition.resolveName(
 					name,

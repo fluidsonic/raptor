@@ -1,5 +1,7 @@
 package io.fluidsonic.raptor
 
+import kotlin.contracts.*
+
 
 object RaptorTransactionFeature : RaptorFeature {
 
@@ -36,7 +38,12 @@ fun RaptorContext.createTransaction(): RaptorTransaction =
 		?: error("You must install ${RaptorTransactionFeature::class.simpleName} for enabling transaction functionality.")
 
 
-inline fun <Result> RaptorScope.withNewTransaction(block: RaptorTransactionScope.() -> Result): Result =
-	with(context.createTransaction().context) {
-		block()
+inline fun <Result> RaptorScope.withNewTransaction(action: RaptorTransactionScope.() -> Result): Result {
+	contract {
+		callsInPlace(action, InvocationKind.EXACTLY_ONCE)
 	}
+
+	return with(context.createTransaction().context) {
+		action()
+	}
+}

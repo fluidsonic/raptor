@@ -88,6 +88,7 @@ interface BsonScope : RaptorScope {
 	}
 
 
+	// FIXME add all primitive overloads
 	fun BsonWriter.write(name: String, value: Any?, preserveNull: Boolean = false) {
 		if (value == null && !preserveNull)
 			return

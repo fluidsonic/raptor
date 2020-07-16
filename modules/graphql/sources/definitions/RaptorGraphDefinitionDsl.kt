@@ -167,6 +167,7 @@ fun <Value : Any> graphInterfaceExtensionDefinition(
 		.build()
 
 
+// FIXME put all dsl behind an object for grouping & reuse in nested{} blocks
 @RaptorDsl
 inline fun <reified Value : Any> graphObjectDefinition(
 	name: String = RaptorGraphDefinition.defaultName,

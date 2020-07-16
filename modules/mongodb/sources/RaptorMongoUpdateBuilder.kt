@@ -58,6 +58,13 @@ class RaptorMongoUpdateBuilder @PublishedApi internal constructor(
 
 
 	@RaptorDsl
+	fun set(fieldName: String, maybeValue: Maybe<*>) {
+		if (maybeValue.hasValue())
+			set(fieldName = fieldName, value = maybeValue.get())
+	}
+
+
+	@RaptorDsl
 	fun setOrUnsetIfNull(fieldName: String, value: Any?) {
 		updates +=
 			if (value != null) Updates.set(fieldName, value)
