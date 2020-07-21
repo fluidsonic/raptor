@@ -8,5 +8,5 @@ dependencies {
 	api(project(":raptor"))
 	implementation(kotlinx("atomicfu", "0.14.3", prefixName = false))
 
-	testImplementation(kotlinx("coroutines-test", "1.3.6"))
+	testImplementation(kotlinx("coroutines-test", "1.3.8"))
 }

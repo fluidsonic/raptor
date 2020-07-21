@@ -6,7 +6,7 @@ fluidJvmLibraryVariant(JvmTarget.jdk8) {
 
 dependencies {
 	api(project(":raptor"))
-	api("org.mongodb:bson:4.0.3")
+	api("org.mongodb:bson:4.0.5")
 	implementation(fluid("stdlib", "0.9.31"))
 	compileOnly(project(":raptor-kodein"))
 }
