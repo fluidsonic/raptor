@@ -378,6 +378,7 @@ internal class GraphSystemBuilder {
 				fieldDefinitionExtensionKey = fieldDefinitionExtensionKey,
 				schema = GSchema(GDocument(definitions = definitions)),
 				typeDefinitionExtensionKey = typeDefinitionExtensionKey,
+				typeDefinitionsByGraphName = typeDefinitionsByName,
 				valueTypeExtensionKey = valueTypeExtensionKey
 			)
 		}

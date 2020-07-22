@@ -59,7 +59,8 @@ internal class GraphRoute(
 					operationName = operationName,
 					variableValues = variables,
 					defaultResolver = system.createFieldResolver(),
-					nodeInputCoercion = system.createNodeInputCoercion()
+					nodeInputCoercion = system.createNodeInputCoercion(),
+					variableInputCoercion = system.createVariableInputCoercion()
 				)
 		}
 		catch (e: GError) { // FIXME other errors

@@ -1,7 +1,8 @@
 package io.fluidsonic.raptor
 
 
-inline class EmailAddress(val value: String) {
+// Inline classes are still broken in Kotlin 1.3.72
+/* inline */ data class EmailAddress(val value: String) {
 
 	fun toLowerCase() =
 		EmailAddress(value.toLowerCase())

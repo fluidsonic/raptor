@@ -11,15 +11,20 @@ internal class GraphSystem(
 	val fieldDefinitionExtensionKey: FieldDefinitionExtensionKey,
 	val schema: GSchema,
 	val typeDefinitionExtensionKey: TypeDefinitionExtensionKey,
+	val typeDefinitionsByGraphName: Map<String, GraphNamedTypeDefinition<*>>,
 	val valueTypeExtensionKey: ValueTypeExtensionKey
 ) {
+
+	fun createFieldResolver(): GFieldResolver<RaptorGraphContext, Any> =
+		FieldResolver()
+
 
 	fun createNodeInputCoercion(): GNodeInputCoercion<RaptorGraphContext> =
 		NodeInputCoercion()
 
 
-	fun createFieldResolver(): GFieldResolver<RaptorGraphContext, Any> =
-		FieldResolver()
+	fun createVariableInputCoercion(): GVariableInputCoercion<RaptorGraphContext> =
+		VariableInputCoercion()
 
 
 	// FIXME use decorator for default instead of re-implementing default behavior
@@ -94,7 +99,7 @@ internal class GraphSystem(
 				@Suppress("UNCHECKED_CAST")
 				val aliasDefinition = argument[typeDefinitionExtensionKey]
 					.ifNull {
-						return decorated.coerceValue(
+						return decorated.coerceValue( // FIXME why not `return value`?
 							value = value,
 							typeRef = typeRef,
 							parentType = parentType,
@@ -111,6 +116,42 @@ internal class GraphSystem(
 
 			if (expectsMaybe)
 				coercedValue = Maybe.of(coercedValue)
+
+			return coercedValue
+		}
+	}
+
+
+	private inner class VariableInputCoercion : GVariableInputCoercion.Decorator<RaptorGraphContext> {
+
+		override val decorated = GVariableInputCoercion.default<RaptorGraphContext>()
+
+
+		override fun coerceValue(
+			value: Any?,
+			typeRef: GTypeRef,
+			variable: GVariableDefinition,
+			context: GVariableInputCoercionContext<RaptorGraphContext>
+		): Any? {
+			// FIXME support Maybe<…>
+
+			var coercedValue = super.coerceValue(value, typeRef, variable, context)
+			if (coercedValue != null && typeRef is GNamedTypeRef) {
+				val typeDefinition = typeDefinitionsByGraphName[typeRef.underlyingName] // FIXME lists and non-null
+				// FIXME refactor
+				coercedValue = when (typeDefinition) {
+					null -> Unit
+					is GraphEnumDefinition -> typeDefinition.values.filterIsInstance<Enum<*>>().first { it.name == value }
+					is GraphInputObjectDefinition -> GraphInputContext(arguments = value as Map<String, Any?>).useBlocking {
+						with(typeDefinition) {
+							with(context.environment as RaptorGraphScope) { factory() }
+						}
+					}
+					is GraphInterfaceDefinition -> error("Interface type '$typeRef' cannot appear in an input position.")
+					is GraphObjectDefinition -> error("Object type '$typeRef' cannot appear in an input position.")
+					is GraphScalarDefinition -> typeDefinition.parseJson(context.environment, coercedValue)
+				}
+			}
 
 			return coercedValue
 		}

@@ -1,7 +1,8 @@
 package io.fluidsonic.raptor
 
 
-inline class Password(val value: String) {
+// Inline classes are still broken in Kotlin 1.3.72
+/* inline */ data class Password(val value: String) {
 
 	override fun toString() =
 		"Password(***)"

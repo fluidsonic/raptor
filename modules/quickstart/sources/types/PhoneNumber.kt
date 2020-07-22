@@ -1,7 +1,8 @@
 package io.fluidsonic.raptor
 
 
-inline class PhoneNumber(val value: String) {
+// Inline classes are still broken in Kotlin 1.3.72
+/* inline */ data class PhoneNumber(val value: String) {
 
 	override fun toString() = value
 
