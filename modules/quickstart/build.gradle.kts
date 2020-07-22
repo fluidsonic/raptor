@@ -10,5 +10,5 @@ dependencies {
 	api(project(":raptor-kodein"))
 	api(project(":raptor-mongodb"))
 	api(fluid("stdlib", "0.9.32"))
-	api(fluid("time", "0.9.19"))
+	api(fluid("time", "0.9.20"))
 }

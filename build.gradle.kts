@@ -4,4 +4,4 @@ plugins {
 	id("io.fluidsonic.gradle") version "1.0.13"
 }
 
-fluidJvmLibrary(name = "raptor", version = "0.9.0", prefixName = false)
+fluidJvmLibrary(name = "raptor", version = "0.9.1", prefixName = false)
