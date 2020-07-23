@@ -9,6 +9,6 @@ dependencies {
 	api(project(":raptor-graphql"))
 	api(project(":raptor-kodein"))
 	api(project(":raptor-mongodb"))
-	api(fluid("stdlib", "0.9.32"))
+	api(fluid("stdlib", "0.9.33"))
 	api(fluid("time", "0.9.20"))
 }
