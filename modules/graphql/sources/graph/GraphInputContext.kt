@@ -21,12 +21,11 @@ internal class GraphInputContext(
 			return Maybe.nothing as Value
 
 		var value = arguments[name]
-
 		if (value != null) {
 			@Suppress("UNCHECKED_CAST")
 			val aliasDefinition = definition[system.typeDefinitionExtensionKey] as? GraphAliasDefinition<Any, Any>
 			if (aliasDefinition != null)
-				value = aliasDefinition.parse(environment, value)
+				value = unserializeAlias(definition = aliasDefinition, value = value, typeRef = definition.type)
 		}
 
 		if (expectsMaybe)
@@ -39,6 +38,16 @@ internal class GraphInputContext(
 	suspend fun <Result> use(block: suspend () -> Result) =
 		withContext(threadLocalContext.asContextElement(value = this)) {
 			block()
+		}
+
+
+	private fun unserializeAlias(definition: GraphAliasDefinition<Any, Any>, value: Any, typeRef: GTypeRef): Any =
+		when (typeRef) {
+			is GListTypeRef -> (value as Collection<Any>).map { element ->
+				element?.let { unserializeAlias(definition = definition, value = it, typeRef = typeRef.elementType) }
+			}
+			is GNamedTypeRef -> definition.parse(environment, value) ?: error("Cannot convert '$value' to '${definition.valueClass}'") // FIXME
+			is GNonNullTypeRef -> unserializeAlias(definition = definition, value = value, typeRef = typeRef.nullableRef)
 		}
 
 
