@@ -11,6 +11,7 @@ object RaptorBsonDefaults {
 	val definitions = listOf<RaptorBsonDefinition<*>>(
 		Cents.bsonDefinition(),
 		Country.bsonDefinition(),
+		CountryCode.bsonDefinition(),
 		Currency.bsonDefinition(),
 		DayOfWeek.bsonDefinition(),
 		GeoCoordinate.bsonDefinition(),

@@ -10,6 +10,7 @@ object RaptorGraphDefaults {
 	val definitions = listOf<RaptorGraphDefinition>(
 		Cents.graphDefinition(),
 		Country.graphDefinition(),
+		CountryCode.graphDefinition(),
 		Currency.graphDefinition(),
 		LocalDate.graphDefinition(),
 		LocalDateTime.graphDefinition(),

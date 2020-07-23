@@ -158,7 +158,7 @@ class RaptorGraphObjectDefinitionBuilder<Value : Any> internal constructor(
 
 		@RaptorDsl
 		fun resolver(resolver: suspend RaptorGraphScope.(parent: Value) -> FieldValue) {
-			check(this.resolver === null && !this.isImplicitResolver) { "Cannot define multiple resolutions." }
+			check(this.resolver === null && !this.isImplicitResolver) { "Cannot define multiple resolutions." } // FIXME mark KProperty resolvers implicit
 
 			this.isImplicitResolver = false
 			this.resolver = resolver
