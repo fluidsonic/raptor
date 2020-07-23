@@ -2,7 +2,8 @@ package io.fluidsonic.raptor
 
 
 internal class DefaultRaptorGraphContext(
-	override val parent: RaptorTransactionContext
+	override val parent: RaptorTransactionContext,
+	val system: GraphSystem
 ) : RaptorGraphContext {
 
 	override val properties

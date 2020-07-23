@@ -39,7 +39,7 @@ internal class GraphSystemBuilder {
 		private val defaultDefinitions: List<RaptorGraphDefinition> = listOf(
 			Boolean.graphDefinition(),
 			Double.graphDefinition(),
-			GraphId.graphDefinition(),
+			//GraphId.graphDefinition(), // FIXME
 			Int.graphDefinition(),
 			String.graphDefinition()
 		)
@@ -82,28 +82,35 @@ internal class GraphSystemBuilder {
 
 
 		private fun applyInputObjectDefinition(definition: GraphInputObjectDefinition<*>) {
-			gqlTypes += GInputObjectType(
-				argumentDefinitions = definition.arguments.map { argument ->
-					GInputObjectArgumentDefinition(
-						defaultValue = argument.default,
-						description = null, // FIXME
-						directives = directivesForArgument(argument),
-						name = argument.name!!, // FIXME
-						type = resolveTypeRef(argument.valueType, referee = definition, typeDefinitionsByValueClass = inputTypeDefinitionsByValueClass),
-						extensions = mapOf(
-							typeDefinitionExtensionKey to resolveTypeDefinition(
-								argument.valueType,
-								referee = definition,
-								typeDefinitionsByValueClass = inputTypeDefinitionsByValueClass
-							),
-							valueTypeExtensionKey to argument.valueType
-						)
+			val argumentDefinitions = definition.arguments.map { argument ->
+				GInputObjectArgumentDefinition(
+					defaultValue = argument.default,
+					description = null, // FIXME
+					directives = directivesForArgument(argument),
+					name = argument.name!!, // FIXME
+					type = resolveTypeRef(argument.valueType, referee = definition, typeDefinitionsByValueClass = inputTypeDefinitionsByValueClass),
+					extensions = mapOf(
+						typeDefinitionExtensionKey to resolveTypeDefinition(
+							argument.valueType,
+							referee = definition,
+							typeDefinitionsByValueClass = inputTypeDefinitionsByValueClass
+						),
+						valueTypeExtensionKey to argument.valueType
 					)
-				},
+				)
+			}
+
+			gqlTypes += GInputObjectType(
+				argumentDefinitions = argumentDefinitions,
 				description = definition.description,
 				name = definition.name,
 				parseValue = { arguments ->
-					GraphInputContext(arguments = arguments).useBlocking {
+					GraphInputContext(
+						arguments = arguments,
+						definitions = argumentDefinitions, // FIXME make accessible through GCoercionContext
+						environment = environment as RaptorGraphScope,
+						system = (environment as DefaultRaptorGraphContext).system
+					).useBlocking {
 						with(definition) {
 							with(environment as RaptorGraphScope) { factory() }
 						}

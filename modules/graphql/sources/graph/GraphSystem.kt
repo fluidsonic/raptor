@@ -1,7 +1,6 @@
 package io.fluidsonic.raptor
 
 import io.fluidsonic.graphql.*
-import io.fluidsonic.graphql.ifNull
 import io.fluidsonic.stdlib.*
 import org.slf4j.*
 import kotlin.reflect.*
@@ -43,7 +42,12 @@ internal class GraphSystem(
 				val resolve = definition.resolver as (suspend RaptorGraphScope.(Any) -> Any?)?
 					?: TODO() // FIXME default resolver
 
-				return GraphInputContext(arguments = context.arguments).use {
+				return GraphInputContext(
+					arguments = context.arguments,
+					definitions = context.fieldDefinition.argumentDefinitions,
+					environment = context.environment,
+					system = this@GraphSystem
+				).use {
 					with(context.environment.asScope()) {
 						resolve(parent)?.let { resolvedValue ->
 							when {
@@ -90,34 +94,10 @@ internal class GraphSystem(
 		): Any? {
 			val valueType = argument[valueTypeExtensionKey]
 			val expectsMaybe = valueType?.classifier == Maybe::class && typeRef == argument.type // FIXME also support for variables
-
 			if (expectsMaybe && value == null)
 				return Maybe.nothing
 
-			var coercedValue = super.coerceValue(value, typeRef, parentType, field, argument, context)
-			if (coercedValue != null && typeRef is GNamedTypeRef) {
-				@Suppress("UNCHECKED_CAST")
-				val aliasDefinition = argument[typeDefinitionExtensionKey]
-					.ifNull {
-						return decorated.coerceValue( // FIXME why not `return value`?
-							value = value,
-							typeRef = typeRef,
-							parentType = parentType,
-							field = field,
-							argument = argument,
-							context = context
-						)
-					}
-					as? GraphAliasDefinition<Any, Any>
-
-				if (aliasDefinition != null)
-					coercedValue = aliasDefinition.parse(context.environment, coercedValue)
-			}
-
-			if (expectsMaybe)
-				coercedValue = Maybe.of(coercedValue)
-
-			return coercedValue
+			return super.coerceValue(value, typeRef, parentType, field, argument, context)
 		}
 	}
 
@@ -133,16 +113,19 @@ internal class GraphSystem(
 			variable: GVariableDefinition,
 			context: GVariableInputCoercionContext<RaptorGraphContext>
 		): Any? {
-			// FIXME support Maybe<…>
-
 			var coercedValue = super.coerceValue(value, typeRef, variable, context)
 			if (coercedValue != null && typeRef is GNamedTypeRef) {
 				val typeDefinition = typeDefinitionsByGraphName[typeRef.underlyingName] // FIXME lists and non-null
 				// FIXME refactor
 				coercedValue = when (typeDefinition) {
-					null -> Unit
+					null -> coercedValue
 					is GraphEnumDefinition -> typeDefinition.values.filterIsInstance<Enum<*>>().first { it.name == value }
-					is GraphInputObjectDefinition -> GraphInputContext(arguments = value as Map<String, Any?>).useBlocking {
+					is GraphInputObjectDefinition -> GraphInputContext(
+						arguments = value as Map<String, Any?>,
+						definitions = (context.schema.resolveType(typeRef.name) as GInputObjectType).argumentDefinitions,
+						environment = context.environment,
+						system = this@GraphSystem
+					).useBlocking {
 						with(typeDefinition) {
 							with(context.environment as RaptorGraphScope) { factory() }
 						}
@@ -178,7 +161,8 @@ private tailrec fun RaptorGraphScope.serializeAlias(value: Any, serialize: Rapto
 	when (typeRef) {
 		is GListTypeRef -> when (value) {
 			is Iterable<*> -> value.map { element ->
-				element?.let { serializeAlias(value = element, serialize = serialize, typeRef = typeRef.elementType) }
+				if (element != null) serializeAlias(value = element, serialize = serialize, typeRef = typeRef.elementType)
+				else null
 			}
 			else -> value
 		}
