@@ -10,11 +10,10 @@
               <build path="$PROJECT_DIR$/../fluid-graphql" name="fluid-graphql">
                 <projects>
                   <project path="$PROJECT_DIR$/../fluid-graphql" />
-                </projects>
-              </build>
-              <build path="$PROJECT_DIR$/../fluid-stdlib" name="fluid-stdlib">
-                <projects>
-                  <project path="$PROJECT_DIR$/../fluid-stdlib" />
+                  <project path="$PROJECT_DIR$/../fluid-graphql/modules/client" />
+                  <project path="$PROJECT_DIR$/../fluid-graphql/modules/dsl" />
+                  <project path="$PROJECT_DIR$/../fluid-graphql/modules/execution" />
+                  <project path="$PROJECT_DIR$/../fluid-graphql/modules/language" />
                 </projects>
               </build>
             </builds>
@@ -27,7 +26,10 @@
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/../fluid-graphql" />
-            <option value="$PROJECT_DIR$/../fluid-stdlib" />
+            <option value="$PROJECT_DIR$/../fluid-graphql/modules/client" />
+            <option value="$PROJECT_DIR$/../fluid-graphql/modules/dsl" />
+            <option value="$PROJECT_DIR$/../fluid-graphql/modules/execution" />
+            <option value="$PROJECT_DIR$/../fluid-graphql/modules/language" />
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/modules/bson" />
             <option value="$PROJECT_DIR$/modules/core" />

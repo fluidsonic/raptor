@@ -1,5 +1,7 @@
 import io.fluidsonic.gradle.*
 
-fluidJvmLibraryVariant(JvmTarget.jdk8) {
+fluidLibraryVariant {
 	description = "FIXME"
+
+	jvm(JvmTarget.jdk8)
 }

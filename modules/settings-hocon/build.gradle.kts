@@ -1,10 +1,12 @@
 import io.fluidsonic.gradle.*
 
-fluidJvmLibraryVariant(JvmTarget.jdk8) {
+fluidLibraryVariant {
 	description = "FIXME"
-}
 
-dependencies {
-	api(project(":raptor-settings"))
-	implementation("com.typesafe:config:1.4.0") // FIXME api?
+	jvm(JvmTarget.jdk8) {
+		dependencies {
+			api(project(":raptor-settings"))
+			implementation("com.typesafe:config:1.4.0") // FIXME api?
+		}
+	}
 }
