@@ -1,17 +1,18 @@
 import io.fluidsonic.gradle.*
 
-fluidLibraryVariant {
-	description = "FIXME"
+fluidLibraryModule(description = "FIXME") {
+	targets {
+		jvm {
+			dependencies {
+				api(project(":raptor"))
+				api("org.kodein.di:kodein-di-erased-jvm:6.5.5")
 
-	jvm(JvmTarget.jdk8) {
-		dependencies {
-			api(project(":raptor"))
-			api("org.kodein.di:kodein-di-erased-jvm:6.5.5")
-			compileOnly(project(":raptor-transactions"))
-		}
+				compileOnly(project(":raptor-transactions"))
+			}
 
-		testDependencies {
-			implementation(project(":raptor-transactions"))
+			testDependencies {
+				implementation(project(":raptor-transactions"))
+			}
 		}
 	}
 }

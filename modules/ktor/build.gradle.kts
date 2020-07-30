@@ -1,27 +1,25 @@
 import io.fluidsonic.gradle.*
 
-fluidLibraryVariant {
-	description = "FIXME"
+fluidLibraryModule(description = "FIXME") {
+	language {
+		withExperimentalApi("io.ktor.util.KtorExperimentalAPI")
+	}
 
-	jvm(JvmTarget.jdk8) {
-		dependencies {
-			api(project(":raptor"))
-			api(project(":raptor-lifecycle"))
-			api(project(":raptor-transactions"))
-			api(ktor("auth-jwt"))
-			api(ktor("server-netty"))
-			implementation("ch.qos.logback:logback-classic:1.2.3")
+	targets {
+		jvm {
+			dependencies {
+				api(project(":raptor"))
+				api(project(":raptor-lifecycle"))
+				api(project(":raptor-transactions"))
+				api(ktor("auth-jwt"))
+				api(ktor("server-netty"))
+
+				implementation("ch.qos.logback:logback-classic:1.2.3")
+			}
 		}
 	}
 }
 
-kotlin {
-	sourceSets.all {
-		languageSettings.useExperimentalAnnotation("io.ktor.util.KtorExperimentalAPI")
-	}
-}
 
-
-@Suppress("unused")
-fun org.jetbrains.kotlin.gradle.plugin.KotlinDependencyHandler.ktor(name: String, version: String = "1.3.2") =
+fun ktor(name: String, version: String = "1.3.2") =
 	"io.ktor:ktor-$name:$version"

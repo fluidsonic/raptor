@@ -1,14 +1,16 @@
 import io.fluidsonic.gradle.*
 
-fluidLibraryVariant {
-	description = "FIXME"
+fluidLibraryModule(description = "FIXME") {
+	targets {
+		jvm {
+			dependencies {
+				api(project(":raptor"))
+				api("org.mongodb:bson:4.0.5")
 
-	jvm(JvmTarget.jdk8) {
-		dependencies {
-			api(project(":raptor"))
-			api("org.mongodb:bson:4.0.5")
-			implementation(fluid("stdlib", "0.9.33"))
-			compileOnly(project(":raptor-kodein"))
+				implementation(fluid("stdlib", "0.10.0"))
+
+				compileOnly(project(":raptor-kodein"))
+			}
 		}
 	}
 }

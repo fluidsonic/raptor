@@ -1,0 +1,136 @@
+package io.fluidsonic.raptor
+
+import io.fluidsonic.graphql.*
+import io.fluidsonic.raptor.graphql.internal.*
+import io.fluidsonic.stdlib.*
+import kotlin.reflect.*
+
+
+@RaptorDsl
+class RaptorGraphArgumentDefinitionBuilder<Value> internal constructor(
+	private val resolver: ArgumentResolver,
+	private val valueType: KType
+) {
+
+	private var default: GValue? = null
+	private val isMaybe = valueType.classifier == Maybe::class
+	private var name: String? = null
+
+
+	init {
+		checkGraphCompatibility(valueType, isMaybeAllowed = true)
+	}
+
+
+	internal fun build() =
+		GraphArgumentDefinition<Value>(
+			default = default,
+			name = name,
+			resolver = resolver,
+			valueType = valueType
+		)
+
+
+	@RaptorDsl
+	private fun default(default: GValue) {
+		check(!isMaybe) { "An optional argument of type '$valueType' cannot have a default value." }
+		check(this.default === null) { "Cannot define multiple defaults." }
+
+		this.default = default
+	}
+
+
+	// FIXME support List and InputObject
+	// FIXME this is annoying, esp. Enum. can't we automate that?
+
+	@RaptorDsl
+	fun defaultNull() =
+		default(GNullValue.withoutOrigin)
+
+
+	@RaptorDsl
+	fun defaultBoolean(default: Boolean) =
+		default(GBooleanValue(default))
+
+
+	@RaptorDsl
+	fun defaultEnumValue(default: String) =
+		default(GEnumValue(default))
+
+
+	@RaptorDsl
+	fun defaultFloat(default: Double) =
+		default(GFloatValue(default))
+
+
+	@RaptorDsl
+	fun defaultInt(default: Int) =
+		default(GIntValue(default))
+
+
+	@RaptorDsl
+	fun defaultString(default: String) =
+		default(GStringValue(default))
+
+
+	@RaptorDsl
+	fun name(name: String) {
+		check(this.name === null) { "Cannot define multiple names." }
+
+		this.name = name
+	}
+
+
+	interface Container {
+
+		@RaptorDsl
+		fun <ArgumentValue> argument(
+			valueType: KType,
+			configure: RaptorGraphArgumentDefinitionBuilder<ArgumentValue>.() -> Unit = {}
+		): GraphArgumentDefinition<ArgumentValue>
+	}
+
+
+	internal interface ContainerInternal : Container {
+
+		fun add(argument: GraphArgumentDefinition<*>)
+	}
+
+
+	internal class ContainerImpl(factoryName: String) : ContainerInternal {
+
+		val arguments: MutableList<GraphArgumentDefinition<*>> = mutableListOf()
+		val resolver = ArgumentResolver(factoryName = factoryName)
+
+
+		override fun add(argument: GraphArgumentDefinition<*>) {
+			// FIXME we need to evaluate all arguments lazily when the parent builder is done because provideDelegate won't be called yet and name is null
+			if (arguments.any { it.name === argument.name })
+				error("Cannot define multiple arguments named '${argument.name}'.")
+
+			arguments += argument
+		}
+
+
+		@RaptorDsl
+		override fun <ArgumentValue> argument(
+			valueType: KType,
+			configure: RaptorGraphArgumentDefinitionBuilder<ArgumentValue>.() -> Unit
+		): GraphArgumentDefinition<ArgumentValue> =
+			RaptorGraphArgumentDefinitionBuilder<ArgumentValue>(
+				resolver = resolver,
+				valueType = valueType
+			)
+				.apply(configure)
+				.build()
+				.also(this::add)
+	}
+}
+
+
+@OptIn(ExperimentalStdlibApi::class)
+@RaptorDsl
+inline fun <reified ArgumentValue> RaptorGraphArgumentDefinitionBuilder.Container.argument(
+	noinline configure: RaptorGraphArgumentDefinitionBuilder<ArgumentValue>.() -> Unit = {}
+): GraphArgumentDefinition<ArgumentValue> =
+	argument(valueType = typeOf<ArgumentValue>(), configure = configure)

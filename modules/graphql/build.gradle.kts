@@ -1,15 +1,20 @@
 import io.fluidsonic.gradle.*
 
-fluidLibraryVariant {
-	description = "FIXME"
+fluidLibraryModule(description = "FIXME") {
+	custom {
+		explicitApiWarning()
+	}
 
-	jvm(JvmTarget.jdk8) {
-		dependencies {
-			api(project(":raptor-ktor"))
-			implementation(fluid("graphql", "0.9.2"))
-			implementation(fluid("json-basic", "1.0.3"))
-			implementation(fluid("stdlib", "0.9.33"))
-			implementation(fluid("time", "0.9.20"))
+	targets {
+		jvm {
+			dependencies {
+				api(project(":raptor-ktor"))
+
+				implementation(fluid("graphql-execution", "0.9.2"))
+				implementation(fluid("json-basic", "1.1.0"))
+				implementation(fluid("stdlib", "0.10.0"))
+				implementation(fluid("time", "0.10.0"))
+			}
 		}
 	}
 }

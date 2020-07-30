@@ -1,11 +1,11 @@
 import io.fluidsonic.gradle.*
 
-fluidLibraryVariant {
-	description = "FIXME"
-
-	jvm(JvmTarget.jdk8) {
-		dependencies {
-			api(project(":raptor"))
+fluidLibraryModule(description = "FIXME") {
+	targets {
+		jvm {
+			dependencies {
+				api(project(":raptor"))
+			}
 		}
 	}
 }
