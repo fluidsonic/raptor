@@ -11,10 +11,10 @@ class RaptorGraphOperationDefinitionBuilder<Value> internal constructor(
 	private val type: RaptorGraphOperationType,
 	private val stackTrace: List<StackTraceElement>,
 	private val valueType: KType,
-	private val argumentsContainer: RaptorGraphArgumentDefinitionBuilder.ContainerImpl = RaptorGraphArgumentDefinitionBuilder.ContainerImpl(
+	private val argumentContainer: RaptorGraphArgumentDefinitionBuilder.ContainerImpl = RaptorGraphArgumentDefinitionBuilder.ContainerImpl(
 		factoryName = "resolver"
 	)
-) : RaptorGraphArgumentDefinitionBuilder.ContainerInternal by argumentsContainer {
+) : RaptorGraphArgumentDefinitionBuilder.ContainerInternal by argumentContainer {
 
 	private var description: String? = null
 	private var isNullable = valueType.isMarkedNullable
@@ -32,7 +32,8 @@ class RaptorGraphOperationDefinitionBuilder<Value> internal constructor(
 		return GraphOperationDefinition(
 			additionalDefinitions = additionalDefinitions,
 			field = GraphFieldDefinition(
-				arguments = argumentsContainer.arguments,
+				arguments = argumentContainer.arguments,
+				argumentResolver = argumentContainer.resolver,
 				description = description,
 				name = name,
 				resolver = { resolver() },

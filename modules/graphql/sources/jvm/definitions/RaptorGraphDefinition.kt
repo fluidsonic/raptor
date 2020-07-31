@@ -1,5 +1,6 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.raptor.graphql.internal.*
 import kotlin.reflect.*
 
 
@@ -115,15 +116,17 @@ class GraphEnumDefinition<Value : Enum<Value>> internal constructor(
 
 internal class GraphFieldDefinition<in Parent : Any, out Value>(
 	val arguments: List<GraphArgumentDefinition<*>>,
+	val argumentResolver: ArgumentResolver?, // FIXME make nested class .Resolvable?
 	val description: String?,
 	val name: String,
-	val resolver: (suspend RaptorGraphScope.(parent: Parent) -> Value)?,
+	val resolver: (suspend RaptorGraphScope.(parent: Parent) -> Value)?, // FIXME make nested class .Resolvable?
 	val valueType: KType
 )
 
 
 class GraphInputObjectDefinition<Value : Any> internal constructor(
 	internal val arguments: List<GraphArgumentDefinition<*>>,
+	internal val argumentResolver: ArgumentResolver,
 	internal val description: String?,
 	internal val factory: RaptorGraphScope.() -> Value,
 	name: String,

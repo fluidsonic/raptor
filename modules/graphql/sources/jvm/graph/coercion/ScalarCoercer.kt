@@ -14,7 +14,7 @@ internal object ScalarCoercer : GNodeInputCoercer<GValue>, GOutputCoercer<Any>, 
 		val parsingContext = object : RaptorGraphArgumentParsingScope, RaptorGraphScope by context {
 
 			override fun invalid(details: String?): Nothing =
-				this@coerceNodeInput.invalidValueError(details = details)
+				this@coerceNodeInput.invalid(details = details)
 		}
 
 		return when (input) {
@@ -23,7 +23,7 @@ internal object ScalarCoercer : GNodeInputCoercer<GValue>, GOutputCoercer<Any>, 
 			is GIntValue -> definition.parseInt?.let { it(parsingContext, input.value) }
 			is GObjectValue -> definition.parseObject?.let { it(parsingContext, input.unwrap()) }
 			is GStringValue -> definition.parseString?.let { it(parsingContext, input.value) }
-			else -> invalidValueError()
+			else -> invalid()
 		}
 	}
 
@@ -43,12 +43,12 @@ internal object ScalarCoercer : GNodeInputCoercer<GValue>, GOutputCoercer<Any>, 
 		val context = checkNotNull(execution.raptorContext)
 		val definition = (type as GCustomScalarType).raptorTypeDefinition as GraphScalarDefinition<*>
 		if (!definition.jsonInputClass.isInstance(input))
-			invalidValueError()
+			invalid()
 
 		val parsingContext = object : RaptorGraphArgumentParsingScope, RaptorGraphScope by context {
 
 			override fun invalid(details: String?): Nothing =
-				this@coerceVariableInput.invalidValueError(details = details)
+				this@coerceVariableInput.invalid(details = details)
 		}
 
 		return with(definition) {

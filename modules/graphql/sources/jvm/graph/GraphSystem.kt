@@ -8,7 +8,6 @@ internal class GraphSystem(schema: GSchema) {
 
 	private val executor = GExecutor.default(
 		schema = schema,
-		fieldResolver = FieldResolver,
 		nodeInputCoercer = NodeInputCoercer,
 		variableInputCoercer = VariableInputCoercer
 	)

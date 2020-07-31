@@ -4,7 +4,7 @@ package io.fluidsonic.raptor
 // FIXME Simplify API. E.g. reusing bsonDefinition { } with special decodeFromString() and encodeAsString()
 @RaptorDsl
 inline fun <reified Value : Any> bsonDefinitionScoped(
-	noinline parse: RaptorBsonDefinitionScope<Value>.(string: String) -> Value?,
+	noinline parse: RaptorBsonDefinitionScope<Value>.(string: String) -> Value?, // FIXME don't allow null. use invalid() as raptor-graph
 	noinline serialize: RaptorBsonDefinitionScope<Value>.(value: Value) -> String
 ) =
 	bsonDefinition<Value> {

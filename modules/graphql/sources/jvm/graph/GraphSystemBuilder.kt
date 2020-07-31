@@ -68,6 +68,7 @@ internal class GraphSystemBuilder {
 				values = definition.values.map { GEnumValueDefinition(name = it.name) },
 				extensions = GNodeExtensionSet {
 					outputCoercer = EnumCoercer
+					nodeInputCoercer = EnumCoercer
 					raptorTypeDefinition = definition
 					variableInputCoercer = EnumCoercer
 				}
@@ -81,6 +82,7 @@ internal class GraphSystemBuilder {
 				description = definition.description,
 				name = definition.name,
 				extensions = GNodeExtensionSet {
+					nodeInputCoercer = InputObjectCoercer
 					raptorTypeDefinition = definition
 					variableInputCoercer = InputObjectCoercer
 				}
@@ -165,6 +167,7 @@ internal class GraphSystemBuilder {
 				interfaces = interfaceTypeRefsForObjectValueClass(definition.valueClass),
 				name = definition.name,
 				extensions = GNodeExtensionSet {
+					kotlinType = definition.valueClass
 					raptorTypeDefinition = definition
 				}
 			)
@@ -186,6 +189,7 @@ internal class GraphSystemBuilder {
 				extensions = GNodeExtensionSet {
 					nodeInputCoercer = ScalarCoercer
 					outputCoercer = ScalarCoercer
+					raptorTypeDefinition = definition
 					variableInputCoercer = ScalarCoercer
 				}
 			)
@@ -237,6 +241,7 @@ internal class GraphSystemBuilder {
 						referee = referee,
 						typeDefinitionsByValueClass = outputTypeDefinitionsByValueClass
 					)
+					resolver = FieldResolver
 				}
 			)
 

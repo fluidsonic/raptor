@@ -9,7 +9,7 @@ internal class ArgumentResolver(
 	private val factoryName: String
 ) {
 
-	private val currentContext = ThreadLocal<Context>()
+	private val currentContext = ThreadLocal<Context>() // FIXME won't work with coroutines
 
 
 	@Suppress("UNCHECKED_CAST")

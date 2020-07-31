@@ -17,7 +17,7 @@ class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi internal co
 	internal val additionalDefinitions: MutableList<GraphNamedTypeDefinition<*>> = mutableListOf()
 	internal var outputObjectDefinition: GraphObjectDefinition<*>? = null
 
-	private val argumentsContainer = RaptorGraphArgumentDefinitionBuilder.ContainerImpl(
+	private val argumentContainer = RaptorGraphArgumentDefinitionBuilder.ContainerImpl(
 		factoryName = "factory"
 	)
 	private var description: String? = null
@@ -36,7 +36,6 @@ class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi internal co
 		if (inputFactory == null && inputClass == Unit::class)
 			inputFactory = { Unit as Input }
 
-		val arguments = argumentsContainer.arguments
 		val description = description
 		val inputFactory = checkNotNull(inputFactory) { "The input must be defined: input { … } or inputObject { … }" }
 		val operation = operation
@@ -46,13 +45,11 @@ class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi internal co
 			name = name,
 			type = operation.type,
 			stackTrace = stackTrace,
-			valueType = outputType
+			valueType = outputType,
+			argumentContainer = argumentContainer
 		)
 			.apply {
 				description?.let(this::description)
-
-				for (argument in arguments)
-					add(argument)
 
 				resolver {
 					val input = inputFactory()
@@ -101,7 +98,7 @@ class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi internal co
 
 		additionalDefinitions += definition
 
-		val input by argumentsContainer.argument<Input>(valueType = inputClass.starProjectedType) {
+		val input by argumentContainer.argument<Input>(valueType = inputClass.starProjectedType) {
 			// FIXME configurable name & description
 			name("input")
 		}
@@ -111,7 +108,7 @@ class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi internal co
 
 
 	@RaptorDsl
-	inner class InputBuilder internal constructor() : RaptorGraphArgumentDefinitionBuilder.Container by argumentsContainer {
+	inner class InputBuilder internal constructor() : RaptorGraphArgumentDefinitionBuilder.Container by argumentContainer {
 
 		@RaptorDsl
 		fun factory(factory: RaptorGraphScope.() -> Input) {

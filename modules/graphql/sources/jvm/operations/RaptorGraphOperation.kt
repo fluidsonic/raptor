@@ -74,11 +74,12 @@ inline fun <reified Input : Any, reified Output> RaptorGraphOperation<Input, Out
 	define(name = name, inputClass = Input::class, outputType = typeOf<Output>()) {
 		input {
 			// https://youtrack.jetbrains.com/issue/KT-39434 FIXME is fixed?
-			val input by argument<Input> {
+			val inputArgument = argument<Input> {
 				name(inputArgumentName)
 			}
+			val inputProvider = inputArgument.provideDelegate(null, String::length)
 
-			factory { input }
+			factory { inputProvider.getValue(null, String::length) }
 		}
 
 		configure()

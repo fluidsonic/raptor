@@ -5,9 +5,9 @@ import io.fluidsonic.time.*
 import io.ktor.http.*
 
 
-object RaptorGraphDefaults {
+public object RaptorGraphDefaults {
 
-	val definitions = listOf<RaptorGraphDefinition>(
+	public val definitions: Collection<RaptorGraphDefinition> = listOf<RaptorGraphDefinition>(
 		Cents.graphDefinition(),
 		Country.graphDefinition(),
 		CountryCode.graphDefinition(),
@@ -15,6 +15,7 @@ object RaptorGraphDefaults {
 		LocalDate.graphDefinition(),
 		LocalDateTime.graphDefinition(),
 		LocalTime.graphDefinition(),
+		Locale.graphDefinition(),
 		Money.graphDefinition(),
 		PreciseDuration.graphDefinition(),
 		Timestamp.graphDefinitions(),

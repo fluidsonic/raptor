@@ -97,10 +97,10 @@ class RaptorGraphInterfaceExtensionDefinitionBuilder<Value : Any> internal const
 	inner class FieldBuilder<FieldValue> internal constructor(
 		private val name: String,
 		private val valueType: KType,
-		private val argumentsContainer: RaptorGraphArgumentDefinitionBuilder.ContainerImpl = RaptorGraphArgumentDefinitionBuilder.ContainerImpl(
+		private val argumentContainer: RaptorGraphArgumentDefinitionBuilder.ContainerImpl = RaptorGraphArgumentDefinitionBuilder.ContainerImpl(
 			factoryName = "-"
 		)
-	) : RaptorGraphArgumentDefinitionBuilder.ContainerInternal by argumentsContainer {
+	) : RaptorGraphArgumentDefinitionBuilder.ContainerInternal by argumentContainer {
 
 		private var description: String? = null
 		private var isNullable = valueType.isMarkedNullable
@@ -113,7 +113,8 @@ class RaptorGraphInterfaceExtensionDefinitionBuilder<Value : Any> internal const
 
 		internal fun build() =
 			GraphFieldDefinition<Value, FieldValue>(
-				arguments = argumentsContainer.arguments,
+				arguments = argumentContainer.arguments,
+				argumentResolver = argumentContainer.resolver,
 				description = description,
 				name = name,
 				resolver = null,

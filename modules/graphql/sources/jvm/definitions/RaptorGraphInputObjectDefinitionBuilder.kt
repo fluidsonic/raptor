@@ -24,6 +24,7 @@ class RaptorGraphInputObjectDefinitionBuilder<Value : Any> internal constructor(
 		GraphInputObjectDefinition(
 			arguments = argumentContainer.arguments.ifEmpty { null }
 				?: error("At least one argument must be defined: argument<…>(…) { … }"),
+			argumentResolver = argumentContainer.resolver,
 			description = description,
 			factory = checkNotNull(factory) { "The factory must be defined: factory { … }" },
 			name = name,

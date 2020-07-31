@@ -8,16 +8,22 @@ internal object FieldResolver : GFieldResolver<Any> {
 
 	@Suppress("UNCHECKED_CAST")
 	override suspend fun GFieldResolverContext.resolveField(parent: Any): Any? {
-		val value = next()
-			?: return null
+		val context = checkNotNull(execution.raptorContext)
+		val definition = checkNotNull(fieldDefinition.raptorFieldDefinition)
+		val resolver = checkNotNull(definition.resolver) as suspend RaptorGraphScope.(parent: Any) -> Any?
+		val argumentResolver = checkNotNull(definition.argumentResolver)
 
-		val scope = execution.raptorContext?.asScope()
+		val value = argumentResolver.withArguments(
+			argumentValues = arguments,
+			argumentDefinitions = fieldDefinition.argumentDefinitions,
+			context = execution
+		) { resolver(context, parent) }
 			?: return null
 
 		val aliasDefinition = fieldDefinition.raptorTypeDefinition as? GraphAliasDefinition<Any, Any>
 			?: return value
 
-		return scope.serializeAliasValue(value, serialize = aliasDefinition.serialize, typeRef = fieldDefinition.type)
+		return context.serializeAliasValue(value, serialize = aliasDefinition.serialize, typeRef = fieldDefinition.type)
 	}
 
 

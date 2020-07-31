@@ -128,10 +128,10 @@ class RaptorGraphObjectDefinitionBuilder<Value : Any> internal constructor(
 		private val name: String,
 		private val valueType: KType,
 		implicitResolver: (suspend RaptorGraphScope.(parent: Value) -> FieldValue?)? = null,
-		private val argumentsContainer: RaptorGraphArgumentDefinitionBuilder.ContainerImpl = RaptorGraphArgumentDefinitionBuilder.ContainerImpl(
+		private val argumentContainer: RaptorGraphArgumentDefinitionBuilder.ContainerImpl = RaptorGraphArgumentDefinitionBuilder.ContainerImpl(
 			factoryName = "resolver"
 		)
-	) : RaptorGraphArgumentDefinitionBuilder.ContainerInternal by argumentsContainer {
+	) : RaptorGraphArgumentDefinitionBuilder.ContainerInternal by argumentContainer {
 
 		private var description: String? = null
 		private var isImplicitResolver = implicitResolver !== null
@@ -146,7 +146,8 @@ class RaptorGraphObjectDefinitionBuilder<Value : Any> internal constructor(
 
 		internal fun build(): GraphFieldDefinition<Value, FieldValue?> =
 			GraphFieldDefinition(
-				arguments = argumentsContainer.arguments,
+				arguments = argumentContainer.arguments,
+				argumentResolver = argumentContainer.resolver,
 				description = description,
 				name = name,
 				resolver = resolver,
