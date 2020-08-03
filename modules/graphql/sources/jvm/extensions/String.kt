@@ -4,9 +4,7 @@
 package io.fluidsonic.raptor
 
 
-public fun String.Companion.graphDefinition(): GraphScalarDefinition<String> = graphScalarDefinition {
+public fun String.Companion.graphDefinition(): RaptorGraphDefinition = graphScalarDefinition {
 	parseString(::identity)
-
-	parseJson(::identity)
-	serializeJson(::identity)
+	serialize(::identity)
 }

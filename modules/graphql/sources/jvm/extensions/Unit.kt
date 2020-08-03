@@ -5,10 +5,9 @@ package io.fluidsonic.raptor
 
 
 @Suppress("unused")
-public fun Unit.graphDefinition(): GraphScalarDefinition<Unit> = graphScalarDefinition<Unit> {
+public fun Unit.graphDefinition(): RaptorGraphDefinition = graphScalarDefinition<Unit> {
 	// outputOnly() // FIXME add this
 
 	parseInt { TODO() }
-	parseJson<Any> { TODO() }
-	serializeJson { 42 } // FIXME
+	serialize { 42 } // FIXME
 }

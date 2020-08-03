@@ -3,6 +3,7 @@ package io.fluidsonic.raptor
 import org.bson.*
 import org.bson.types.*
 import kotlin.reflect.*
+import kotlin.reflect.full.*
 
 
 interface EntityId {
@@ -41,7 +42,7 @@ interface EntityId {
 			final override val type: String, // FIXME confusing - rename - also, check for duplicates
 			final override val idClass: KClass<Id>,
 			final override val graphName: String = idClass.simpleName!!, // FIXME improve
-			private val constructor: (raw: ObjectId) -> Id
+			private val constructor: (raw: ObjectId) -> Id,
 		) : EntityId.Factory<Id> {
 
 			private val prefix = "$type/"
@@ -94,7 +95,7 @@ interface EntityId {
 			final override val type: String,
 			final override val idClass: KClass<Id>,
 			final override val graphName: String = idClass.simpleName!!, // FIXME improve
-			private val constructor: (raw: String) -> Id
+			private val constructor: (raw: String) -> Id,
 		) : EntityId.Factory<Id> {
 
 			private val prefix = "$type/"
@@ -141,7 +142,7 @@ fun <Id : EntityId> EntityId.Factory<Id>.bsonDefinition() = bsonDefinition(idCla
 }
 
 
-fun <Id : EntityId> EntityId.Factory<Id>.graphDefinition() = graphIdAliasDefinition(valueClass = idClass) {
+fun <Id : EntityId> EntityId.Factory<Id>.graphDefinition() = graphIdAliasDefinition<Id>(type = idClass.starProjectedType) {
 	parse { parse(it) ?: error("\"$it\" is not a valid '$graphName'.") } // FIXME graph error
 	serialize { it.serialize() }
 }

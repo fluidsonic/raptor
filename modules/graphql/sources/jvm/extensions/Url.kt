@@ -6,9 +6,7 @@ package io.fluidsonic.raptor
 import io.ktor.http.*
 
 
-public fun Url.Companion.graphDefinition(): GraphScalarDefinition<Url> = graphScalarDefinition {
+public fun Url.Companion.graphDefinition(): RaptorGraphDefinition = graphScalarDefinition {
 	parseString { runCatching { Url(it) }.getOrNull() ?: invalid() }
-
-	parseJson<String> { runCatching { Url(it) }.getOrNull() ?: invalid() }
-	serializeJson(Url::toString)
+	serialize(Url::toString)
 }

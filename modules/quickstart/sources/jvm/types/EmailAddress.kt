@@ -19,11 +19,9 @@ package io.fluidsonic.raptor
 		)
 
 
-		fun graphDefinition(): GraphScalarDefinition<EmailAddress> = graphScalarDefinition {
+		fun graphDefinition(): RaptorGraphDefinition = graphScalarDefinition {
 			parseString(::EmailAddress)
-
-			parseJson(::EmailAddress)
-			serializeJson(EmailAddress::value)
+			serialize(EmailAddress::value)
 		}
 	}
 }

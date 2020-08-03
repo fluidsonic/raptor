@@ -6,9 +6,7 @@ package io.fluidsonic.raptor
 import io.fluidsonic.time.*
 
 
-public fun LocalDate.Companion.graphDefinition(): GraphScalarDefinition<LocalDate> = graphScalarDefinition {
+public fun LocalDate.Companion.graphDefinition(): RaptorGraphDefinition = graphScalarDefinition {
 	parseString { parse(it) ?: invalid() }
-
-	parseJson<String> { parse(it) ?: invalid() }
-	serializeJson(LocalDate::toString)
+	serialize(LocalDate::toString)
 }

@@ -1,17 +1,18 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.raptor.graphql.internal.*
 import io.fluidsonic.stdlib.*
 import kotlin.reflect.*
 
 
-sealed class RaptorGraphOperation<Input : Any, Output> {
+public sealed class RaptorGraphOperation<Input : Any, Output> {
 
 	internal abstract val defaultNameSuffixToRemove: String
 	internal abstract val type: RaptorGraphOperationType
 
-	abstract val definition: GraphOperationDefinition<Output> // FIXME fun graphDefinition() like the others?
+	public abstract val definition: RaptorGraphDefinition // FIXME fun graphDefinition() like the others?
 
-	abstract suspend fun RaptorGraphScope.execute(input: Input): Output
+	public abstract suspend fun RaptorGraphScope.execute(input: Input): Output
 
 	internal fun defaultName() =
 		this::class.simpleName
@@ -19,20 +20,20 @@ sealed class RaptorGraphOperation<Input : Any, Output> {
 			?.decapitalize()
 
 
-	companion object
+	public companion object
 }
 
 
-suspend fun <Output> RaptorGraphOperation<Unit, Output>.execute(context: RaptorGraphContext): Output =
+public suspend fun <Output> RaptorGraphOperation<Unit, Output>.execute(context: RaptorGraphContext): Output =
 	execute(context = context, input = Unit)
 
 
-suspend fun <Input : Any, Output> RaptorGraphOperation<Input, Output>.execute(context: RaptorGraphContext, input: Input): Output =
+public suspend fun <Input : Any, Output> RaptorGraphOperation<Input, Output>.execute(context: RaptorGraphContext, input: Input): Output =
 	context.asScope().execute(input)
 
 
 // FIXME check that subclass name doesn't end in Query
-abstract class RaptorGraphMutation<Input : Any, Output> : RaptorGraphOperation<Input, Output>() {
+public abstract class RaptorGraphMutation<Input : Any, Output> : RaptorGraphOperation<Input, Output>() {
 
 	final override val defaultNameSuffixToRemove
 		get() = "Mutation"
@@ -44,7 +45,7 @@ abstract class RaptorGraphMutation<Input : Any, Output> : RaptorGraphOperation<I
 
 
 // FIXME check that subclass name doesn't end in Mutation
-abstract class RaptorGraphQuery<Input : Any, Output> : RaptorGraphOperation<Input, Output>() {
+public abstract class RaptorGraphQuery<Input : Any, Output> : RaptorGraphOperation<Input, Output>() {
 
 	final override val defaultNameSuffixToRemove
 		get() = "Query"
@@ -57,21 +58,21 @@ abstract class RaptorGraphQuery<Input : Any, Output> : RaptorGraphOperation<Inpu
 
 @OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
-inline fun <reified Input : Any, reified Output> RaptorGraphOperation<Input, Output>.define(
+public inline fun <reified Input : Any, reified Output> RaptorGraphOperation<Input, Output>.define(
 	name: String = RaptorGraphDefinition.defaultName,
-	noinline configure: RaptorGraphOperationBuilder<Input, Output>.() -> Unit
-): GraphOperationDefinition<Output> =
-	define(name = name, inputClass = Input::class, outputType = typeOf<Output>(), configure = configure)
+	noinline configure: RaptorGraphOperationBuilder<Input, Output>.() -> Unit,
+): RaptorGraphDefinition =
+	define(name = name, inputType = typeOf<Input>(), outputType = typeOf<Output>(), configure = configure)
 
 
 @OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
-inline fun <reified Input : Any, reified Output> RaptorGraphOperation<Input, Output>.define(
+public inline fun <reified Input : Any, reified Output> RaptorGraphOperation<Input, Output>.define(
 	name: String = RaptorGraphDefinition.defaultName,
 	inputArgumentName: String,
-	configure: RaptorGraphOperationBuilder<Input, Output>.() -> Unit = {}
-): GraphOperationDefinition<Output> =
-	define(name = name, inputClass = Input::class, outputType = typeOf<Output>()) {
+	noinline configure: RaptorGraphOperationBuilder<Input, Output>.() -> Unit = {},
+): RaptorGraphDefinition =
+	define(name = name, inputType = typeOf<Input>(), outputType = typeOf<Output>()) {
 		input {
 			// https://youtrack.jetbrains.com/issue/KT-39434 FIXME is fixed?
 			val inputArgument = argument<Input> {
@@ -88,17 +89,17 @@ inline fun <reified Input : Any, reified Output> RaptorGraphOperation<Input, Out
 
 // FIXME validate KTypes
 @RaptorDsl
-inline fun <Input : Any, Output> RaptorGraphOperation<Input, Output>.define(
+public fun <Input : Any, Output> RaptorGraphOperation<Input, Output>.define(
 	name: String = RaptorGraphDefinition.defaultName,
-	inputClass: KClass<Input>,
+	inputType: KType,
 	outputType: KType,
-	configure: RaptorGraphOperationBuilder<Input, Output>.() -> Unit
-): GraphOperationDefinition<Output> =
+	configure: RaptorGraphOperationBuilder<Input, Output>.() -> Unit,
+): RaptorGraphDefinition =
 	RaptorGraphOperationBuilder(
 		name = name,
-		inputClass = inputClass,
+		inputKotlinType = KotlinType.of(inputType, requireSpecialization = true, allowMaybe = false, allowNull = false),
 		operation = this,
-		outputType = outputType,
+		outputKotlinType = KotlinType.of(outputType, requireSpecialization = true, allowMaybe = false, allowNull = true),
 		stackTrace = stackTrace(skipCount = 1)
 	)
 		.apply(configure)
@@ -106,7 +107,7 @@ inline fun <Input : Any, Output> RaptorGraphOperation<Input, Output>.define(
 
 
 @RaptorDsl
-inline fun <reified Output> RaptorGraphOperation<Unit, Output>.define(
-	name: String = RaptorGraphDefinition.defaultName
-): GraphOperationDefinition<Output> =
+public inline fun <reified Output> RaptorGraphOperation<Unit, Output>.define(
+	name: String = RaptorGraphDefinition.defaultName,
+): RaptorGraphDefinition =
 	define(name = name) {}

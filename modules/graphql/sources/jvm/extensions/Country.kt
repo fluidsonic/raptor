@@ -6,7 +6,7 @@ package io.fluidsonic.raptor
 import io.fluidsonic.stdlib.*
 
 
-public fun Country.Companion.graphDefinition(): GraphObjectDefinition<Country> = graphObjectDefinition<Country> {
+public fun Country.Companion.graphDefinition(): RaptorGraphDefinition = graphObjectDefinition<Country> {
 	field(Country::code)
 	field("name") {
 		val locale by argument<Locale> {

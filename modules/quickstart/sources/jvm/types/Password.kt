@@ -10,11 +10,9 @@ package io.fluidsonic.raptor
 
 	companion object {
 
-		fun graphDefinition(): GraphScalarDefinition<Password> = graphScalarDefinition {
+		fun graphDefinition(): RaptorGraphDefinition = graphScalarDefinition {
 			parseString(::Password)
-
-			parseJson(::Password)
-			serializeJson(Password::value)
+			serialize(Password::value)
 		}
 	}
 }

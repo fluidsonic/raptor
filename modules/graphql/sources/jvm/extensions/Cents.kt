@@ -6,9 +6,7 @@ package io.fluidsonic.raptor
 import io.fluidsonic.stdlib.*
 
 
-public fun Cents.Companion.graphDefinition(): GraphScalarDefinition<Cents> = graphScalarDefinition<Cents> {
-	parseString { Cents(it.toLongOrNull() ?: invalid()) } // FIXME shouldn't need duplication
-
-	parseJson<String> { Cents(it.toLongOrNull() ?: invalid()) }
-	serializeJson { it.value.toString() }
+public fun Cents.Companion.graphDefinition(): RaptorGraphDefinition = graphScalarDefinition<Cents> {
+	parseString { Cents(it.toLongOrNull() ?: invalid()) }
+	serialize { it.value.toString() }
 }

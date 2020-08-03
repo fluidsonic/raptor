@@ -1,5 +1,6 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.raptor.graphql.internal.*
 import io.fluidsonic.stdlib.*
 import kotlin.reflect.*
 
@@ -7,211 +8,29 @@ import kotlin.reflect.*
 // FIXME Can also improve automatic name generation.
 
 
+@OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
-inline fun <reified Value : Any, reified ReferencedValue : Any> graphAliasDefinition(
-	@BuilderInference noinline configure: RaptorGraphAliasDefinitionBuilder<Value, ReferencedValue>.() -> Unit
-): GraphAliasDefinition<Value, ReferencedValue> =
+public inline fun <reified Type : Any, reified ReferencedType : Any> graphAliasDefinition(
+	@BuilderInference noinline configure: RaptorAliasGraphDefinitionBuilder<Type, ReferencedType>.() -> Unit,
+): RaptorGraphDefinition =
 	graphAliasDefinition(
-		valueClass = Value::class,
-		referencedValueClass = ReferencedValue::class,
+		type = typeOf<Type>(),
+		referencedType = typeOf<ReferencedType>(),
 		configure = configure
 	)
 
 
 @RaptorDsl
-fun <Value : Any, ReferencedValue : Any> graphAliasDefinition(
-	valueClass: KClass<Value>,
-	referencedValueClass: KClass<ReferencedValue>,
-	configure: RaptorGraphAliasDefinitionBuilder<Value, ReferencedValue>.() -> Unit
-): GraphAliasDefinition<Value, ReferencedValue> =
-	RaptorGraphAliasDefinitionBuilder(
+public fun <Type : Any, ReferencedType : Any> graphAliasDefinition(
+	type: KType,
+	referencedType: KType,
+	configure: RaptorAliasGraphDefinitionBuilder<Type, ReferencedType>.() -> Unit,
+): RaptorGraphDefinition =
+	RaptorAliasGraphDefinitionBuilder<Type, ReferencedType>(
 		isId = false,
-		referencedValueClass = referencedValueClass,
+		kotlinType = KotlinType.of(type, requireSpecialization = false, allowMaybe = false, allowNull = false),
+		referencedKotlinType = KotlinType.of(referencedType, requireSpecialization = false, allowMaybe = false, allowNull = false),
 		stackTrace = stackTrace(skipCount = 1),
-		valueClass = valueClass
-	)
-		.apply(configure)
-		.build()
-
-
-@RaptorDsl
-inline fun <reified Value : Enum<Value>> graphEnumDefinition(
-	name: String = RaptorGraphDefinition.defaultName,
-	@BuilderInference noinline configure: RaptorGraphEnumDefinitionBuilder<Value>.() -> Unit = {}
-): GraphEnumDefinition<Value> =
-	graphEnumDefinition(
-		name = name,
-		valueClass = Value::class,
-		values = enumValues<Value>().toList(),
-		configure = configure
-	)
-
-
-@RaptorDsl
-fun <Value : Enum<Value>> graphEnumDefinition(
-	name: String = RaptorGraphDefinition.defaultName,
-	valueClass: KClass<Value>,
-	values: List<Value>, // FIXME validate
-	configure: RaptorGraphEnumDefinitionBuilder<Value>.() -> Unit = {}
-): GraphEnumDefinition<Value> =
-	RaptorGraphEnumDefinitionBuilder(
-		name = RaptorGraphDefinition.resolveName(name, valueClass = valueClass),
-		stackTrace = stackTrace(skipCount = 1),
-		valueClass = valueClass,
-		values = values
-	)
-		.apply(configure)
-		.build()
-
-
-@RaptorDsl
-inline fun <reified Value : Any> graphIdAliasDefinition(
-	@BuilderInference noinline configure: RaptorGraphAliasDefinitionBuilder<Value, String>.() -> Unit
-): GraphAliasDefinition<Value, String> =
-	graphIdAliasDefinition(
-		valueClass = Value::class,
-		configure = configure
-	)
-
-
-@RaptorDsl
-fun <Value : Any> graphIdAliasDefinition(
-	valueClass: KClass<Value>,
-	configure: RaptorGraphAliasDefinitionBuilder<Value, String>.() -> Unit
-): GraphAliasDefinition<Value, String> =
-	RaptorGraphAliasDefinitionBuilder(
-		isId = true,
-		referencedValueClass = String::class,
-		stackTrace = stackTrace(skipCount = 1),
-		valueClass = valueClass
-	)
-		.apply(configure)
-		.build()
-
-
-@RaptorDsl
-inline fun <reified Value : Any> graphInputObjectDefinition(
-	name: String = RaptorGraphDefinition.defaultName,
-	@BuilderInference noinline configure: RaptorGraphInputObjectDefinitionBuilder<Value>.() -> Unit
-): GraphInputObjectDefinition<Value> =
-	graphInputObjectDefinition(
-		name = name,
-		valueClass = Value::class,
-		configure = configure
-	)
-
-
-@RaptorDsl
-fun <Value : Any> graphInputObjectDefinition(
-	name: String = RaptorGraphDefinition.defaultName,
-	valueClass: KClass<Value>,
-	configure: RaptorGraphInputObjectDefinitionBuilder<Value>.() -> Unit
-): GraphInputObjectDefinition<Value> =
-	RaptorGraphInputObjectDefinitionBuilder(
-		name = RaptorGraphDefinition.resolveName(name, valueClass = valueClass),
-		stackTrace = stackTrace(skipCount = 1),
-		valueClass = valueClass
-	)
-		.apply(configure)
-		.build()
-
-
-@RaptorDsl
-inline fun <reified Value : Any> graphInterfaceDefinition(
-	name: String = RaptorGraphDefinition.defaultName,
-	@BuilderInference noinline configure: RaptorGraphInterfaceDefinitionBuilder<Value>.() -> Unit
-): GraphInterfaceDefinition<Value> =
-	graphInterfaceDefinition(
-		name = name,
-		valueClass = Value::class,
-		configure = configure
-	)
-
-
-@RaptorDsl
-fun <Value : Any> graphInterfaceDefinition(
-	name: String = RaptorGraphDefinition.defaultName,
-	valueClass: KClass<Value>,
-	configure: RaptorGraphInterfaceDefinitionBuilder<Value>.() -> Unit
-): GraphInterfaceDefinition<Value> =
-	RaptorGraphInterfaceDefinitionBuilder(
-		name = RaptorGraphDefinition.resolveName(name, valueClass = valueClass),
-		stackTrace = stackTrace(skipCount = 1),
-		valueClass = valueClass
-	)
-		.apply(configure)
-		.build()
-
-
-@RaptorDsl
-inline fun <reified Value : Any> graphInterfaceExtensionDefinition(
-	@BuilderInference noinline configure: RaptorGraphInterfaceExtensionDefinitionBuilder<Value>.() -> Unit
-): GraphInterfaceExtensionDefinition<Value> =
-	graphInterfaceExtensionDefinition(
-		valueClass = Value::class,
-		configure = configure
-	)
-
-
-@RaptorDsl
-fun <Value : Any> graphInterfaceExtensionDefinition(
-	valueClass: KClass<Value>,
-	configure: RaptorGraphInterfaceExtensionDefinitionBuilder<Value>.() -> Unit
-): GraphInterfaceExtensionDefinition<Value> =
-	RaptorGraphInterfaceExtensionDefinitionBuilder(
-		stackTrace = stackTrace(skipCount = 1),
-		valueClass = valueClass
-	)
-		.apply(configure)
-		.build()
-
-
-// FIXME put all dsl behind an object for grouping & reuse in nested{} blocks
-@RaptorDsl
-inline fun <reified Value : Any> graphObjectDefinition(
-	name: String = RaptorGraphDefinition.defaultName,
-	@BuilderInference noinline configure: RaptorGraphObjectDefinitionBuilder<Value>.() -> Unit
-): GraphObjectDefinition<Value> =
-	graphObjectDefinition(
-		name = name,
-		valueClass = Value::class,
-		configure = configure
-	)
-
-
-@RaptorDsl
-fun <Value : Any> graphObjectDefinition(
-	name: String = RaptorGraphDefinition.defaultName,
-	valueClass: KClass<Value>,
-	configure: RaptorGraphObjectDefinitionBuilder<Value>.() -> Unit
-): GraphObjectDefinition<Value> =
-	RaptorGraphObjectDefinitionBuilder(
-		name = RaptorGraphDefinition.resolveName(name, valueClass = valueClass),
-		stackTrace = stackTrace(skipCount = 1),
-		valueClass = valueClass
-	)
-		.apply(configure)
-		.build()
-
-
-@RaptorDsl
-inline fun <reified Value : Any> graphObjectExtensionDefinition(
-	@BuilderInference noinline configure: RaptorGraphObjectExtensionDefinitionBuilder<Value>.() -> Unit
-): GraphObjectExtensionDefinition<Value> =
-	graphObjectExtensionDefinition(
-		valueClass = Value::class,
-		configure = configure
-	)
-
-
-@RaptorDsl
-fun <Value : Any> graphObjectExtensionDefinition(
-	valueClass: KClass<Value>,
-	configure: RaptorGraphObjectExtensionDefinitionBuilder<Value>.() -> Unit
-): GraphObjectExtensionDefinition<Value> =
-	RaptorGraphObjectExtensionDefinitionBuilder(
-		stackTrace = stackTrace(skipCount = 1),
-		valueClass = valueClass
 	)
 		.apply(configure)
 		.build()
@@ -219,100 +38,251 @@ fun <Value : Any> graphObjectExtensionDefinition(
 
 @OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
-inline fun <reified Value> graphOperationDefinition(
+public inline fun <reified Type : Enum<Type>> graphEnumDefinition(
+	name: String = RaptorGraphDefinition.defaultName,
+	@BuilderInference noinline configure: RaptorEnumGraphDefinitionBuilder<Type>.() -> Unit = {},
+): RaptorGraphDefinition =
+	graphEnumDefinition(
+		name = name,
+		type = typeOf<Type>(),
+		values = enumValues<Type>().toList(),
+		configure = configure
+	)
+
+
+@RaptorDsl
+public fun <Type : Enum<Type>> graphEnumDefinition(
+	name: String = RaptorGraphDefinition.defaultName,
+	type: KType,
+	values: List<Type>, // FIXME validate
+	configure: RaptorEnumGraphDefinitionBuilder<Type>.() -> Unit = {},
+): RaptorGraphDefinition =
+	RaptorEnumGraphDefinitionBuilder(
+		kotlinType = KotlinType.of(type, requireSpecialization = true, allowMaybe = false, allowNull = false),
+		name = RaptorGraphDefinition.resolveName(name, type = type),
+		stackTrace = stackTrace(skipCount = 1),
+		values = values
+	)
+		.apply(configure)
+		.build()
+
+
+@OptIn(ExperimentalStdlibApi::class)
+@RaptorDsl
+public inline fun <reified Type : Any> graphIdAliasDefinition(
+	@BuilderInference noinline configure: RaptorAliasGraphDefinitionBuilder<Type, String>.() -> Unit,
+): RaptorGraphDefinition =
+	graphIdAliasDefinition(
+		type = typeOf<Type>(),
+		configure = configure
+	)
+
+
+@OptIn(ExperimentalStdlibApi::class)
+@RaptorDsl
+public fun <Type : Any> graphIdAliasDefinition(
+	type: KType,
+	configure: RaptorAliasGraphDefinitionBuilder<Type, String>.() -> Unit,
+): RaptorGraphDefinition =
+	RaptorAliasGraphDefinitionBuilder<Type, String>(
+		isId = true,
+		kotlinType = KotlinType.of(type, requireSpecialization = false, allowMaybe = false, allowNull = false),
+		referencedKotlinType = KotlinType.of(typeOf<String>(), requireSpecialization = false, allowMaybe = false, allowNull = false),
+		stackTrace = stackTrace(skipCount = 1)
+	)
+		.apply(configure)
+		.build()
+
+
+@OptIn(ExperimentalStdlibApi::class)
+@RaptorDsl
+public inline fun <reified Type : Any> graphInputObjectDefinition(
+	name: String = RaptorGraphDefinition.defaultName,
+	@BuilderInference noinline configure: RaptorInputObjectGraphDefinitionBuilder<Type>.() -> Unit,
+): RaptorGraphDefinition =
+	graphInputObjectDefinition(
+		name = name,
+		type = typeOf<Type>(),
+		configure = configure
+	)
+
+
+@RaptorDsl
+public fun <Type : Any> graphInputObjectDefinition(
+	name: String = RaptorGraphDefinition.defaultName,
+	type: KType,
+	configure: RaptorInputObjectGraphDefinitionBuilder<Type>.() -> Unit,
+): RaptorGraphDefinition =
+	RaptorInputObjectGraphDefinitionBuilder<Type>(
+		kotlinType = KotlinType.of(type, requireSpecialization = false, allowMaybe = false, allowNull = false),
+		name = RaptorGraphDefinition.resolveName(name, type = type),
+		stackTrace = stackTrace(skipCount = 1)
+	)
+		.apply(configure)
+		.build()
+
+
+@OptIn(ExperimentalStdlibApi::class)
+@RaptorDsl
+public inline fun <reified Type : Any> graphInterfaceDefinition(
+	name: String = RaptorGraphDefinition.defaultName,
+	@BuilderInference noinline configure: RaptorInterfaceGraphDefinitionBuilder<Type>.() -> Unit,
+): RaptorGraphDefinition =
+	graphInterfaceDefinition(
+		name = name,
+		type = typeOf<Type>(),
+		configure = configure
+	)
+
+
+@RaptorDsl
+public fun <Type : Any> graphInterfaceDefinition(
+	name: String = RaptorGraphDefinition.defaultName,
+	type: KType,
+	configure: RaptorInterfaceGraphDefinitionBuilder<Type>.() -> Unit,
+): RaptorGraphDefinition =
+	RaptorInterfaceGraphDefinitionBuilder<Type>(
+		kotlinType = KotlinType.of(type, requireSpecialization = false, allowMaybe = false, allowNull = false),
+		name = RaptorGraphDefinition.resolveName(name, type = type),
+		stackTrace = stackTrace(skipCount = 1)
+	)
+		.apply(configure)
+		.build()
+
+
+@OptIn(ExperimentalStdlibApi::class)
+@RaptorDsl
+public inline fun <reified Type : Any> graphInterfaceExtensionDefinition(
+	@BuilderInference noinline configure: RaptorInterfaceExtensionGraphDefinitionBuilder<Type>.() -> Unit,
+): RaptorGraphDefinition =
+	graphInterfaceExtensionDefinition(
+		type = typeOf<Type>(),
+		configure = configure
+	)
+
+
+@RaptorDsl
+public fun <Type : Any> graphInterfaceExtensionDefinition(
+	type: KType,
+	configure: RaptorInterfaceExtensionGraphDefinitionBuilder<Type>.() -> Unit,
+): RaptorGraphDefinition =
+	RaptorInterfaceExtensionGraphDefinitionBuilder<Type>(
+		kotlinType = KotlinType.of(type, requireSpecialization = false, allowMaybe = false, allowNull = false),
+		stackTrace = stackTrace(skipCount = 1)
+	)
+		.apply(configure)
+		.build()
+
+
+// FIXME put all dsl behind an object for grouping & reuse in nested{} blocks
+@OptIn(ExperimentalStdlibApi::class)
+@RaptorDsl
+public inline fun <reified Type : Any> graphObjectDefinition(
+	name: String = RaptorGraphDefinition.defaultName,
+	@BuilderInference noinline configure: RaptorObjectGraphDefinitionBuilder<Type>.() -> Unit,
+): RaptorGraphDefinition =
+	graphObjectDefinition(
+		name = name,
+		type = typeOf<Type>(),
+		configure = configure
+	)
+
+
+@RaptorDsl
+public fun <Type : Any> graphObjectDefinition(
+	name: String = RaptorGraphDefinition.defaultName,
+	type: KType,
+	configure: RaptorObjectGraphDefinitionBuilder<Type>.() -> Unit,
+): RaptorGraphDefinition =
+	RaptorObjectGraphDefinitionBuilder<Type>(
+		kotlinType = KotlinType.of(type, requireSpecialization = false, allowMaybe = false, allowNull = false),
+		name = RaptorGraphDefinition.resolveName(name, type = type),
+		stackTrace = stackTrace(skipCount = 1)
+	)
+		.apply(configure)
+		.build()
+
+
+@OptIn(ExperimentalStdlibApi::class)
+@RaptorDsl
+public inline fun <reified Type : Any> graphObjectExtensionDefinition(
+	@BuilderInference noinline configure: RaptorObjectExtensionGraphDefinitionBuilder<Type>.() -> Unit,
+): RaptorGraphDefinition =
+	graphObjectExtensionDefinition(
+		type = typeOf<Type>(),
+		configure = configure
+	)
+
+
+@RaptorDsl
+public fun <Type : Any> graphObjectExtensionDefinition(
+	type: KType,
+	configure: RaptorObjectExtensionGraphDefinitionBuilder<Type>.() -> Unit,
+): RaptorGraphDefinition =
+	RaptorObjectExtensionGraphDefinitionBuilder<Type>(
+		kotlinType = KotlinType.of(type, requireSpecialization = false, allowMaybe = false, allowNull = false),
+		stackTrace = stackTrace(skipCount = 1)
+	)
+		.apply(configure)
+		.build()
+
+
+@OptIn(ExperimentalStdlibApi::class)
+@RaptorDsl
+public inline fun <reified Value> graphOperationDefinition(
 	name: String,
-	type: RaptorGraphOperationType,
-	@BuilderInference noinline configure: RaptorGraphOperationDefinitionBuilder<Value>.() -> Unit
-): GraphOperationDefinition<Value> =
+	operationType: RaptorGraphOperationType,
+	@BuilderInference noinline configure: RaptorGraphOperationDefinitionBuilder<Value>.() -> Unit,
+): RaptorGraphDefinition =
 	graphOperationDefinition(
 		name = name,
-		type = type,
-		valueType = typeOf<Value>(),
+		operationType = operationType,
+		type = typeOf<Value>(),
 		configure = configure
 	)
 
 
 @RaptorDsl
-fun <Value> graphOperationDefinition(
+public fun <Value> graphOperationDefinition(
 	name: String,
-	type: RaptorGraphOperationType,
-	valueType: KType,
-	configure: RaptorGraphOperationDefinitionBuilder<Value>.() -> Unit
-): GraphOperationDefinition<Value> =
+	type: KType,
+	operationType: RaptorGraphOperationType,
+	configure: RaptorGraphOperationDefinitionBuilder<Value>.() -> Unit,
+): RaptorGraphDefinition =
 	RaptorGraphOperationDefinitionBuilder<Value>(
 		additionalDefinitions = emptyList(),
+		kotlinType = KotlinType.of(type, requireSpecialization = true, allowMaybe = false, allowNull = true),
 		name = name,
-		type = type,
-		stackTrace = stackTrace(skipCount = 1),
-		valueType = valueType
+		operationType = operationType,
+		stackTrace = stackTrace(skipCount = 1)
 	)
 		.apply(configure)
 		.build()
 
 
+@OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
-inline fun <reified Value : Any> graphScalarDefinition(
+public inline fun <reified Value : Any> graphScalarDefinition(
 	name: String = RaptorGraphDefinition.defaultName,
-	@BuilderInference noinline configure: RaptorGraphScalarDefinitionBuilder<Value>.() -> Unit
-): GraphScalarDefinition<Value> =
+	@BuilderInference noinline configure: RaptorScalarGraphDefinitionBuilder<Value>.() -> Unit,
+): RaptorGraphDefinition =
 	graphScalarDefinition(
 		name = name,
-		valueClass = Value::class,
+		type = typeOf<Value>(),
 		configure = configure
 	)
 
 
 @RaptorDsl
-fun <Value : Any> graphScalarDefinition(
+public fun <Type : Any> graphScalarDefinition(
 	name: String = RaptorGraphDefinition.defaultName,
-	valueClass: KClass<Value>,
-	configure: RaptorGraphScalarDefinitionBuilder<Value>.() -> Unit
-): GraphScalarDefinition<Value> =
-	RaptorGraphScalarDefinitionBuilder(
-		name = RaptorGraphDefinition.resolveName(name, valueClass = valueClass),
-		stackTrace = stackTrace(skipCount = 1),
-		valueClass = valueClass
+	type: KType,
+	configure: RaptorScalarGraphDefinitionBuilder<Type>.() -> Unit,
+): RaptorGraphDefinition =
+	RaptorScalarGraphDefinitionBuilder<Type>(
+		kotlinType = KotlinType.of(type, requireSpecialization = false, allowMaybe = false, allowNull = false),
+		name = RaptorGraphDefinition.resolveName(name, type = type),
+		stackTrace = stackTrace(skipCount = 1)
 	)
 		.apply(configure)
 		.build()
-
-
-internal fun checkGraphCompatibility(clazz: KClass<*>) {
-	check(isGraphRepresentable(clazz)) {
-		error("Kotlin type is not representable in GraphQL: $clazz")
-	}
-}
-
-
-internal fun checkGraphCompatibility(type: KType, isMaybeAllowed: Boolean = false) {
-	val isRepresentable = if (isMaybeAllowed && type.classifier == Maybe::class)
-		isGraphRepresentable(type.arguments.first())
-	else
-		isGraphRepresentable(type)
-
-	check(isRepresentable) {
-		error("Kotlin type is not representable in GraphQL: $type")
-	}
-}
-
-
-private fun isGraphRepresentable(clazz: KClass<*>): Boolean =
-	when (clazz) {
-		Any::class, Nothing::class -> false
-		else -> clazz.typeParameters.isEmpty()
-	}
-
-
-private fun isGraphRepresentable(type: KType): Boolean =
-	when (val classifier = type.classifier) {
-		Collection::class, List::class, Set::class -> isGraphRepresentable(type.arguments.first())
-		is KClass<*> -> isGraphRepresentable(classifier)
-		else -> false
-	}
-
-
-private fun isGraphRepresentable(typeProjection: KTypeProjection): Boolean =
-	when (val type = typeProjection.type) {
-		null -> false
-		else -> isGraphRepresentable(type)
-	}

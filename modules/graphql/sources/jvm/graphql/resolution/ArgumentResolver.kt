@@ -1,0 +1,98 @@
+package io.fluidsonic.raptor.graphql.internal
+
+import io.fluidsonic.graphql.*
+import io.fluidsonic.raptor.*
+import io.fluidsonic.stdlib.*
+
+
+internal class ArgumentResolver(
+	private val factoryName: String,
+) {
+
+	private val currentContext = ThreadLocal<Context>() // FIXME won't work with coroutines
+
+
+	@Suppress("UNCHECKED_CAST")
+	private fun Context.resolve(name: String): Any? {
+		val context = execution.raptorContext
+			?: return null
+
+		val gqlDefinition = argumentDefinitions.first { it.name == name }
+		val argument = checkNotNull(gqlDefinition.raptorArgument)
+
+		val expectsMaybe = argument.kotlinType.classifier == Maybe::class
+		if (expectsMaybe && !argumentValues.containsKey(name))
+			return Maybe.nothing
+
+		var value = argumentValues[name]?.let { value ->
+			val aliasType = gqlDefinition.raptorType as? AliasGraphType
+			if (aliasType != null) {
+				val inputScope = object : RaptorGraphInputScope, RaptorGraphScope by context { // FIXME improve
+
+					override fun invalid(details: String?): Nothing =
+						error("invalid argument") // FIXME
+				}
+
+				inputScope.parseAliasValue(value, parse = aliasType.convertReferencedToAlias, typeRef = gqlDefinition.type)
+			}
+			else
+				value
+		}
+
+		if (expectsMaybe)
+			value = Maybe.of(value)
+
+		return value
+	}
+
+
+	fun resolveArgument(name: String, variableName: String): Any? {
+		val context = currentContext.get()
+			?: error("Variable '$variableName' is delegated to argument(\"'$name'\") and can only be accessed within '$factoryName { … }'.")
+
+		return context.resolve(name = name)
+	}
+
+
+	// FIXME Consolidate list handling
+	private fun RaptorGraphInputScope.parseAliasValue(value: Any, parse: RaptorGraphInputScope.(input: Any) -> Any, typeRef: GTypeRef): Any =
+		when (typeRef) {
+			is GListTypeRef -> (value as Collection<Any?>).map { element ->
+				element?.let { parseAliasValue(it, parse = parse, typeRef = typeRef.elementType) }
+			}
+			is GNamedTypeRef -> parse(value)
+			is GNonNullTypeRef -> parseAliasValue(value, parse = parse, typeRef = typeRef.nullableRef)
+		}
+
+
+	internal inline fun <Result> withArguments(
+		// FIXME
+		argumentValues: Map<String, Any?>,
+		argumentDefinitions: Collection<GArgumentDefinition>,
+		context: GExecutorContext,
+		action: () -> Result,
+	): Result {
+		val previousContext = currentContext.get()
+
+		currentContext.set(Context(
+			argumentDefinitions = argumentDefinitions,
+			argumentValues = argumentValues,
+			execution = context
+		))
+
+		try {
+			return action()
+		}
+		finally {
+			currentContext.set(previousContext)
+		}
+	}
+
+
+	@Suppress("ProtectedInFinal")
+	protected class Context(
+		val argumentDefinitions: Collection<GArgumentDefinition>,
+		val argumentValues: Map<String, Any?>,
+		val execution: GExecutorContext,
+	)
+}

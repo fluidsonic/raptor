@@ -7,33 +7,31 @@ import kotlin.reflect.*
 
 
 @RaptorDsl
-class RaptorGraphArgumentDefinitionBuilder<Value> internal constructor(
+public class RaptorGraphArgumentDefinitionBuilder<Value> internal constructor(
+	private val kotlinType: KotlinType,
 	private val resolver: ArgumentResolver,
-	private val valueType: KType
+	private val stackTrace: List<StackTraceElement>,
 ) {
 
 	private var default: GValue? = null
-	private val isMaybe = valueType.classifier == Maybe::class
+	private val isMaybe = kotlinType.classifier == Maybe::class
 	private var name: String? = null
 
 
-	init {
-		checkGraphCompatibility(valueType, isMaybeAllowed = true)
-	}
-
-
 	internal fun build() =
-		GraphArgumentDefinition<Value>(
-			default = default,
+		GraphArgumentDefinition(
+			defaultValue = default,
+			description = null, // FIXME
+			kotlinType = kotlinType,
 			name = name,
 			resolver = resolver,
-			valueType = valueType
+			stackTrace = stackTrace
 		)
 
 
 	@RaptorDsl
 	private fun default(default: GValue) {
-		check(!isMaybe) { "An optional argument of type '$valueType' cannot have a default value." }
+		check(!isMaybe) { "An optional argument of type '$kotlinType' cannot have a default value." }
 		check(this.default === null) { "Cannot define multiple defaults." }
 
 		this.default = default
@@ -41,96 +39,129 @@ class RaptorGraphArgumentDefinitionBuilder<Value> internal constructor(
 
 
 	// FIXME support List and InputObject
-	// FIXME this is annoying, esp. Enum. can't we automate that?
+	// FIXME this is annoying, esp. Enum. we need a wrapper
 
 	@RaptorDsl
-	fun defaultNull() =
+	public fun defaultNull() {
 		default(GNullValue.withoutOrigin)
+	}
 
 
 	@RaptorDsl
-	fun defaultBoolean(default: Boolean) =
+	public fun defaultBoolean(default: Boolean) {
 		default(GBooleanValue(default))
+	}
 
 
 	@RaptorDsl
-	fun defaultEnumValue(default: String) =
+	public fun defaultEnumValue(default: String) {
 		default(GEnumValue(default))
+	}
 
 
 	@RaptorDsl
-	fun defaultFloat(default: Double) =
+	public fun defaultFloat(default: Double) {
 		default(GFloatValue(default))
+	}
 
 
 	@RaptorDsl
-	fun defaultInt(default: Int) =
+	public fun defaultInt(default: Int) {
 		default(GIntValue(default))
+	}
 
 
 	@RaptorDsl
-	fun defaultString(default: String) =
+	public fun defaultString(default: String) {
 		default(GStringValue(default))
+	}
 
 
 	@RaptorDsl
-	fun name(name: String) {
+	public fun name(name: String) {
 		check(this.name === null) { "Cannot define multiple names." }
 
 		this.name = name
 	}
 
 
-	interface Container {
+	public interface Container {
 
 		@RaptorDsl
-		fun <ArgumentValue> argument(
-			valueType: KType,
-			configure: RaptorGraphArgumentDefinitionBuilder<ArgumentValue>.() -> Unit = {}
-		): GraphArgumentDefinition<ArgumentValue>
+		public fun <ArgumentValue> argument(
+			type: KType,
+			configure: RaptorGraphArgumentDefinitionBuilder<ArgumentValue>.() -> Unit = {},
+		): RaptorGraphArgumentDelegate<ArgumentValue>
 	}
 
 
 	internal interface ContainerInternal : Container {
 
-		fun add(argument: GraphArgumentDefinition<*>)
+		fun add(argument: GraphArgumentDefinition)
 	}
 
 
-	internal class ContainerImpl(factoryName: String) : ContainerInternal {
+	internal class ContainerImpl(
+		private val parentKotlinType: KotlinType, // fIXME
+		factoryName: String,
+	) : ContainerInternal {
 
-		val arguments: MutableList<GraphArgumentDefinition<*>> = mutableListOf()
+		val argumentDefinitions: MutableList<GraphArgumentDefinition> = mutableListOf()
 		val resolver = ArgumentResolver(factoryName = factoryName)
 
 
-		override fun add(argument: GraphArgumentDefinition<*>) {
+		override fun add(argument: GraphArgumentDefinition) {
 			// FIXME we need to evaluate all arguments lazily when the parent builder is done because provideDelegate won't be called yet and name is null
-			if (arguments.any { it.name === argument.name })
+			if (argumentDefinitions.any { it.name === argument.name })
 				error("Cannot define multiple arguments named '${argument.name}'.")
 
-			arguments += argument
+			argumentDefinitions += argument
 		}
 
 
 		@RaptorDsl
 		override fun <ArgumentValue> argument(
-			valueType: KType,
-			configure: RaptorGraphArgumentDefinitionBuilder<ArgumentValue>.() -> Unit
-		): GraphArgumentDefinition<ArgumentValue> =
+			type: KType,
+			configure: RaptorGraphArgumentDefinitionBuilder<ArgumentValue>.() -> Unit,
+		): RaptorGraphArgumentDelegate<ArgumentValue> =
 			RaptorGraphArgumentDefinitionBuilder<ArgumentValue>(
+				kotlinType = KotlinType.of(type, requireSpecialization = true, allowMaybe = true, allowNull = true),
 				resolver = resolver,
-				valueType = valueType
+				stackTrace = stackTrace(skipCount = 1)
 			)
 				.apply(configure)
 				.build()
 				.also(this::add)
+				.let {
+					@Suppress("UNCHECKED_CAST")
+					it as RaptorGraphArgumentDelegate<ArgumentValue>
+				}
+
+
+		@RaptorDsl
+		internal fun <ArgumentValue> argument(
+			type: KotlinType,
+			configure: RaptorGraphArgumentDefinitionBuilder<ArgumentValue>.() -> Unit,
+		): RaptorGraphArgumentDelegate<ArgumentValue> =
+			RaptorGraphArgumentDefinitionBuilder<ArgumentValue>(
+				kotlinType = type,
+				resolver = resolver,
+				stackTrace = stackTrace(skipCount = 1)
+			)
+				.apply(configure)
+				.build()
+				.also(this::add)
+				.let {
+					@Suppress("UNCHECKED_CAST")
+					it as RaptorGraphArgumentDelegate<ArgumentValue>
+				}
 	}
 }
 
 
 @OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
-inline fun <reified ArgumentValue> RaptorGraphArgumentDefinitionBuilder.Container.argument(
-	noinline configure: RaptorGraphArgumentDefinitionBuilder<ArgumentValue>.() -> Unit = {}
-): GraphArgumentDefinition<ArgumentValue> =
-	argument(valueType = typeOf<ArgumentValue>(), configure = configure)
+public inline fun <reified ArgumentValue> RaptorGraphArgumentDefinitionBuilder.Container.argument(
+	noinline configure: RaptorGraphArgumentDefinitionBuilder<ArgumentValue>.() -> Unit = {},
+): RaptorGraphArgumentDelegate<ArgumentValue> =
+	argument(type = typeOf<ArgumentValue>(), configure = configure)

@@ -15,11 +15,9 @@ package io.fluidsonic.raptor
 		)
 
 
-		fun graphDefinition(): GraphScalarDefinition<PhoneNumber> = graphScalarDefinition {
+		fun graphDefinition(): RaptorGraphDefinition = graphScalarDefinition {
 			parseString(::PhoneNumber)
-
-			parseJson(::PhoneNumber)
-			serializeJson(PhoneNumber::value)
+			serialize(PhoneNumber::value)
 		}
 	}
 }

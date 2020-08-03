@@ -1,24 +1,24 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.raptor.graphql.internal.*
 import io.fluidsonic.stdlib.*
-import kotlin.reflect.*
-import kotlin.reflect.full.*
 
 
 @RaptorDsl
-class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi internal constructor(
+public class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi internal constructor(
 	name: String,
-	private val inputClass: KClass<Input>,
+	private val inputKotlinType: KotlinType,
 	internal val operation: RaptorGraphOperation<Input, Output>,
-	internal val outputType: KType,
-	private val stackTrace: List<StackTraceElement>
+	internal val outputKotlinType: KotlinType,
+	private val stackTrace: List<StackTraceElement>,
 ) {
 
-	internal val additionalDefinitions: MutableList<GraphNamedTypeDefinition<*>> = mutableListOf()
-	internal var outputObjectDefinition: GraphObjectDefinition<*>? = null
+	internal val additionalDefinitions: MutableList<RaptorGraphDefinition> = mutableListOf()
+	internal var outputObjectDefinition: RaptorGraphDefinition? = null
 
 	private val argumentContainer = RaptorGraphArgumentDefinitionBuilder.ContainerImpl(
-		factoryName = "factory"
+		factoryName = "factory",
+		parentKotlinType = inputKotlinType
 	)
 	private var description: String? = null
 	private var inputFactory: (RaptorGraphScope.() -> Input)? = null
@@ -31,9 +31,9 @@ class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi internal co
 
 
 	@PublishedApi
-	internal fun build(): GraphOperationDefinition<Output> {
+	internal fun build(): RaptorGraphDefinition {
 		@Suppress("UNCHECKED_CAST")
-		if (inputFactory == null && inputClass == Unit::class)
+		if (inputFactory == null && inputKotlinType.classifier == Unit::class)
 			inputFactory = { Unit as Input }
 
 		val description = description
@@ -42,10 +42,10 @@ class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi internal co
 
 		return RaptorGraphOperationDefinitionBuilder<Output>(
 			additionalDefinitions = additionalDefinitions,
+			kotlinType = outputKotlinType,
 			name = name,
-			type = operation.type,
+			operationType = operation.type,
 			stackTrace = stackTrace,
-			valueType = outputType,
 			argumentContainer = argumentContainer
 		)
 			.apply {
@@ -72,7 +72,7 @@ class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi internal co
 
 
 	@RaptorDsl
-	fun input(configure: InputBuilder.() -> Unit) {
+	public fun input(configure: InputBuilder.() -> Unit) {
 		check(inputFactory === null) { "Cannot define multiple inputs." }
 
 		InputBuilder().apply(configure)
@@ -82,23 +82,23 @@ class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi internal co
 
 
 	@RaptorDsl
-	fun inputObject(
+	public fun inputObject(
 		name: String = RaptorGraphDefinition.defaultName,
-		configure: RaptorGraphInputObjectDefinitionBuilder<Input>.() -> Unit
+		configure: RaptorInputObjectGraphDefinitionBuilder<Input>.() -> Unit,
 	) {
 		check(inputFactory === null) { "Cannot define multiple inputs." }
 
-		val definition = RaptorGraphInputObjectDefinitionBuilder(
+		val definition = RaptorInputObjectGraphDefinitionBuilder<Input>(
+			kotlinType = inputKotlinType,
 			name = RaptorGraphDefinition.resolveName(name, defaultName = this::defaultInputObjectName),
-			stackTrace = stackTrace(skipCount = 1),
-			valueClass = inputClass
+			stackTrace = stackTrace(skipCount = 1)
 		)
 			.apply(configure)
 			.build()
 
 		additionalDefinitions += definition
 
-		val input by argumentContainer.argument<Input>(valueType = inputClass.starProjectedType) {
+		val input by argumentContainer.argument<Input>(type = inputKotlinType) {
 			// FIXME configurable name & description
 			name("input")
 		}
@@ -108,10 +108,10 @@ class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi internal co
 
 
 	@RaptorDsl
-	inner class InputBuilder internal constructor() : RaptorGraphArgumentDefinitionBuilder.Container by argumentContainer {
+	public inner class InputBuilder internal constructor() : RaptorGraphArgumentDefinitionBuilder.Container by argumentContainer {
 
 		@RaptorDsl
-		fun factory(factory: RaptorGraphScope.() -> Input) {
+		public fun factory(factory: RaptorGraphScope.() -> Input) {
 			check(this@RaptorGraphOperationBuilder.inputFactory === null) { "Cannot define multiple factories." }
 
 			this@RaptorGraphOperationBuilder.inputFactory = factory
@@ -121,17 +121,17 @@ class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi internal co
 
 
 @RaptorDsl
-fun <Output : Any> RaptorGraphOperationBuilder<*, Output>.outputObject(
+public fun <Output : Any> RaptorGraphOperationBuilder<*, Output>.outputObject(
 	name: String = RaptorGraphDefinition.defaultName,
-	configure: RaptorGraphObjectDefinitionBuilder<Output>.() -> Unit
+	configure: RaptorObjectGraphDefinitionBuilder<Output>.() -> Unit,
 ) {
 	check(outputObjectDefinition === null) { "Cannot define multiple outputs." }
 
 	@Suppress("UNCHECKED_CAST")
-	val definition = RaptorGraphObjectDefinitionBuilder(
+	val definition = RaptorObjectGraphDefinitionBuilder<Output>(
+		kotlinType = outputKotlinType,
 		name = RaptorGraphDefinition.resolveName(name, defaultName = this::defaultOutputObjectName),
-		stackTrace = stackTrace(skipCount = 1),
-		valueClass = outputType.classifier as KClass<Output>
+		stackTrace = stackTrace(skipCount = 1)
 	)
 		.apply(configure)
 		.build()

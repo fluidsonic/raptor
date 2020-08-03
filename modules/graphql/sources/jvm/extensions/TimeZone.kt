@@ -6,9 +6,7 @@ package io.fluidsonic.raptor
 import io.fluidsonic.time.*
 
 
-public fun TimeZone.Companion.graphDefinition(): GraphScalarDefinition<TimeZone> = graphScalarDefinition {
+public fun TimeZone.Companion.graphDefinition(): RaptorGraphDefinition = graphScalarDefinition {
 	parseString { withId(it) ?: invalid() }
-
-	parseJson<String> { withId(it) ?: invalid() }
-	serializeJson(TimeZone::toString)
+	serialize(TimeZone::toString)
 }

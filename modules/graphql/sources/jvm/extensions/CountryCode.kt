@@ -6,9 +6,7 @@ package io.fluidsonic.raptor
 import io.fluidsonic.stdlib.*
 
 
-public fun CountryCode.Companion.graphDefinition(): GraphScalarDefinition<CountryCode> = graphScalarDefinition {
+public fun CountryCode.Companion.graphDefinition(): RaptorGraphDefinition = graphScalarDefinition {
 	parseString(::CountryCode)
-
-	parseJson(::CountryCode)
-	serializeJson(CountryCode::value)
+	serialize(CountryCode::value)
 }

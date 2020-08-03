@@ -11,11 +11,9 @@ internal val Locale.code: String
 	get() = toPlatform().toLanguageTag()
 
 
-public fun Locale.Companion.graphDefinition(): GraphScalarDefinition<Locale> = graphScalarDefinition {
+public fun Locale.Companion.graphDefinition(): RaptorGraphDefinition = graphScalarDefinition {
 	parseString { forCodeOrNull(it) ?: invalid() } // FIXME shouldn't need duplication
-
-	parseJson<String> { forCodeOrNull(it) ?: invalid() }
-	serializeJson { it.code }
+	serialize(Locale::code)
 }
 
 

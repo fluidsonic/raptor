@@ -1,8 +1,10 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.raptor.graphql.internal.*
+
 
 // FIXME taggable
-class GraphRaptorComponent internal constructor() : RaptorComponent.Default<GraphRaptorComponent>() {
+public class GraphRaptorComponent internal constructor() : RaptorComponent.Default<GraphRaptorComponent>() {
 
 	internal val definitions: MutableList<RaptorGraphDefinition> = mutableListOf()
 	internal var includesDefaultDefinitions = false
@@ -10,7 +12,9 @@ class GraphRaptorComponent internal constructor() : RaptorComponent.Default<Grap
 
 	internal fun toGraphRoute() =
 		GraphRoute(
-			system = GraphSystem(definitions = definitions)
+			system = GraphSystemDefinitionBuilder.build(definitions)
+				.let(GraphTypeSystemBuilder::build)
+				.let(GraphSystemBuilder::build)
 		)
 
 
