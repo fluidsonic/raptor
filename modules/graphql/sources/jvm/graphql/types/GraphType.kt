@@ -118,7 +118,7 @@ internal class ObjectGraphType(
 
 
 	override val isOutput: Boolean
-		get() = false
+		get() = true
 }
 
 

@@ -7,6 +7,7 @@ import kotlin.reflect.*
 internal data class KotlinType(
 	val classifier: KClass<*>,
 	val typeArgument: KotlinType? = null,
+	val isNullable: Boolean,
 ) {
 
 	init {
@@ -26,8 +27,9 @@ internal data class KotlinType(
 		get() = !isGeneric || (typeArgument?.isSpecialized ?: false)
 
 
-	fun specialize(typeArgument: KClass<*>): KotlinType {
-		check(!isSpecialized)
+	fun specialize(typeArgument: KotlinType): KotlinType {
+		if (isSpecialized)
+			return this
 
 		return when (val thisTypeArgument = this.typeArgument) {
 			null -> withTypeArgument(typeArgument)
@@ -36,14 +38,22 @@ internal data class KotlinType(
 	}
 
 
-	override fun toString() = when (typeArgument) {
-		null -> classifier.qualifiedName ?: "(unnamed class)"
-		else -> "${classifier.qualifiedName ?: "(unnamed class)"}<$typeArgument>"
+	override fun toString() = buildString {
+		append(classifier.qualifiedName ?: "(unnamed class)")
+		typeArgument?.let { typeArgument ->
+			append("<")
+			append(typeArgument)
+			append(">")
+		}
+		if (isNullable)
+			append("?")
 	}
 
 
-	fun withTypeArgument(classifier: KClass<*>?) =
-		withTypeArgument(classifier?.let { KotlinType(classifier = it) })
+	fun withNullable(isNullable: Boolean) = when (isNullable) {
+		this.isNullable -> this
+		else -> copy(isNullable = isNullable)
+	}
 
 
 	fun withTypeArgument(typeArgument: KotlinType?) =
@@ -58,27 +68,55 @@ internal data class KotlinType(
 
 		fun of(
 			type: KType,
-			requireSpecialization: Boolean,
+			containingType: KotlinType?,
 			allowMaybe: Boolean,
 			allowNull: Boolean,
+			allowedVariance: KVariance,
+			requireSpecialization: Boolean,
 		): KotlinType =
-			of(type = type, requireSpecialization = requireSpecialization, allowMaybe = allowMaybe, allowNull = allowNull, rootType = type)
+			of(
+				type = type,
+				containingType = containingType,
+				allowMaybe = allowMaybe,
+				allowNull = allowNull,
+				allowedTypeParameterName = containingType?.classifier?.typeParameters?.singleOrNull()?.name,
+				allowedVariance = allowedVariance,
+				requireSpecialization = requireSpecialization,
+				rootType = type
+			) ?: error("Type '$type' is not valid here.")
 
 
-		// FIXME check variance
 		private fun of(
 			type: KType,
-			requireSpecialization: Boolean,
+			containingType: KotlinType?,
 			allowMaybe: Boolean,
 			allowNull: Boolean,
+			allowedTypeParameterName: String?,
+			allowedVariance: KVariance,
+			requireSpecialization: Boolean,
 			rootType: KType,
-		): KotlinType {
+		): KotlinType? {
 			if (!allowNull && type.isMarkedNullable)
 				error("Type '$rootType' cannot be used here. The Kotlin type must not be nullable.")
 			if (!allowMaybe && type.classifier == Maybe::class)
 				error("Type '$rootType' cannot be used here. 'Maybe' is not allowed in this context.")
 			if (type.arguments.size > 1)
 				error("Type '$rootType' cannot be used here. Kotlin types with more than one type parameter are not supported.")
+
+			fun checkTypeVariance(variance: KVariance?) {
+				when (variance) {
+					KVariance.INVARIANT -> Unit
+					else -> check(variance == allowedVariance) {
+						val varianceString = when (allowedVariance) {
+							KVariance.INVARIANT -> "invariant"
+							KVariance.IN -> "'in'"
+							KVariance.OUT -> "'out'"
+						}
+
+						"Type '$rootType' cannot be used here. Type arguments in this position must have $varianceString variance."
+					}
+				}
+			}
 
 			return when (val classifier = type.classifier) {
 				is KClass<*> -> when (classifier) {
@@ -87,19 +125,34 @@ internal data class KotlinType(
 
 					else -> KotlinType(
 						classifier = classifier,
+						isNullable = type.isMarkedNullable,
 						typeArgument = type.arguments.firstOrNull()?.let { projection ->
+							checkTypeVariance(projection.variance ?: classifier.typeParameters.first().variance)
+
 							when (val argument = projection.type) {
 								null -> null
 								else -> of(
 									type = argument,
-									requireSpecialization = requireSpecialization,
+									containingType = containingType,
 									allowMaybe = false,
 									allowNull = allowNull,
+									allowedTypeParameterName = allowedTypeParameterName,
+									allowedVariance = allowedVariance,
+									requireSpecialization = requireSpecialization,
 									rootType = rootType
 								)
 							}
 						}
 					)
+				}
+
+				is KTypeParameter -> {
+					checkTypeVariance(classifier.variance)
+
+					if (allowedTypeParameterName != null && classifier.name == allowedTypeParameterName)
+						null
+					else
+						error("Type '$rootType' cannot be used here. Type parameters must resolve to the type parameter of the containing type.")
 				}
 
 				else -> error("Type '$rootType' cannot be used here.")

@@ -28,8 +28,22 @@ public fun <Type : Any, ReferencedType : Any> graphAliasDefinition(
 ): RaptorGraphDefinition =
 	RaptorAliasGraphDefinitionBuilder<Type, ReferencedType>(
 		isId = false,
-		kotlinType = KotlinType.of(type, requireSpecialization = false, allowMaybe = false, allowNull = false),
-		referencedKotlinType = KotlinType.of(referencedType, requireSpecialization = false, allowMaybe = false, allowNull = false),
+		kotlinType = KotlinType.of(
+			type = type,
+			containingType = null,
+			allowMaybe = false,
+			allowNull = false,
+			allowedVariance = KVariance.OUT, // TODO prb. wrong
+			requireSpecialization = false
+		),
+		referencedKotlinType = KotlinType.of(
+			type = referencedType,
+			containingType = null,
+			allowMaybe = false,
+			allowNull = false,
+			allowedVariance = KVariance.OUT, // TODO prb. wrong
+			requireSpecialization = false
+		),
 		stackTrace = stackTrace(skipCount = 1),
 	)
 		.apply(configure)
@@ -58,7 +72,14 @@ public fun <Type : Enum<Type>> graphEnumDefinition(
 	configure: RaptorEnumGraphDefinitionBuilder<Type>.() -> Unit = {},
 ): RaptorGraphDefinition =
 	RaptorEnumGraphDefinitionBuilder(
-		kotlinType = KotlinType.of(type, requireSpecialization = true, allowMaybe = false, allowNull = false),
+		kotlinType = KotlinType.of(
+			type = type,
+			containingType = null,
+			allowMaybe = false,
+			allowNull = false,
+			allowedVariance = KVariance.OUT, // TODO prb. wrong
+			requireSpecialization = true
+		),
 		name = RaptorGraphDefinition.resolveName(name, type = type),
 		stackTrace = stackTrace(skipCount = 1),
 		values = values
@@ -86,8 +107,22 @@ public fun <Type : Any> graphIdAliasDefinition(
 ): RaptorGraphDefinition =
 	RaptorAliasGraphDefinitionBuilder<Type, String>(
 		isId = true,
-		kotlinType = KotlinType.of(type, requireSpecialization = false, allowMaybe = false, allowNull = false),
-		referencedKotlinType = KotlinType.of(typeOf<String>(), requireSpecialization = false, allowMaybe = false, allowNull = false),
+		kotlinType = KotlinType.of(
+			type = type,
+			containingType = null,
+			allowMaybe = false,
+			allowNull = false,
+			allowedVariance = KVariance.OUT, // TODO prb. wrong
+			requireSpecialization = false
+		),
+		referencedKotlinType = KotlinType.of(
+			type = typeOf<String>(),
+			containingType = null,
+			allowMaybe = false,
+			allowNull = false,
+			allowedVariance = KVariance.OUT, // TODO prb. wrong
+			requireSpecialization = false
+		),
 		stackTrace = stackTrace(skipCount = 1)
 	)
 		.apply(configure)
@@ -114,7 +149,14 @@ public fun <Type : Any> graphInputObjectDefinition(
 	configure: RaptorInputObjectGraphDefinitionBuilder<Type>.() -> Unit,
 ): RaptorGraphDefinition =
 	RaptorInputObjectGraphDefinitionBuilder<Type>(
-		kotlinType = KotlinType.of(type, requireSpecialization = false, allowMaybe = false, allowNull = false),
+		kotlinType = KotlinType.of(
+			type = type,
+			containingType = null,
+			allowMaybe = false,
+			allowNull = false,
+			allowedVariance = KVariance.OUT, // TODO prb. wrong
+			requireSpecialization = false
+		),
 		name = RaptorGraphDefinition.resolveName(name, type = type),
 		stackTrace = stackTrace(skipCount = 1)
 	)
@@ -142,7 +184,14 @@ public fun <Type : Any> graphInterfaceDefinition(
 	configure: RaptorInterfaceGraphDefinitionBuilder<Type>.() -> Unit,
 ): RaptorGraphDefinition =
 	RaptorInterfaceGraphDefinitionBuilder<Type>(
-		kotlinType = KotlinType.of(type, requireSpecialization = false, allowMaybe = false, allowNull = false),
+		kotlinType = KotlinType.of(
+			type = type,
+			containingType = null,
+			allowMaybe = false,
+			allowNull = false,
+			allowedVariance = KVariance.OUT, // TODO prb. wrong
+			requireSpecialization = false
+		),
 		name = RaptorGraphDefinition.resolveName(name, type = type),
 		stackTrace = stackTrace(skipCount = 1)
 	)
@@ -167,7 +216,14 @@ public fun <Type : Any> graphInterfaceExtensionDefinition(
 	configure: RaptorInterfaceExtensionGraphDefinitionBuilder<Type>.() -> Unit,
 ): RaptorGraphDefinition =
 	RaptorInterfaceExtensionGraphDefinitionBuilder<Type>(
-		kotlinType = KotlinType.of(type, requireSpecialization = false, allowMaybe = false, allowNull = false),
+		kotlinType = KotlinType.of(
+			type = type,
+			containingType = null,
+			allowMaybe = false,
+			allowNull = false,
+			allowedVariance = KVariance.OUT, // TODO prb. wrong
+			requireSpecialization = false
+		),
 		stackTrace = stackTrace(skipCount = 1)
 	)
 		.apply(configure)
@@ -195,7 +251,14 @@ public fun <Type : Any> graphObjectDefinition(
 	configure: RaptorObjectGraphDefinitionBuilder<Type>.() -> Unit,
 ): RaptorGraphDefinition =
 	RaptorObjectGraphDefinitionBuilder<Type>(
-		kotlinType = KotlinType.of(type, requireSpecialization = false, allowMaybe = false, allowNull = false),
+		kotlinType = KotlinType.of(
+			type = type,
+			containingType = null,
+			allowMaybe = false,
+			allowNull = false,
+			allowedVariance = KVariance.OUT, // TODO prb. wrong
+			requireSpecialization = false
+		),
 		name = RaptorGraphDefinition.resolveName(name, type = type),
 		stackTrace = stackTrace(skipCount = 1)
 	)
@@ -220,7 +283,14 @@ public fun <Type : Any> graphObjectExtensionDefinition(
 	configure: RaptorObjectExtensionGraphDefinitionBuilder<Type>.() -> Unit,
 ): RaptorGraphDefinition =
 	RaptorObjectExtensionGraphDefinitionBuilder<Type>(
-		kotlinType = KotlinType.of(type, requireSpecialization = false, allowMaybe = false, allowNull = false),
+		kotlinType = KotlinType.of(
+			type = type,
+			containingType = null,
+			allowMaybe = false,
+			allowNull = false,
+			allowedVariance = KVariance.OUT, // TODO prb. wrong
+			requireSpecialization = false
+		),
 		stackTrace = stackTrace(skipCount = 1)
 	)
 		.apply(configure)
@@ -251,7 +321,14 @@ public fun <Value> graphOperationDefinition(
 ): RaptorGraphDefinition =
 	RaptorGraphOperationDefinitionBuilder<Value>(
 		additionalDefinitions = emptyList(),
-		kotlinType = KotlinType.of(type, requireSpecialization = true, allowMaybe = false, allowNull = true),
+		kotlinType = KotlinType.of(
+			type = type,
+			containingType = null,
+			allowMaybe = false,
+			allowNull = true,
+			allowedVariance = KVariance.OUT,
+			requireSpecialization = true
+		),
 		name = name,
 		operationType = operationType,
 		stackTrace = stackTrace(skipCount = 1)
@@ -280,7 +357,14 @@ public fun <Type : Any> graphScalarDefinition(
 	configure: RaptorScalarGraphDefinitionBuilder<Type>.() -> Unit,
 ): RaptorGraphDefinition =
 	RaptorScalarGraphDefinitionBuilder<Type>(
-		kotlinType = KotlinType.of(type, requireSpecialization = false, allowMaybe = false, allowNull = false),
+		kotlinType = KotlinType.of(
+			type = type,
+			containingType = null,
+			allowMaybe = false,
+			allowNull = false,
+			allowedVariance = KVariance.OUT, // TODO prb. wrong
+			requireSpecialization = false
+		),
 		name = RaptorGraphDefinition.resolveName(name, type = type),
 		stackTrace = stackTrace(skipCount = 1)
 	)

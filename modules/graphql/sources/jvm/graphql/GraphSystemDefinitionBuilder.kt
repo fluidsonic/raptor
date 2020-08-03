@@ -26,9 +26,18 @@ internal class GraphSystemDefinitionBuilder private constructor(
 		hashMapOf()
 
 
-	fun build() = GraphSystemDefinition(
-		definitions = registeredDefinitions // FIXME must not include unspecialized!
-	)
+	fun build(): GraphSystemDefinition {
+		process()
+
+		return GraphSystemDefinition(
+			definitions = registeredDefinitions.filter { definition ->
+				when (definition) {
+					is GraphTypeSystemDefinition -> definition.kotlinType.isSpecialized
+					is GraphOperationDefinition -> true
+				}
+			}
+		)
+	}
 
 
 	private fun checkExtensionFieldNameCollisions() {
@@ -71,7 +80,7 @@ internal class GraphSystemDefinitionBuilder private constructor(
 	}
 
 
-	fun process() {
+	private fun process() {
 		registerDefinitions(defaultDefinitions)
 		registerDefinitions(initialDefinitions)
 		resolveAliasTypeDefinitions()
@@ -281,10 +290,9 @@ internal class GraphSystemDefinitionBuilder private constructor(
 	private fun specializeGenericTypeDefinition(kotlinType: KotlinType, typeArgument: KotlinType, argumentType: GraphTypeDefinition) {
 		argumentType as NamedGraphTypeDefinition // FIXME
 
-		val definitions = checkNotNull(unspecializedDefinitionsByClassifier[kotlinType])
+		val definitions = checkNotNull(unspecializedDefinitionsByClassifier[kotlinType.withNullable(false)])
 		for (definition in definitions)
-		// FIXME not .classifier
-			registerDefinition(definition.specialize(typeArgument = typeArgument.classifier, namePrefix = argumentType.name))
+			registerDefinition(definition.specialize(typeArgument = typeArgument, namePrefix = argumentType.name))
 	}
 
 
@@ -311,10 +319,6 @@ internal class GraphSystemDefinitionBuilder private constructor(
 		private val definitionsByKotlinType: MutableMap<KotlinType, GraphTypeDefinition> = hashMapOf()
 
 
-		val definitions
-			get() = definitionsByKotlinType.values
-
-
 		fun register(definition: GraphTypeDefinition) {
 			definitionsByKotlinType.put(definition.kotlinType, definition)?.let { existingDefinition ->
 				error(
@@ -328,6 +332,9 @@ internal class GraphSystemDefinitionBuilder private constructor(
 
 		// FIXME handle alias and generic alias argument
 		fun resolve(kotlinType: KotlinType, referee: RaptorGraphNode): GraphTypeDefinition? {
+			@Suppress("NAME_SHADOWING")
+			val kotlinType = kotlinType.withNullable(false)
+
 			definitionsByKotlinType[kotlinType]
 				?.let { return it }
 

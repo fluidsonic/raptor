@@ -92,7 +92,14 @@ public class RaptorObjectExtensionGraphDefinitionBuilder<Type : Any> internal co
 			error("Cannot define multiple fields named '$name'.")
 
 		fieldDefinitions += RaptorGraphFieldBuilder.WithResolver<FieldType, Type>(
-			kotlinType = KotlinType.of(type, requireSpecialization = true, allowMaybe = false, allowNull = true),
+			kotlinType = KotlinType.of(
+				type = type,
+				containingType = kotlinType,
+				allowMaybe = false,
+				allowNull = true,
+				allowedVariance = KVariance.OUT,
+				requireSpecialization = true
+			),
 			implicitResolver = implicitResolver,
 			name = name,
 			parentKotlinType = kotlinType,

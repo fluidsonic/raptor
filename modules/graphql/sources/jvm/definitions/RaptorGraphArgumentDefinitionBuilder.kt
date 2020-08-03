@@ -125,7 +125,14 @@ public class RaptorGraphArgumentDefinitionBuilder<Value> internal constructor(
 			configure: RaptorGraphArgumentDefinitionBuilder<ArgumentValue>.() -> Unit,
 		): RaptorGraphArgumentDelegate<ArgumentValue> =
 			RaptorGraphArgumentDefinitionBuilder<ArgumentValue>(
-				kotlinType = KotlinType.of(type, requireSpecialization = true, allowMaybe = true, allowNull = true),
+				kotlinType = KotlinType.of(
+					type = type,
+					containingType = parentKotlinType,
+					allowMaybe = true,
+					allowNull = true,
+					allowedVariance = KVariance.IN,
+					requireSpecialization = true
+				),
 				resolver = resolver,
 				stackTrace = stackTrace(skipCount = 1)
 			)

@@ -11,7 +11,7 @@ import kotlin.system.*
 
 
 internal class GraphRoute(
-	private val system: GraphSystem
+	private val system: GraphSystem,
 ) {
 
 	suspend fun handle(call: ApplicationCall) {

@@ -40,7 +40,14 @@ internal class GraphTypeSystemBuilder private constructor(
 	private fun buildType(operationType: RaptorGraphOperationType, definitions: Collection<GraphOperationDefinition>) =
 		ObjectGraphType(
 			description = null,
-			kotlinType = KotlinType.of(typeOf<Unit>(), requireSpecialization = true, allowMaybe = false, allowNull = false),
+			kotlinType = KotlinType.of(
+				type = typeOf<Unit>(),
+				containingType = null,
+				allowMaybe = false,
+				allowNull = false,
+				allowedVariance = KVariance.INVARIANT,
+				requireSpecialization = false
+			),
 			fields = definitions.map { buildField(it.fieldDefinition) },
 			name = operationType.gqlType.defaultObjectTypeName
 		)

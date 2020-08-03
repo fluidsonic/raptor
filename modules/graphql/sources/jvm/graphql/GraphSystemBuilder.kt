@@ -21,6 +21,7 @@ internal class GraphSystemBuilder private constructor(
 	)
 
 
+	// FIXME validate
 	private fun buildSchema() = GSchema(GDocument(
 		definitions = buildDirectiveDefinitions() + buildTypeDefinitions()
 	))
@@ -185,7 +186,7 @@ internal class GraphSystemBuilder private constructor(
 	private fun interfaceTypeNamesForObjectValueClass(kotlinType: KotlinType, target: MutableSet<String>) {
 		for (superType in kotlinType.classifier.supertypes) {
 			val superClass = superType.classifier as? KClass<*> ?: continue
-			val superKotlinType = KotlinType(classifier = superClass)
+			val superKotlinType = KotlinType(classifier = superClass, isNullable = false)
 
 			val gqlSuperClassName = interfaceTypesByKotlinType[superKotlinType]?.name
 			if (gqlSuperClassName !== null)
@@ -196,28 +197,21 @@ internal class GraphSystemBuilder private constructor(
 	}
 
 
-	private fun underlyingType(kotlinType: KotlinType, isInput: Boolean): GraphType =
-		when (kotlinType.classifier) {
-			Collection::class, List::class, Maybe::class, Set::class -> // FIXME improve
-				underlyingType(checkNotNull(kotlinType.typeArgument), isInput = isInput)
+	private fun typeRef(kotlinType: KotlinType, isInput: Boolean): GTypeRef {
+		val nonNullKotlinType = kotlinType.withNullable(false)
+
+		return when (nonNullKotlinType.classifier) {
+			Collection::class, List::class, Set::class -> // FIXME improve
+				GListTypeRef(typeRef(checkNotNull(nonNullKotlinType.typeArgument), isInput = isInput))
+
+			Maybe::class ->
+				return typeRef(checkNotNull(nonNullKotlinType.typeArgument), isInput = isInput)
 
 			else -> when (isInput) {
-				true -> typeSystem.resolveInputType(kotlinType)
-				false -> typeSystem.resolveOutputType(kotlinType)
-			} ?: error("Cannot resolve GraphQL type for Kotlin type '$kotlinType'.")
-		}
-
-
-	private fun typeRef(kotlinType: KotlinType, isInput: Boolean): GTypeRef =
-		when (kotlinType.classifier) {
-			Collection::class, List::class, Maybe::class, Set::class -> // FIXME improve
-				typeRef(checkNotNull(kotlinType.typeArgument), isInput = isInput)
-
-			else -> when (isInput) {
-				true -> typeSystem.resolveInputType(kotlinType)
-				false -> typeSystem.resolveOutputType(kotlinType)
+				true -> typeSystem.resolveInputType(nonNullKotlinType)
+				false -> typeSystem.resolveOutputType(nonNullKotlinType)
 			}
-				.ifNull { error("Cannot resolve GraphQL type for Kotlin type '$kotlinType'.") }
+				.ifNull { error("Cannot resolve GraphQL type for Kotlin type '$nonNullKotlinType'.") }
 				.let { type ->
 					when (type) {
 						is AliasGraphType -> when {
@@ -229,7 +223,29 @@ internal class GraphSystemBuilder private constructor(
 							GNamedTypeRef(type.name)
 					}
 				}
+		}.let { typeRef ->
+			when (kotlinType.isNullable) {
+				true -> typeRef
+				false -> GNonNullTypeRef(typeRef)
+			}
 		}
+	}
+
+
+	private fun underlyingType(kotlinType: KotlinType, isInput: Boolean): GraphType {
+		@Suppress("NAME_SHADOWING")
+		val kotlinType = kotlinType.withNullable(false)
+
+		return when (kotlinType.classifier) {
+			Collection::class, List::class, Maybe::class, Set::class -> // FIXME improve
+				underlyingType(checkNotNull(kotlinType.typeArgument), isInput = isInput)
+
+			else -> when (isInput) {
+				true -> typeSystem.resolveInputType(kotlinType)
+				false -> typeSystem.resolveOutputType(kotlinType)
+			} ?: error("Cannot resolve GraphQL type for Kotlin type '$kotlinType'.")
+		}
+	}
 
 
 	companion object {

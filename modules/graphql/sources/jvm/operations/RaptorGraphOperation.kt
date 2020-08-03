@@ -97,9 +97,23 @@ public fun <Input : Any, Output> RaptorGraphOperation<Input, Output>.define(
 ): RaptorGraphDefinition =
 	RaptorGraphOperationBuilder(
 		name = name,
-		inputKotlinType = KotlinType.of(inputType, requireSpecialization = true, allowMaybe = false, allowNull = false),
+		inputKotlinType = KotlinType.of(
+			type = inputType,
+			containingType = null,
+			allowMaybe = true,
+			allowNull = false,
+			allowedVariance = KVariance.IN, // TODO prb. wrong
+			requireSpecialization = true
+		),
 		operation = this,
-		outputKotlinType = KotlinType.of(outputType, requireSpecialization = true, allowMaybe = false, allowNull = true),
+		outputKotlinType = KotlinType.of(
+			type = outputType,
+			containingType = null,
+			allowMaybe = false,
+			allowNull = true,
+			allowedVariance = KVariance.OUT, // TODO prb. wrong
+			requireSpecialization = true
+		),
 		stackTrace = stackTrace(skipCount = 1)
 	)
 		.apply(configure)

@@ -71,7 +71,14 @@ public class RaptorInterfaceGraphDefinitionBuilder<Type : Any> internal construc
 			error("Cannot define multiple fields named '$name'.")
 
 		fieldDefinitions += RaptorGraphFieldBuilder(
-			kotlinType = KotlinType.of(type, requireSpecialization = true, allowMaybe = false, allowNull = true),
+			kotlinType = KotlinType.of(
+				type = type,
+				containingType = kotlinType,
+				allowMaybe = false,
+				allowNull = true,
+				allowedVariance = KVariance.OUT,
+				requireSpecialization = true
+			),
 			name = name,
 			parentKotlinType = kotlinType,
 			stackTrace = stackTrace(skipCount = 1)

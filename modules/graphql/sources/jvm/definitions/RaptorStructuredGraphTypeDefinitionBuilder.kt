@@ -59,7 +59,14 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 			configure: RaptorEnumGraphDefinitionBuilder<Type>.() -> Unit = {},
 		) {
 			nestedDefinitions += RaptorEnumGraphDefinitionBuilder(
-				kotlinType = KotlinType.of(type, requireSpecialization = true, allowMaybe = false, allowNull = false),
+				kotlinType = KotlinType.of(
+					type = type,
+					containingType = null,
+					allowMaybe = false,
+					allowNull = false,
+					allowedVariance = KVariance.OUT, // TODO prb. wrong
+					requireSpecialization = true
+				),
 				name = RaptorGraphDefinition.resolveName(
 					name,
 					defaultNamePrefix = this@RaptorStructuredGraphTypeDefinitionBuilder.name,
@@ -93,7 +100,14 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 			configure: RaptorInputObjectGraphDefinitionBuilder<Type>.() -> Unit,
 		) {
 			nestedDefinitions += RaptorInputObjectGraphDefinitionBuilder<Type>(
-				kotlinType = KotlinType.of(type, requireSpecialization = false, allowMaybe = false, allowNull = false),
+				kotlinType = KotlinType.of(
+					type = type,
+					containingType = null,
+					allowMaybe = false,
+					allowNull = false,
+					allowedVariance = KVariance.OUT, // TODO prb. wrong
+					requireSpecialization = false
+				),
 				name = RaptorGraphDefinition.resolveName(
 					name,
 					defaultNamePrefix = this@RaptorStructuredGraphTypeDefinitionBuilder.name,
@@ -127,7 +141,14 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 		) {
 			// FIXME building lazily removes definition-site from the stack trace for errors thrown by the builder
 			nestedDefinitions += RaptorInterfaceGraphDefinitionBuilder<Type>(
-				kotlinType = KotlinType.of(type, requireSpecialization = false, allowMaybe = false, allowNull = false),
+				kotlinType = KotlinType.of(
+					type = type,
+					containingType = null,
+					allowMaybe = false,
+					allowNull = false,
+					allowedVariance = KVariance.OUT, // TODO prb. wrong
+					requireSpecialization = false
+				),
 				name = RaptorGraphDefinition.resolveName(
 					name,
 					defaultNamePrefix = this@RaptorStructuredGraphTypeDefinitionBuilder.name,
@@ -160,7 +181,14 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 			configure: RaptorObjectGraphDefinitionBuilder<Type>.() -> Unit,
 		) {
 			nestedDefinitions += RaptorObjectGraphDefinitionBuilder<Type>(
-				kotlinType = KotlinType.of(type, requireSpecialization = false, allowMaybe = false, allowNull = false),
+				kotlinType = KotlinType.of(
+					type = type,
+					containingType = null,
+					allowMaybe = false,
+					allowNull = false,
+					allowedVariance = KVariance.OUT, // TODO prb. wrong
+					requireSpecialization = false
+				),
 				name = RaptorGraphDefinition.resolveName(
 					name,
 					defaultNamePrefix = this@RaptorStructuredGraphTypeDefinitionBuilder.name,
@@ -193,7 +221,14 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 			configure: RaptorScalarGraphDefinitionBuilder<Type>.() -> Unit,
 		) {
 			nestedDefinitions += RaptorScalarGraphDefinitionBuilder<Type>(
-				kotlinType = KotlinType.of(type, requireSpecialization = false, allowMaybe = false, allowNull = false),
+				kotlinType = KotlinType.of(
+					type = type,
+					containingType = null,
+					allowMaybe = false,
+					allowNull = false,
+					allowedVariance = KVariance.OUT, // TODO prb. wrong
+					requireSpecialization = false
+				),
 				name = RaptorGraphDefinition.resolveName(
 					name,
 					defaultNamePrefix = this@RaptorStructuredGraphTypeDefinitionBuilder.name,

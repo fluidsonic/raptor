@@ -28,7 +28,7 @@ internal object ScalarCoercer : GNodeInputCoercer<GValue>, GOutputCoercer<Any>, 
 	@Suppress("UNCHECKED_CAST")
 	override fun GOutputCoercerContext.coerceOutput(output: Any): Any {
 		val context = checkNotNull(execution.raptorContext)
-		val raptorType = (type as GCustomScalarType).raptorType as ScalarGraphDefinition
+		val raptorType = (type as GCustomScalarType).raptorType as ScalarGraphType
 
 		val outputScope = object : RaptorGraphOutputScope, RaptorGraphScope by context {}  // FIXME improve
 

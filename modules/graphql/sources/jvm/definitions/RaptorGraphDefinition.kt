@@ -80,7 +80,7 @@ internal class AliasGraphTypeDefinition(
 		"${if (isId) "id" else "alias"} $kotlinType = $referencedKotlinType"
 
 
-	override fun specialize(typeArgument: KClass<*>, namePrefix: String): AliasGraphTypeDefinition {
+	override fun specialize(typeArgument: KotlinType, namePrefix: String): AliasGraphTypeDefinition {
 		check(kotlinType.isGeneric)
 
 		return AliasGraphTypeDefinition(
@@ -127,7 +127,7 @@ internal class EnumGraphDefinition(
 		"enum $name = $kotlinType"
 
 
-	override fun specialize(typeArgument: KClass<*>, namePrefix: String): EnumGraphDefinition {
+	override fun specialize(typeArgument: KotlinType, namePrefix: String): EnumGraphDefinition {
 		error("Enum definitions cannot be generic.")
 	}
 }
@@ -154,6 +154,20 @@ internal class GraphArgumentDefinition(
 
 	override fun debugString() =
 		"argument '$name': $kotlinType"
+
+	fun specialize(typeArgument: KotlinType): GraphArgumentDefinition {
+		if (kotlinType.isSpecialized)
+			return this
+
+		return GraphArgumentDefinition(
+			defaultValue = defaultValue,
+			description = description,
+			kotlinType = kotlinType.specialize(typeArgument),
+			name = name,
+			resolver = resolver,
+			stackTrace = stackTrace
+		)
+	}
 
 
 	public override operator fun provideDelegate(thisRef: Any?, property: KProperty<*>): ReadOnlyProperty<Any?, Any?> {
@@ -188,6 +202,9 @@ internal sealed class GraphFieldDefinition(
 		"field '$name': $kotlinType"
 
 
+	abstract fun specialize(typeArgument: KotlinType): GraphFieldDefinition
+
+
 	class Resolvable(
 		argumentDefinitions: Collection<GraphArgumentDefinition>,
 		val argumentResolver: ArgumentResolver,
@@ -202,7 +219,18 @@ internal sealed class GraphFieldDefinition(
 		kotlinType = kotlinType,
 		name = name,
 		stackTrace = stackTrace
-	)
+	) {
+
+		override fun specialize(typeArgument: KotlinType) = Resolvable(
+			argumentDefinitions = argumentDefinitions.map { it.specialize(typeArgument) },
+			argumentResolver = argumentResolver,
+			description = description,
+			kotlinType = kotlinType.specialize(typeArgument),
+			name = name,
+			resolve = resolve,
+			stackTrace = stackTrace
+		)
+	}
 
 
 	class Unresolvable(
@@ -217,7 +245,16 @@ internal sealed class GraphFieldDefinition(
 		kotlinType = kotlinType,
 		name = name,
 		stackTrace = stackTrace
-	)
+	) {
+
+		override fun specialize(typeArgument: KotlinType) = Unresolvable(
+			argumentDefinitions = argumentDefinitions.map { it.specialize(typeArgument) },
+			description = description,
+			kotlinType = kotlinType.specialize(typeArgument),
+			name = name,
+			stackTrace = stackTrace
+		)
+	}
 }
 
 
@@ -271,7 +308,7 @@ internal sealed class GraphTypeSystemDefinition(
 	stackTrace = stackTrace
 ) {
 
-	abstract fun specialize(typeArgument: KClass<*>, namePrefix: String): GraphTypeSystemDefinition
+	abstract fun specialize(typeArgument: KotlinType, namePrefix: String): GraphTypeSystemDefinition
 }
 
 
@@ -304,12 +341,12 @@ internal class InputObjectGraphDefinition(
 		get() = false
 
 
-	override fun specialize(typeArgument: KClass<*>, namePrefix: String): InputObjectGraphDefinition {
+	override fun specialize(typeArgument: KotlinType, namePrefix: String): InputObjectGraphDefinition {
 		check(kotlinType.isGeneric)
 
 		return InputObjectGraphDefinition(
 			additionalDefinitions = additionalDefinitions,
-			argumentDefinitions = argumentDefinitions,
+			argumentDefinitions = argumentDefinitions.map { it.specialize(typeArgument) },
 			argumentResolver = argumentResolver,
 			create = create,
 			description = description,
@@ -348,13 +385,13 @@ internal class InterfaceGraphDefinition(
 		get() = true
 
 
-	override fun specialize(typeArgument: KClass<*>, namePrefix: String): InterfaceGraphDefinition {
+	override fun specialize(typeArgument: KotlinType, namePrefix: String): InterfaceGraphDefinition {
 		check(kotlinType.isGeneric)
 
 		return InterfaceGraphDefinition(
 			additionalDefinitions = additionalDefinitions,
 			description = description,
-			fieldDefinitions = fieldDefinitions,
+			fieldDefinitions = fieldDefinitions.map { it.specialize(typeArgument) },
 			kotlinType = kotlinType.specialize(typeArgument),
 			name = "${namePrefix}$name",
 			stackTrace = stackTrace
@@ -391,12 +428,12 @@ internal class InterfaceExtensionGraphDefinition(
 		"extension interface: $kotlinType"
 
 
-	override fun specialize(typeArgument: KClass<*>, namePrefix: String): InterfaceExtensionGraphDefinition {
+	override fun specialize(typeArgument: KotlinType, namePrefix: String): InterfaceExtensionGraphDefinition {
 		check(kotlinType.isGeneric)
 
 		return InterfaceExtensionGraphDefinition(
 			additionalDefinitions = additionalDefinitions,
-			fieldDefinitions = fieldDefinitions,
+			fieldDefinitions = fieldDefinitions.map { it.specialize(typeArgument) },
 			kotlinType = kotlinType.specialize(typeArgument),
 			stackTrace = stackTrace
 		)
@@ -431,13 +468,13 @@ internal class ObjectGraphDefinition(
 		get() = true
 
 
-	override fun specialize(typeArgument: KClass<*>, namePrefix: String): ObjectGraphDefinition {
+	override fun specialize(typeArgument: KotlinType, namePrefix: String): ObjectGraphDefinition {
 		check(kotlinType.isGeneric)
 
 		return ObjectGraphDefinition(
 			additionalDefinitions = additionalDefinitions,
 			description = description,
-			fieldDefinitions = fieldDefinitions,
+			fieldDefinitions = fieldDefinitions.map { it.specialize(typeArgument) },
 			kotlinType = kotlinType.specialize(typeArgument),
 			name = "${namePrefix}$name",
 			stackTrace = stackTrace
@@ -461,12 +498,12 @@ internal class ObjectExtensionGraphDefinition(
 		"extension object: $kotlinType"
 
 
-	override fun specialize(typeArgument: KClass<*>, namePrefix: String): ObjectExtensionGraphDefinition {
+	override fun specialize(typeArgument: KotlinType, namePrefix: String): ObjectExtensionGraphDefinition {
 		check(kotlinType.isGeneric)
 
 		return ObjectExtensionGraphDefinition(
 			additionalDefinitions = additionalDefinitions,
-			fieldDefinitions = fieldDefinitions,
+			fieldDefinitions = fieldDefinitions.map { it.specialize(typeArgument) },
 			kotlinType = kotlinType.specialize(typeArgument),
 			stackTrace = stackTrace
 		)
@@ -501,7 +538,7 @@ internal class ScalarGraphDefinition(
 		"scalar $name: $kotlinType"
 
 
-	override fun specialize(typeArgument: KClass<*>, namePrefix: String): ScalarGraphDefinition {
+	override fun specialize(typeArgument: KotlinType, namePrefix: String): ScalarGraphDefinition {
 		check(kotlinType.isGeneric)
 
 		return ScalarGraphDefinition(
