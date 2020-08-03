@@ -59,6 +59,22 @@ public class RaptorObjectGraphDefinitionBuilder<Type : Any> internal constructor
 
 	@RaptorDsl
 	public fun <FieldType> field(
+		function: KFunction2<Type, RaptorGraphContext, FieldType>,
+		configure: RaptorGraphFieldBuilder.WithResolver<FieldType, Type>.() -> Unit = {},
+	) {
+		field(
+			name = function.name,
+			type = function.reflect()!!.returnType, // FIXME
+			stackTrace = stackTrace(skipCount = 1),
+			implicitResolver = { function(it as Type, context) }, // FIXME
+			configure = configure
+		)
+	}
+
+
+	@JvmName("fieldSuspend")
+	@RaptorDsl
+	public fun <FieldType> field(
 		function: KSuspendFunction2<Type, RaptorGraphContext, FieldType>,
 		configure: RaptorGraphFieldBuilder.WithResolver<FieldType, Type>.() -> Unit = {},
 	) {
