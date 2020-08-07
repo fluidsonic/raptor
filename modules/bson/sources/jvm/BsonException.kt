@@ -2,7 +2,7 @@ package io.fluidsonic.raptor
 
 
 // FIXME
-class BsonException(message: String? = null) : RuntimeException(message) {
+public class BsonException(message: String? = null) : RuntimeException(message) {
 
-	companion object
+	public companion object
 }

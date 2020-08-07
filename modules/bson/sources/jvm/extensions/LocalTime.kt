@@ -3,7 +3,7 @@ package io.fluidsonic.raptor
 import io.fluidsonic.time.*
 
 
-fun LocalTime.Companion.bsonDefinition() = bsonDefinition<LocalTime> {
+public fun LocalTime.Companion.bsonDefinition(): RaptorBsonDefinitions = bsonDefinition<LocalTime> {
 	decode {
 		Timestamp.of(millisecondsSince1970 = Milliseconds(readDateTime())).toLocalTime(TimeZone.utc)
 	}

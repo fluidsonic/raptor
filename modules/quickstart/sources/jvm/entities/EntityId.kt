@@ -1,9 +1,10 @@
 package io.fluidsonic.raptor
 
-import org.bson.*
-import org.bson.types.*
+import io.fluidsonic.raptor.quickstart.internal.*
 import kotlin.reflect.*
 import kotlin.reflect.full.*
+import org.bson.*
+import org.bson.types.*
 
 
 interface EntityId {
@@ -131,15 +132,8 @@ interface EntityId {
 }
 
 
-fun <Id : EntityId> EntityId.Factory<Id>.bsonDefinition() = bsonDefinition(idClass) {
-	decode {
-		readIdValue()
-	}
-
-	encode { value ->
-		writeIdValue(value)
-	}
-}
+fun <Id : EntityId> EntityId.Factory<Id>.bsonDefinition(): RaptorBsonDefinitions =
+	EntityIdBsonDefinition(factory = this)
 
 
 fun <Id : EntityId> EntityId.Factory<Id>.graphDefinition() = graphIdAliasDefinition<Id>(type = idClass.starProjectedType) {

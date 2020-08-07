@@ -2,11 +2,12 @@ package io.fluidsonic.raptor
 
 
 // FIXME Simplify API. E.g. reusing bsonDefinition { } with special decodeFromString() and encodeAsString()
+// FIXME make API more like GraphQL api & also allow nesting
 @RaptorDsl
-inline fun <reified Value : Any> bsonDefinitionScoped(
+public inline fun <reified Value : Any> bsonDefinitionScoped(
 	noinline parse: RaptorBsonDefinitionScope<Value>.(string: String) -> Value?, // FIXME don't allow null. use invalid() as raptor-graph
-	noinline serialize: RaptorBsonDefinitionScope<Value>.(value: Value) -> String
-) =
+	noinline serialize: RaptorBsonDefinitionScope<Value>.(value: Value) -> String,
+): RaptorBsonDefinitions =
 	bsonDefinition<Value> {
 		decode {
 			readString().let { string ->
@@ -21,10 +22,10 @@ inline fun <reified Value : Any> bsonDefinitionScoped(
 
 
 @RaptorDsl
-inline fun <reified Value : Any> bsonDefinition(
+public inline fun <reified Value : Any> bsonDefinition(
 	noinline parse: (string: String) -> Value?,
-	noinline serialize: (value: Value) -> String
-) =
+	noinline serialize: (value: Value) -> String,
+): RaptorBsonDefinitions =
 	bsonDefinition<Value> {
 		decode {
 			readString().let { string ->

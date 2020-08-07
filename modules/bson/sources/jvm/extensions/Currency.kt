@@ -3,7 +3,7 @@ package io.fluidsonic.raptor
 import io.fluidsonic.stdlib.*
 
 
-fun Currency.Companion.bsonDefinition() = bsonDefinition(
+public fun Currency.Companion.bsonDefinition(): RaptorBsonDefinitions = bsonDefinition(
 	parse = { byCode(it) ?: throw BsonException("Invalid currency code: $it") },
 	serialize = Currency::code
 )

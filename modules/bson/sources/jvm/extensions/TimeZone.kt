@@ -3,7 +3,7 @@ package io.fluidsonic.raptor
 import io.fluidsonic.time.*
 
 
-fun TimeZone.Companion.bsonDefinition() = bsonDefinition(
+public fun TimeZone.Companion.bsonDefinition(): RaptorBsonDefinitions = bsonDefinition(
 	parse = TimeZone::withId,
 	serialize = TimeZone::toString
 )

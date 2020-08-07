@@ -4,7 +4,7 @@ import io.fluidsonic.stdlib.*
 import org.bson.*
 
 
-fun Cents.Companion.bsonDefinition() = bsonDefinition<Cents> {
+public fun Cents.Companion.bsonDefinition(): RaptorBsonDefinitions = bsonDefinition<Cents> {
 	decode {
 		Cents(if (currentBsonType == BsonType.INT32) readInt32().toLong() else readInt64())
 	}

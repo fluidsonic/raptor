@@ -6,29 +6,29 @@ import org.bson.codecs.*
 import org.bson.codecs.jsr310.*
 
 
-object RaptorBsonDefaults {
+public object RaptorBsonDefaults {
 
-	val definitions = listOf<RaptorBsonDefinition<*>>(
-		Cents.bsonDefinition(),
-		Country.bsonDefinition(),
-		CountryCode.bsonDefinition(),
-		Currency.bsonDefinition(),
-		DayOfWeek.bsonDefinition(),
-		GeoCoordinate.bsonDefinition(),
-		LocalDate.bsonDefinition(),
-		LocalDateTime.bsonDefinition(),
-		LocalTime.bsonDefinition(),
-		Money.bsonDefinition(),
-		PreciseDuration.bsonDefinition(),
-		Timestamp.bsonDefinition(),
-		TimeZone.bsonDefinition()
-	)
-
-
-	val providers = listOf(
-		ValueCodecProvider(),
-		BsonValueCodecProvider(),
-		Jsr310CodecProvider(),
-		BsonCodecProvider()
+	public val definitions: RaptorBsonDefinitions = RaptorBsonDefinitions.of(
+		RaptorBsonDefinitions.of(
+			Cents.bsonDefinition(),
+			Country.bsonDefinition(),
+			CountryCode.bsonDefinition(),
+			Currency.bsonDefinition(),
+			DayOfWeek.bsonDefinition(),
+			GeoCoordinate.bsonDefinition(),
+			LocalDate.bsonDefinition(),
+			LocalDateTime.bsonDefinition(),
+			LocalTime.bsonDefinition(),
+			Money.bsonDefinition(),
+			PreciseDuration.bsonDefinition(),
+			Timestamp.bsonDefinition(),
+			TimeZone.bsonDefinition()
+		),
+		RaptorBsonDefinitions.of(
+			ValueCodecProvider(),
+			BsonValueCodecProvider(),
+			Jsr310CodecProvider(),
+			BsonCodecProvider()
+		)
 	)
 }

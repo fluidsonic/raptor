@@ -3,7 +3,7 @@ package io.fluidsonic.raptor
 import io.fluidsonic.stdlib.*
 
 
-fun GeoCoordinate.Companion.bsonDefinition() = bsonDefinition<GeoCoordinate> {
+public fun GeoCoordinate.Companion.bsonDefinition(): RaptorBsonDefinitions = bsonDefinition<GeoCoordinate> {
 	decode {
 		var coordinate: GeoCoordinate? = null
 		var type: String? = null

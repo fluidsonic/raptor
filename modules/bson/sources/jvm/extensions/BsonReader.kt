@@ -4,7 +4,7 @@ import org.bson.*
 import org.bson.AbstractBsonReader.*
 
 
-fun BsonReader.expectValue(methodName: String) {
+public fun BsonReader.expectValue(methodName: String) {
 	if (this !is AbstractBsonReader) {
 		return
 	}
@@ -26,14 +26,14 @@ fun BsonReader.expectValue(methodName: String) {
 }
 
 
-inline fun <T> BsonReader.readArray(name: String, read: BsonReader.() -> T): T {
+public inline fun <T> BsonReader.readArray(name: String, read: BsonReader.() -> T): T {
 	readName(name)
 
 	return readArray(read)
 }
 
 
-inline fun <T> BsonReader.readArray(read: BsonReader.() -> T): T {
+public inline fun <T> BsonReader.readArray(read: BsonReader.() -> T): T {
 	readStartArray()
 	val result = read()
 	readEndArray()
@@ -42,7 +42,7 @@ inline fun <T> BsonReader.readArray(read: BsonReader.() -> T): T {
 }
 
 
-inline fun BsonReader.readArrayWithValues(readValue: BsonReader.() -> Unit) {
+public inline fun BsonReader.readArrayWithValues(readValue: BsonReader.() -> Unit) {
 	readArray {
 		while (readBsonType() != BsonType.END_OF_DOCUMENT) {
 			readValue()
@@ -51,7 +51,7 @@ inline fun BsonReader.readArrayWithValues(readValue: BsonReader.() -> Unit) {
 }
 
 
-fun BsonReader.readBooleanOrNull(): Boolean? {
+public fun BsonReader.readBooleanOrNull(): Boolean? {
 	expectValue("readBooleanOrNull")
 
 	if (currentBsonType == BsonType.NULL) {
@@ -63,7 +63,7 @@ fun BsonReader.readBooleanOrNull(): Boolean? {
 }
 
 
-fun BsonReader.readCoercedDouble(): Double {
+public fun BsonReader.readCoercedDouble(): Double {
 	expectValue("readCoercedDouble")
 
 	return when (currentBsonType) {
@@ -74,7 +74,7 @@ fun BsonReader.readCoercedDouble(): Double {
 }
 
 
-fun BsonReader.readCoercedInt32(): Int {
+public fun BsonReader.readCoercedInt32(): Int {
 	expectValue("readCoercedInt32")
 
 	return when (currentBsonType) {
@@ -85,7 +85,7 @@ fun BsonReader.readCoercedInt32(): Int {
 }
 
 
-fun BsonReader.readCoercedInt32OrNull(): Int? {
+public fun BsonReader.readCoercedInt32OrNull(): Int? {
 	expectValue("readCoercedInt32OrNull")
 
 	if (currentBsonType == BsonType.NULL) {
@@ -97,7 +97,7 @@ fun BsonReader.readCoercedInt32OrNull(): Int? {
 }
 
 
-inline fun <T> BsonReader.readDocument(read: BsonReader.() -> T): T {
+public inline fun <T> BsonReader.readDocument(read: BsonReader.() -> T): T {
 	readStartDocument()
 	val result = read()
 	readEndDocument()
@@ -106,14 +106,14 @@ inline fun <T> BsonReader.readDocument(read: BsonReader.() -> T): T {
 }
 
 
-inline fun <T> BsonReader.readDocument(name: String, read: BsonReader.() -> T): T {
+public inline fun <T> BsonReader.readDocument(name: String, read: BsonReader.() -> T): T {
 	readName(name)
 
 	return readDocument(read)
 }
 
 
-inline fun <T> BsonReader.readDocumentOrNull(read: BsonReader.() -> T): T? {
+public inline fun <T> BsonReader.readDocumentOrNull(read: BsonReader.() -> T): T? {
 	expectValue("readDocumentOrNull")
 
 	if (currentBsonType == BsonType.NULL) {
@@ -125,14 +125,14 @@ inline fun <T> BsonReader.readDocumentOrNull(read: BsonReader.() -> T): T? {
 }
 
 
-inline fun <T> BsonReader.readDocumentOrNull(name: String, read: BsonReader.() -> T): T? {
+public inline fun <T> BsonReader.readDocumentOrNull(name: String, read: BsonReader.() -> T): T? {
 	readName(name)
 
 	return readDocumentOrNull(read)
 }
 
 
-inline fun BsonReader.readDocumentWithValues(readValue: BsonReader.(fieldName: String) -> Unit) {
+public inline fun BsonReader.readDocumentWithValues(readValue: BsonReader.(fieldName: String) -> Unit) {
 	readDocument {
 		while (readBsonType() != BsonType.END_OF_DOCUMENT) {
 			readValue(readName())
@@ -141,7 +141,7 @@ inline fun BsonReader.readDocumentWithValues(readValue: BsonReader.(fieldName: S
 }
 
 
-fun BsonReader.readInt32OrNull(): Int? {
+public fun BsonReader.readInt32OrNull(): Int? {
 	expectValue("readInt32OrNull")
 
 	if (currentBsonType == BsonType.NULL) {
@@ -153,7 +153,7 @@ fun BsonReader.readInt32OrNull(): Int? {
 }
 
 
-inline fun <Key, Value> BsonReader.readMap(readEntry: BsonReader.(fieldName: String) -> Pair<Key, Value>): Map<Key, Value> {
+public inline fun <Key, Value> BsonReader.readMap(readEntry: BsonReader.(fieldName: String) -> Pair<Key, Value>): Map<Key, Value> {
 	val map = mutableMapOf<Key, Value>()
 	readDocumentWithValues { fieldName ->
 		map += readEntry(fieldName)
@@ -162,7 +162,7 @@ inline fun <Key, Value> BsonReader.readMap(readEntry: BsonReader.(fieldName: Str
 }
 
 
-fun BsonReader.readStringOrNull(): String? {
+public fun BsonReader.readStringOrNull(): String? {
 	expectValue("readStringOrNull")
 
 	if (currentBsonType == BsonType.NULL) {

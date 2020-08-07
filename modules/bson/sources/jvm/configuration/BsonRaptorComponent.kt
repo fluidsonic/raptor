@@ -1,29 +1,34 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.raptor.RaptorBsonDefinitions.*
+import java.util.*
 import org.bson.codecs.*
 import org.bson.codecs.configuration.*
 
 
-class BsonRaptorComponent internal constructor() : RaptorComponent.Default<BsonRaptorComponent>() {
+public class BsonRaptorComponent internal constructor() : RaptorComponent.Default<BsonRaptorComponent>() {
 
-	internal val codecs: MutableList<Codec<*>> = mutableListOf()
-	internal val definitions: MutableList<RaptorBsonDefinition<*>> = mutableListOf()
+	internal val definitionsByPriority: MutableMap<Priority, MutableList<RaptorBsonDefinitions>> = EnumMap(Priority::class.java)
 	internal var includesDefaultCodecs = false
-	internal val providers: MutableList<CodecProvider> = mutableListOf()
-	internal val registries: MutableList<CodecRegistry> = mutableListOf()
 
 
 	override fun RaptorComponentConfigurationEndScope.onConfigurationEnded() {
-		propertyRegistry.register(BsonConfiguration.PropertyKey, BsonConfiguration(
-			codecs = codecs,
-			definitions = definitions,
-			providers = providers,
-			registries = registries
-		))
+		// These codecs must come last to allow all other codecs to override default behavior.
+		// Also, MongoDB would freak out with StackOverflowError if their own codecs don't come before these!
+		val definitions =
+			definitionsByPriority[Priority.high].orEmpty() +
+				definitionsByPriority[Priority.normal].orEmpty() +
+				definitionsByPriority[Priority.low].orEmpty() +
+				if (includesDefaultCodecs) listOf(RaptorBsonDefaults.definitions) else emptyList()
+
+		propertyRegistry.register(
+			BsonConfiguration.PropertyKey,
+			BsonConfiguration(definitions = RaptorBsonDefinitions.of(definitions))
+		)
 	}
 
 
-	companion object;
+	public companion object;
 
 
 	internal object Key : RaptorComponentKey<BsonRaptorComponent> {
@@ -34,61 +39,86 @@ class BsonRaptorComponent internal constructor() : RaptorComponent.Default<BsonR
 
 
 @RaptorDsl
-fun RaptorComponentSet<BsonRaptorComponent>.codecs(vararg codecs: Codec<*>) {
-	codecs(codecs.asIterable())
+public fun RaptorComponentSet<BsonRaptorComponent>.codecs(
+	vararg codecs: Codec<*>,
+	priority: Priority = Priority.normal,
+) {
+	codecs(codecs.asIterable(), priority = priority)
 }
 
 
 @RaptorDsl
-fun RaptorComponentSet<BsonRaptorComponent>.codecs(codecs: Iterable<Codec<*>>) = configure {
-	this.codecs += codecs
+public fun RaptorComponentSet<BsonRaptorComponent>.codecs(
+	codecs: Iterable<Codec<*>>,
+	priority: Priority = Priority.normal,
+) {
+	definitions(RaptorBsonDefinitions.of(codecs), priority = priority)
 }
 
 
 // FIXME can be confused with global bsonDefinition()
 @RaptorDsl
-fun RaptorComponentSet<BsonRaptorComponent>.definitions(vararg definitions: RaptorBsonDefinition<*>) {
-	definitions(definitions.asIterable())
+public fun RaptorComponentSet<BsonRaptorComponent>.definitions(
+	vararg definitions: RaptorBsonDefinitions,
+	priority: Priority = Priority.normal,
+) {
+	definitions(definitions.asIterable(), priority = priority)
 }
 
 
 @RaptorDsl
-fun RaptorComponentSet<BsonRaptorComponent>.definitions(definitions: Iterable<RaptorBsonDefinition<*>>) = configure {
-	this.definitions += definitions
+public fun RaptorComponentSet<BsonRaptorComponent>.definitions(
+	definitions: Iterable<RaptorBsonDefinitions>,
+	priority: Priority = Priority.normal,
+) {
+	configure {
+		definitionsByPriority.getOrPut(priority, ::mutableListOf).addAll(definitions)
+	}
 }
 
 
 @RaptorDsl
-fun RaptorComponentSet<BsonRaptorComponent>.includeDefaultCodecs() = configure {
-	if (includesDefaultCodecs)
-		return@configure
+public fun RaptorComponentSet<BsonRaptorComponent>.includeDefaultCodecs() {
+	configure {
+		if (includesDefaultCodecs)
+			return@configure
 
-	includesDefaultCodecs = true
-
-	definitions(RaptorBsonDefaults.definitions)
-	providers(RaptorBsonDefaults.providers)
+		includesDefaultCodecs = true
+	}
 }
 
 
 @RaptorDsl
-fun RaptorComponentSet<BsonRaptorComponent>.providers(vararg providers: CodecProvider) {
-	providers(providers.asIterable())
+public fun RaptorComponentSet<BsonRaptorComponent>.providers(
+	vararg providers: CodecProvider,
+	priority: Priority = Priority.normal,
+) {
+	providers(providers.asIterable(), priority = priority)
 }
 
 
 @RaptorDsl
-fun RaptorComponentSet<BsonRaptorComponent>.providers(providers: Iterable<CodecProvider>) = configure {
-	this.providers += providers
+public fun RaptorComponentSet<BsonRaptorComponent>.providers(
+	providers: Iterable<CodecProvider>,
+	priority: Priority = Priority.normal,
+) {
+	definitions(RaptorBsonDefinitions.of(providers), priority = priority)
 }
 
 
 @RaptorDsl
-fun RaptorComponentSet<BsonRaptorComponent>.registries(vararg registries: CodecRegistry) {
-	registries(registries.asIterable())
+public fun RaptorComponentSet<BsonRaptorComponent>.registries(
+	vararg registries: CodecRegistry,
+	priority: Priority = Priority.normal,
+) {
+	registries(registries.asIterable(), priority = priority)
 }
 
 
 @RaptorDsl
-fun RaptorComponentSet<BsonRaptorComponent>.registries(registries: Iterable<CodecRegistry>) = configure {
-	this.registries += registries
+public fun RaptorComponentSet<BsonRaptorComponent>.registries(
+	registries: Iterable<CodecRegistry>,
+	priority: Priority = Priority.normal,
+) {
+	definitions(RaptorBsonDefinitions.of(registries), priority = priority)
 }

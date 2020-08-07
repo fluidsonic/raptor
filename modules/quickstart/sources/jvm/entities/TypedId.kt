@@ -1,6 +1,6 @@
 package io.fluidsonic.raptor
 
-import kotlin.reflect.full.*
+import io.fluidsonic.raptor.quickstart.internal.*
 
 
 inline class TypedId(val untyped: EntityId) {
@@ -14,9 +14,8 @@ inline class TypedId(val untyped: EntityId) {
 
 
 internal fun TypedId.Companion.bsonDefinition() = bsonDefinition<TypedId> {
-	val factoryByType: Map<String, EntityId.Factory<*>> = context.bsonConfiguration
-		.definitions
-		.mapNotNull { it.valueClass.companionObjectInstance as? EntityId.Factory<*> } // FIXME evil hack!
+	val factoryByType: Map<String, EntityId.Factory<*>> = findEntityIdDefinitions(context.bsonConfiguration.definitions)
+		.map { it.factory }
 		.associateBy { it.type }
 
 	decode {
@@ -37,3 +36,8 @@ internal fun TypedId.Companion.bsonDefinition() = bsonDefinition<TypedId> {
 		}
 	}
 }
+
+
+private fun findEntityIdDefinitions(definition: RaptorBsonDefinitions): Collection<EntityIdBsonDefinition<*>> =
+	(definition as? EntityIdBsonDefinition<*>)?.let(::listOf)
+		?: definition.underlyingDefinitions.flatMap(::findEntityIdDefinitions)

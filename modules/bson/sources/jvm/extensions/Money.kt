@@ -3,7 +3,7 @@ package io.fluidsonic.raptor
 import io.fluidsonic.stdlib.*
 
 
-fun Money.Companion.bsonDefinition() = bsonDefinition<Money> {
+public fun Money.Companion.bsonDefinition(): RaptorBsonDefinitions = bsonDefinition<Money> {
 	decode {
 		var amount: Cents? = null
 		var currency: Currency? = null

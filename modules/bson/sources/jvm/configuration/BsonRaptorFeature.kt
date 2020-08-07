@@ -5,7 +5,7 @@ import org.kodein.di.erased.*
 
 
 // FIXME name order
-object BsonRaptorFeature : RaptorFeature.Configurable<BsonRaptorComponent> {
+public object BsonRaptorFeature : RaptorFeature.Configurable<BsonRaptorComponent> {
 
 	override val id: RaptorFeatureId = raptorBsonFeatureId
 
@@ -40,14 +40,14 @@ object BsonRaptorFeature : RaptorFeature.Configurable<BsonRaptorComponent> {
 }
 
 
-const val raptorBsonFeatureId: RaptorFeatureId = "raptor.bson"
+public const val raptorBsonFeatureId: RaptorFeatureId = "raptor.bson"
 
 
-val RaptorContext.bsonConfiguration: BsonConfiguration
+public val RaptorContext.bsonConfiguration: BsonConfiguration
 	get() = properties[BsonConfiguration.PropertyKey]
 		?: error("You must install ${BsonRaptorFeature::class.simpleName} for enabling BSON functionality.")
 
 
 @RaptorDsl
-val RaptorTopLevelConfigurationScope.bson: RaptorComponentSet<BsonRaptorComponent>
+public val RaptorTopLevelConfigurationScope.bson: RaptorComponentSet<BsonRaptorComponent>
 	get() = componentRegistry.configure(BsonRaptorComponent.Key)

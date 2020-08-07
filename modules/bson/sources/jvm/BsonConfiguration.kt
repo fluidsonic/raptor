@@ -1,25 +1,13 @@
 package io.fluidsonic.raptor
 
-import org.bson.codecs.*
-import org.bson.codecs.configuration.*
 
-
-// FIXME find a different way that maintains order
-class BsonConfiguration(
-	val codecs: Collection<Codec<*>>,
-	val definitions: Collection<RaptorBsonDefinition<*>>,
-	val providers: Collection<CodecProvider>,
-	val registries: Collection<CodecRegistry>
+public class BsonConfiguration(
+	public val definitions: RaptorBsonDefinitions,
 ) {
 
-	companion object {
+	public companion object {
 
-		val empty = BsonConfiguration(
-			codecs = emptyList(),
-			definitions = emptyList(),
-			providers = emptyList(),
-			registries = emptyList()
-		)
+		public val empty: BsonConfiguration = BsonConfiguration(definitions = RaptorBsonDefinitions.empty)
 	}
 
 

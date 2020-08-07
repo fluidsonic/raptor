@@ -3,7 +3,7 @@ package io.fluidsonic.raptor
 import io.fluidsonic.time.*
 
 
-fun DayOfWeek.Companion.bsonDefinition() = bsonDefinition(
+public fun DayOfWeek.Companion.bsonDefinition(): RaptorBsonDefinitions = bsonDefinition(
 	parse = { string ->
 		when (string) {
 			"monday" -> DayOfWeek.monday

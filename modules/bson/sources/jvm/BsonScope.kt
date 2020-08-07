@@ -1,17 +1,17 @@
 package io.fluidsonic.raptor
 
+import kotlin.reflect.*
 import org.bson.*
 import org.bson.codecs.*
 import org.bson.codecs.configuration.*
-import kotlin.reflect.*
 
 
-interface BsonScope : RaptorScope {
+public interface BsonScope : RaptorScope {
 
-	val codecRegistry: CodecRegistry
+	public val codecRegistry: CodecRegistry
 
 
-	fun <Value : Any> BsonReader.readValueOfType(name: String, `class`: KClass<Value>): Value {
+	public fun <Value : Any> BsonReader.readValueOfType(name: String, `class`: KClass<Value>): Value {
 		readName(name)
 
 		return readValueOfType(`class`)
@@ -19,18 +19,18 @@ interface BsonScope : RaptorScope {
 
 
 	// FIXME convert primitive to box classes
-	fun <Value : Any> BsonReader.readValueOfType(`class`: KClass<Value>): Value =
+	public fun <Value : Any> BsonReader.readValueOfType(`class`: KClass<Value>): Value =
 		codecRegistry[`class`.java].decode(this, decoderContext)
 
 
-	fun <Value : Any> BsonReader.readValueOfTypeOrNull(name: String, `class`: KClass<Value>): Value? {
+	public fun <Value : Any> BsonReader.readValueOfTypeOrNull(name: String, `class`: KClass<Value>): Value? {
 		readName(name)
 
 		return readValueOfTypeOrNull(`class`)
 	}
 
 
-	fun <Value : Any> BsonReader.readValueOfTypeOrNull(`class`: KClass<Value>): Value? {
+	public fun <Value : Any> BsonReader.readValueOfTypeOrNull(`class`: KClass<Value>): Value? {
 		expectValue("readValueOfTypeOrNull")
 
 		if (currentBsonType == BsonType.NULL) {
@@ -43,13 +43,13 @@ interface BsonScope : RaptorScope {
 	}
 
 
-	fun <Value : Any> BsonReader.readValuesOfType(`class`: KClass<Value>): List<Value> =
+	public fun <Value : Any> BsonReader.readValuesOfType(`class`: KClass<Value>): List<Value> =
 		readValuesOfType(`class`, container = mutableListOf())
 
 
-	fun <Value, Container> BsonReader.readValuesOfType(
+	public fun <Value, Container> BsonReader.readValuesOfType(
 		`class`: KClass<Value>,
-		container: Container
+		container: Container,
 	): Container where Value : Any, Container : MutableCollection<Value> {
 		readArrayWithValues {
 			container.add(readValueOfType(`class`))
@@ -59,7 +59,7 @@ interface BsonScope : RaptorScope {
 	}
 
 
-	fun <Value : Any> BsonReader.readValuesOfTypeOrNull(`class`: KClass<Value>): List<Value>? {
+	public fun <Value : Any> BsonReader.readValuesOfTypeOrNull(`class`: KClass<Value>): List<Value>? {
 		expectValue("readValuesOfTypeOrNull")
 
 		if (currentBsonType == BsonType.NULL) {
@@ -72,9 +72,9 @@ interface BsonScope : RaptorScope {
 	}
 
 
-	fun <Value, Container> BsonReader.readValuesOfTypeOrNull(
+	public fun <Value, Container> BsonReader.readValuesOfTypeOrNull(
 		`class`: KClass<Value>,
-		container: Container
+		container: Container,
 	): Container? where Value : Any, Container : MutableCollection<Value> {
 		expectValue("readValuesOfTypeOrNull")
 
@@ -89,7 +89,7 @@ interface BsonScope : RaptorScope {
 
 
 	// FIXME add all primitive overloads
-	fun BsonWriter.write(name: String, value: Any?, preserveNull: Boolean = false) {
+	public fun BsonWriter.write(name: String, value: Any?, preserveNull: Boolean = false) {
 		if (value == null && !preserveNull)
 			return
 
@@ -98,7 +98,7 @@ interface BsonScope : RaptorScope {
 	}
 
 
-	fun BsonWriter.write(name: String, values: Iterable<Any>?, preserveNull: Boolean = false) { // FIXME use preserveNull in BsonWriter extensions
+	public fun BsonWriter.write(name: String, values: Iterable<Any>?, preserveNull: Boolean = false) { // FIXME use preserveNull in BsonWriter extensions
 		if (values == null && !preserveNull)
 			return
 
@@ -107,7 +107,7 @@ interface BsonScope : RaptorScope {
 	}
 
 
-	fun BsonWriter.writeValue(value: Any?) {
+	public fun BsonWriter.writeValue(value: Any?) {
 		if (value == null)
 			return writeNull()
 
@@ -116,7 +116,7 @@ interface BsonScope : RaptorScope {
 	}
 
 
-	fun BsonWriter.writeValues(values: Iterable<Any>?) {
+	public fun BsonWriter.writeValues(values: Iterable<Any>?) {
 		if (values == null)
 			return writeNull()
 
@@ -127,7 +127,7 @@ interface BsonScope : RaptorScope {
 	}
 
 
-	companion object {
+	public companion object {
 
 		internal val decoderContext = DecoderContext.builder().build()!!
 		internal val encoderContext = EncoderContext.builder().build()!!
