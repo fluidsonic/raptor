@@ -6,7 +6,7 @@ import java.io.*
 
 // FIXME taggable
 class KtorServerRaptorComponent internal constructor(
-	internal val globalScope: RaptorTopLevelConfigurationScope
+	internal val globalScope: RaptorTopLevelConfigurationScope,
 ) : RaptorComponent.Default<KtorServerRaptorComponent>(), RaptorTransactionGeneratingComponent {
 
 	// FIXME ok not to specify parent?
@@ -73,7 +73,7 @@ class KtorServerRaptorComponent internal constructor(
 	internal class Scopes(
 		private val globalScope: RaptorTopLevelConfigurationScope,
 		propertyRegistry: RaptorPropertyRegistry,
-		serverComponentRegistry: RaptorComponentRegistry
+		serverComponentRegistry: RaptorComponentRegistry,
 	) : KtorServerFeatureConfigurationEndScope,
 		KtorServerFeatureConfigurationStartScope {
 
@@ -92,7 +92,7 @@ class KtorServerRaptorComponent internal constructor(
 
 		private class ServerScope(
 			override val componentRegistry: RaptorComponentRegistry,
-			override val propertyRegistry: RaptorPropertyRegistry
+			override val propertyRegistry: RaptorPropertyRegistry,
 		) : KtorServerFeatureConfigurationEndScope.ServerScope
 	}
 }
@@ -109,7 +109,7 @@ fun RaptorComponentSet<KtorServerRaptorComponent>.custom(configuration: RaptorKt
 @RaptorDsl
 fun RaptorComponentSet<KtorServerRaptorComponent>.httpConnector(
 	host: String = "0.0.0.0",
-	port: Int = 80
+	port: Int = 80,
 ) {
 	configure {
 		connectors += KtorServerConfiguration.Connector.Http(
@@ -127,7 +127,7 @@ fun RaptorComponentSet<KtorServerRaptorComponent>.httpsConnector(
 	keyAlias: String,
 	keyStoreFile: File,
 	keyStorePassword: String,
-	privateKeyPassword: String
+	privateKeyPassword: String,
 ) {
 	configure {
 		connectors += KtorServerConfiguration.Connector.Https(
@@ -151,6 +151,20 @@ fun RaptorComponentSet<KtorServerRaptorComponent>.install(feature: KtorServerFea
 			}
 	}
 }
+
+
+@RaptorDsl
+fun RaptorComponentSet<KtorServerRaptorComponent>.newRoute(path: String = ""): RaptorComponentSet<KtorRouteRaptorComponent> =
+	withComponentAuthoring {
+		map {
+			KtorRouteRaptorComponent(
+				globalScope = globalScope,
+				path = path,
+				serverComponentRegistry = componentRegistry
+			)
+				.also { componentRegistry.register(KtorRouteRaptorComponent.Key, it) }
+		}
+	}
 
 
 @RaptorDsl

@@ -1,7 +1,6 @@
 package io.fluidsonic.raptor
 
 import freemarker.template.*
-import org.kodein.di.erased.*
 
 
 object FreemarkerRaptorFeature : RaptorFeature { // FIXME rn
@@ -12,11 +11,9 @@ object FreemarkerRaptorFeature : RaptorFeature { // FIXME rn
 	override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
 		componentRegistry.register(FreemarkerRaptorComponent.Key, FreemarkerRaptorComponent())
 
-		ifInstalled(raptorKodeinFeatureId) {
-			kodein {
-				bind<Configuration>() with singleton {
-					raptorContext.freemarker
-				}
+		ifInstalled(raptorDIFeatureId) {
+			di {
+				provide { get<RaptorContext>().freemarker }
 			}
 		}
 	}

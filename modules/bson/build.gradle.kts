@@ -13,7 +13,7 @@ fluidLibraryModule(description = "FIXME") {
 
 				implementation(fluid("stdlib", "0.10.0"))
 
-				compileOnly(project(":raptor-kodein"))
+				compileOnly(project(":raptor-di"))
 			}
 		}
 	}

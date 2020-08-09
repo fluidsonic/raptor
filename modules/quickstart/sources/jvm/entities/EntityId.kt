@@ -34,7 +34,7 @@ interface EntityId {
 	}
 
 
-	interface ObjectIdBased : EntityId {
+	interface ObjectIdBased : EntityId { // FIXME prb. remove this, use String/Int, & convert to ObjectId only in codecs
 
 		val value: ObjectId
 

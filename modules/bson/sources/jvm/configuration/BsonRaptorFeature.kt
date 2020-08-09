@@ -1,8 +1,5 @@
 package io.fluidsonic.raptor
 
-import org.bson.codecs.configuration.*
-import org.kodein.di.erased.*
-
 
 // FIXME name order
 public object BsonRaptorFeature : RaptorFeature.Configurable<BsonRaptorComponent> {
@@ -18,22 +15,11 @@ public object BsonRaptorFeature : RaptorFeature.Configurable<BsonRaptorComponent
 	override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
 		componentRegistry.register(BsonRaptorComponent.Key, BsonRaptorComponent())
 
-		ifInstalled(raptorKodeinFeatureId) {
-			kodein {
-				bind() from singleton {
-					raptorContext.bsonConfiguration
-				}
-
-				bind<BsonScope>() with singleton {
-					DefaultBsonScope(
-						configuration = instance(),
-						context = instance()
-					)
-				}
-
-				bind<CodecRegistry>() with singleton {
-					instance<BsonScope>().codecRegistry
-				}
+		ifInstalled(raptorDIFeatureId) {
+			di {
+				provide { get<RaptorContext>().bsonConfiguration }
+				provide { DefaultBsonScope(configuration = get(), context = get()) }
+				provide { get<BsonScope>().codecRegistry }
 			}
 		}
 	}

@@ -1,5 +1,6 @@
 package io.fluidsonic.raptor
 
+import kotlin.internal.*
 import kotlin.reflect.*
 import org.bson.*
 import org.bson.codecs.*
@@ -89,6 +90,8 @@ public interface BsonScope : RaptorScope {
 
 
 	// FIXME add all primitive overloads
+	@Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
+	@LowPriorityInOverloadResolution
 	public fun BsonWriter.write(name: String, value: Any?, preserveNull: Boolean = false) {
 		if (value == null && !preserveNull)
 			return
@@ -98,7 +101,9 @@ public interface BsonScope : RaptorScope {
 	}
 
 
-	public fun BsonWriter.write(name: String, values: Iterable<Any>?, preserveNull: Boolean = false) { // FIXME use preserveNull in BsonWriter extensions
+	@Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
+	@LowPriorityInOverloadResolution
+	public fun BsonWriter.write(name: String, values: Iterable<Any>?, preserveNull: Boolean = false) {
 		if (values == null && !preserveNull)
 			return
 

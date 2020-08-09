@@ -7,7 +7,7 @@ fluidLibraryModule(description = "FIXME") {
 				api(project(":raptor"))
 				api("org.freemarker:freemarker:2.3.30")
 
-				compileOnly(project(":raptor-kodein"))
+				compileOnly(project(":raptor-di"))
 			}
 		}
 	}

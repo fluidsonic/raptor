@@ -31,8 +31,8 @@ internal fun TypedId.Companion.bsonDefinition() = bsonDefinition<TypedId> {
 
 	encode { value ->
 		writeDocument {
-			write("type", string = value.untyped.factory.type)
-			write("id", value = value.untyped)
+			write("type", value.untyped.factory.type)
+			write("id", value.untyped)
 		}
 	}
 }

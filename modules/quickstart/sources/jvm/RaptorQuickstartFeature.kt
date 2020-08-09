@@ -1,7 +1,6 @@
 package io.fluidsonic.raptor
 
 import io.ktor.http.*
-import org.kodein.di.erased.*
 
 
 object RaptorQuickstartFeature : RaptorFeature {
@@ -11,7 +10,7 @@ object RaptorQuickstartFeature : RaptorFeature {
 
 	override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
 		install(BsonRaptorFeature)
-		install(RaptorKodeinFeature)
+		install(RaptorDIFeature)
 		install(KtorRaptorFeature)
 
 		bson {
@@ -19,9 +18,7 @@ object RaptorQuickstartFeature : RaptorFeature {
 			includeMongoClientDefaultCodecs()
 
 			definitions(
-				EmailAddress.bsonDefinition(),
 				PasswordHash.bsonDefinition(),
-				PhoneNumber.bsonDefinition(),
 				TypedId.bsonDefinition(),
 				Url.bsonDefinition() // FIXME move to either BsonFeature or KtorFeature with ifAvailable
 			)
@@ -32,14 +29,12 @@ object RaptorQuickstartFeature : RaptorFeature {
 
 			definitions(
 				AccessToken.graphDefinition(),
-				EmailAddress.graphDefinition(),
-				Password.graphDefinition(),
-				PhoneNumber.graphDefinition()
+				Password.graphDefinition()
 			)
 		}
 
-		kodein {
-			bind() from singleton { PasswordHasher() }
+		di {
+			provide { PasswordHasher() }
 		}
 	}
 }

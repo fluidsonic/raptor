@@ -1,11 +1,16 @@
 import io.fluidsonic.gradle.*
 
 fluidLibraryModule(description = "FIXME") {
+	custom {
+		explicitApiWarning()
+	}
+
 	targets {
 		jvm {
 			dependencies {
+				implementation(kotlin("reflect"))
+
 				api(project(":raptor"))
-				api("org.kodein.di:kodein-di-erased-jvm:6.5.5")
 
 				compileOnly(project(":raptor-transactions"))
 			}

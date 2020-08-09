@@ -3,8 +3,6 @@ package io.fluidsonic.raptor
 import org.bson.*
 
 
-// FIXME consistency
-
 public fun BsonWriter.write(name: String, value: Boolean) {
 	writeName(name)
 	writeBoolean(value)
@@ -15,9 +13,11 @@ public fun BsonWriter.write(name: String, value: Boolean?, preserveNull: Boolean
 	if (value == null && !preserveNull)
 		return
 
-	write(name = name, value = value)
-}
+	writeName(name)
 
+	if (value != null) writeBoolean(value)
+	else writeNull()
+}
 
 public inline fun BsonWriter.write(name: String, write: BsonWriter.() -> Unit) {
 	writeName(name)
@@ -25,86 +25,71 @@ public inline fun BsonWriter.write(name: String, write: BsonWriter.() -> Unit) {
 }
 
 
-public inline fun <Value : Any> BsonWriter.write(name: String, document: Value, write: BsonWriter.(value: Value) -> Unit) {
+public fun BsonWriter.write(name: String, value: Double) {
 	writeName(name)
-	writeDocument(document = document, write = write)
+	writeDouble(value)
 }
 
 
-@JvmName("writeOrSkip")
-public inline fun <Value : Any> BsonWriter.write(name: String, documentOrSkip: Value?, write: BsonWriter.(value: Value) -> Unit) {
-	documentOrSkip ?: return
-
-	write(name = name, document = documentOrSkip, write = write)
-}
-
-
-public fun BsonWriter.write(name: String, double: Double) {
-	writeName(name)
-	writeDouble(double)
-}
-
-
-@JvmName("writeOrSkip")
-public fun BsonWriter.write(name: String, doubleOrSkip: Double?) {
-	if (doubleOrSkip == null) {
+public fun BsonWriter.write(name: String, value: Double?, preserveNull: Boolean = false) {
+	if (value == null && !preserveNull)
 		return
-	}
 
-	write(name = name, double = doubleOrSkip)
-}
-
-
-public fun BsonWriter.write(name: String, int32: Int) {
 	writeName(name)
-	writeInt32(int32)
+
+	if (value != null) writeDouble(value)
+	else writeNull()
 }
 
 
-@JvmName("writeOrSkip")
-public fun BsonWriter.write(name: String, int32OrSkip: Int?) {
-	if (int32OrSkip == null) {
+public fun BsonWriter.write(name: String, value: Int) {
+	writeName(name)
+	writeInt32(value)
+}
+
+
+public fun BsonWriter.write(name: String, value: Int?, preserveNull: Boolean = false) {
+	if (value == null && !preserveNull)
 		return
-	}
 
-	write(name = name, int32 = int32OrSkip)
-}
-
-
-public fun BsonWriter.write(name: String, string: String) {
 	writeName(name)
-	writeString(string)
+
+	if (value != null) writeInt32(value)
+	else writeNull()
 }
 
 
-public fun BsonWriter.write(name: String, strings: Iterable<String>) {
+public fun BsonWriter.write(name: String, value: Long) {
 	writeName(name)
-	writeStrings(strings)
+	writeInt64(value)
 }
 
 
-public inline fun <K, V> BsonWriter.write(name: String, value: Map<K, V>, writeEntry: (entry: Map.Entry<K, V>) -> Unit) {
-	writeName(name)
-	writeDocument {
-		value.entries.forEach(writeEntry)
-	}
-}
-
-
-@JvmName("writeOrSkip")
-public inline fun <K, V> BsonWriter.write(name: String, valueOrSkip: Map<K, V>?, writeEntry: (entry: Map.Entry<K, V>) -> Unit) {
-	valueOrSkip ?: return
-
-	write(name = name, value = valueOrSkip, writeEntry = writeEntry)
-}
-
-
-public fun BsonWriter.write(name: String, stringOrSkip: String?, skipIfEmpty: Boolean = false) {
-	if (stringOrSkip == null || (skipIfEmpty && stringOrSkip.isEmpty())) {
+public fun BsonWriter.write(name: String, value: Long?, preserveNull: Boolean = false) {
+	if (value == null && !preserveNull)
 		return
-	}
 
-	write(name = name, string = stringOrSkip)
+	writeName(name)
+
+	if (value != null) writeInt64(value)
+	else writeNull()
+}
+
+
+public fun BsonWriter.write(name: String, value: String) {
+	writeName(name)
+	writeString(value)
+}
+
+
+public fun BsonWriter.write(name: String, value: String?, preserveNull: Boolean = false) {
+	if (value == null && !preserveNull)
+		return
+
+	writeName(name)
+
+	if (value != null) writeString(value)
+	else writeNull()
 }
 
 
