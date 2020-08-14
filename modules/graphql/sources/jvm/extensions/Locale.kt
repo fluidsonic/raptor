@@ -3,7 +3,7 @@
 
 package io.fluidsonic.raptor
 
-import io.fluidsonic.stdlib.*
+import io.fluidsonic.locale.*
 
 
 // FIXME move to fluid-stdlib

@@ -3,6 +3,7 @@
 
 package io.fluidsonic.raptor
 
+import io.fluidsonic.locale.*
 import io.fluidsonic.stdlib.*
 
 

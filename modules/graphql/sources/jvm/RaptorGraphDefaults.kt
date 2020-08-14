@@ -1,5 +1,6 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.locale.*
 import io.fluidsonic.stdlib.*
 import io.fluidsonic.time.*
 import io.ktor.http.*

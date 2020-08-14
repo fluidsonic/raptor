@@ -21,7 +21,7 @@ public class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi inte
 		parentKotlinType = inputKotlinType
 	)
 	private var description: String? = null
-	private var inputFactory: (RaptorGraphScope.() -> Input)? = null
+	private var inputFactory: (RaptorGraphInputScope.() -> Input)? = null
 
 	private val name = when (name) {
 		RaptorGraphDefinition.defaultName -> operation.defaultName()
@@ -52,7 +52,13 @@ public class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi inte
 				description?.let(this::description)
 
 				resolver {
-					val input = inputFactory()
+					val inputScope = object : RaptorGraphInputScope, RaptorGraphScope by context { // FIXME improve
+
+						override fun invalid(details: String?): Nothing =
+							error("invalid argument") // FIXME
+					}
+
+					val input = inputFactory(inputScope)
 
 					with(operation) {
 						this@resolver.execute(input)
@@ -111,7 +117,7 @@ public class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi inte
 	public inner class InputBuilder internal constructor() : RaptorGraphArgumentDefinitionBuilder.Container by argumentContainer {
 
 		@RaptorDsl
-		public fun factory(factory: RaptorGraphScope.() -> Input) {
+		public fun factory(factory: RaptorGraphInputScope.() -> Input) {
 			check(this@RaptorGraphOperationBuilder.inputFactory === null) { "Cannot define multiple factories." }
 
 			this@RaptorGraphOperationBuilder.inputFactory = factory
