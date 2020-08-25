@@ -6,7 +6,7 @@ import com.mongodb.*
 
 
 @RaptorDsl
-fun RaptorComponentSet<BsonRaptorComponent>.includeMongoClientDefaultCodecs() = configure {
+public fun RaptorComponentSet<BsonRaptorComponent>.includeMongoClientDefaultCodecs(): Unit = configure {
 	if (extensions[MongoClientDefaultCodecsIncluded] != true) {
 		extensions[MongoClientDefaultCodecsIncluded] = true
 

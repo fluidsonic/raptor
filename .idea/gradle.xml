@@ -1,41 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
-  <component name="GradleMigrationSettings" migrationVersion="1" />
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
-        <compositeConfiguration>
-          <compositeBuild compositeDefinitionSource="SCRIPT">
-            <builds>
-              <build path="$PROJECT_DIR$/../fluid-graphql" name="fluid-graphql">
-                <projects>
-                  <project path="$PROJECT_DIR$/../fluid-graphql" />
-                  <project path="$PROJECT_DIR$/../fluid-graphql/modules/client" />
-                  <project path="$PROJECT_DIR$/../fluid-graphql/modules/dsl" />
-                  <project path="$PROJECT_DIR$/../fluid-graphql/modules/execution" />
-                  <project path="$PROJECT_DIR$/../fluid-graphql/modules/language" />
-                </projects>
-              </build>
-            </builds>
-          </compositeBuild>
-        </compositeConfiguration>
-        <option name="delegatedBuild" value="false" />
-        <option name="testRunner" value="PLATFORM" />
         <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$/../fluid-graphql" />
-            <option value="$PROJECT_DIR$/../fluid-graphql/modules/client" />
-            <option value="$PROJECT_DIR$/../fluid-graphql/modules/dsl" />
-            <option value="$PROJECT_DIR$/../fluid-graphql/modules/execution" />
-            <option value="$PROJECT_DIR$/../fluid-graphql/modules/language" />
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/modules/bson" />
             <option value="$PROJECT_DIR$/modules/core" />
+            <option value="$PROJECT_DIR$/modules/di" />
             <option value="$PROJECT_DIR$/modules/freemarker" />
             <option value="$PROJECT_DIR$/modules/graphql" />
-            <option value="$PROJECT_DIR$/modules/kodein" />
             <option value="$PROJECT_DIR$/modules/ktor" />
             <option value="$PROJECT_DIR$/modules/lifecycle" />
             <option value="$PROJECT_DIR$/modules/mongodb" />
@@ -45,7 +22,6 @@
             <option value="$PROJECT_DIR$/modules/transactions" />
           </set>
         </option>
-        <option name="resolveModulePerSourceSet" value="false" />
       </GradleProjectSettings>
     </option>
   </component>

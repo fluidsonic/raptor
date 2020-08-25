@@ -1,8 +1,8 @@
 package io.fluidsonic.raptor
 
-import kotlin.reflect.*
 import org.bson.codecs.*
 import org.bson.codecs.configuration.*
+import kotlin.reflect.*
 
 
 private class ScopedBsonDefinition<Value : Any>(
@@ -16,6 +16,10 @@ private class ScopedBsonDefinition<Value : Any>(
 			codec = DefaultBsonDefinitionScope(scope = scope, valueClass = valueClass).apply(config).codec(),
 			encodesSubclasses = encodesSubclasses
 		))
+
+
+	override fun toString() =
+		"<BSON definition: ${valueClass.qualifiedName}>"
 
 
 	private class Provider<Value : Any>(

@@ -1,7 +1,8 @@
 package tests
 
+import io.fluidsonic.country.*
+import io.fluidsonic.currency.*
 import io.fluidsonic.raptor.*
-import io.fluidsonic.stdlib.*
 import org.bson.codecs.configuration.*
 import kotlin.test.*
 
@@ -29,35 +30,37 @@ class BsonTests {
 
 		val configuration = raptor.context.bsonConfiguration
 
-		assertEquals(expected = listOf(codec), actual = configuration.codecs)
-		assertEquals(expected = listOf(definition), actual = configuration.definitions)
-		assertEquals(expected = listOf(provider), actual = configuration.providers)
-		assertEquals(expected = listOf(registry), actual = configuration.registries)
+		assertEquals(
+			expected = listOf(
+				RaptorBsonDefinitions.of(codec),
+				definition,
+				RaptorBsonDefinitions.of(provider),
+				RaptorBsonDefinitions.of(registry),
+			),
+			actual = configuration.definitions.underlyingDefinitions.toList()
+		)
 	}
 
 
 	@Test
 	fun testDefaultCodecs() {
-		val centsDefinition = Cents.bsonDefinition()
 		val countryDefinition = Country.bsonDefinition()
+		val currencyDefinition = Currency.bsonDefinition()
 
 		val raptor = raptor {
 			install(BsonRaptorFeature) {
 				definitions(countryDefinition)
 				includeDefaultCodecs()
-				definitions(centsDefinition)
+				definitions(currencyDefinition)
 			}
 		}
 
 		val configuration = raptor.context.bsonConfiguration
 
-		assertEquals(expected = emptyList(), actual = configuration.codecs)
 		assertEquals(
-			expected = listOf(countryDefinition) + RaptorBsonDefaults.definitions + centsDefinition,
-			actual = configuration.definitions
+			expected = listOf(countryDefinition) + currencyDefinition + RaptorBsonDefaults.definitions,
+			actual = configuration.definitions.underlyingDefinitions
 		)
-		assertEquals(expected = RaptorBsonDefaults.providers, actual = configuration.providers)
-		assertEquals(expected = emptyList(), actual = configuration.registries)
 	}
 
 
@@ -69,10 +72,7 @@ class BsonTests {
 
 		val configuration = raptor.context.bsonConfiguration
 
-		assertTrue(configuration.codecs.isEmpty())
-		assertTrue(configuration.definitions.isEmpty())
-		assertTrue(configuration.providers.isEmpty())
-		assertTrue(configuration.registries.isEmpty())
+		assertEquals(expected = RaptorBsonDefinitions.empty, actual = configuration.definitions)
 	}
 
 

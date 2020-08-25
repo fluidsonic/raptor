@@ -3,10 +3,10 @@
 
 package io.fluidsonic.raptor
 
-import io.fluidsonic.stdlib.*
+import io.fluidsonic.country.*
 
 
 public fun CountryCode.Companion.graphDefinition(): RaptorGraphDefinition = graphScalarDefinition {
-	parseString(::CountryCode)
-	serialize(CountryCode::value)
+	parseString { parseOrNull(it) ?: invalid() }
+	serialize(CountryCode::toString)
 }

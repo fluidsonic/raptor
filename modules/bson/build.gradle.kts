@@ -8,11 +8,13 @@ fluidLibraryModule(description = "FIXME") {
 	targets {
 		jvm {
 			dependencies {
-				api(project(":raptor"))
-				api("org.mongodb:bson:4.0.5")
+				api(project(":raptor-core"))
+				api("org.mongodb:bson:4.1.0")
 
-				implementation(fluid("stdlib", "0.10.1"))
-				implementation(fluid("time", "0.10.2"))
+				implementation(fluid("country", "0.9.1"))
+				implementation(fluid("currency", "0.9.1"))
+				implementation(fluid("stdlib", "0.10.2"))
+				implementation(fluid("time", "0.10.3"))
 
 				compileOnly(project(":raptor-di"))
 			}

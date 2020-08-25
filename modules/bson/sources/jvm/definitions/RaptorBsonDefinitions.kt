@@ -99,6 +99,10 @@ public interface RaptorBsonDefinitions {
 
 		override fun createCodecRegistry(scope: BsonScope) =
 			EmptyRegistry
+
+
+		override fun toString() =
+			"<empty RaptorBsonDefinition>"
 	}
 
 
@@ -110,6 +114,10 @@ public interface RaptorBsonDefinitions {
 
 		override fun <T : Any?> get(clazz: Class<T>, registry: CodecRegistry): Nothing? =
 			null
+
+
+		override fun toString() =
+			"<empty CodecRegistry>"
 	}
 
 
@@ -119,6 +127,18 @@ public interface RaptorBsonDefinitions {
 
 		override fun createCodecRegistry(scope: BsonScope): CodecRegistry =
 			CodecRegistries.fromRegistries(underlyingDefinitions.map { it.createCodecRegistry(scope) })
+
+
+		override fun equals(other: Any?) =
+			this === other || (other is OfDefinitions && underlyingDefinitions == other.underlyingDefinitions)
+
+
+		override fun hashCode() =
+			underlyingDefinitions.hashCode()
+
+
+		override fun toString() =
+			underlyingDefinitions.toString()
 	}
 
 
@@ -128,6 +148,18 @@ public interface RaptorBsonDefinitions {
 
 		override fun createCodecRegistry(scope: BsonScope) =
 			registry
+
+
+		override fun equals(other: Any?) =
+			this === other || (other is OfRegistry && registry == other.registry)
+
+
+		override fun hashCode() =
+			registry.hashCode()
+
+
+		override fun toString() =
+			registry.toString()
 	}
 
 

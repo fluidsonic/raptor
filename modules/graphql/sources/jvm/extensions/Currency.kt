@@ -3,10 +3,10 @@
 
 package io.fluidsonic.raptor
 
-import io.fluidsonic.stdlib.*
+import io.fluidsonic.currency.*
 
 
 public fun Currency.Companion.graphDefinition(): RaptorGraphDefinition = graphScalarDefinition {
-	parseString { byCode(it) ?: invalid() }
+	parseString { forCodeOrNull(it) ?: invalid() }
 	serialize(Currency::code)
 }

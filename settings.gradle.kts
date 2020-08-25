@@ -1,4 +1,6 @@
-includeBuild("../fluid-graphql")
+rootProject.name = "raptor"
+
+//includeBuild("../fluid-graphql")
 
 file("modules")
 	.listFiles()!!
@@ -9,10 +11,7 @@ file("modules")
 		include(name)
 
 		project(":$name").apply {
-			this.name = when (name) {
-				"core" -> "raptor"
-				else -> "raptor-$name"
-			}
+			this.name = "raptor-$name"
 			this.projectDir = directory
 		}
 	}

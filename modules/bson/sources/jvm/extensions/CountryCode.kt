@@ -3,10 +3,10 @@
 
 package io.fluidsonic.raptor
 
-import io.fluidsonic.stdlib.*
+import io.fluidsonic.country.*
 
 
 public fun CountryCode.Companion.bsonDefinition(): RaptorBsonDefinitions = bsonDefinition(
-	parse = ::CountryCode,
-	serialize = CountryCode::value
+	parse = CountryCode::parse,
+	serialize = CountryCode::toString
 )

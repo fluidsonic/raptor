@@ -8,12 +8,13 @@ fluidLibraryModule(description = "FIXME") {
 	targets {
 		jvm {
 			dependencies {
-				api(project(":raptor"))
+				api(project(":raptor-core"))
 				api(project(":raptor-lifecycle"))
 				api(project(":raptor-transactions"))
 				api(ktor("auth-jwt"))
 				api(ktor("server-netty"))
 
+				implementation(kotlinx("atomicfu", "0.14.4", usePrefix = false))
 				implementation("ch.qos.logback:logback-classic:1.2.3")
 			}
 		}
@@ -21,5 +22,5 @@ fluidLibraryModule(description = "FIXME") {
 }
 
 
-fun ktor(name: String, version: String = "1.3.2") =
+fun ktor(name: String, version: String = "1.4.0") =
 	"io.ktor:ktor-$name:$version"

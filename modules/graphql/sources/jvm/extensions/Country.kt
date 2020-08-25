@@ -3,8 +3,9 @@
 
 package io.fluidsonic.raptor
 
+import io.fluidsonic.country.*
+import io.fluidsonic.i18n.*
 import io.fluidsonic.locale.*
-import io.fluidsonic.stdlib.*
 
 
 public fun Country.Companion.graphDefinition(): RaptorGraphDefinition = graphObjectDefinition<Country> {

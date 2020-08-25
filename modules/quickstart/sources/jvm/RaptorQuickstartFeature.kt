@@ -18,6 +18,8 @@ object RaptorQuickstartFeature : RaptorFeature {
 			includeMongoClientDefaultCodecs()
 
 			definitions(
+				Cents.bsonDefinition(),
+				Money.bsonDefinition(),
 				PasswordHash.bsonDefinition(),
 				TypedId.bsonDefinition(),
 				Url.bsonDefinition() // FIXME move to either BsonFeature or KtorFeature with ifAvailable
@@ -29,6 +31,8 @@ object RaptorQuickstartFeature : RaptorFeature {
 
 			definitions(
 				AccessToken.graphDefinition(),
+				Cents.graphDefinition(),
+				Money.graphDefinition(),
 				Password.graphDefinition()
 			)
 		}

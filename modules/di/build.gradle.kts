@@ -10,7 +10,7 @@ fluidLibraryModule(description = "FIXME") {
 			dependencies {
 				implementation(kotlin("reflect"))
 
-				api(project(":raptor"))
+				api(project(":raptor-core"))
 
 				compileOnly(project(":raptor-transactions"))
 			}

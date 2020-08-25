@@ -278,7 +278,6 @@ internal class GraphSystemDefinitionBuilder private constructor(
 			is ObjectExtensionGraphDefinition -> {
 				outputTypeDefinitionRegistry.resolve(definition.kotlinType, referee = definition)
 
-
 				definition.fieldDefinitions.forEach { field ->
 					outputTypeDefinitionRegistry.resolve(field.kotlinType, referee = field)
 				}

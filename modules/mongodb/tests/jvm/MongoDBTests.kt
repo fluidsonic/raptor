@@ -1,3 +1,5 @@
+package tests
+
 import com.mongodb.*
 import io.fluidsonic.raptor.*
 import kotlin.test.*
@@ -15,6 +17,9 @@ class MongoDBTests {
 
 		val configuration = raptor.context.bsonConfiguration
 
-		assertEquals(expected = listOf(MongoClientSettings.getDefaultCodecRegistry()), actual = configuration.registries)
+		assertEquals(
+			expected = RaptorBsonDefinitions.of(MongoClientSettings.getDefaultCodecRegistry()),
+			actual = configuration.definitions
+		)
 	}
 }
