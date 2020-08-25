@@ -16,3 +16,10 @@ public interface RaptorDIBuilder {
 public inline fun <reified Dependency : Any> RaptorDIBuilder.provide(noinline provide: RaptorDI.() -> Dependency) {
 	provide(typeOf<Dependency>(), provide = provide)
 }
+
+
+@OptIn(ExperimentalStdlibApi::class)
+@RaptorDsl
+public inline fun <reified Dependency : Any> RaptorDIBuilder.provide(dependency: Dependency) {
+	provide { dependency }
+}
