@@ -7,13 +7,14 @@ import io.ktor.routing.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.ktor.util.*
-import kotlinx.atomicfu.*
-import kotlinx.coroutines.*
-import org.slf4j.event.*
 import java.io.*
 import java.security.*
 import java.util.concurrent.*
 import kotlin.text.toCharArray
+import kotlinx.atomicfu.*
+import kotlinx.coroutines.*
+import org.slf4j.*
+import org.slf4j.event.*
 
 
 private val ktorServerAttributeKey = AttributeKey<KtorServer>("Raptor: server")
@@ -21,10 +22,13 @@ private val ktorServerAttributeKey = AttributeKey<KtorServer>("Raptor: server")
 
 internal class KtorServer(
 	private val configuration: KtorServerConfiguration,
-	parentContext: RaptorContext
+	parentContext: RaptorContext,
 ) {
 
-	private var engine = embeddedServer(Netty, applicationEngineEnvironment {
+	private var engine: ApplicationEngine? = null
+	private val environment = applicationEngineEnvironment {
+		log = LoggerFactory.getLogger("io.ktor.Application")
+
 		for (connector in configuration.connectors)
 			when (connector) {
 				is KtorServerConfiguration.Connector.Http ->
@@ -56,7 +60,7 @@ internal class KtorServer(
 					}
 				}
 			}
-	})
+	}
 	private val stateRef = atomic(State.initial)
 
 	// FIXME Support child context w/o Transaction, e.g. for Kodein.
@@ -75,6 +79,8 @@ internal class KtorServer(
 
 
 	private fun startEngineBlocking() {
+		val engine = embeddedServer(Netty, environment)
+
 		var exception: Throwable? = null
 
 		// Engine is created before monitoring the start event because Netty's subscriptions must be processed first.
@@ -101,6 +107,8 @@ internal class KtorServer(
 
 			throw exception
 		}
+
+		this.engine = engine
 	}
 
 
@@ -116,7 +124,9 @@ internal class KtorServer(
 
 
 	private fun stopEngineBlocking() {
-		engine.stop(0, 10, TimeUnit.SECONDS) // FIXME
+		checkNotNull(engine).stop(0, 10, TimeUnit.SECONDS) // FIXME
+
+		this.engine = null
 	}
 
 

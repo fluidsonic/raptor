@@ -155,6 +155,12 @@ internal class GraphArgumentDefinition(
 	override fun debugString() =
 		"argument '$name': $kotlinType"
 
+
+	override fun <TransformedType> map(transform: RaptorGraphInputScope.(value: Any?) -> TransformedType): RaptorGraphArgumentDelegate<TransformedType> {
+		TODO() // FIXME
+	}
+
+
 	fun specialize(typeArgument: KotlinType): GraphArgumentDefinition {
 		if (kotlinType.isSpecialized)
 			return this
@@ -170,7 +176,7 @@ internal class GraphArgumentDefinition(
 	}
 
 
-	public override operator fun provideDelegate(thisRef: Any?, property: KProperty<*>): ReadOnlyProperty<Any?, Any?> {
+	override operator fun provideDelegate(thisRef: Any?, property: KProperty<*>): ReadOnlyProperty<Any?, Any?> {
 		check(!isProvided) { "Cannot delegate multiple variables to the same argument." }
 
 		val variableName = property.name
@@ -183,6 +189,11 @@ internal class GraphArgumentDefinition(
 		return ReadOnlyProperty { _, _ ->
 			resolver.resolveArgument(name = name, variableName = variableName)
 		}
+	}
+
+
+	override fun validate(validate: RaptorGraphInputScope.(value: Any?) -> Unit): RaptorGraphArgumentDelegate<Any?> {
+		TODO() // FIXME
 	}
 }
 

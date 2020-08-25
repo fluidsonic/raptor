@@ -22,9 +22,12 @@ internal class DefaultRaptorDIBuilder : RaptorDIBuilder {
 		@Suppress("NAME_SHADOWING")
 		val type = type.withNullability(false)
 
-		providerByKey.put(type, provide)?.let {
-			error("A dependency for type '$type' has already been registered.")
-		}
+		providerByKey[type] = provide
+
+		// FIXME How to handle collisions & unit testing?
+//		providerByKey.put(type, provide)?.let {
+//			error("A dependency for type '$type' has already been registered.")
+//		}
 	}
 
 

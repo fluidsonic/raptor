@@ -7,7 +7,7 @@ import kotlinx.atomicfu.*
 internal class DefaultRaptorLifecycle(
 	override val context: RaptorContext,
 	private val startActions: List<suspend RaptorLifecycleStartScope.() -> Unit>,
-	private val stopActions: List<suspend RaptorLifecycleStopScope.() -> Unit>
+	private val stopActions: List<suspend RaptorLifecycleStopScope.() -> Unit>,
 ) : RaptorLifecycle, RaptorLifecycleStartScope, RaptorLifecycleStopScope {
 
 	private val stateRef = atomic(State.stopped)
