@@ -7,6 +7,7 @@ plugins {
 fluidLibrary(name = "raptor", version = "0.9.2", prefixName = false) {
 	allModules {
 		language {
+			withExperimentalApi("io.fluidsonic.raptor.InternalRaptorApi")
 			withoutExplicitApi()
 		}
 	}

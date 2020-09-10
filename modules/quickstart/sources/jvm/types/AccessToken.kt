@@ -2,14 +2,14 @@ package io.fluidsonic.raptor
 
 
 // Inline classes are still broken in Kotlin 1.3.72
-/* inline */ data class AccessToken(val value: String) {
+/* inline */ public data class AccessToken(val value: String) {
 
-	override fun toString() = value
+	override fun toString(): String = value
 
 
-	companion object {
+	public companion object {
 
-		fun graphDefinition(): RaptorGraphDefinition = graphScalarDefinition {
+		public fun graphDefinition(): RaptorGraphDefinition = graphScalarDefinition {
 			parseString(::AccessToken)
 			serialize(AccessToken::value)
 		}

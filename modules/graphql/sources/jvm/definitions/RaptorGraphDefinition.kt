@@ -147,6 +147,7 @@ internal class GraphArgumentDefinition(
 	RaptorGraphArgumentDelegate<Any?> {
 
 	private var isProvided = false
+	private var transforms = emptyList<RaptorGraphInputScope.(Any?) -> Any?>()
 
 	internal var name = name // FIXME validate uniqueness
 		private set
@@ -157,22 +158,12 @@ internal class GraphArgumentDefinition(
 
 
 	override fun <TransformedType> map(transform: RaptorGraphInputScope.(value: Any?) -> TransformedType): RaptorGraphArgumentDelegate<TransformedType> {
-		TODO() // FIXME
-	}
+		// FIXME freeze after builder is done
 
+		transforms = transforms + transform
 
-	fun specialize(typeArgument: KotlinType): GraphArgumentDefinition {
-		if (kotlinType.isSpecialized)
-			return this
-
-		return GraphArgumentDefinition(
-			defaultValue = defaultValue,
-			description = description,
-			kotlinType = kotlinType.specialize(typeArgument),
-			name = name,
-			resolver = resolver,
-			stackTrace = stackTrace
-		)
+		@Suppress("UNCHECKED_CAST")
+		return this as RaptorGraphArgumentDelegate<TransformedType>
 	}
 
 
@@ -187,13 +178,27 @@ internal class GraphArgumentDefinition(
 
 		@Suppress("UNCHECKED_CAST")
 		return ReadOnlyProperty { _, _ ->
-			resolver.resolveArgument(name = name, variableName = variableName)
+			resolveArgument(name = name, variableName = variableName)
 		}
 	}
 
 
-	override fun validate(validate: RaptorGraphInputScope.(value: Any?) -> Unit): RaptorGraphArgumentDelegate<Any?> {
-		TODO() // FIXME
+	private fun resolveArgument(name: String, variableName: String): Any? =
+		resolver.resolveArgument(name = name, variableName = variableName, transforms = transforms)
+
+
+	fun specialize(typeArgument: KotlinType): GraphArgumentDefinition {
+		if (kotlinType.isSpecialized)
+			return this
+
+		return GraphArgumentDefinition(
+			defaultValue = defaultValue,
+			description = description,
+			kotlinType = kotlinType.specialize(typeArgument),
+			name = name,
+			resolver = resolver,
+			stackTrace = stackTrace
+		)
 	}
 }
 

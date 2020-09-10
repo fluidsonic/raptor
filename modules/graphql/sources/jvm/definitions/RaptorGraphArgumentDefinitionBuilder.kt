@@ -38,8 +38,13 @@ public class RaptorGraphArgumentDefinitionBuilder<Value> internal constructor(
 	}
 
 
-	// FIXME support List and InputObject
-	// FIXME this is annoying, esp. Enum. we need a wrapper
+	// FIXME refactor
+
+	@RaptorDsl
+	public fun defaultList() {
+		default(GListValue(emptyList()))
+	}
+
 
 	@RaptorDsl
 	public fun defaultNull() {

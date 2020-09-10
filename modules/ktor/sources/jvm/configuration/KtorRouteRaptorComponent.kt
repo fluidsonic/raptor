@@ -7,7 +7,7 @@ import io.ktor.routing.*
 class KtorRouteRaptorComponent internal constructor(
 	internal val globalScope: RaptorTopLevelConfigurationScope,
 	private val path: String,
-	internal val serverComponentRegistry: RaptorComponentRegistry
+	internal val serverComponentRegistry: RaptorComponentRegistry,
 ) : RaptorComponent.Default<KtorRouteRaptorComponent>(), RaptorTransactionGeneratingComponent {
 
 	// FIXME ok not to specify parent?
@@ -68,7 +68,7 @@ class KtorRouteRaptorComponent internal constructor(
 		private val globalScope: RaptorTopLevelConfigurationScope,
 		propertyRegistry: RaptorPropertyRegistry,
 		override val route: KtorRouteRaptorComponent,
-		serverComponentRegistry: RaptorComponentRegistry
+		serverComponentRegistry: RaptorComponentRegistry,
 	) : KtorRouteFeatureConfigurationEndScope,
 		KtorRouteFeatureConfigurationStartScope {
 
@@ -93,13 +93,13 @@ class KtorRouteRaptorComponent internal constructor(
 
 		private class RouteScope(
 			override val componentRegistry: RaptorComponentRegistry,
-			override val propertyRegistry: RaptorPropertyRegistry
+			override val propertyRegistry: RaptorPropertyRegistry,
 		) : KtorRouteFeatureConfigurationEndScope.RouteScope
 
 
 		private class ServerScope(
 			override val componentRegistry: RaptorComponentRegistry,
-			override val propertyRegistry: RaptorPropertyRegistry
+			override val propertyRegistry: RaptorPropertyRegistry,
 		) : KtorRouteFeatureConfigurationEndScope.ServerScope
 	}
 }
@@ -123,16 +123,22 @@ fun RaptorComponentSet<KtorRouteRaptorComponent>.install(feature: KtorRouteFeatu
 
 
 @RaptorDsl
-fun RaptorComponentSet<KtorRouteRaptorComponent>.newRoute(path: String, configure: KtorRouteRaptorComponent.() -> Unit) {
-	configure {
-		KtorRouteRaptorComponent(
-			globalScope = globalScope,
-			path = path,
-			serverComponentRegistry = serverComponentRegistry
-		)
-			.also { componentRegistry.register(KtorRouteRaptorComponent.Key, it) }
-			.also(configure)
+public fun RaptorComponentSet<KtorRouteRaptorComponent>.newRoute(path: String): RaptorComponentSet<KtorRouteRaptorComponent> =
+	withComponentAuthoring {
+		map {
+			KtorRouteRaptorComponent(
+				globalScope = globalScope,
+				path = path,
+				serverComponentRegistry = serverComponentRegistry
+			)
+				.also { componentRegistry.register(KtorRouteRaptorComponent.Key, it) }
+		}
 	}
+
+
+@RaptorDsl
+public fun RaptorComponentSet<KtorRouteRaptorComponent>.newRoute(path: String, configure: KtorRouteRaptorComponent.() -> Unit) {
+	newRoute(path).configure(configure)
 }
 
 

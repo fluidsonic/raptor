@@ -1,14 +1,15 @@
 package io.fluidsonic.raptor
 
 import io.fluidsonic.time.*
+import io.fluidsonic.time.Timestamp.*
 
 
-public fun Timestamp.Companion.bsonDefinition(): RaptorBsonDefinitions = bsonDefinition<Timestamp> {
+public fun Companion.bsonDefinition(): RaptorBsonDefinition = raptor.bson.definition<Timestamp> {
 	decode {
-		of(millisecondsSince1970 = Milliseconds(readDateTime()))
+		reader.timestamp()
 	}
 
 	encode { value ->
-		writeDateTime(value.millisecondsSince1970.toLong())
+		writer.value(value)
 	}
 }

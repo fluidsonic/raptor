@@ -1,14 +1,15 @@
 package io.fluidsonic.raptor
 
 import io.fluidsonic.time.*
+import io.fluidsonic.time.LocalDate.*
 
 
-public fun LocalDate.Companion.bsonDefinition(): RaptorBsonDefinitions = bsonDefinition<LocalDate> {
+public fun Companion.bsonDefinition(): RaptorBsonDefinition = raptor.bson.definition<LocalDate> {
 	decode {
-		Timestamp.of(millisecondsSince1970 = Milliseconds(readDateTime())).toLocalDate(TimeZone.utc)
+		reader.timestamp().toLocalDate(TimeZone.utc)
 	}
 
 	encode { value ->
-		writeDateTime(value.atStartOfDay(TimeZone.utc).millisecondsSince1970.toLong())
+		writer.value(value.atStartOfDay(TimeZone.utc))
 	}
 }

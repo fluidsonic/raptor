@@ -15,7 +15,7 @@ internal class DefaultRaptorDIFactory(
 		}
 
 		val contextModule = DefaultRaptorDIModule(
-			name = "raptor/context",
+			name = "raptor (context)",
 			provideByType = mapOf(context::class.starProjectedType to {
 				(context as? RaptorContext.Lazy)?.context ?: context
 			})

@@ -10,7 +10,7 @@ public fun RaptorComponentSet<BsonRaptorComponent>.includeMongoClientDefaultCode
 	if (extensions[MongoClientDefaultCodecsIncluded] != true) {
 		extensions[MongoClientDefaultCodecsIncluded] = true
 
-		registries(MongoClientSettings.getDefaultCodecRegistry(), priority = RaptorBsonDefinitions.Priority.low)
+		providers(MongoClientSettings.getDefaultCodecRegistry(), priority = RaptorBsonDefinition.Priority.low)
 	}
 }
 

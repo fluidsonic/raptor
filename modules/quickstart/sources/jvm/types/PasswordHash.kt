@@ -2,17 +2,17 @@ package io.fluidsonic.raptor
 
 
 // Inline classes are still broken in Kotlin 1.3.72
-/* inline */ data class PasswordHash(val value: String) {
+/* inline */ public data class PasswordHash(val value: String) {
 
-	override fun toString() =
+	override fun toString(): String =
 		"PasswordHash(***)"
 
 
-	companion object {
+	public companion object {
 
-		fun bsonDefinition() = bsonDefinition(
-			parse = ::PasswordHash,
-			serialize = PasswordHash::value
-		)
+		public fun bsonDefinition(): RaptorBsonDefinition = raptor.bson.definition<PasswordHash> {
+			decode(::PasswordHash)
+			encode(PasswordHash::value)
+		}
 	}
 }

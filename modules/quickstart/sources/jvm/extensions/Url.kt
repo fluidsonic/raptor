@@ -3,9 +3,10 @@
 package io.fluidsonic.raptor
 
 import io.ktor.http.*
+import io.ktor.http.Url.*
 
 
-fun Url.Companion.bsonDefinition() = bsonDefinition(
-	parse = ::Url,
-	serialize = Url::toString
-)
+public fun Companion.bsonDefinition(): RaptorBsonDefinition = raptor.bson.definition<Url> {
+	decode<String>(::Url)
+	encode(Url::toString)
+}

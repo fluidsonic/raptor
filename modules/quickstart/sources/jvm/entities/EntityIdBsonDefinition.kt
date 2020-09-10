@@ -1,44 +1,34 @@
 package io.fluidsonic.raptor.quickstart.internal
 
 import io.fluidsonic.raptor.*
-import org.bson.*
-import org.bson.codecs.*
-import org.bson.codecs.configuration.*
+import kotlin.reflect.*
 
 
 internal class EntityIdBsonDefinition<Id : EntityId>(
 	val factory: EntityId.Factory<Id>,
-) : RaptorBsonDefinitions, Codec<Id>, CodecRegistry {
+) : RaptorBsonDefinition, RaptorBsonCodec<Id> {
 
-	private val encoderClass = factory.idClass.java
-
-
-	override fun createCodecRegistry(scope: BsonScope): CodecRegistry =
-		this
+	override val valueClass = factory.idClass
 
 
-	override fun decode(reader: BsonReader, decoderContext: DecoderContext): Id =
+	@Suppress("UNCHECKED_CAST")
+	override fun <Value : Any> codecForValueClass(valueClass: KClass<Value>, registry: RaptorBsonCodecRegistry): RaptorBsonCodec<Value>? =
+		takeIf { valueClass == this.valueClass }
+			?.let { this as RaptorBsonCodec<Value> }
+
+
+	override fun RaptorBsonReaderScope.decode(): Id =
 		with(factory) {
 			reader.readIdValue()
 		}
 
 
-	override fun encode(writer: BsonWriter, value: Id, encoderContext: EncoderContext) {
+	override fun RaptorBsonWriterScope.encode(value: Id) {
 		with(factory) {
 			writer.writeIdValue(value)
 		}
 	}
 
 
-	@Suppress("UNCHECKED_CAST")
-	override fun <T : Any?> get(clazz: Class<T>): Codec<T>? =
-		takeIf { clazz == encoderClass } as Codec<T>?
-
-
-	override fun <T : Any?> get(clazz: Class<T>, registry: CodecRegistry) =
-		get(clazz)
-
-
-	override fun getEncoderClass() =
-		encoderClass
+	override fun toString() = "Raptor BSON definition (${valueClass.qualifiedName})"
 }

@@ -5,10 +5,10 @@ import com.mongodb.client.model.Filters.*
 import com.mongodb.client.result.*
 import io.fluidsonic.mongo.*
 import io.fluidsonic.stdlib.*
+import kotlin.reflect.*
 import org.bson.*
 import org.bson.codecs.*
 import org.bson.conversions.*
-import kotlin.reflect.*
 
 
 private val bsonDecoderContext = DecoderContext.builder().build()!!
@@ -51,19 +51,25 @@ suspend fun <TResult : Any> MongoCollection<*>.findOneFieldById(id: Any?, fieldN
 		)
 		.firstOrNull()
 		?.let { document ->
-			document.asBsonReader().readDocument {
-				(readBsonType() != BsonType.END_OF_DOCUMENT).thenTake {
+			with(document.asBsonReader()) {
+				readStartDocument()
+
+				val result = (readBsonType() != BsonType.END_OF_DOCUMENT).thenTake {
 					check(readName() == fieldName)
 
 					codecRegistry.get(resultClass.java).decode(this, bsonDecoderContext)
 				}
+
+				readEndDocument()
+
+				result
 			}
 		}
 
 
 suspend fun <TDocument : Any> MongoCollection<TDocument>.findOneByIdAndDelete(
 	id: Any?,
-	options: FindOneAndDeleteOptions = FindOneAndDeleteOptions()
+	options: FindOneAndDeleteOptions = FindOneAndDeleteOptions(),
 ): TDocument? =
 	findOneAndDelete(
 		filter = eq("_id", id),
@@ -74,7 +80,7 @@ suspend fun <TDocument : Any> MongoCollection<TDocument>.findOneByIdAndDelete(
 suspend fun <TDocument : Any> MongoCollection<TDocument>.findOneByIdAndUpdate(
 	id: Any?,
 	update: Bson,
-	options: FindOneAndUpdateOptions = FindOneAndUpdateOptions()
+	options: FindOneAndUpdateOptions = FindOneAndUpdateOptions(),
 ): TDocument? =
 	findOneAndUpdate(
 		filter = eq("_id", id),
@@ -86,7 +92,7 @@ suspend fun <TDocument : Any> MongoCollection<TDocument>.findOneByIdAndUpdate(
 suspend fun <TDocument : Any> MongoCollection<TDocument>.replaceOneById(
 	id: Any?,
 	replacement: TDocument,
-	options: ReplaceOptions = ReplaceOptions()
+	options: ReplaceOptions = ReplaceOptions(),
 ): UpdateResult =
 	replaceOne(filter = eq("_id", id), replacement = replacement, options = options)
 
@@ -94,6 +100,6 @@ suspend fun <TDocument : Any> MongoCollection<TDocument>.replaceOneById(
 suspend fun <TDocument : Any> MongoCollection<TDocument>.updateOneById(
 	id: Any?,
 	update: Bson,
-	options: UpdateOptions = UpdateOptions()
+	options: UpdateOptions = UpdateOptions(),
 ): UpdateResult =
 	updateOne(filter = eq("_id", id), update = update, options = options)

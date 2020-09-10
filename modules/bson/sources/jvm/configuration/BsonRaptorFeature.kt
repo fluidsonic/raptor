@@ -1,5 +1,7 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.raptor.bson.internal.*
+
 
 // FIXME name order
 public object BsonRaptorFeature : RaptorFeature.Configurable<BsonRaptorComponent> {
@@ -18,8 +20,9 @@ public object BsonRaptorFeature : RaptorFeature.Configurable<BsonRaptorComponent
 		ifInstalled(raptorDIFeatureId) {
 			di {
 				provide { get<RaptorContext>().bsonConfiguration }
-				provide { DefaultBsonScope(configuration = get(), context = get()) }
-				provide { get<BsonScope>().codecRegistry }
+				provide<RaptorBsonScope> { DefaultRaptorBsonScope(configuration = get(), context = get()) }
+				provide { get<RaptorBsonScope>().codecRegistry }
+				provide { get<RaptorBsonCodecRegistry>().internal() }
 			}
 		}
 	}
@@ -29,8 +32,8 @@ public object BsonRaptorFeature : RaptorFeature.Configurable<BsonRaptorComponent
 public const val raptorBsonFeatureId: RaptorFeatureId = "raptor.bson"
 
 
-public val RaptorContext.bsonConfiguration: BsonConfiguration
-	get() = properties[BsonConfiguration.PropertyKey]
+public val RaptorContext.bsonConfiguration: RaptorBsonConfiguration
+	get() = properties[RaptorBsonConfiguration.PropertyKey]
 		?: error("You must install ${BsonRaptorFeature::class.simpleName} for enabling BSON functionality.")
 
 

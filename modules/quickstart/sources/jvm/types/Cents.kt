@@ -79,6 +79,18 @@ public data /*inline*/ class Cents(val value: Long) : Comparable<Cents> {
 	public companion object {
 
 		public val zero: Cents = Cents(0L)
+
+
+		public fun bsonDefinition(): RaptorBsonDefinition = raptor.bson.definition<Cents> {
+			decode(::Cents)
+			encode(Cents::value)
+		}
+
+
+		public fun graphDefinition(): RaptorGraphDefinition = graphScalarDefinition<Cents> {
+			parseString { Cents(it.toLongOrNull() ?: invalid()) }
+			serialize { it.value.toString() }
+		}
 	}
 }
 

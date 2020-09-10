@@ -14,14 +14,14 @@ object RaptorQuickstartFeature : RaptorFeature {
 		install(KtorRaptorFeature)
 
 		bson {
-			includeDefaultCodecs()
+			includeDefaultDefinitions()
 			includeMongoClientDefaultCodecs()
 
 			definitions(
 				Cents.bsonDefinition(),
 				Money.bsonDefinition(),
 				PasswordHash.bsonDefinition(),
-				TypedId.bsonDefinition(),
+//				TypedId.bsonDefinition(),
 				Url.bsonDefinition() // FIXME move to either BsonFeature or KtorFeature with ifAvailable
 			)
 		}

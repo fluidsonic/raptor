@@ -12,8 +12,9 @@ internal class ArgumentResolver(
 	private val currentContext = ThreadLocal<Context>() // FIXME won't work with coroutines
 
 
+	// FIXME refactor
 	@Suppress("UNCHECKED_CAST")
-	private fun Context.resolve(name: String): Any? {
+	private fun Context.resolve(name: String, transforms: List<RaptorGraphInputScope.(Any?) -> Any?>): Any? {
 		val context = execution.raptorContext
 			?: return null
 
@@ -24,17 +25,16 @@ internal class ArgumentResolver(
 		if (expectsMaybe && !argumentValues.containsKey(name))
 			return Maybe.nothing
 
+		val inputScope = object : RaptorGraphInputScope, RaptorGraphScope by context { // FIXME improve
+
+			override fun invalid(details: String?): Nothing =
+				error("invalid argument") // FIXME
+		}
+
 		var value = argumentValues[name]?.let { value ->
 			val aliasType = gqlDefinition.raptorType as? AliasGraphType
-			if (aliasType != null) {
-				val inputScope = object : RaptorGraphInputScope, RaptorGraphScope by context { // FIXME improve
-
-					override fun invalid(details: String?): Nothing =
-						error("invalid argument") // FIXME
-				}
-
+			if (aliasType != null)
 				inputScope.parseAliasValue(value, parse = aliasType.convertReferencedToAlias, typeRef = gqlDefinition.type)
-			}
 			else
 				value
 		}
@@ -42,15 +42,20 @@ internal class ArgumentResolver(
 		if (expectsMaybe)
 			value = Maybe.of(value)
 
+		with(inputScope) {
+			for (transform in transforms)
+				value = transform(value)
+		}
+
 		return value
 	}
 
 
-	fun resolveArgument(name: String, variableName: String): Any? {
+	fun resolveArgument(name: String, variableName: String, transforms: List<RaptorGraphInputScope.(Any?) -> Any?> = emptyList()): Any? {
 		val context = currentContext.get()
 			?: error("Variable '$variableName' is delegated to argument(\"'$name'\") and can only be accessed within '$factoryName { … }'.")
 
-		return context.resolve(name = name)
+		return context.resolve(name = name, transforms = transforms)
 	}
 
 

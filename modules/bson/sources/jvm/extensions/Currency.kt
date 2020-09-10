@@ -1,9 +1,10 @@
 package io.fluidsonic.raptor
 
 import io.fluidsonic.currency.*
+import io.fluidsonic.currency.Currency.*
 
 
-public fun Currency.Companion.bsonDefinition(): RaptorBsonDefinitions = bsonDefinition(
-	parse = Currency::forCode,
-	serialize = { it.code.toString() }
-)
+public fun Companion.bsonDefinition(): RaptorBsonDefinition = raptor.bson.definition<Currency> {
+	decode<CurrencyCode>(::forCode)
+	encode(Currency::code)
+}

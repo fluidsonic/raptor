@@ -1,43 +1,53 @@
-package io.fluidsonic.raptor
-
-import io.fluidsonic.raptor.quickstart.internal.*
-
-
-inline class TypedId(val untyped: EntityId) {
-
-	override fun toString() =
-		untyped.toString()
-
-
-	companion object
-}
-
-
-internal fun TypedId.Companion.bsonDefinition() = bsonDefinition<TypedId> {
-	val factoryByType: Map<String, EntityId.Factory<*>> = findEntityIdDefinitions(context.bsonConfiguration.definitions)
-		.map { it.factory }
-		.associateBy { it.type }
-
-	decode {
-		readDocument {
-			val factory = readString("type").let { type ->
-				factoryByType[type] ?: throw BsonException("ID type '$type' has not been registered with Raptor")
-			}
-
-			readName("id")
-			readValueOfType(factory.idClass).typed
-		}
-	}
-
-	encode { value ->
-		writeDocument {
-			write("type", value.untyped.factory.type)
-			write("id", value.untyped)
-		}
-	}
-}
-
-
-private fun findEntityIdDefinitions(definition: RaptorBsonDefinitions): Collection<EntityIdBsonDefinition<*>> =
-	(definition as? EntityIdBsonDefinition<*>)?.let(::listOf)
-		?: definition.underlyingDefinitions.flatMap(::findEntityIdDefinitions)
+// FIXME support this through an ID factory[/definition] registry
+//package io.fluidsonic.raptor
+//
+//import io.fluidsonic.raptor.quickstart.internal.*
+//
+//
+//public inline class TypedId(public val untyped: EntityId) {
+//
+//	override fun toString(): String =
+//		untyped.toString()
+//
+//
+//	public companion object {
+//
+//		public fun bsonDefinition(): RaptorBsonDefinition = raptor.bson.definition<TypedId> {
+//			val factoryByType: Map<String, EntityId.Factory<*>> = findEntityIdDefinitions(context.bsonConfiguration.definitions)
+//				.map { it.factory }
+//				.associateBy { it.type }
+//
+//			decode {
+//				reader.document {
+//					val factory = string("type").let { type ->
+//						factoryByType[type] ?: error("No BSON definition provided for ID type '$type'.")
+//					}
+//
+//					fieldName("id")
+//					value(factory.idClass).typed
+//				}
+//			}
+//
+//			encode { value ->
+//				writer.document {
+//					value("type", value.untyped.factory.type)
+//					value("id", value.untyped)
+//				}
+//			}
+//		}
+//	}
+//}
+//
+//
+//private fun findEntityIdDefinitions(
+//	definitions: List<RaptorBsonDefinition>,
+//	destination: MutableList<EntityIdBsonDefinition<*>> = mutableListOf(),
+//): Collection<EntityIdBsonDefinition<*>> =
+//	destination.apply {
+//		for (definition in definitions) {
+//			when (definition) {
+//				is EntityIdBsonDefinition<*> -> add(definition)
+//				else -> findEntityIdDefinitions(definitions = definition.additionalDefinitions, destination = this)
+//			}
+//		}
+//	}

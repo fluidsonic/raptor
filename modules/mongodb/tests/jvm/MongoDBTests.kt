@@ -18,7 +18,7 @@ class MongoDBTests {
 		val configuration = raptor.context.bsonConfiguration
 
 		assertEquals(
-			expected = RaptorBsonDefinitions.of(MongoClientSettings.getDefaultCodecRegistry()),
+			expected = RaptorBsonDefinition.of(MongoClientSettings.getDefaultCodecRegistry()),
 			actual = configuration.definitions
 		)
 	}

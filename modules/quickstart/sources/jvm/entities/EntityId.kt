@@ -3,7 +3,6 @@ package io.fluidsonic.raptor
 import io.fluidsonic.raptor.quickstart.internal.*
 import kotlin.reflect.*
 import kotlin.reflect.full.*
-import org.bson.*
 import org.bson.types.*
 
 
@@ -24,9 +23,9 @@ interface EntityId {
 
 		fun parseWithoutType(string: String): Id?
 
-		fun BsonReader.readIdValue(): Id
+		fun RaptorBsonReader.readIdValue(): Id
 
-		fun BsonWriter.writeIdValue(id: Id)
+		fun RaptorBsonWriter.writeIdValue(id: Id)
 
 		fun Id.serialize(): String
 
@@ -69,12 +68,12 @@ interface EntityId {
 					?.let(constructor)
 
 
-			final override fun BsonReader.readIdValue() =
-				constructor(readObjectId())
+			final override fun RaptorBsonReader.readIdValue() =
+				constructor(objectId())
 
 
-			final override fun BsonWriter.writeIdValue(id: Id) =
-				writeObjectId(id.value)
+			final override fun RaptorBsonWriter.writeIdValue(id: Id) =
+				value(id.value)
 
 
 			final override fun Id.serialize() =
@@ -113,12 +112,12 @@ interface EntityId {
 				constructor(string)
 
 
-			final override fun BsonReader.readIdValue() =
-				constructor(readString())
+			final override fun RaptorBsonReader.readIdValue() =
+				constructor(string())
 
 
-			final override fun BsonWriter.writeIdValue(id: Id) =
-				writeString(id.value)
+			final override fun RaptorBsonWriter.writeIdValue(id: Id) =
+				value(id.value)
 
 
 			final override fun Id.serialize() =
@@ -132,7 +131,7 @@ interface EntityId {
 }
 
 
-fun <Id : EntityId> EntityId.Factory<Id>.bsonDefinition(): RaptorBsonDefinitions =
+fun <Id : EntityId> EntityId.Factory<Id>.bsonDefinition(): RaptorBsonDefinition =
 	EntityIdBsonDefinition(factory = this)
 
 
@@ -147,8 +146,9 @@ fun EntityId.toStringWithoutType() =
 	(factory as EntityId.Factory<EntityId>).run { serializeWithoutType() }
 
 
-val EntityId.typed
-	get() = TypedId(this)
+// FIXME support this
+//val EntityId.typed
+//	get() = TypedId(this)
 
 
 fun <Id : EntityId> EntityId.Factory<Id>.serialize(id: Id) =

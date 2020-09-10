@@ -1,30 +1,32 @@
 package io.fluidsonic.raptor
 
 import io.fluidsonic.time.*
+import io.fluidsonic.time.DayOfWeek.*
 
 
-public fun DayOfWeek.Companion.bsonDefinition(): RaptorBsonDefinitions = bsonDefinition(
-	parse = { string ->
+public fun Companion.bsonDefinition(): RaptorBsonDefinition = raptor.bson.definition<DayOfWeek> {
+	decode<String> { string ->
 		when (string) {
-			"monday" -> DayOfWeek.monday
-			"tuesday" -> DayOfWeek.tuesday
-			"wednesday" -> DayOfWeek.wednesday
-			"thursday" -> DayOfWeek.thursday
-			"friday" -> DayOfWeek.friday
-			"saturday" -> DayOfWeek.saturday
-			"sunday" -> DayOfWeek.sunday
+			"monday" -> monday
+			"tuesday" -> tuesday
+			"wednesday" -> wednesday
+			"thursday" -> thursday
+			"friday" -> friday
+			"saturday" -> saturday
+			"sunday" -> sunday
 			else -> error("invalid day of week: $string")
 		}
-	},
-	serialize = { value ->
+	}
+
+	encode<String> { value ->
 		when (value) {
-			DayOfWeek.monday -> "monday"
-			DayOfWeek.tuesday -> "tuesday"
-			DayOfWeek.wednesday -> "wednesday"
-			DayOfWeek.thursday -> "thursday"
-			DayOfWeek.friday -> "friday"
-			DayOfWeek.saturday -> "saturday"
-			DayOfWeek.sunday -> "sunday"
+			monday -> "monday"
+			tuesday -> "tuesday"
+			wednesday -> "wednesday"
+			thursday -> "thursday"
+			friday -> "friday"
+			saturday -> "saturday"
+			sunday -> "sunday"
 		}
 	}
-)
+}

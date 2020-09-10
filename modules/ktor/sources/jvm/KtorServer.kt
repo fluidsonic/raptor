@@ -138,6 +138,8 @@ internal class KtorServer(
 			level = Level.INFO
 		}
 
+		install(Compression)
+
 		install(DefaultHeaders) {
 			header(HttpHeaders.Server, "Raptor")
 		}
@@ -221,5 +223,6 @@ internal val Application.raptorKtorServer
 	get() = attributes[ktorServerAttributeKey]
 
 
+@RaptorDsl
 val Route.raptorContext: RaptorContext
 	get() = application.raptorKtorServer.context

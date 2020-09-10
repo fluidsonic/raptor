@@ -4,9 +4,10 @@
 package io.fluidsonic.raptor
 
 import io.fluidsonic.country.*
+import io.fluidsonic.country.Country.*
 
 
-public fun Country.Companion.bsonDefinition(): RaptorBsonDefinitions = bsonDefinition(
-	parse = Country::forCode,
-	serialize = { it.code.toString() }
-)
+public fun Companion.bsonDefinition(): RaptorBsonDefinition = raptor.bson.definition<Country> {
+	decode<CountryCode>(::forCode)
+	encode(Country::code)
+}

@@ -1,40 +1,39 @@
 package io.fluidsonic.raptor
 
 import io.fluidsonic.stdlib.*
+import io.fluidsonic.stdlib.GeoCoordinate.*
 
 
-public fun GeoCoordinate.Companion.bsonDefinition(): RaptorBsonDefinitions = bsonDefinition<GeoCoordinate> {
+public fun Companion.bsonDefinition(): RaptorBsonDefinition = raptor.bson.definition<GeoCoordinate> {
 	decode {
 		var coordinate: GeoCoordinate? = null
 		var type: String? = null
 
-		readDocumentWithValues { fieldName ->
+		reader.documentByField { fieldName ->
 			when (fieldName) {
-				"coordinates" -> coordinate = readArray {
-					val longitude = readDouble()
-					val latitude = readDouble()
+				"coordinates" -> coordinate = array {
+					val longitude = double()
+					val latitude = double()
 
 					GeoCoordinate(latitude = latitude, longitude = longitude)
 				}
-				"type" -> type = readString()
+				"type" -> type = string()
 				else -> skipValue()
 			}
 		}
 
-		if (type != "Point")
-			throw BsonException("invalid type for GeoCoordinate: $type")
+		check(type == "Point") { "Invalid GeoCoordinate type: $type" }
 
-		coordinate ?: throw BsonException("missing coordinate")
+		coordinate ?: error("Missing coordinate.")
 	}
 
-
 	encode { value ->
-		writeDocument {
-			writeArray("coordinates") {
-				writeDouble(value.longitude)
-				writeDouble(value.latitude)
+		writer.document {
+			array("coordinates") {
+				value(value.longitude)
+				value(value.latitude)
 			}
-			writeString("type", "Point")
+			this.value("type", "Point")
 		}
 	}
 }
