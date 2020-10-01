@@ -1,14 +1,14 @@
 package io.fluidsonic.raptor
 
 
-interface RaptorFeatureInstallCheckScope {
+public interface RaptorFeatureInstallCheckScope {
 
-	fun Unit.ifInstalled(featureId: RaptorFeatureId, action: () -> Unit)
+	public fun Unit.ifInstalled(featureId: RaptorFeatureId, action: () -> Unit)
 }
 
 
 @RaptorDsl
-fun <Scope : RaptorFeatureInstallCheckScope> Scope.ifInstalled(featureId: RaptorFeatureId, action: Scope.() -> Unit) {
+public fun <Scope : RaptorFeatureInstallCheckScope> Scope.ifInstalled(featureId: RaptorFeatureId, action: Scope.() -> Unit) {
 	with(Unit) {
 		this.ifInstalled(featureId) {
 			action()

@@ -5,7 +5,7 @@ import io.fluidsonic.raptor.*
 
 object TextCollectionFeature : RaptorFeature {
 
-	override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
+	override fun RaptorFeatureConfigurationScope.beginConfiguration() {
 		componentRegistry.register(TextCollectionComponent.Key, TextCollectionComponent())
 	}
 

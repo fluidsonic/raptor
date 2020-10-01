@@ -107,7 +107,7 @@ public class RaptorGraphArgumentDefinitionBuilder<Value> internal constructor(
 
 
 	internal class ContainerImpl(
-		private val parentKotlinType: KotlinType, // fIXME
+		private val parentKotlinType: KotlinType, // FIXME
 		factoryName: String,
 	) : ContainerInternal {
 

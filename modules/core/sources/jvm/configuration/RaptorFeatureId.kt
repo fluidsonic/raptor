@@ -1,4 +1,4 @@
 package io.fluidsonic.raptor
 
 
-typealias RaptorFeatureId = String
+public typealias RaptorFeatureId = String

@@ -9,6 +9,7 @@ fluidLibraryModule(description = "FIXME") {
 		jvm {
 			dependencies {
 				api(project(":raptor-di"))
+				api(project(":raptor-entities"))
 				api(project(":raptor-graphql"))
 				api(project(":raptor-mongodb"))
 				api(project(":raptor-settings-hocon"))

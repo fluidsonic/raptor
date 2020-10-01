@@ -5,12 +5,12 @@ import io.fluidsonic.raptor.*
 
 object RequestFeature : RaptorFeature {
 
-	override fun RaptorFeatureConfigurationEndScope.onConfigurationEnded() {
+	override fun RaptorFeatureConfigurationApplicationScope.applyConfiguration() {
 		propertyRegistry.register(RequestTransactionFactoryRaptorPropertyKey, transactionFactory(componentRegistry.one(RequestComponent.Key)))
 	}
 
 
-	override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
+	override fun RaptorFeatureConfigurationScope.beginConfiguration() {
 		componentRegistry.register(RequestComponent.Key, RequestComponent())
 	}
 

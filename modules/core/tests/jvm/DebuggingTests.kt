@@ -63,7 +63,7 @@ class DebuggingTests {
 
 			install(object : RaptorFeature {
 
-				override fun RaptorFeatureConfigurationEndScope.onConfigurationEnded() {
+				override fun RaptorFeatureConfigurationApplicationScope.applyConfiguration() {
 					assertEquals(
 						expected = """
 							[component registry] ->
@@ -111,7 +111,7 @@ class DebuggingTests {
 				}
 
 
-				override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
+				override fun RaptorFeatureConfigurationScope.beginConfiguration() {
 					componentRegistry.register(DummyComponent.Key, DummyComponent("z"))
 					componentRegistry.register(DummyComponent.Key, DummyComponent("1").apply {
 						extensions[AnyRaptorComponentExtensionKey] = "dummy extension"

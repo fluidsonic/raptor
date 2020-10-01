@@ -8,12 +8,12 @@ object RaptorTransactionFeature : RaptorFeature {
 	override val id = raptorTransactionFeatureId
 
 
-	override fun RaptorFeatureConfigurationEndScope.onConfigurationEnded() {
+	override fun RaptorFeatureConfigurationApplicationScope.applyConfiguration() {
 		propertyRegistry.register(DefaultRaptorTransactionFactory.PropertyKey, componentRegistry.one(RaptorTransactionComponent.Key).toFactory())
 	}
 
 
-	override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
+	override fun RaptorFeatureConfigurationScope.beginConfiguration() {
 		componentRegistry.register(RaptorTransactionComponent.Key, RaptorTransactionComponent())
 	}
 
@@ -22,7 +22,7 @@ object RaptorTransactionFeature : RaptorFeature {
 }
 
 
-const val raptorTransactionFeatureId: RaptorFeatureId = "raptor.transaction"
+const val raptorTransactionFeatureId: RaptorFeatureId = "raptor.transaction" // FIXME we could use the DSL with `inline` extension, e.g. `raptor.features.transaction`
 
 
 fun Raptor.createTransaction(): RaptorTransaction =

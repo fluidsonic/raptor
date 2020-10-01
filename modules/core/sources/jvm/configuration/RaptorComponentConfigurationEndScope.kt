@@ -1,11 +1,11 @@
 package io.fluidsonic.raptor
 
 
-interface RaptorComponentConfigurationEndScope : RaptorConfigurationEndScope {
+public interface RaptorComponentConfigurationEndScope : RaptorConfigurationEndScope {
 
 	@RaptorDsl
-	val lazyContext: RaptorContext
+	public val lazyContext: RaptorContext
 
 	@RaptorDsl
-	val propertyRegistry: RaptorPropertyRegistry
+	public val propertyRegistry: RaptorPropertyRegistry
 }

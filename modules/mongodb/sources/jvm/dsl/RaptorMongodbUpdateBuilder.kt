@@ -44,6 +44,11 @@ public class RaptorMongodbUpdateBuilder @PublishedApi internal constructor(
 
 
 	@RaptorDsl
+	public fun hasChanges(): Boolean =
+		changes.isNotEmpty()
+
+
+	@RaptorDsl
 	public fun pullAll(fieldName: String, value: Collection<*>) {
 		changes += Updates.pullAll(fieldName, value as? List<*> ?: value.toList())
 	}

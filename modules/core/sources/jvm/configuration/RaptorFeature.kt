@@ -1,19 +1,20 @@
 package io.fluidsonic.raptor
 
 
-interface RaptorFeature {
+public interface RaptorFeature {
 
-	val id: RaptorFeatureId? get() = null
+	public val id: RaptorFeatureId? get() = null
 
-	fun RaptorFeatureConfigurationEndScope.onConfigurationEnded() = Unit
-	fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() = Unit
-
-
-	companion object
+	public fun RaptorFeatureConfigurationApplicationScope.applyConfiguration(): Unit = Unit
+	public fun RaptorFeatureConfigurationScope.beginConfiguration(): Unit = Unit
+	public fun RaptorFeatureConfigurationScope.completeConfiguration(): Unit = Unit
 
 
-	interface Configurable<out ConfigurationScope : Any> : RaptorFeature {
+	public companion object;
 
-		fun RaptorTopLevelConfigurationScope.configure(action: ConfigurationScope.() -> Unit)
+
+	public interface Configurable<out ConfigurationScope : Any> : RaptorFeature {
+
+		public fun RaptorTopLevelConfigurationScope.configure(action: ConfigurationScope.() -> Unit)
 	}
 }

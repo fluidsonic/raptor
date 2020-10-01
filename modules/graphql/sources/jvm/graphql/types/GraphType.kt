@@ -140,3 +140,22 @@ internal class ScalarGraphType(
 		require(isInput || isOutput)
 	}
 }
+
+
+internal class UnionGraphType(
+	description: String?,
+	kotlinType: KotlinType,
+	name: String,
+) : NamedGraphType(
+	description = description,
+	kotlinType = kotlinType,
+	name = name
+) {
+
+	override val isInput: Boolean
+		get() = false
+
+
+	override val isOutput: Boolean
+		get() = true
+}

@@ -1,4 +1,4 @@
 package io.fluidsonic.raptor
 
 
-interface RaptorComponentConfigurationStartScope
+public interface RaptorComponentConfigurationStartScope

@@ -6,7 +6,7 @@ public object RaptorDIFeature : RaptorFeature {
 	override val id: RaptorFeatureId = raptorDIFeatureId
 
 
-	override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
+	override fun RaptorFeatureConfigurationScope.beginConfiguration() {
 		componentRegistry.register(RootDIRaptorComponent.Key, RootDIRaptorComponent())
 	}
 }

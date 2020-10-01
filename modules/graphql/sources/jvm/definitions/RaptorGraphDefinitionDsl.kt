@@ -370,3 +370,39 @@ public fun <Type : Any> graphScalarDefinition(
 	)
 		.apply(configure)
 		.build()
+
+
+@OptIn(ExperimentalStdlibApi::class)
+@RaptorDsl
+public inline fun <reified Type : Any> graphUnionDefinition(
+	name: String = RaptorGraphDefinition.defaultName,
+	@BuilderInference noinline configure: RaptorUnionGraphDefinitionBuilder<Type>.() -> Unit = {},
+): RaptorGraphDefinition =
+	graphUnionDefinition(
+		name = name,
+		type = typeOf<Type>(),
+		configure = configure
+	)
+
+
+@RaptorDsl
+public fun <Type : Any> graphUnionDefinition(
+	name: String = RaptorGraphDefinition.defaultName,
+	type: KType,
+	configure: RaptorUnionGraphDefinitionBuilder<Type>.() -> Unit = {},
+): RaptorGraphDefinition =
+	RaptorUnionGraphDefinitionBuilder<Type>(
+		kotlinType = KotlinType.of(
+			type = type,
+			containingType = null,
+			allowMaybe = false,
+			allowNull = false,
+			allowedVariance = KVariance.OUT, // TODO prb. wrong
+			requireSpecialization = false
+		),
+		name = RaptorGraphDefinition.resolveName(name, type = type),
+		stackTrace = stackTrace(skipCount = 1)
+	)
+		.apply(configure)
+		.build()
+

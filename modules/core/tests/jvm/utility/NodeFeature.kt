@@ -10,12 +10,12 @@ object NodeFeature : RaptorFeature.Configurable<NodeComponent> {
 	}
 
 
-	override fun RaptorFeatureConfigurationEndScope.onConfigurationEnded() {
+	override fun RaptorFeatureConfigurationApplicationScope.applyConfiguration() {
 		propertyRegistry.register(RootNodeRaptorKey, componentRegistry.one(NodeComponent.Key).toNode())
 	}
 
 
-	override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
+	override fun RaptorFeatureConfigurationScope.beginConfiguration() {
 		componentRegistry.register(NodeComponent.Key, NodeComponent(name = "root"))
 	}
 

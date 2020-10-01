@@ -570,3 +570,43 @@ internal class ScalarGraphDefinition(
 		)
 	}
 }
+
+
+internal class UnionGraphDefinition(
+	additionalDefinitions: Collection<RaptorGraphDefinition>,
+	description: String?,
+	kotlinType: KotlinType,
+	name: String,
+	stackTrace: List<StackTraceElement>,
+) : NamedGraphTypeDefinition(
+	additionalDefinitions = additionalDefinitions,
+	description = description,
+	kotlinType = kotlinType,
+	name = name,
+	stackTrace = stackTrace
+) {
+
+	override fun debugString() =
+		"union $name: $kotlinType"
+
+
+	override val isInput: Boolean
+		get() = false
+
+
+	override val isOutput: Boolean
+		get() = true
+
+
+	override fun specialize(typeArgument: KotlinType, namePrefix: String): UnionGraphDefinition {
+		check(kotlinType.isGeneric)
+
+		return UnionGraphDefinition(
+			additionalDefinitions = additionalDefinitions,
+			description = description,
+			kotlinType = kotlinType.specialize(typeArgument),
+			name = "${namePrefix}$name",
+			stackTrace = stackTrace
+		)
+	}
+}

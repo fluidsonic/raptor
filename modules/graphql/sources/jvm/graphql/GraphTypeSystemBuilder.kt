@@ -12,12 +12,12 @@ internal class GraphTypeSystemBuilder private constructor(
 
 	private val interfaceExtensionDefinitionsByKotlinType = systemDefinition.definitions
 		.filterIsInstance<InterfaceExtensionGraphDefinition>()
-		.groupBy { it.kotlinType }
+		.groupBy { it.kotlinType.specialize() }
 		.mapValues { (_, definitions) -> definitions.flatMap { it.fieldDefinitions } }
 
 	private val objectExtensionDefinitionsByKotlinType = systemDefinition.definitions
 		.filterIsInstance<InterfaceExtensionGraphDefinition>()
-		.groupBy { it.kotlinType }
+		.groupBy { it.kotlinType.specialize() }
 		.mapValues { (_, definitions) -> definitions.flatMap { it.fieldDefinitions } }
 
 	private val operationDefinitionsByType = systemDefinition.definitions
@@ -74,6 +74,9 @@ internal class GraphTypeSystemBuilder private constructor(
 
 			is ScalarGraphDefinition ->
 				buildScalarType(definition)
+
+			is UnionGraphDefinition ->
+				buildUnionType(definition)
 		}
 	}
 
@@ -111,12 +114,12 @@ internal class GraphTypeSystemBuilder private constructor(
 					defaultValue = argumentDefinition.defaultValue,
 					description = argumentDefinition.description,
 					directives = directivesForArgument(argumentDefinition),
-					kotlinType = argumentDefinition.kotlinType,
+					kotlinType = argumentDefinition.kotlinType.specialize(),
 					name = argumentDefinition.name!! // FIXME
 				)
 			},
 			description = definition.description,
-			kotlinType = definition.kotlinType,
+			kotlinType = definition.kotlinType.specialize(),
 			name = definition.name,
 			resolve = definition.resolve
 		)
@@ -126,12 +129,12 @@ internal class GraphTypeSystemBuilder private constructor(
 					defaultValue = argumentDefinition.defaultValue,
 					description = argumentDefinition.description,
 					directives = directivesForArgument(argumentDefinition),
-					kotlinType = argumentDefinition.kotlinType,
+					kotlinType = argumentDefinition.kotlinType.specialize(),
 					name = argumentDefinition.name!! // FIXME
 				)
 			},
 			description = definition.description,
-			kotlinType = definition.kotlinType,
+			kotlinType = definition.kotlinType.specialize(),
 			name = definition.name,
 		)
 	}
@@ -145,7 +148,7 @@ internal class GraphTypeSystemBuilder private constructor(
 					defaultValue = argumentDefinition.defaultValue,
 					description = argumentDefinition.description,
 					directives = directivesForArgument(argumentDefinition),
-					kotlinType = argumentDefinition.kotlinType,
+					kotlinType = argumentDefinition.kotlinType.specialize(),
 					name = argumentDefinition.name!! // FIXME
 				)
 			},
@@ -159,7 +162,7 @@ internal class GraphTypeSystemBuilder private constructor(
 	private fun buildInterfaceType(definition: InterfaceGraphDefinition) =
 		InterfaceGraphType(
 			description = definition.description,
-			fields = (definition.fieldDefinitions + interfaceExtensionDefinitionsByKotlinType[definition.kotlinType].orEmpty())
+			fields = (definition.fieldDefinitions + interfaceExtensionDefinitionsByKotlinType[definition.kotlinType.specialize()].orEmpty())
 				.map(::buildField),
 			kotlinType = definition.kotlinType,
 			name = definition.name
@@ -169,7 +172,7 @@ internal class GraphTypeSystemBuilder private constructor(
 	private fun buildObjectType(definition: ObjectGraphDefinition) =
 		ObjectGraphType(
 			description = definition.description,
-			fields = (definition.fieldDefinitions + objectExtensionDefinitionsByKotlinType[definition.kotlinType].orEmpty())
+			fields = (definition.fieldDefinitions + objectExtensionDefinitionsByKotlinType[definition.kotlinType.specialize()].orEmpty())
 				.map(::buildField),
 			kotlinType = definition.kotlinType,
 			name = definition.name
@@ -185,6 +188,14 @@ internal class GraphTypeSystemBuilder private constructor(
 			name = definition.name,
 			parse = definition.parse,
 			serialize = definition.serialize
+		)
+
+
+	private fun buildUnionType(definition: UnionGraphDefinition) =
+		UnionGraphType(
+			description = definition.description,
+			kotlinType = definition.kotlinType,
+			name = definition.name
 		)
 
 

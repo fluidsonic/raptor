@@ -6,7 +6,7 @@ object KtorRaptorFeature : RaptorFeature {
 	override val id = raptorKtorFeatureId
 
 
-	override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
+	override fun RaptorFeatureConfigurationScope.beginConfiguration() {
 		install(RaptorLifecycleFeature)
 		install(RaptorTransactionFeature)
 

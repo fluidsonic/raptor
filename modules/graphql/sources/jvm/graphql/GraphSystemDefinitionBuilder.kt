@@ -3,6 +3,7 @@ package io.fluidsonic.raptor.graphql.internal
 import io.fluidsonic.graphql.*
 import io.fluidsonic.raptor.*
 import io.fluidsonic.stdlib.*
+import kotlin.reflect.*
 
 
 // FIXME check duplicate op field names
@@ -30,10 +31,29 @@ internal class GraphSystemDefinitionBuilder private constructor(
 		process()
 
 		return GraphSystemDefinition(
-			definitions = registeredDefinitions.filter { definition ->
+			definitions = registeredDefinitions.mapNotNull { definition -> // FIXME refactor
 				when (definition) {
-					is GraphTypeSystemDefinition -> definition.kotlinType.isSpecialized
-					is GraphOperationDefinition -> true
+					is GraphTypeSystemDefinition -> when (definition.kotlinType.isSpecialized) {
+						true -> definition
+						false -> {
+							val typeArgument = definition.kotlinType.classifier.typeParameters.single().upperBounds.single()
+							if (typeArgument.classifier == Any::class)
+								return@mapNotNull null
+
+							definition.specialize(
+								typeArgument = KotlinType.of(
+									type = typeArgument,
+									containingType = null,
+									allowMaybe = false,
+									allowNull = true,
+									allowedVariance = KVariance.OUT,
+									requireSpecialization = true
+								),
+								namePrefix = ""
+							)
+						}
+					}
+					is GraphOperationDefinition -> definition
 				}
 			}
 		)

@@ -6,7 +6,7 @@ object RaptorLifecycleFeature : RaptorFeature {
 	override val id: RaptorFeatureId = raptorLifecycleFeatureId
 
 
-	override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
+	override fun RaptorFeatureConfigurationScope.beginConfiguration() {
 		componentRegistry.register(RaptorLifecycleComponent.Key, RaptorLifecycleComponent())
 	}
 }

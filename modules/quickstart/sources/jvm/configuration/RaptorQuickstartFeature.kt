@@ -1,16 +1,18 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.raptor.entities.*
 import io.ktor.http.*
 
 
-object RaptorQuickstartFeature : RaptorFeature {
+public object RaptorQuickstartFeature : RaptorFeature {
 
 	override val id: RaptorFeatureId = raptorQuickstartFeatureId
 
 
-	override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
+	override fun RaptorFeatureConfigurationScope.beginConfiguration() {
 		install(BsonRaptorFeature)
 		install(RaptorDIFeature)
+		install(RaptorEntitiesFeature)
 		install(KtorRaptorFeature)
 
 		bson {
@@ -21,7 +23,6 @@ object RaptorQuickstartFeature : RaptorFeature {
 				Cents.bsonDefinition(),
 				Money.bsonDefinition(),
 				PasswordHash.bsonDefinition(),
-//				TypedId.bsonDefinition(),
 				Url.bsonDefinition() // FIXME move to either BsonFeature or KtorFeature with ifAvailable
 			)
 		}
@@ -44,4 +45,4 @@ object RaptorQuickstartFeature : RaptorFeature {
 }
 
 
-const val raptorQuickstartFeatureId: RaptorFeatureId = "raptor.quickstart"
+public const val raptorQuickstartFeatureId: RaptorFeatureId = "raptor.quickstart"

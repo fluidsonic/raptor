@@ -2,20 +2,20 @@ package io.fluidsonic.raptor
 
 
 @RaptorDsl
-interface RaptorComponent {
+public interface RaptorComponent {
 
 	@RaptorDsl
-	val extensions: RaptorComponentExtensionSet
+	public val extensions: RaptorComponentExtensionSet
 
-	fun RaptorComponentConfigurationEndScope.onConfigurationEnded() = Unit
-	fun RaptorComponentConfigurationStartScope.onConfigurationStarted() = Unit
+	public fun RaptorComponentConfigurationEndScope.onConfigurationEnded(): Unit = Unit
+	public fun RaptorComponentConfigurationStartScope.onConfigurationStarted(): Unit = Unit
 
 
-	companion object
+	public companion object
 
 
 	@RaptorDsl
-	abstract class Default<out Self : Typed<Self>> : Typed<Self> {
+	public abstract class Default<out Self : Typed<Self>> : Typed<Self> { // FIXME rn to Base?
 
 		@RaptorDsl
 		final override val extensions: RaptorComponentExtensionSet = DefaultRaptorComponentExtensionSet()
@@ -28,5 +28,5 @@ interface RaptorComponent {
 	}
 
 
-	interface Typed<out Self : Typed<Self>> : RaptorComponent, RaptorComponentSet<Self>
+	public interface Typed<out Self : Typed<Self>> : RaptorComponent, RaptorComponentSet<Self>
 }

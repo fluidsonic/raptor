@@ -4,8 +4,8 @@ package io.fluidsonic.raptor
 internal class DefaultRaptorRootComponent : RaptorComponent.Default<RaptorRootComponent>(),
 	RaptorRootComponent,
 	RaptorComponentConfigurationEndScope,
-	RaptorFeatureConfigurationEndScope,
-	RaptorFeatureConfigurationStartScope {
+	RaptorFeatureConfigurationApplicationScope,
+	RaptorFeatureConfigurationScope {
 
 	private val featureIds: MutableSet<RaptorFeatureId> = mutableSetOf()
 	private val features: MutableSet<RaptorFeature> = mutableSetOf()
@@ -30,11 +30,17 @@ internal class DefaultRaptorRootComponent : RaptorComponent.Default<RaptorRootCo
 
 
 	internal fun endConfiguration(): Raptor {
+		// FIXME prevent installing more features
+		for (feature in features)
+			with(feature) {
+				completeConfiguration()
+			}
+
 		componentRegistry.endConfiguration(scope = this)
 
 		for (feature in features)
 			with(feature) {
-				onConfigurationEnded()
+				applyConfiguration()
 			}
 
 		val context = DefaultRaptorContext(properties = propertyRegistry.toSet())
@@ -55,7 +61,7 @@ internal class DefaultRaptorRootComponent : RaptorComponent.Default<RaptorRootCo
 			error("Multiple features cannot have the same ID '$id'.") // FIXME report which ones
 
 		with(feature) {
-			onConfigurationStarted()
+			beginConfiguration()
 		}
 
 		id?.let(this::applyLazyFeatureConfigurations)
@@ -64,7 +70,7 @@ internal class DefaultRaptorRootComponent : RaptorComponent.Default<RaptorRootCo
 
 	override fun <Feature : RaptorFeature.Configurable<ConfigurationScope>, ConfigurationScope : Any> install(
 		feature: Feature,
-		configuration: ConfigurationScope.() -> Unit
+		configuration: ConfigurationScope.() -> Unit,
 	) {
 		install(feature = feature)
 

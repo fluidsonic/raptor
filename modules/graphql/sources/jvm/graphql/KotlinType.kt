@@ -27,13 +27,31 @@ internal data class KotlinType(
 		get() = !isGeneric || (typeArgument?.isSpecialized ?: false)
 
 
+	fun specialize(): KotlinType {
+		if (isSpecialized)
+			return this // TODO ok?
+
+		return when (val typeArgument = typeArgument) {
+			null -> withTypeArgument(of(
+				type = classifier.typeParameters.single().upperBounds.single(),
+				containingType = null,
+				allowMaybe = false,
+				allowNull = true,
+				allowedVariance = KVariance.OUT,
+				requireSpecialization = true
+			))
+			else -> withTypeArgument(typeArgument.specialize())
+		}
+	}
+
+
 	fun specialize(typeArgument: KotlinType): KotlinType {
 		if (isSpecialized)
-			return this
+			return this // TODO ok?
 
 		return when (val thisTypeArgument = this.typeArgument) {
 			null -> withTypeArgument(typeArgument)
-			else -> thisTypeArgument.specialize(typeArgument)
+			else -> thisTypeArgument.specialize(typeArgument) // FIXME correct?
 		}
 	}
 

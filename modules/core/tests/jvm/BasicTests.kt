@@ -68,7 +68,7 @@ class BasicTests {
 		val raptor = raptor {
 			install(object : RaptorFeature {
 
-				override fun RaptorFeatureConfigurationEndScope.onConfigurationEnded() {
+				override fun RaptorFeatureConfigurationApplicationScope.applyConfiguration() {
 					propertyRegistry.register(CountRaptorPropertyKey, 1)
 
 					lazyContext = this.lazyContext
@@ -80,7 +80,7 @@ class BasicTests {
 				}
 
 
-				override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() = Unit
+				override fun RaptorFeatureConfigurationScope.beginConfiguration() = Unit
 			})
 		}
 
@@ -100,7 +100,7 @@ class BasicTests {
 
 			install(object : RaptorFeature {
 
-				override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
+				override fun RaptorFeatureConfigurationScope.beginConfiguration() {
 					textCollection {
 						append("working!")
 					}

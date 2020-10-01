@@ -4,6 +4,7 @@ import io.fluidsonic.graphql.*
 import io.fluidsonic.raptor.*
 import io.fluidsonic.stdlib.*
 import kotlin.reflect.*
+import kotlin.reflect.full.*
 
 
 internal class GraphSystemBuilder private constructor(
@@ -19,6 +20,7 @@ internal class GraphSystemBuilder private constructor(
 		schema = buildSchema(),
 		typeSystem = typeSystem
 	)
+		.also { println(it.schema) }
 
 
 	// FIXME validate
@@ -145,11 +147,22 @@ internal class GraphSystemBuilder private constructor(
 		is InterfaceGraphType -> buildInterfaceDefinition(type)
 		is ObjectGraphType -> buildObjectDefinition(type)
 		is ScalarGraphType -> buildScalarDefinition(type)
+		is UnionGraphType -> buildUnionDefinition(type)
 	}
 
 
 	private fun buildTypeDefinitions(): List<GNamedType> =
 		typeSystem.types.filterIsInstance<NamedGraphType>().map(::buildTypeDefinition).sortedBy { it.name }
+
+
+	private fun buildUnionDefinition(type: UnionGraphType) = GUnionType(
+		description = type.description,
+		name = type.name,
+		possibleTypes = resolvePossibleTypesForKotlinType(type.kotlinType),
+		extensions = GNodeExtensionSet {
+			raptorType = type
+		}
+	)
 
 
 	@OptIn(ExperimentalStdlibApi::class)
@@ -159,6 +172,7 @@ internal class GraphSystemBuilder private constructor(
 				is AliasGraphType,
 				is EnumGraphType,
 				is ScalarGraphType,
+				is UnionGraphType,
 				->
 					emptyList()
 
@@ -197,6 +211,17 @@ internal class GraphSystemBuilder private constructor(
 	}
 
 
+	private fun resolvePossibleTypesForKotlinType(kotlinType: KotlinType): List<GNamedTypeRef> =
+		typeSystem.types
+			.filterIsInstance<ObjectGraphType>()
+			.filterNot { it.kotlinType.isGeneric }
+			.filter { it.kotlinType.classifier.isSubclassOf(kotlinType.classifier) }
+			.ifEmpty { error("Cannot find any possible types for union type '$kotlinType'.") }
+			.map { it.name }
+			.sorted()
+			.map(::GNamedTypeRef)
+
+
 	private fun typeRef(kotlinType: KotlinType, isInput: Boolean): GTypeRef {
 		val nonNullKotlinType = kotlinType.withNullable(false)
 
@@ -211,7 +236,7 @@ internal class GraphSystemBuilder private constructor(
 				true -> typeSystem.resolveInputType(nonNullKotlinType)
 				false -> typeSystem.resolveOutputType(nonNullKotlinType)
 			}
-				.ifNull { error("Cannot resolve GraphQL type for Kotlin type '$nonNullKotlinType'.") }
+				.ifNull { error("Cannot resolve GraphQL type for Kotlin type '$nonNullKotlinType'.") } // FIXME print stacktrace of usage(s) here
 				.let { type ->
 					when (type) {
 						is AliasGraphType -> when {

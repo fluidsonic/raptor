@@ -28,7 +28,7 @@ class ConfigurationLifecycleTests {
 
 			install(object : RaptorFeature {
 
-				override fun RaptorFeatureConfigurationEndScope.onConfigurationEnded() {
+				override fun RaptorFeatureConfigurationApplicationScope.applyConfiguration() {
 					assertFails {
 						componentRegistry.configure(TextCollectionComponent.Key)
 					}
@@ -43,7 +43,7 @@ class ConfigurationLifecycleTests {
 				}
 
 
-				override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() = Unit
+				override fun RaptorFeatureConfigurationScope.beginConfiguration() = Unit
 			})
 		}
 	}

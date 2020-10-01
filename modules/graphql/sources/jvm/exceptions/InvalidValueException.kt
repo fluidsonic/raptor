@@ -107,6 +107,7 @@ public open class InvalidValueException : Exception("Invalid value.") {
 }
 
 
+// FIXME not top-level!
 @RaptorDsl
 public fun invalidValueError(): Nothing =
 	throw InvalidValueException()
