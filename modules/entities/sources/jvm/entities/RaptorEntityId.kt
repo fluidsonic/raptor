@@ -32,7 +32,7 @@ public interface RaptorEntityId {
 
 
 		public fun Id.serialize(): String =
-			definition.serialize(this)
+			definition.serialize(this) // FIXME add namespace
 	}
 }
 

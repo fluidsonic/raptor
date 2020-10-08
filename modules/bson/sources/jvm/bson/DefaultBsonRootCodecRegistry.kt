@@ -46,7 +46,7 @@ internal class DefaultBsonRootCodecRegistry(
 				for (definition in definitions) {
 					when (definition) {
 						is BsonCodecProviderDefinition ->
-							definition.codecProvider.get(valueClass.java, registry)
+							definition.codecProvider.get(valueClass.javaObjectType, registry)
 								?.let { return@getOrPut BsonCodecDefinition(it) }
 
 						else ->

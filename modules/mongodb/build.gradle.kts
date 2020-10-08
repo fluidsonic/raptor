@@ -11,7 +11,7 @@ fluidLibraryModule(description = "FIXME") {
 				api(project(":raptor-bson"))
 				api(fluid("mongo", "1.1.2"))
 
-				implementation(fluid("stdlib", "0.10.2"))
+				implementation(fluid("stdlib", "0.10.3"))
 			}
 		}
 	}

@@ -29,5 +29,5 @@ fluidLibraryModule(description = "FIXME") {
 }
 
 
-fun ktor(name: String, version: String = "1.4.0") =
+fun ktor(name: String, version: String = "1.4.1") =
 	"io.ktor:ktor-$name:$version"

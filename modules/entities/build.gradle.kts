@@ -8,7 +8,7 @@ fluidLibraryModule(description = "FIXME") {
 	targets {
 		jvm {
 			dependencies {
-				implementation(fluid("stdlib", "0.10.2"))
+				implementation(fluid("stdlib", "0.10.3"))
 
 				compileOnly(project(":raptor-bson"))
 				compileOnly(project(":raptor-di"))

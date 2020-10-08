@@ -13,7 +13,7 @@ fluidLibraryModule(description = "FIXME") {
 
 				implementation(fluid("country", "0.9.1"))
 				implementation(fluid("currency", "0.9.1"))
-				implementation(fluid("stdlib", "0.10.2"))
+				implementation(fluid("stdlib", "0.10.3"))
 				implementation(fluid("time", "0.10.3"))
 
 				compileOnly(project(":raptor-di"))

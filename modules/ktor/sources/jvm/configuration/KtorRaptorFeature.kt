@@ -1,7 +1,7 @@
 package io.fluidsonic.raptor
 
 
-object KtorRaptorFeature : RaptorFeature {
+public object KtorRaptorFeature : RaptorFeature {
 
 	override val id = raptorKtorFeatureId
 
@@ -28,9 +28,9 @@ object KtorRaptorFeature : RaptorFeature {
 }
 
 
-const val raptorKtorFeatureId: RaptorFeatureId = "raptor.ktor"
+public const val raptorKtorFeatureId: RaptorFeatureId = "raptor.ktor"
 
 
 @RaptorDsl
-val RaptorTopLevelConfigurationScope.ktor: RaptorComponentSet<KtorRaptorComponent>
+public val RaptorTopLevelConfigurationScope.ktor: RaptorComponentSet<KtorRaptorComponent>
 	get() = componentRegistry.configure(KtorRaptorComponent.Key)

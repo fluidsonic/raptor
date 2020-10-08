@@ -66,7 +66,7 @@ internal class DefaultRaptorDI(
 		}
 
 		if (isNullable) return null // TODO Remember unsuccessful resolutions to not perform them over and over again.
-		else reportUnresolvedDependency(type)
+		else reportMissingDependency(type)
 	}
 
 
@@ -97,7 +97,7 @@ internal class DefaultRaptorDI(
 	}
 
 
-	private fun reportUnresolvedDependency(type: KType): Nothing {
+	private fun reportMissingDependency(type: KType): Nothing {
 		error("Cannot resolve dependency of type '$type'.\n\nDI:\n$this") // FIXME will print wrong DI
 	}
 

@@ -20,7 +20,6 @@ internal class GraphSystemBuilder private constructor(
 		schema = buildSchema(),
 		typeSystem = typeSystem
 	)
-		.also { println(it.schema) }
 
 
 	// FIXME validate

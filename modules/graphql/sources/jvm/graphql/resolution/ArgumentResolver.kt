@@ -32,6 +32,9 @@ internal class ArgumentResolver(
 		}
 
 		var value = argumentValues[name]?.let { value ->
+			if (expectsMaybe && value == Maybe.nothing)
+				return value
+
 			val aliasType = gqlDefinition.raptorType as? AliasGraphType
 			if (aliasType != null)
 				inputScope.parseAliasValue(value, parse = aliasType.convertReferencedToAlias, typeRef = gqlDefinition.type)

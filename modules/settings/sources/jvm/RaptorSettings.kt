@@ -117,6 +117,7 @@ public fun raptorSettings(configure: RaptorSettings.Builder.() -> Unit): RaptorS
 	RaptorSettings.Builder().apply(configure).build()
 
 
+// FIXME install(settings) w/o settings installed will lead the error below
 @RaptorDsl
 public val RaptorTopLevelConfigurationScope.settings: RaptorSettings
 	get() = componentRegistry.root.oneOrNull(RaptorSettingsComponent.Key)?.settings

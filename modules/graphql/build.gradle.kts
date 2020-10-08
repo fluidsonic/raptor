@@ -15,8 +15,8 @@ fluidLibraryModule(description = "FIXME") {
 				implementation(fluid("graphql-execution", "0.9.5"))
 				implementation(fluid("i18n", "0.9.1"))
 				implementation(fluid("json-basic", "1.1.1"))
-				implementation(fluid("locale", "0.9.2"))
-				implementation(fluid("stdlib", "0.10.2"))
+				implementation(fluid("locale", "0.9.3"))
+				implementation(fluid("stdlib", "0.10.3"))
 				implementation(fluid("time", "0.10.3"))
 			}
 		}
