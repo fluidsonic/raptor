@@ -1,5 +1,7 @@
 package io.fluidsonic.raptor
 
+import kotlinx.coroutines.*
+
 
 object RaptorLifecycleFeature : RaptorFeature {
 
@@ -8,6 +10,13 @@ object RaptorLifecycleFeature : RaptorFeature {
 
 	override fun RaptorFeatureConfigurationScope.beginConfiguration() {
 		componentRegistry.register(RaptorLifecycleComponent.Key, RaptorLifecycleComponent())
+
+		ifInstalled(raptorDIFeatureId) {
+			di {
+				provide { get<RaptorContext>()[DefaultRaptorLifecycle.PropertyKey]!!.coroutineContext }
+				provide { CoroutineScope(get()) }
+			}
+		}
 	}
 }
 

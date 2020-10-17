@@ -7,6 +7,7 @@ import java.io.*
 // FIXME taggable
 class KtorServerRaptorComponent internal constructor(
 	internal val globalScope: RaptorTopLevelConfigurationScope,
+	internal val insecure: Boolean,
 ) : RaptorComponent.Default<KtorServerRaptorComponent>(), RaptorTransactionGeneratingComponent {
 
 	// FIXME ok not to specify parent?
@@ -41,6 +42,7 @@ class KtorServerRaptorComponent internal constructor(
 		return KtorServerConfiguration(
 			connectors = connectors.toList(),
 			customConfigurations = customConfigurations.toList(),
+			insecure = insecure,
 			rootRouteConfiguration = rootRouteConfiguration,
 			transactionFactory = transactionFactory(this@KtorServerRaptorComponent)
 		)

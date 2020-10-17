@@ -1,7 +1,13 @@
 import io.fluidsonic.gradle.*
 
 plugins {
-	id("io.fluidsonic.gradle") version "1.1.8"
+	id("io.fluidsonic.gradle") version "1.1.11"
+}
+
+allprojects {
+	repositories {
+		mavenLocal() // FIXME remove
+	}
 }
 
 fluidLibrary(name = "raptor", version = "0.9.2", prefixName = false) {

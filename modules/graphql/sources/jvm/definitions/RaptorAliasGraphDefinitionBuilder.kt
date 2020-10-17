@@ -1,6 +1,7 @@
 package io.fluidsonic.raptor
 
 import io.fluidsonic.raptor.graphql.internal.*
+import kotlin.reflect.*
 
 
 @RaptorDsl
@@ -51,5 +52,12 @@ public class RaptorAliasGraphDefinitionBuilder<Type : Any, ReferencedType : Any>
 
 		@Suppress("UNCHECKED_CAST")
 		this.convertAliasToReferenced = convert as RaptorGraphOutputScope.(output: Any) -> Any
+	}
+
+
+	// FIXME rn
+	@RaptorDsl
+	public fun serialize(convert: KFunction1<Type, ReferencedType>) {
+		serialize { convert(it) }
 	}
 }

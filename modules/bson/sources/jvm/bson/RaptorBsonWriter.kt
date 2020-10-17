@@ -123,6 +123,13 @@ public fun RaptorBsonWriter.value(field: String, value: Any?, preserveNull: Bool
 
 
 @RaptorDsl
+public fun RaptorBsonWriter.value(field: String, value: Boolean) {
+	fieldName(field)
+	value(value)
+}
+
+
+@RaptorDsl
 public fun RaptorBsonWriter.value(field: String, value: Boolean?, preserveNull: Boolean = false) {
 	if (value == null && !preserveNull)
 		return
@@ -133,6 +140,13 @@ public fun RaptorBsonWriter.value(field: String, value: Boolean?, preserveNull: 
 		null -> value(null)
 		else -> value(value)
 	}
+}
+
+
+@RaptorDsl
+public fun RaptorBsonWriter.value(field: String, value: Double) {
+	fieldName(field)
+	value(value)
 }
 
 
@@ -151,6 +165,13 @@ public fun RaptorBsonWriter.value(field: String, value: Double?, preserveNull: B
 
 
 @RaptorDsl
+public fun RaptorBsonWriter.value(field: String, value: Float) {
+	fieldName(field)
+	value(value)
+}
+
+
+@RaptorDsl
 public fun RaptorBsonWriter.value(field: String, value: Float?, preserveNull: Boolean = false) {
 	if (value == null && !preserveNull)
 		return
@@ -165,6 +186,13 @@ public fun RaptorBsonWriter.value(field: String, value: Float?, preserveNull: Bo
 
 
 @RaptorDsl
+public fun RaptorBsonWriter.value(field: String, value: Int) {
+	fieldName(field)
+	value(value)
+}
+
+
+@RaptorDsl
 public fun RaptorBsonWriter.value(field: String, value: Int?, preserveNull: Boolean = false) {
 	if (value == null && !preserveNull)
 		return
@@ -175,6 +203,13 @@ public fun RaptorBsonWriter.value(field: String, value: Int?, preserveNull: Bool
 		null -> value(null)
 		else -> value(value)
 	}
+}
+
+
+@RaptorDsl
+public fun RaptorBsonWriter.value(field: String, value: Long) {
+	fieldName(field)
+	value(value)
 }
 
 
@@ -203,6 +238,13 @@ public fun RaptorBsonWriter.value(field: String, value: ObjectId?, preserveNull:
 		null -> value(null)
 		else -> value(value)
 	}
+}
+
+
+@RaptorDsl
+public fun RaptorBsonWriter.value(field: String, value: Short) {
+	fieldName(field)
+	value(value)
 }
 
 

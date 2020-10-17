@@ -4,7 +4,7 @@
 package io.fluidsonic.raptor
 
 
-public fun Double.Companion.graphDefinition(): RaptorGraphDefinition = graphScalarDefinition {
+public fun Double.Companion.graphDefinition(): RaptorGraphDefinition = graphScalarDefinition(name = "Float") {
 	parseFloat(::identity)
 	serialize(::identity)
 }

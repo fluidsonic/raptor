@@ -1,9 +1,12 @@
 package io.fluidsonic.raptor
 
 import io.fluidsonic.raptor.RaptorLifecycle.*
+import kotlin.coroutines.*
 import kotlinx.atomicfu.*
+import kotlinx.coroutines.*
 
 
+// FIXME prevent reuse b/c coroutineContext cannot be reused
 internal class DefaultRaptorLifecycle(
 	override val context: RaptorContext,
 	private val startActions: List<suspend RaptorLifecycleStartScope.() -> Unit>,
@@ -11,6 +14,8 @@ internal class DefaultRaptorLifecycle(
 ) : RaptorLifecycle, RaptorLifecycleStartScope, RaptorLifecycleStopScope {
 
 	private val stateRef = atomic(State.stopped)
+
+	override val coroutineContext: CoroutineContext = SupervisorJob() + CoroutineName("Raptor: lifecycle") // FIXME ok?
 
 
 	override suspend fun start() {
@@ -36,6 +41,8 @@ internal class DefaultRaptorLifecycle(
 
 		for (action in stopActions)
 			action()
+
+		coroutineContext.cancel(CancellationException("Raptor was stopped."))
 
 		stateRef.value = State.stopped
 	}

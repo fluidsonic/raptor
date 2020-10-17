@@ -22,12 +22,23 @@ internal class GraphSystem(
 		variableValues: Map<String, Any?> = emptyMap(),
 		context: RaptorGraphContext,
 	): Map<String, Any?> =
-		executor.serializeResult(executor.execute(
-			documentSource = documentSource,
-			operationName = operationName,
-			variableValues = variableValues,
-			extensions = GExecutorContextExtensionSet {
-				raptorContext = context
+		GDocument.parse(documentSource)
+			.flatMapValue { document ->
+				val errors = document.validate(schema)
+				when {
+					errors.isNotEmpty() -> GResult.failure(errors)
+					else -> GResult.success(document)
+				}
 			}
-		))
+			.flatMapValue { document ->
+				executor.execute(
+					document = document,
+					operationName = operationName,
+					variableValues = variableValues,
+					extensions = GExecutorContextExtensionSet {
+						raptorContext = context
+					}
+				)
+			}
+			.let { executor.serializeResult(it) }
 }

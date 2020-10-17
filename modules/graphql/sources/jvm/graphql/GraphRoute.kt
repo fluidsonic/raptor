@@ -6,14 +6,16 @@ import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.request.*
 import io.ktor.response.*
-import org.slf4j.*
 import kotlin.system.*
+import kotlin.time.*
+import org.slf4j.*
 
 
 internal class GraphRoute(
-	private val system: GraphSystem,
+	internal val system: GraphSystem,
 ) {
 
+	@OptIn(ExperimentalTime::class)
 	suspend fun handle(call: ApplicationCall) {
 		// FIXME rewrite JSON parsing
 		// FIXME disallow mutation for GET

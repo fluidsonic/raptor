@@ -1,6 +1,8 @@
 package io.fluidsonic.raptor
 
 import io.ktor.application.*
+import io.ktor.http.*
+import io.ktor.response.*
 import io.ktor.routing.*
 
 
@@ -40,8 +42,20 @@ val RaptorTopLevelConfigurationScope.graphs: RaptorComponentSet<GraphRaptorCompo
 
 
 @RaptorDsl
-fun KtorRouteRaptorComponent.newGraph(configuration: GraphRaptorComponent.() -> Unit = {}) {
+fun KtorRouteRaptorComponent.newGraph(provideSchema: Boolean = false, configuration: GraphRaptorComponent.() -> Unit = {}) {
 	GraphRaptorComponent()
 		.also { componentRegistry.register(GraphRaptorComponent.Key, it) }
 		.also(configuration)
+
+	if (provideSchema) {
+		newRoute("schema") {
+			custom {
+				get {
+					val schema = raptorContext[GraphRoute.PropertyKey]!!.system.schema
+
+					call.respondText(schema.toString(), ContentType.Text.Plain)
+				}
+			}
+		}
+	}
 }

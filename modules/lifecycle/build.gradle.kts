@@ -7,6 +7,9 @@ fluidLibraryModule(description = "FIXME") {
 				api(project(":raptor-core"))
 
 				implementation(kotlinx("atomicfu", "0.14.4", usePrefix = false))
+				implementation(kotlinx("coroutines-core", "1.3.9"))
+
+				compileOnly(project(":raptor-di"))
 			}
 
 			testDependencies {

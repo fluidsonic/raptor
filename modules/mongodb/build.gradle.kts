@@ -9,7 +9,7 @@ fluidLibraryModule(description = "FIXME") {
 		jvm {
 			dependencies {
 				api(project(":raptor-bson"))
-				api(fluid("mongo", "1.1.2"))
+				api(fluid("mongo", "1.1.3"))
 
 				implementation(fluid("stdlib", "0.10.3"))
 			}

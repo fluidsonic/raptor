@@ -6,18 +6,19 @@ import java.io.*
 internal class KtorServerConfiguration(
 	val connectors: List<Connector>,
 	val customConfigurations: List<RaptorKtorConfigurationScope.() -> Unit>,
+	val insecure: Boolean,
 	val rootRouteConfiguration: KtorRouteConfiguration?,
-	val transactionFactory: RaptorTransactionFactory // FIXME use
+	val transactionFactory: RaptorTransactionFactory, // FIXME use
 ) {
 
 	sealed class Connector(
 		val host: String,
-		val port: Int
+		val port: Int,
 	) {
 
 		class Http(
 			host: String,
-			port: Int
+			port: Int,
 		) : Connector(host = host, port = port)
 
 
@@ -27,7 +28,7 @@ internal class KtorServerConfiguration(
 			val keyAlias: String,
 			val keyStoreFile: File,
 			val keyStorePassword: String,
-			val privateKeyPassword: String
+			val privateKeyPassword: String,
 		) : Connector(host = host, port = port)
 	}
 }

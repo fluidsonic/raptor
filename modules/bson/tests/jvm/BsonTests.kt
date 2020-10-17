@@ -3,8 +3,8 @@ package tests
 import io.fluidsonic.country.*
 import io.fluidsonic.currency.*
 import io.fluidsonic.raptor.*
-import kotlin.test.*
 import org.bson.codecs.configuration.*
+import kotlin.test.*
 
 
 class BsonTests {

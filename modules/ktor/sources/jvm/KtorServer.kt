@@ -43,7 +43,7 @@ internal class KtorServer(
 							load(it, connector.keyStorePassword.toCharArray())
 						}
 
-						requireNotNull(getKey(connector.keyAlias, connector.privateKeyPassword.toCharArray()) == null) {
+						requireNotNull(getKey(connector.keyAlias, connector.privateKeyPassword.toCharArray())) {
 							"The specified key ${connector.keyAlias} doesn't exist in the key store ${connector.keyStoreFile}"
 						}
 					}
@@ -155,7 +155,8 @@ internal class KtorServer(
 		}
 
 		install(XForwardedHeaderSupport)
-		install(EncryptionEnforcementKtorFeature)
+		if (!configuration.insecure)
+			install(EncryptionEnforcementKtorFeature)
 		install(RaptorTransactionKtorFeature(serverContext = this@KtorServer.context))
 
 		for (customConfiguration in configuration.customConfigurations)

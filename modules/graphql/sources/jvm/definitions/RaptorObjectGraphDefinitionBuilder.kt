@@ -45,7 +45,7 @@ public class RaptorObjectGraphDefinitionBuilder<Type : Any> internal constructor
 	@OptIn(ExperimentalStdlibApi::class)
 	@RaptorDsl
 	public inline fun <reified FieldType> field(
-		property: KProperty1<Type, FieldType>,
+		property: KProperty1<in Type, FieldType>,
 		noinline configure: RaptorGraphFieldBuilder.WithResolver<FieldType, Type>.() -> Unit = {},
 	) {
 		field(
@@ -58,7 +58,7 @@ public class RaptorObjectGraphDefinitionBuilder<Type : Any> internal constructor
 
 	@RaptorDsl
 	public fun <FieldType> field(
-		property: KProperty1<Type, FieldType>,
+		property: KProperty1<in Type, FieldType>,
 		type: KType,
 		configure: RaptorGraphFieldBuilder.WithResolver<FieldType, Type>.() -> Unit = {},
 	) {
