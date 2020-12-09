@@ -16,34 +16,39 @@ internal class DefaultRaptorDI(
 		.reversed()
 		.associateWithTo(mutableMapOf()) { hashMapOf() }
 
-	private val dependenciesByType: MutableMap<KType, Any?> = hashMapOf()
+	private val dependenciesByType: MutableMap<KType, ResolvedDependency> = hashMapOf()
 	private val currentlyResolvingTypes = mutableListOf<KType>()
 	private val lock = ReentrantLock()
 
 
 	@Suppress("NAME_SHADOWING")
-	override fun get(type: KType): Any? =
+	override fun get(type: KType): Any? {
+		val isNullable = type.isMarkedNullable
+		val type = type.withNullability(false)
+
+		val value = getDependency(type).value
+		if (value == null && !isNullable)
+			reportMissingDependency(type)
+
+		return value
+	}
+
+
+	private fun getDependency(type: KType): ResolvedDependency =
 		lock.withLock { // TODO Add fast-path if dependency is already resolved.
-			val isNullable = type.isMarkedNullable
-			val type = type.withNullability(false)
-			val dependency = dependenciesByType.getOrPut(type) {
+			dependenciesByType.getOrPut(type) {
 				if (currentlyResolvingTypes.contains(type))
 					reportCyclicDependency(type)
 
 				currentlyResolvingTypes += type
 
 				try {
-					return@getOrPut resolve(type, isNullable = isNullable)
+					return@getOrPut resolve(type)
 				}
 				finally {
 					currentlyResolvingTypes.removeLast()
 				}
 			}
-
-			if (dependency == null && !isNullable)
-				reportUnexpectedNullDependency(type)
-
-			dependency
 		}
 
 
@@ -51,22 +56,28 @@ internal class DefaultRaptorDI(
 		lazy { factory() }
 
 
-	private fun resolve(type: KType, isNullable: Boolean): Any? {
+	private fun resolve(type: KType): ResolvedDependency {
+		// FIXME if not successful must delegate to parents first before going on with modules
+		dependenciesByType.values.forEach { resolvedDependency ->
+			// FIXME must set moduleDependenciesByType[…]
+			if (resolvedDependency.type.isSubtypeOf(type))
+				return resolvedDependency
+		}
+
 		dependenciesByModule.forEach { (module, moduleDependenciesByType) ->
-			val provide = module.provideByType.entries.firstOrNull { it.key.isSubtypeOf(type) }?.value ?: return@forEach
-			val dependency = provide()
+			val (providedType, provide) = module.provideByType.entries.firstOrNull { it.key.isSubtypeOf(type) } ?: return@forEach
+			val value = provide()
 
-			moduleDependenciesByType[type] = dependency
+			moduleDependenciesByType[type] = value
 
-			return dependency
+			return ResolvedDependency(type = providedType, value = value)
 		}
 
 		parent?.let { parent ->
-			return parent.get(type)
+			return (parent as DefaultRaptorDI).getDependency(type) // FIXME make abstract
 		}
 
-		if (isNullable) return null // TODO Remember unsuccessful resolutions to not perform them over and over again.
-		else reportMissingDependency(type)
+		return ResolvedDependency(type = type, value = null)
 	}
 
 
@@ -140,4 +151,10 @@ internal class DefaultRaptorDI(
 			append(parent)
 		}
 	}
+
+
+	private class ResolvedDependency(
+		val type: KType,
+		val value: Any?,
+	)
 }

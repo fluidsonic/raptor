@@ -39,8 +39,9 @@ public fun RaptorComponentSet<RaptorTransactionComponent>.di(configuration: Rapt
 				val factoryPropertyKey = diComponent.factoryPropertyKey
 
 				onCreate {
-					if (parentContext.parent != null) // TODO Do we want to support nested transactions here?
-						return@onCreate
+					// TODO Do we want to support nested transactions here?. raptor-ktor uses them (root tx -> route tx -> route tx -> …)
+//					if (parentContext.parent != null)
+//						return@onCreate
 
 					val factory = parentContext[factoryPropertyKey]
 						?: error("Cannot find dependency injection factory.")

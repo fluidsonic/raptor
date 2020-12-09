@@ -41,7 +41,10 @@ internal class GraphTypeSystemBuilder private constructor(
 		ObjectGraphType(
 			description = null,
 			kotlinType = KotlinType.of(
-				type = typeOf<Unit>(),
+				type = when (operationType) {
+					RaptorGraphOperationType.mutation -> typeOf<MutationRoot>()
+					RaptorGraphOperationType.query -> typeOf<QueryRoot>()
+				},
 				containingType = null,
 				allowMaybe = false,
 				allowNull = false,
@@ -211,4 +214,8 @@ internal class GraphTypeSystemBuilder private constructor(
 		fun build(systemDefinition: GraphSystemDefinition): GraphTypeSystem =
 			GraphTypeSystemBuilder(systemDefinition = systemDefinition).build()
 	}
+
+
+	private object MutationRoot
+	private object QueryRoot
 }

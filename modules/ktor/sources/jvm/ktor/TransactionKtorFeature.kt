@@ -9,7 +9,7 @@ internal val ktorServerTransactionAttributeKey = AttributeKey<RaptorTransaction>
 
 
 internal class RaptorTransactionKtorFeature(
-	private val serverContext: RaptorContext
+	private val serverContext: RaptorContext,
 ) : ApplicationFeature<ApplicationCallPipeline, Unit, Unit> {
 
 	override val key = AttributeKey<Unit>("Raptor: transaction feature")
@@ -34,6 +34,6 @@ internal class RaptorTransactionKtorFeature(
 }
 
 
-// FIXME we may need type alises everywhere for DSL Markers
+// FIXME we may need type aliases everywhere for DSL Markers
 internal val ApplicationCall.raptorKtorServerTransaction
 	get() = attributes[ktorServerTransactionAttributeKey]

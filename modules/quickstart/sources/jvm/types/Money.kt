@@ -58,7 +58,7 @@ public data class Money(
 			serialize { value: Money ->
 				mapOf(
 					"amount" to value.amount.value.toString(),
-					"currency" to value.currency.code
+					"currency" to value.currency.code.toString(),
 				)
 			}
 		}
