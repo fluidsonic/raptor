@@ -4,7 +4,7 @@ import io.fluidsonic.raptor.graphql.internal.*
 
 
 // FIXME taggable
-public class GraphRaptorComponent internal constructor() : RaptorComponent.Default<GraphRaptorComponent>() {
+public class GraphRaptorComponent internal constructor() : RaptorComponent.Default<GraphRaptorComponent>(), RaptorTaggableComponent {
 
 	internal val definitions: MutableList<RaptorGraphDefinition> = mutableListOf()
 	internal var includesDefaultDefinitions = false
@@ -18,7 +18,7 @@ public class GraphRaptorComponent internal constructor() : RaptorComponent.Defau
 		)
 
 
-	companion object;
+	public companion object;
 
 
 	internal object Key : RaptorComponentKey<GraphRaptorComponent> {
@@ -29,13 +29,13 @@ public class GraphRaptorComponent internal constructor() : RaptorComponent.Defau
 
 
 @RaptorDsl
-fun RaptorComponentSet<GraphRaptorComponent>.definitions(vararg definitions: RaptorGraphDefinition) {
+public fun RaptorComponentSet<GraphRaptorComponent>.definitions(vararg definitions: RaptorGraphDefinition) {
 	definitions(definitions.asIterable())
 }
 
 
 @RaptorDsl
-fun RaptorComponentSet<GraphRaptorComponent>.definitions(definitions: Iterable<RaptorGraphDefinition>) {
+public fun RaptorComponentSet<GraphRaptorComponent>.definitions(definitions: Iterable<RaptorGraphDefinition>) {
 	configure {
 		this.definitions += definitions
 	}
@@ -43,11 +43,13 @@ fun RaptorComponentSet<GraphRaptorComponent>.definitions(definitions: Iterable<R
 
 
 @RaptorDsl
-fun RaptorComponentSet<GraphRaptorComponent>.includeDefaultDefinitions() = configure {
-	if (includesDefaultDefinitions)
-		return@configure
+public fun RaptorComponentSet<GraphRaptorComponent>.includeDefaultDefinitions() {
+	configure {
+		if (includesDefaultDefinitions)
+			return@configure
 
-	includesDefaultDefinitions = true
+		includesDefaultDefinitions = true
 
-	definitions(RaptorGraphDefaults.definitions)
+		definitions(RaptorGraphDefaults.definitions)
+	}
 }

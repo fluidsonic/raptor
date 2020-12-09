@@ -18,6 +18,8 @@ public class RaptorAliasGraphDefinitionBuilder<Type : Any, ReferencedType : Any>
 
 	init {
 		check(!isId || referencedKotlinType.classifier == String::class) { "A GraphQL 'ID' alias must reference Kotlin type 'String'." }
+		check(!kotlinType.isNullable) { "Type must not be nullable: $kotlinType" }
+		check(!referencedKotlinType.isNullable) { "Referenced type must not be nullable: $referencedKotlinType" }
 	}
 
 

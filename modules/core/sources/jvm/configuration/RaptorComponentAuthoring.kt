@@ -3,15 +3,15 @@ package io.fluidsonic.raptor
 
 @RaptorDsl
 @Suppress("NON_PUBLIC_PRIMARY_CONSTRUCTOR_OF_INLINE_CLASS")
-inline class RaptorComponentAuthoring<Component : RaptorComponent>(
-	@RaptorDsl val authoredSet: RaptorComponentSet<Component>
+public inline class RaptorComponentAuthoring<Component : RaptorComponent>(
+	@RaptorDsl public val authoredSet: RaptorComponentSet<Component>,
 )
 
 
 @RaptorDsl
 @Suppress("unused")
-fun <Component : RaptorComponent> RaptorComponentAuthoring<*>.componentSet(
-	configure: (action: Component.() -> Unit) -> Unit
+public fun <Component : RaptorComponent> RaptorComponentAuthoring<*>.componentSet(
+	configure: (action: Component.() -> Unit) -> Unit,
 ): RaptorComponentSet<Component> =
 	object : RaptorComponentSet<Component> {
 
@@ -22,8 +22,8 @@ fun <Component : RaptorComponent> RaptorComponentAuthoring<*>.componentSet(
 
 
 @RaptorDsl
-fun <Component : RaptorComponent> RaptorComponentAuthoring<Component>.filter(
-	filter: (component: Component) -> Boolean
+public fun <Component : RaptorComponent> RaptorComponentAuthoring<Component>.filter(
+	filter: (component: Component) -> Boolean,
 ): RaptorComponentSet<Component> =
 	componentSet { action ->
 		authoredSet {
@@ -34,8 +34,8 @@ fun <Component : RaptorComponent> RaptorComponentAuthoring<Component>.filter(
 
 
 @RaptorDsl
-fun <Component : RaptorComponent, TransformedComponent : RaptorComponent> RaptorComponentAuthoring<Component>.map(
-	transform: Component.() -> RaptorComponentSet<TransformedComponent>
+public fun <Component : RaptorComponent, TransformedComponent : RaptorComponent> RaptorComponentAuthoring<Component>.map(
+	transform: Component.() -> RaptorComponentSet<TransformedComponent>,
 ): RaptorComponentSet<TransformedComponent> {
 	val actions: MutableList<TransformedComponent.() -> Unit> = mutableListOf()
 	val transforms: MutableList<RaptorComponentSet<TransformedComponent>> = mutableListOf()
@@ -59,7 +59,7 @@ fun <Component : RaptorComponent, TransformedComponent : RaptorComponent> Raptor
 
 
 @RaptorDsl
-inline fun <Component : RaptorComponent, Result> RaptorComponentSet<Component>.withComponentAuthoring(
-	action: RaptorComponentAuthoring<Component>.() -> Result
-) =
+public inline fun <Component : RaptorComponent, Result> RaptorComponentSet<Component>.withComponentAuthoring(
+	action: RaptorComponentAuthoring<Component>.() -> Result,
+): Result =
 	RaptorComponentAuthoring(authoredSet = this).run(action)

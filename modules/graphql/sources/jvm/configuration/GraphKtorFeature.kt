@@ -6,7 +6,7 @@ import io.ktor.response.*
 import io.ktor.routing.*
 
 
-object GraphKtorFeature : KtorRouteFeature {
+public object GraphKtorFeature : KtorRouteFeature {
 
 	override fun KtorRouteFeatureConfigurationEndScope.onConfigurationEnded() {
 		route {
@@ -19,7 +19,6 @@ object GraphKtorFeature : KtorRouteFeature {
 		route {
 			custom {
 				get {
-					val r = raptorContext
 					checkNotNull(raptorContext[GraphRoute.PropertyKey]).handle(call)
 				}
 
@@ -33,7 +32,7 @@ object GraphKtorFeature : KtorRouteFeature {
 
 
 @RaptorDsl
-val RaptorTopLevelConfigurationScope.graphs: RaptorComponentSet<GraphRaptorComponent>
+public val RaptorTopLevelConfigurationScope.graphs: RaptorComponentSet<GraphRaptorComponent>
 	get() = ktor.servers.routes(recursive = true).withComponentAuthoring {
 		map {
 			componentRegistry.configure(GraphRaptorComponent.Key)
@@ -42,7 +41,7 @@ val RaptorTopLevelConfigurationScope.graphs: RaptorComponentSet<GraphRaptorCompo
 
 
 @RaptorDsl
-fun KtorRouteRaptorComponent.newGraph(provideSchema: Boolean = false, configuration: GraphRaptorComponent.() -> Unit = {}) {
+public fun KtorRouteRaptorComponent.newGraph(provideSchema: Boolean = false, configuration: GraphRaptorComponent.() -> Unit = {}) {
 	GraphRaptorComponent()
 		.also { componentRegistry.register(GraphRaptorComponent.Key, it) }
 		.also(configuration)

@@ -16,7 +16,7 @@ internal class GraphTypeSystemBuilder private constructor(
 		.mapValues { (_, definitions) -> definitions.flatMap { it.fieldDefinitions } }
 
 	private val objectExtensionDefinitionsByKotlinType = systemDefinition.definitions
-		.filterIsInstance<InterfaceExtensionGraphDefinition>()
+		.filterIsInstance<ObjectExtensionGraphDefinition>()
 		.groupBy { it.kotlinType.specialize() }
 		.mapValues { (_, definitions) -> definitions.flatMap { it.fieldDefinitions } }
 

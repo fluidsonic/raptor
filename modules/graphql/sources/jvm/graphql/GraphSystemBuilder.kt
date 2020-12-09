@@ -240,7 +240,7 @@ internal class GraphSystemBuilder private constructor(
 					when (type) {
 						is AliasGraphType -> when {
 							type.isId -> GIdTypeRef
-							else -> typeRef(type.referencedKotlinType, isInput = isInput)
+							else -> typeRef(type.referencedKotlinType, isInput = isInput).nullableRef
 						}
 
 						is NamedGraphType ->

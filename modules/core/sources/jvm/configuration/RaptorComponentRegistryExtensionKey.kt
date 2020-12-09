@@ -1,7 +1,7 @@
 package io.fluidsonic.raptor
 
 
-object RaptorComponentRegistryExtensionKey : RaptorComponentExtensionKey<RaptorComponentRegistry> {
+public object RaptorComponentRegistryExtensionKey : RaptorComponentExtensionKey<RaptorComponentRegistry> {
 
-	override fun toString() = "registry"
+	override fun toString(): String = "registry"
 }

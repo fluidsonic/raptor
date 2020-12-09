@@ -2,16 +2,19 @@ package io.fluidsonic.raptor
 
 
 // TODO Make public if it's actually useful and after API was revisited.
-internal interface RaptorDIGeneratingComponent : RaptorComponent {
+@InternalRaptorApi
+public interface RaptorDIGeneratingComponent : RaptorComponent {
 
-	companion object
+	public companion object
 }
 
 
 @RaptorDsl
-internal fun RaptorComponentSet<RaptorDIGeneratingComponent>.di(configuration: RaptorDIBuilder.() -> Unit) = configure {
-	componentRegistry.oneOrRegister(DIFactoryRaptorComponent.Key) { DIFactoryRaptorComponent() }.configure {
-		builder.apply(configuration)
+public fun RaptorComponentSet<RaptorDIGeneratingComponent>.di(configuration: RaptorDIBuilder.() -> Unit) {
+	configure {
+		componentRegistry.oneOrRegister(DIFactoryRaptorComponent.Key) { DIFactoryRaptorComponent() }.configure {
+			builder.apply(configuration)
+		}
 	}
 }
 
@@ -19,6 +22,6 @@ internal fun RaptorComponentSet<RaptorDIGeneratingComponent>.di(configuration: R
 // FIXME throw if feature not installed?
 @RaptorDsl
 @Suppress("unused")
-internal fun RaptorConfigurationEndScope.diFactory(name: String, component: RaptorDIGeneratingComponent): RaptorDIFactory =
+public fun RaptorConfigurationEndScope.diFactory(name: String, component: RaptorDIGeneratingComponent): RaptorDIFactory =
 	component.componentRegistry.oneOrNull(DIFactoryRaptorComponent.Key)?.toFactory(name = name)
 		?: DefaultRaptorDIFactory(modules = emptyList())

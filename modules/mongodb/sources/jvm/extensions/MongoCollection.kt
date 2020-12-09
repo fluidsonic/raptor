@@ -40,6 +40,10 @@ suspend fun <TResult : Any> MongoCollection<*>.findOneById(id: Any?, resultClass
 	find(filter = eq("_id", id), resultClass = resultClass).firstOrNull()
 
 
+suspend inline fun <reified TResult : Any> MongoCollection<*>.findOneFieldById(id: Any?, fieldName: String): TResult? =
+	findOneFieldById(id, fieldName = fieldName, resultClass = TResult::class)
+
+
 suspend fun <TResult : Any> MongoCollection<*>.findOneFieldById(id: Any?, fieldName: String, resultClass: KClass<out TResult>): TResult? =
 	find(
 		filter = eq("_id", id),

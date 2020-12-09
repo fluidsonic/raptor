@@ -4,11 +4,10 @@ import io.ktor.application.*
 import java.io.*
 
 
-// FIXME taggable
-class KtorServerRaptorComponent internal constructor(
+public class KtorServerRaptorComponent internal constructor(
 	internal val globalScope: RaptorTopLevelConfigurationScope,
 	internal val insecure: Boolean,
-) : RaptorComponent.Default<KtorServerRaptorComponent>(), RaptorTransactionGeneratingComponent {
+) : RaptorComponent.Default<KtorServerRaptorComponent>(), RaptorTaggableComponent, RaptorTransactionGeneratingComponent {
 
 	// FIXME ok not to specify parent?
 	private val propertyRegistry = RaptorPropertyRegistry.default() // FIXME actually use!
@@ -101,7 +100,7 @@ class KtorServerRaptorComponent internal constructor(
 
 
 @RaptorDsl
-fun RaptorComponentSet<KtorServerRaptorComponent>.custom(configuration: RaptorKtorConfigurationScope.() -> Unit) {
+public fun RaptorComponentSet<KtorServerRaptorComponent>.custom(configuration: RaptorKtorConfigurationScope.() -> Unit) {
 	configure {
 		customConfigurations += configuration
 	}
@@ -109,7 +108,7 @@ fun RaptorComponentSet<KtorServerRaptorComponent>.custom(configuration: RaptorKt
 
 
 @RaptorDsl
-fun RaptorComponentSet<KtorServerRaptorComponent>.httpConnector(
+public fun RaptorComponentSet<KtorServerRaptorComponent>.httpConnector(
 	host: String = "0.0.0.0",
 	port: Int = 80,
 ) {
@@ -123,7 +122,7 @@ fun RaptorComponentSet<KtorServerRaptorComponent>.httpConnector(
 
 
 @RaptorDsl
-fun RaptorComponentSet<KtorServerRaptorComponent>.httpsConnector(
+public fun RaptorComponentSet<KtorServerRaptorComponent>.httpsConnector(
 	host: String = "0.0.0.0",
 	port: Int = 443,
 	keyAlias: String,
@@ -145,7 +144,7 @@ fun RaptorComponentSet<KtorServerRaptorComponent>.httpsConnector(
 
 
 @RaptorDsl
-fun RaptorComponentSet<KtorServerRaptorComponent>.install(feature: KtorServerFeature) {
+public fun RaptorComponentSet<KtorServerRaptorComponent>.install(feature: KtorServerFeature) {
 	configure {
 		if (features.add(feature))
 			with(feature) {
@@ -156,7 +155,7 @@ fun RaptorComponentSet<KtorServerRaptorComponent>.install(feature: KtorServerFea
 
 
 @RaptorDsl
-fun RaptorComponentSet<KtorServerRaptorComponent>.newRoute(path: String = ""): RaptorComponentSet<KtorRouteRaptorComponent> =
+public fun RaptorComponentSet<KtorServerRaptorComponent>.newRoute(path: String = ""): RaptorComponentSet<KtorRouteRaptorComponent> =
 	withComponentAuthoring {
 		map {
 			KtorRouteRaptorComponent(
@@ -170,7 +169,7 @@ fun RaptorComponentSet<KtorServerRaptorComponent>.newRoute(path: String = ""): R
 
 
 @RaptorDsl
-fun RaptorComponentSet<KtorServerRaptorComponent>.newRoute(path: String = "", configure: KtorRouteRaptorComponent.() -> Unit) {
+public fun RaptorComponentSet<KtorServerRaptorComponent>.newRoute(path: String = "", configure: KtorRouteRaptorComponent.() -> Unit) {
 	configure {
 		KtorRouteRaptorComponent(
 			globalScope = globalScope,
@@ -184,7 +183,7 @@ fun RaptorComponentSet<KtorServerRaptorComponent>.newRoute(path: String = "", co
 
 
 @RaptorDsl
-val RaptorComponentSet<KtorServerRaptorComponent>.routes: RaptorComponentSet<KtorRouteRaptorComponent>
+public val RaptorComponentSet<KtorServerRaptorComponent>.routes: RaptorComponentSet<KtorRouteRaptorComponent>
 	get() = withComponentAuthoring {
 		map {
 			componentRegistry.configure(KtorRouteRaptorComponent.Key)
@@ -193,7 +192,7 @@ val RaptorComponentSet<KtorServerRaptorComponent>.routes: RaptorComponentSet<Kto
 
 
 @RaptorDsl
-fun RaptorComponentSet<KtorServerRaptorComponent>.routes(recursive: Boolean): RaptorComponentSet<KtorRouteRaptorComponent> =
+public fun RaptorComponentSet<KtorServerRaptorComponent>.routes(recursive: Boolean): RaptorComponentSet<KtorRouteRaptorComponent> =
 	withComponentAuthoring {
 		when (recursive) {
 			true -> componentSet { action ->
@@ -208,5 +207,5 @@ fun RaptorComponentSet<KtorServerRaptorComponent>.routes(recursive: Boolean): Ra
 
 
 @RaptorDsl
-fun RaptorComponentSet<KtorServerRaptorComponent>.routes(recursive: Boolean, configure: KtorRouteRaptorComponent.() -> Unit) =
+public fun RaptorComponentSet<KtorServerRaptorComponent>.routes(recursive: Boolean, configure: KtorRouteRaptorComponent.() -> Unit) =
 	routes(recursive = recursive).invoke(configure)

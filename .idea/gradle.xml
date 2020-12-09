@@ -4,20 +4,6 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
-        <compositeConfiguration>
-          <compositeBuild compositeDefinitionSource="SCRIPT">
-            <builds>
-              <build path="$PROJECT_DIR$/../fluid-graphql" name="fluid-graphql">
-                <projects>
-                  <project path="$PROJECT_DIR$/../fluid-graphql" />
-                  <project path="$PROJECT_DIR$/../fluid-graphql/modules/dsl" />
-                  <project path="$PROJECT_DIR$/../fluid-graphql/modules/execution" />
-                  <project path="$PROJECT_DIR$/../fluid-graphql/modules/language" />
-                </projects>
-              </build>
-            </builds>
-          </compositeBuild>
-        </compositeConfiguration>
         <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="modules">

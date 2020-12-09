@@ -3,12 +3,13 @@ package io.fluidsonic.raptor
 import io.ktor.routing.*
 
 
-// FIXME taggable
-class KtorRouteRaptorComponent internal constructor(
+public class KtorRouteRaptorComponent internal constructor(
 	internal val globalScope: RaptorTopLevelConfigurationScope,
 	private val path: String,
 	internal val serverComponentRegistry: RaptorComponentRegistry,
-) : RaptorComponent.Default<KtorRouteRaptorComponent>(), RaptorTransactionGeneratingComponent {
+) : RaptorComponent.Default<KtorRouteRaptorComponent>(),
+	RaptorTaggableComponent,
+	RaptorTransactionGeneratingComponent {
 
 	// FIXME ok not to specify parent?
 	private val propertyRegistry = RaptorPropertyRegistry.default()
@@ -106,13 +107,15 @@ class KtorRouteRaptorComponent internal constructor(
 
 
 @RaptorDsl
-fun RaptorComponentSet<KtorRouteRaptorComponent>.custom(configure: RaptorKtorRouteConfigurationScope.() -> Unit) = configure {
-	customConfigurations += configure
+public fun RaptorComponentSet<KtorRouteRaptorComponent>.custom(configure: RaptorKtorRouteConfigurationScope.() -> Unit) {
+	configure {
+		customConfigurations += configure
+	}
 }
 
 
 @RaptorDsl
-fun RaptorComponentSet<KtorRouteRaptorComponent>.install(feature: KtorRouteFeature) {
+public fun RaptorComponentSet<KtorRouteRaptorComponent>.install(feature: KtorRouteFeature) {
 	configure {
 		if (features.add(feature))
 			with(feature) {
@@ -143,7 +146,7 @@ public fun RaptorComponentSet<KtorRouteRaptorComponent>.newRoute(path: String, c
 
 
 @RaptorDsl
-val RaptorComponentSet<KtorRouteRaptorComponent>.routes: RaptorComponentSet<KtorRouteRaptorComponent>
+public val RaptorComponentSet<KtorRouteRaptorComponent>.routes: RaptorComponentSet<KtorRouteRaptorComponent>
 	get() = withComponentAuthoring {
 		map {
 			componentRegistry.configure(KtorRouteRaptorComponent.Key)
@@ -152,7 +155,7 @@ val RaptorComponentSet<KtorRouteRaptorComponent>.routes: RaptorComponentSet<Ktor
 
 
 @RaptorDsl
-fun RaptorComponentSet<KtorRouteRaptorComponent>.routes(recursive: Boolean): RaptorComponentSet<KtorRouteRaptorComponent> =
+public fun RaptorComponentSet<KtorRouteRaptorComponent>.routes(recursive: Boolean): RaptorComponentSet<KtorRouteRaptorComponent> =
 	withComponentAuthoring {
 		when (recursive) {
 			true -> componentSet { action ->
@@ -167,12 +170,13 @@ fun RaptorComponentSet<KtorRouteRaptorComponent>.routes(recursive: Boolean): Rap
 
 
 @RaptorDsl
-fun RaptorComponentSet<KtorRouteRaptorComponent>.routes(recursive: Boolean, configure: KtorRouteRaptorComponent.() -> Unit) =
+public fun RaptorComponentSet<KtorRouteRaptorComponent>.routes(recursive: Boolean, configure: KtorRouteRaptorComponent.() -> Unit) {
 	routes(recursive = recursive).invoke(configure)
+}
 
 
 @RaptorDsl
-fun RaptorComponentSet<KtorRouteRaptorComponent>.wrap(wrapper: RaptorKtorRouteConfigurationScope.(next: Route.() -> Unit) -> Unit) {
+public fun RaptorComponentSet<KtorRouteRaptorComponent>.wrap(wrapper: RaptorKtorRouteConfigurationScope.(next: Route.() -> Unit) -> Unit) {
 	configure {
 		val previousWrapper = this.wrapper
 		if (previousWrapper != null)

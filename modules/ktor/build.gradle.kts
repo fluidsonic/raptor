@@ -14,6 +14,7 @@ fluidLibraryModule(description = "FIXME") {
 			@Suppress("SpellCheckingInspection")
 			dependencies {
 				api(project(":raptor-core"))
+				api(project(":raptor-di"))
 				api(project(":raptor-lifecycle"))
 				api(project(":raptor-transactions"))
 				api(ktor("auth-jwt"))
@@ -29,5 +30,5 @@ fluidLibraryModule(description = "FIXME") {
 }
 
 
-fun ktor(name: String, version: String = "1.4.1") =
+fun ktor(name: String, version: String = "1.4.3") =
 	"io.ktor:ktor-$name:$version"

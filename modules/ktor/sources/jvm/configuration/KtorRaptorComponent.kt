@@ -1,7 +1,7 @@
 package io.fluidsonic.raptor
 
 
-class KtorRaptorComponent internal constructor(
+public class KtorRaptorComponent internal constructor(
 	internal val globalScope: RaptorTopLevelConfigurationScope,
 ) : RaptorComponent.Default<KtorRaptorComponent>() {
 
@@ -27,7 +27,7 @@ class KtorRaptorComponent internal constructor(
 
 
 @RaptorDsl
-fun RaptorComponentSet<KtorRaptorComponent>.newServer(insecure: Boolean = false, configure: KtorServerRaptorComponent.() -> Unit = {}) {
+public fun RaptorComponentSet<KtorRaptorComponent>.newServer(insecure: Boolean = false, configure: KtorServerRaptorComponent.() -> Unit = {}) {
 	configure {
 		KtorServerRaptorComponent(globalScope = globalScope, insecure = insecure)
 			.also { componentRegistry.register(KtorServerRaptorComponent.Key, it) }
@@ -37,7 +37,7 @@ fun RaptorComponentSet<KtorRaptorComponent>.newServer(insecure: Boolean = false,
 
 
 @RaptorDsl
-val RaptorComponentSet<KtorRaptorComponent>.servers: RaptorComponentSet<KtorServerRaptorComponent>
+public val RaptorComponentSet<KtorRaptorComponent>.servers: RaptorComponentSet<KtorServerRaptorComponent>
 	get() = withComponentAuthoring {
 		map {
 			componentRegistry.configure(KtorServerRaptorComponent.Key)

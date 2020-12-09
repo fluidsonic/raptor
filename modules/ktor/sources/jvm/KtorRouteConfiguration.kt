@@ -9,5 +9,5 @@ internal class KtorRouteConfiguration(
 	val path: String,
 	val properties: RaptorPropertySet,
 	val transactionFactory: RaptorTransactionFactory?,
-	val wrapper: (RaptorKtorRouteConfigurationScope.(next: Route.() -> Unit) -> Unit)?
+	val wrapper: (RaptorKtorRouteConfigurationScope.(next: Route.() -> Unit) -> Unit)?,
 )
