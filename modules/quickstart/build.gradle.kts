@@ -17,7 +17,7 @@ fluidLibraryModule(description = "FIXME") {
 				api(fluid("country", "0.9.3"))
 				api(fluid("currency", "0.9.3"))
 				api(fluid("stdlib", "0.10.3"))
-				api(fluid("time", "0.11.0"))
+				api(fluid("time", "0.12.0"))
 			}
 		}
 	}
