@@ -8,12 +8,11 @@ fluidLibraryModule(description = "FIXME") {
 	targets {
 		jvm {
 			dependencies {
+				implementation(project(":raptor-bson"))
+				implementation(project(":raptor-di"))
+				implementation(project(":raptor-graphql"))
+				implementation(project(":raptor-transactions"))
 				implementation(fluid("stdlib", "0.10.3"))
-
-				compileOnly(project(":raptor-bson"))
-				compileOnly(project(":raptor-di"))
-				implementation(project(":raptor-graphql")) // FIXME
-				compileOnly(project(":raptor-transactions"))
 			}
 		}
 	}

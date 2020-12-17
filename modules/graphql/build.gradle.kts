@@ -9,13 +9,13 @@ fluidLibraryModule(description = "FIXME") {
 		jvm {
 			dependencies {
 				implementation(fluid("country", "0.9.3"))
-				implementation(fluid("currency", "0.9.2"))
+				implementation(fluid("currency", "0.9.3"))
 				implementation(fluid("graphql-execution", "0.9.6"))
 				implementation(fluid("i18n", "0.9.2"))
 				implementation(fluid("json-basic", "1.1.1"))
 				implementation(fluid("locale", "0.9.4"))
 				implementation(fluid("stdlib", "0.10.3"))
-				implementation(fluid("time", "0.10.5"))
+				implementation(fluid("time", "0.11.0"))
 
 				api(project(":raptor-ktor"))
 			}
