@@ -6,13 +6,13 @@ public class KtorRaptorComponent internal constructor(
 ) : RaptorComponent.Default<KtorRaptorComponent>() {
 
 	override fun RaptorComponentConfigurationEndScope.onConfigurationEnded() {
-		val servers = componentRegistry.many(KtorServerRaptorComponent.Key).map { serverComponent ->
+		val servers = componentRegistry.many(RaptorKtorServerComponent.Key).map { serverComponent ->
 			with(serverComponent) {
 				toServerConfigurations()
 			}
 		}
 
-		propertyRegistry.register(Ktor.PropertyKey, Ktor(
+		propertyRegistry.register(RaptorKtorImpl.PropertyKey, RaptorKtorImpl(
 			configuration = KtorConfiguration(servers = servers),
 			context = lazyContext
 		))
@@ -27,19 +27,19 @@ public class KtorRaptorComponent internal constructor(
 
 
 @RaptorDsl
-public fun RaptorComponentSet<KtorRaptorComponent>.newServer(insecure: Boolean = false, configure: KtorServerRaptorComponent.() -> Unit = {}) {
+public fun RaptorComponentSet<KtorRaptorComponent>.newServer(insecure: Boolean = false, configure: RaptorKtorServerComponent.() -> Unit = {}) {
 	configure {
-		KtorServerRaptorComponent(globalScope = globalScope, insecure = insecure)
-			.also { componentRegistry.register(KtorServerRaptorComponent.Key, it) }
+		RaptorKtorServerComponent(globalScope = globalScope, insecure = insecure)
+			.also { componentRegistry.register(RaptorKtorServerComponent.Key, it) }
 			.also(configure)
 	}
 }
 
 
 @RaptorDsl
-public val RaptorComponentSet<KtorRaptorComponent>.servers: RaptorComponentSet<KtorServerRaptorComponent>
+public val RaptorComponentSet<KtorRaptorComponent>.servers: RaptorComponentSet<RaptorKtorServerComponent>
 	get() = withComponentAuthoring {
 		map {
-			componentRegistry.configure(KtorServerRaptorComponent.Key)
+			componentRegistry.configure(RaptorKtorServerComponent.Key)
 		}
 	}

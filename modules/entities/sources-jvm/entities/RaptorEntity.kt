@@ -1,15 +1,6 @@
 package io.fluidsonic.raptor
 
 
-public interface RaptorEntity {
-
-	public val id: RaptorEntityId
-
-
-	public companion object {
-
-		internal fun graphDefinition() = graphInterfaceDefinition(name = "Entity") {
-			field(RaptorEntity::id)
-		}
-	}
+internal fun RaptorEntity.Companion.graphDefinition() = graphInterfaceDefinition(name = "Entity") {
+	field(RaptorEntity::id)
 }

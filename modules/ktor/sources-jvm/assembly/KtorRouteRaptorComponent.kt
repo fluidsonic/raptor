@@ -107,7 +107,7 @@ public class KtorRouteRaptorComponent internal constructor(
 
 
 @RaptorDsl
-public fun RaptorComponentSet<KtorRouteRaptorComponent>.custom(configure: RaptorKtorRouteConfigurationScope.() -> Unit) {
+public fun RaptorComponentSet<KtorRouteRaptorComponent>.custom(configure: RaptorKtorRouteInitializationScope.() -> Unit) {
 	configure {
 		customConfigurations += configure
 	}
@@ -176,7 +176,7 @@ public fun RaptorComponentSet<KtorRouteRaptorComponent>.routes(recursive: Boolea
 
 
 @RaptorDsl
-public fun RaptorComponentSet<KtorRouteRaptorComponent>.wrap(wrapper: RaptorKtorRouteConfigurationScope.(next: Route.() -> Unit) -> Unit) {
+public fun RaptorComponentSet<KtorRouteRaptorComponent>.wrap(wrapper: RaptorKtorRouteInitializationScope.(next: Route.() -> Unit) -> Unit) {
 	configure {
 		val previousWrapper = this.wrapper
 		if (previousWrapper != null)

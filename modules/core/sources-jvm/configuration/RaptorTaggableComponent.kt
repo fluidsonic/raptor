@@ -7,7 +7,7 @@ public interface RaptorTaggableComponent : RaptorComponent
 @RaptorDsl
 public fun <Component : RaptorTaggableComponent> RaptorComponentSet<Component>.addTags(vararg tags: Any) {
 	if (tags.isNotEmpty())
-		configure { tagRegistry.addTags(tags.toHashSet()) }
+		configure { tagRegistryOrCreate().addTags(tags.toHashSet()) }
 }
 
 
@@ -21,3 +21,9 @@ public fun <Component : RaptorTaggableComponent> RaptorComponentSet<Component>.w
 public fun <Component : RaptorTaggableComponent> RaptorComponentSet<Component>.withTag(tag: Any, action: Component.() -> Unit) {
 	withTag(tag).configure(action)
 }
+
+
+@RaptorDsl
+@Suppress("unused")
+public fun RaptorComponentConfigurationEndScope.tags(component: RaptorTaggableComponent): Set<Any> =
+	component.tagRegistry()?.tags.orEmpty()

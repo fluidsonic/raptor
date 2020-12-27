@@ -18,7 +18,7 @@ public val RaptorGlobalDsl.entities: RaptorEntitiesDsl
 @JvmName("idDefinitionObjectId")
 @RaptorDsl
 @Suppress("unused")
-public inline fun <reified Id : RaptorEntityId.ObjectIdBased> RaptorEntitiesDsl.idDefinition(
+public inline fun <reified Id : RaptorEntityIdObjectIdBased> RaptorEntitiesDsl.idDefinition(
 	discriminator: String,
 	noinline factory: (objectId: ObjectId) -> Id,
 ): RaptorEntityIdDefinition<Id> =
@@ -32,7 +32,7 @@ public inline fun <reified Id : RaptorEntityId.ObjectIdBased> RaptorEntitiesDsl.
 @JvmName("idDefinitionObjectId")
 @RaptorDsl
 @Suppress("unused")
-public fun <Id : RaptorEntityId.ObjectIdBased> RaptorEntitiesDsl.idDefinition(
+public fun <Id : RaptorEntityIdObjectIdBased> RaptorEntitiesDsl.idDefinition(
 	discriminator: String,
 	factory: (objectId: ObjectId) -> Id,
 	type: KClass<Id>,
@@ -54,7 +54,7 @@ public fun <Id : RaptorEntityId.ObjectIdBased> RaptorEntitiesDsl.idDefinition(
 @JvmName("idDefinitionString")
 @RaptorDsl
 @Suppress("unused")
-public inline fun <reified Id : RaptorEntityId.StringBased> RaptorEntitiesDsl.idDefinition(
+public inline fun <reified Id : RaptorEntityIdStringBased> RaptorEntitiesDsl.idDefinition(
 	discriminator: String,
 	noinline factory: (string: String) -> Id,
 ): RaptorEntityIdDefinition<Id> =
@@ -68,7 +68,7 @@ public inline fun <reified Id : RaptorEntityId.StringBased> RaptorEntitiesDsl.id
 @JvmName("idDefinitionString")
 @RaptorDsl
 @Suppress("unused")
-public fun <Id : RaptorEntityId.StringBased> RaptorEntitiesDsl.idDefinition(
+public fun <Id : RaptorEntityIdStringBased> RaptorEntitiesDsl.idDefinition(
 	discriminator: String,
 	factory: (string: String) -> Id,
 	type: KClass<Id>,

@@ -68,6 +68,19 @@ public class RaptorMongodbUpdateBuilder @PublishedApi internal constructor(
 
 
 	@RaptorDsl
+	public fun setOnInsert(fieldName: String, value: Any?) {
+		changes += Updates.setOnInsert(fieldName, value)
+	}
+
+
+	@RaptorDsl
+	public fun setOnInsert(fieldName: String, maybeValue: Maybe<*>) {
+		if (maybeValue.hasValue())
+			setOnInsert(fieldName = fieldName, value = maybeValue.get())
+	}
+
+
+	@RaptorDsl
 	public fun setOrUnsetIfNull(fieldName: String, value: Any?) {
 		changes +=
 			if (value != null) Updates.set(fieldName, value)

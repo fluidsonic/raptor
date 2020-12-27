@@ -5,9 +5,9 @@ import io.ktor.routing.*
 
 internal class KtorRouteConfiguration(
 	val children: List<KtorRouteConfiguration>,
-	val customConfigurations: List<RaptorKtorRouteConfigurationScope.() -> Unit>,
+	val customConfigurations: List<RaptorKtorRouteInitializationScope.() -> Unit>,
 	val path: String,
 	val properties: RaptorPropertySet,
 	val transactionFactory: RaptorTransactionFactory?,
-	val wrapper: (RaptorKtorRouteConfigurationScope.(next: Route.() -> Unit) -> Unit)?,
+	val wrapper: (RaptorKtorRouteInitializationScope.(next: Route.() -> Unit) -> Unit)?,
 )

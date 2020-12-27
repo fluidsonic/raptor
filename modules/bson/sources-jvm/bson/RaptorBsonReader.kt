@@ -188,6 +188,18 @@ public inline fun <Reader : RaptorBsonReader> Reader.documentByField(readField: 
 
 
 @RaptorDsl
+public inline fun <Reader : RaptorBsonReader> Reader.documentByField(field: String, readField: Reader.(field: String) -> Unit) {
+	contract {
+		callsInPlace(readField, InvocationKind.UNKNOWN)
+	}
+
+	fieldName(field)
+
+	documentByField(readField)
+}
+
+
+@RaptorDsl
 public inline fun <Reader : RaptorBsonReader, Value> Reader.documentOrNull(read: Reader.() -> Value): Value? {
 	contract {
 		callsInPlace(read, InvocationKind.EXACTLY_ONCE)

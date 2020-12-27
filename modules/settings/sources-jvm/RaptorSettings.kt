@@ -1,6 +1,7 @@
 package io.fluidsonic.raptor
 
 
+// FIXME inject with DI? or should this only be used at assembly-time?
 public interface RaptorSettings {
 
 	public fun hasValue(path: String): Boolean

@@ -4,4 +4,4 @@ import io.ktor.application.*
 
 
 @RaptorDsl
-typealias RaptorKtorConfigurationScope = Application
+public typealias RaptorKtorInitializationScope = Application

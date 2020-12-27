@@ -17,16 +17,22 @@ import org.slf4j.*
 import org.slf4j.event.*
 
 
-private val ktorServerAttributeKey = AttributeKey<KtorServer>("Raptor: server")
-
-
-internal class KtorServer(
+internal class RaptorKtorServerImpl(
 	private val configuration: KtorServerConfiguration,
 	parentContext: RaptorContext,
-) {
+) : RaptorKtorServer {
 
-	private var engine: ApplicationEngine? = null
-	private val environment = applicationEngineEnvironment {
+	private val stateRef = atomic(State.initial)
+
+	// FIXME child context w/ own DI?
+	val context = parentContext
+
+
+	override var engine: ApplicationEngine? = null
+		private set
+
+
+	override val environment = configuration.engineEnvironmentFactory {
 		log = LoggerFactory.getLogger("io.ktor.Application")
 
 		for (connector in configuration.connectors)
@@ -61,10 +67,6 @@ internal class KtorServer(
 				}
 			}
 	}
-	private val stateRef = atomic(State.initial)
-
-	// FIXME Support child context w/o Transaction, e.g. for Kodein.
-	val context = parentContext
 
 
 	suspend fun start() {
@@ -79,15 +81,16 @@ internal class KtorServer(
 
 
 	private fun startEngineBlocking() {
-		val engine = embeddedServer(Netty, environment)
+		val engine = configuration.engineFactory(environment)
 
 		var exception: Throwable? = null
 
-		// Engine is created before monitoring the start event because Netty's subscriptions must be processed first.
+		// Subscribed only after the engine is created because the engine's subscriptions must be processed first.
 		val subscription = engine.environment.monitor.subscribe(ApplicationStarting) { application ->
 			try {
 				application.configure()
-			} catch (e: Throwable) {
+			}
+			catch (e: Throwable) {
 				exception = e
 			}
 		}
@@ -99,7 +102,8 @@ internal class KtorServer(
 		exception?.let { exception ->
 			try {
 				engine.stop(gracePeriodMillis = 0, timeoutMillis = 0)
-			} catch (e: Exception) {
+			}
+			catch (e: Throwable) {
 				exception.addSuppressed(e)
 			}
 
@@ -128,9 +132,13 @@ internal class KtorServer(
 	}
 
 
+	override val tags: Set<Any>
+		get() = configuration.tags
+
+
 	// FIXME rework
 	private fun Application.configure() {
-		attributes.put(ktorServerAttributeKey, this@KtorServer)
+		attributes.put(attributeKey, this@RaptorKtorServerImpl)
 
 		install(CallLogging) {
 			level = Level.INFO
@@ -155,7 +163,7 @@ internal class KtorServer(
 		install(XForwardedHeaderSupport)
 		if (!configuration.insecure)
 			install(EncryptionEnforcementKtorFeature)
-		install(RaptorTransactionKtorFeature(serverContext = this@KtorServer.context))
+		install(RaptorTransactionKtorFeature(serverContext = this@RaptorKtorServerImpl.context))
 
 		for (customConfiguration in configuration.customConfigurations)
 			customConfiguration()
@@ -177,24 +185,25 @@ internal class KtorServer(
 
 				configuration.transactionFactory?.let { transactionFactory ->
 					intercept(ApplicationCallPipeline.Setup) {
-						val parentTransaction = context.attributes.getOrNull(ktorServerTransactionAttributeKey)
+						val parentTransaction = context.attributes.getOrNull(RaptorTransactionKtorFeature.attributeKey)
 							?: return@intercept
 
 						val parentContext = parentTransaction.context
 
 						val transaction = transactionFactory.createTransaction(
-							context = RaptorKtorRouteContext(
+							context = RaptorKtorRouteContextImpl(
 								parent = parentTransaction.context,
 								properties = configuration.properties.withFallback(parentContext.properties)
 							)
 						)
 
-						call.attributes.put(ktorServerTransactionAttributeKey, transaction)
+						call.attributes.put(RaptorTransactionKtorFeature.attributeKey, transaction)
 
 						try {
 							proceed()
-						} finally {
-							call.attributes.put(ktorServerTransactionAttributeKey, parentTransaction)
+						}
+						finally {
+							call.attributes.put(RaptorTransactionKtorFeature.attributeKey, parentTransaction)
 						}
 					}
 				}
@@ -203,6 +212,12 @@ internal class KtorServer(
 					configure(childConfig)
 			}
 		}
+	}
+
+
+	companion object {
+
+		val attributeKey = AttributeKey<RaptorKtorServerImpl>("Raptor: server")
 	}
 
 
@@ -217,10 +232,6 @@ internal class KtorServer(
 }
 
 
-internal val Application.raptorKtorServer
-	get() = attributes[ktorServerAttributeKey]
-
-
-@RaptorDsl
-val Route.raptorContext: RaptorContext
-	get() = application.raptorKtorServer.context
+internal val Application.raptorServerImpl
+	get() = attributes.getOrNull(RaptorKtorServerImpl.attributeKey)
+		?: error("You must install ${RaptorKtorFeature::class.simpleName} for enabling Raptor functionality.")

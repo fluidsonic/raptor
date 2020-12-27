@@ -6,7 +6,9 @@ internal class RaptorComponentTagRegistry<Component : RaptorTaggableComponent>(
 ) {
 
 	private var pendingConfigurations: List<RaptorTaggableComponentConfiguration<Component>> = emptyList()
-	private var tags: Set<Any> = emptySet()
+
+	var tags: Set<Any> = emptySet()
+		private set
 
 
 	fun addConfiguration(configuration: RaptorTaggableComponentConfiguration<Component>) {

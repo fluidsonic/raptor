@@ -4,4 +4,4 @@ import io.ktor.routing.*
 
 
 @RaptorDsl
-typealias RaptorKtorRouteConfigurationScope = Route
+public typealias RaptorKtorRouteInitializationScope = Route

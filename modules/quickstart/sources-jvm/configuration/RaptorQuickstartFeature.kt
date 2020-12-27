@@ -12,7 +12,7 @@ public object RaptorQuickstartFeature : RaptorFeature {
 		install(BsonRaptorFeature)
 		install(RaptorDIFeature)
 		install(RaptorEntitiesFeature)
-		install(KtorRaptorFeature)
+		install(RaptorKtorFeature)
 
 		bson {
 			includeDefaultDefinitions()

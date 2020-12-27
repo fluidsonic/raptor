@@ -1,9 +1,9 @@
 package io.fluidsonic.raptor
 
 
-internal class RaptorKtorRouteContext(
+internal class RaptorKtorRouteContextImpl(
 	override val parent: RaptorContext,
-	override val properties: RaptorPropertySet
+	override val properties: RaptorPropertySet,
 ) : RaptorContext {
 
 	override fun toString(): String =

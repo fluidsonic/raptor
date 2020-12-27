@@ -1,9 +1,9 @@
 package io.fluidsonic.raptor
 
 
-public object KtorRaptorFeature : RaptorFeature {
+public object RaptorKtorFeature : RaptorFeature {
 
-	override val id = raptorKtorFeatureId
+	override val id: RaptorFeatureId = raptorKtorFeatureId
 
 
 	override fun RaptorFeatureConfigurationScope.beginConfiguration() {
@@ -12,16 +12,14 @@ public object KtorRaptorFeature : RaptorFeature {
 
 		componentRegistry.register(KtorRaptorComponent.Key, KtorRaptorComponent(globalScope = this))
 
-		// HoconApplicationConfig(ConfigFactory.defaultApplication().resolve()!!) // FIXME
-
 		// FIXME prevent multi-start
 		lifecycle {
 			onStart {
-				checkNotNull(context[Ktor.PropertyKey]).start()
+				checkNotNull(context[RaptorKtorImpl.PropertyKey]).start()
 			}
 
 			onStop {
-				checkNotNull(context[Ktor.PropertyKey]).stop()
+				checkNotNull(context[RaptorKtorImpl.PropertyKey]).stop()
 			}
 		}
 	}

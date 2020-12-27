@@ -2,22 +2,22 @@ package io.fluidsonic.raptor
 
 
 // FIXME better move to quickstart & make usage in this module configurable
-class ServerFailure private constructor(
-	val code: String,
-	val developerMessage: String,
-	val internalMessage: String,
-	val userMessage: String,
-	cause: Throwable? = null
+public class ServerFailure private constructor(
+	public val code: String,
+	public val developerMessage: String,
+	public val internalMessage: String,
+	public val userMessage: String,
+	cause: Throwable? = null,
 ) : Exception(internalMessage, cause) {
 
-	companion object {
+	public companion object {
 
-		const val genericUserMessage = "Looks like we're having some trouble right now.\nPlease try again soon."
+		public const val genericUserMessage: String = "Looks like we're having some trouble right now.\nPlease try again soon."
 
 
-		fun internal(
-			cause: Throwable
-		) =
+		public fun internal(
+			cause: Throwable,
+		): ServerFailure =
 			ServerFailure(
 				code = "internal",
 				userMessage = genericUserMessage,
@@ -27,13 +27,13 @@ class ServerFailure private constructor(
 			)
 
 
-		fun ofDeveloper(
+		public fun ofDeveloper(
 			code: String,
 			developerMessage: String,
 			userMessage: String = genericUserMessage,
 			internalMessage: String = developerMessage,
-			cause: Throwable? = null
-		) =
+			cause: Throwable? = null,
+		): ServerFailure =
 			ServerFailure(
 				code = code,
 				userMessage = userMessage,
@@ -43,13 +43,13 @@ class ServerFailure private constructor(
 			)
 
 
-		fun ofUser(
+		public fun ofUser(
 			code: String,
 			userMessage: String,
 			developerMessage: String = userMessage,
 			internalMessage: String = developerMessage,
-			cause: Throwable? = null
-		) =
+			cause: Throwable? = null,
+		): ServerFailure =
 			ServerFailure(
 				code = code,
 				userMessage = userMessage,

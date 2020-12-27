@@ -8,6 +8,10 @@ private object RaptorTagsRegistryExtensionKey : RaptorComponentExtensionKey<Rapt
 
 
 @Suppress("UNCHECKED_CAST")
-internal val <Component : RaptorTaggableComponent> Component.tagRegistry
-	get() = extensions.getOrSet(RaptorTagsRegistryExtensionKey) { RaptorComponentTagRegistry(component = this) }
-		as RaptorComponentTagRegistry<Component>
+internal fun <Component : RaptorTaggableComponent> Component.tagRegistry() =
+	extensions[RaptorTagsRegistryExtensionKey] as RaptorComponentTagRegistry<Component>?
+
+
+@Suppress("UNCHECKED_CAST")
+internal fun <Component : RaptorTaggableComponent> Component.tagRegistryOrCreate() =
+	tagRegistry() ?: RaptorComponentTagRegistry(component = this).also { extensions[RaptorTagsRegistryExtensionKey] = it }

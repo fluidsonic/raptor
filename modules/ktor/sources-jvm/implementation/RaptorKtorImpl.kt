@@ -4,18 +4,19 @@ import kotlinx.atomicfu.*
 
 
 // FIXME prevent multi-start in feature with clear message
-internal class Ktor(
+internal class RaptorKtorImpl(
 	configuration: KtorConfiguration,
-	context: RaptorContext
-) {
+	context: RaptorContext,
+) : RaptorKtor {
 
-	private val servers = configuration.servers.map { configuration ->
-		KtorServer(
+	private val stateRef = atomic(State.initial)
+
+	override val servers = configuration.servers.map { configuration ->
+		RaptorKtorServerImpl(
 			configuration = configuration,
 			parentContext = context
 		)
 	}
-	private val stateRef = atomic(State.initial)
 
 
 	suspend fun start() {
@@ -29,7 +30,7 @@ internal class Ktor(
 
 
 	suspend fun stop() {
-		check(stateRef.compareAndSet(expect = State.started, update = State.stopping)) { "Cannot start Ktor unless it's in 'started' state." }
+		check(stateRef.compareAndSet(expect = State.started, update = State.stopping)) { "Cannot stop Ktor unless it's in 'started' state." }
 
 		for (server in servers)
 			server.stop()
@@ -38,7 +39,7 @@ internal class Ktor(
 	}
 
 
-	object PropertyKey : RaptorPropertyKey<Ktor> {
+	object PropertyKey : RaptorPropertyKey<RaptorKtorImpl> {
 
 		override fun toString() = "ktor"
 	}

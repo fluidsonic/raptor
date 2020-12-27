@@ -10,7 +10,7 @@ internal class RaptorTagMatchingComponentSet<out Component : RaptorTaggableCompo
 		val configuration = RaptorTaggableComponentConfiguration(tagsToMatch = tagsToMatch, action = action)
 
 		source.configure {
-			tagRegistry.addConfiguration(configuration)
+			tagRegistryOrCreate().addConfiguration(configuration)
 		}
 	}
 }
