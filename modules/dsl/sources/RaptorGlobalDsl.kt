@@ -1,6 +1,7 @@
 package io.fluidsonic.raptor
 
 
+// FIXME RaptorGlobal
 public object RaptorGlobalDsl
 
 

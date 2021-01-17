@@ -1,22 +1,22 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.raptor.di.*
 import java.util.concurrent.locks.*
-import kotlin.collections.set
 import kotlin.concurrent.*
 import kotlin.reflect.*
 import kotlin.reflect.full.*
 
 
 internal class DefaultRaptorDI(
-	modules: List<DefaultRaptorDIModule>,
+	modules: List<RaptorDI.Module>,
 	private val parent: RaptorDI?,
 ) : RaptorDI {
 
-	private val dependenciesByModule: MutableMap<DefaultRaptorDIModule, MutableMap<KType, Any?>> = modules
+	private val dependenciesByModule: Map<RaptorDI.Module, MutableMap<KType, Any?>> = modules
 		.reversed()
-		.associateWithTo(mutableMapOf()) { hashMapOf() }
+		.associateWith { hashMapOf() }
 
-	private val dependenciesByType: MutableMap<KType, ResolvedDependency> = hashMapOf()
+	private val dependenciesByType: MutableMap<KType, Any?> = hashMapOf()
 	private val currentlyResolvingTypes = mutableListOf<KType>()
 	private val lock = ReentrantLock()
 
@@ -26,7 +26,7 @@ internal class DefaultRaptorDI(
 		val isNullable = type.isMarkedNullable
 		val type = type.withNullability(false)
 
-		val value = getDependency(type).value
+		val value = getOrResolveDependency(type)
 		if (value == null && !isNullable)
 			reportMissingDependency(type)
 
@@ -34,16 +34,16 @@ internal class DefaultRaptorDI(
 	}
 
 
-	private fun getDependency(type: KType): ResolvedDependency =
+	private fun getOrResolveDependency(type: KType): Any? =
 		lock.withLock { // TODO Add fast-path if dependency is already resolved.
-			dependenciesByType.getOrPut(type) {
+			dependenciesByType.getOrPutNullable(type) {
 				if (currentlyResolvingTypes.contains(type))
 					reportCyclicDependency(type)
 
 				currentlyResolvingTypes += type
 
 				try {
-					return@getOrPut resolve(type)
+					resolve(type)
 				}
 				finally {
 					currentlyResolvingTypes.removeLast()
@@ -54,31 +54,6 @@ internal class DefaultRaptorDI(
 
 	override fun <Value> invoke(factory: RaptorDI.() -> Value) =
 		lazy { factory() }
-
-
-	private fun resolve(type: KType): ResolvedDependency {
-		// FIXME if not successful must delegate to parents first before going on with modules
-		dependenciesByType.values.forEach { resolvedDependency ->
-			// FIXME must set moduleDependenciesByType[…]
-			if (resolvedDependency.type.isSubtypeOf(type))
-				return resolvedDependency
-		}
-
-		dependenciesByModule.forEach { (module, moduleDependenciesByType) ->
-			val (providedType, provide) = module.provideByType.entries.firstOrNull { it.key.isSubtypeOf(type) } ?: return@forEach
-			val value = provide()
-
-			moduleDependenciesByType[type] = value
-
-			return ResolvedDependency(type = providedType, value = value)
-		}
-
-		parent?.let { parent ->
-			return (parent as DefaultRaptorDI).getDependency(type) // FIXME make abstract
-		}
-
-		return ResolvedDependency(type = type, value = null)
-	}
 
 
 	private fun reportCyclicDependency(type: KType): Nothing {
@@ -98,18 +73,35 @@ internal class DefaultRaptorDI(
 			repeat(currentlyResolvingTypes.size) { append('\t') }
 			append(type)
 			append("  <--\n\nDI:\n")
-			append(this) // FIXME will print wrong DI
+			append(this) // FIXME will print wrong DI - `this` may not be the DI that initiated the resolution
 		})
 	}
 
 
-	private fun reportUnexpectedNullDependency(type: KType): Nothing {
-		error("Dependency of type '$type' is not available. It resolved to 'null' which was not expected.\n\nDI:\n$this") // FIXME will print wrong DI
+	private fun reportMissingDependency(type: KType): Nothing {
+		error("Cannot resolve dependency of type '$type'.\n\nDI:\n$this") // FIXME will print wrong DI - `this` may not be the DI that initiated the resolution
 	}
 
 
-	private fun reportMissingDependency(type: KType): Nothing {
-		error("Cannot resolve dependency of type '$type'.\n\nDI:\n$this") // FIXME will print wrong DI
+	private fun resolve(type: KType): Any? {
+		dependenciesByModule.forEach { (module, moduleDependenciesByType) ->
+			val provider = module.providerForType(type) ?: return@forEach
+
+			val value = when (provider.type) {
+				type -> provider.provide(this@DefaultRaptorDI) ?: return@forEach
+				else -> getOrResolveDependency(provider.type)
+			}
+
+			moduleDependenciesByType[type] = value
+
+			return value
+		}
+
+		parent?.let { parent ->
+			return (parent as DefaultRaptorDI).getOrResolveDependency(type) // FIXME make abstract
+		}
+
+		return null
 	}
 
 
@@ -120,13 +112,14 @@ internal class DefaultRaptorDI(
 			append(module.name)
 			append(" {")
 
-			if (module.provideByType.isNotEmpty()) {
+			if (module.providers.isNotEmpty()) {
 				append("\n")
-				module.provideByType
-					.keys
-					.map { type -> type to type.toString() }
+				module.providers
+					.map { provider -> provider to provider.type.toString() }
 					.sortedBy { it.second }
-					.forEach { (type, typeString) ->
+					.forEach { (provider, typeString) ->
+						val type = provider.type
+
 						append("\t")
 						append(typeString)
 						append(" = ")
@@ -153,8 +146,49 @@ internal class DefaultRaptorDI(
 	}
 
 
-	private class ResolvedDependency(
-		val type: KType,
-		val value: Any?,
-	)
+	internal class Factory(
+		private val modules: List<RaptorDI.Module>,
+	) : RaptorDI.Factory {
+
+		override fun createDI(context: RaptorContext, configuration: RaptorDIBuilder.() -> Unit): RaptorDI {
+			val parentContext = context.parent
+			val parentDI = when (context) {
+				is RaptorContext.Lazy -> parentContext?.di
+				else -> context.di
+			}
+
+			val contextModule = Module(
+				name = "raptor (context)",
+				providers = listOf(RaptorDI.provider(context::class.starProjectedType) {
+					(context as? RaptorContext.Lazy)?.context ?: context
+				})
+			)
+
+			val inlineModule = DefaultRaptorDIBuilder()
+				.apply(configuration)
+				.createModule(name = "inline")
+				.takeIf { it.providers.isNotEmpty() }
+
+			return DefaultRaptorDI(
+				modules = modules + listOfNotNull(inlineModule, contextModule),
+				parent = parentDI
+			)
+		}
+	}
+
+
+	internal class Module(
+		override val name: String,
+		override val providers: List<RaptorDI.Provider>,
+	) : RaptorDI.Module
+
+
+	internal class Provider(
+		private val provide: RaptorDI.() -> Any?,
+		override val type: KType,
+	) : RaptorDI.Provider {
+
+		override fun provide(di: RaptorDI) =
+			with(di) { provide() }
+	}
 }

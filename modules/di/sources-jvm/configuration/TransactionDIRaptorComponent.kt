@@ -4,7 +4,7 @@ package io.fluidsonic.raptor
 internal class TransactionDIRaptorComponent : RaptorComponent.Default<TransactionDIRaptorComponent>() {
 
 	val builder = DefaultRaptorDIBuilder()
-	val factoryPropertyKey: RaptorPropertyKey<RaptorDIFactory> = FactoryPropertyKey()
+	val factoryPropertyKey: RaptorPropertyKey<RaptorDI.Factory> = FactoryPropertyKey()
 
 
 	override fun toString() = "transaction DI configuration"
@@ -12,7 +12,7 @@ internal class TransactionDIRaptorComponent : RaptorComponent.Default<Transactio
 
 	override fun RaptorComponentConfigurationEndScope.onConfigurationEnded() {
 		// FIXME Use different names for different components. Can we take the component hierarchy into account?
-		propertyRegistry.register(factoryPropertyKey, DefaultRaptorDIFactory(modules = listOf(builder.createModule(name = "transaction"))))
+		propertyRegistry.register(factoryPropertyKey, DefaultRaptorDI.Factory(modules = listOf(builder.createModule(name = "transaction"))))
 	}
 
 
@@ -22,7 +22,7 @@ internal class TransactionDIRaptorComponent : RaptorComponent.Default<Transactio
 	}
 
 
-	private class FactoryPropertyKey : RaptorPropertyKey<RaptorDIFactory> {
+	private class FactoryPropertyKey : RaptorPropertyKey<RaptorDI.Factory> {
 
 		override fun toString() = "transaction DI factory"
 	}

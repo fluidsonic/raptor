@@ -13,15 +13,19 @@ internal class DefaultRaptorLifecycle(
 	private val stopActions: List<suspend RaptorLifecycleStopScope.() -> Unit>,
 ) : RaptorLifecycle, RaptorLifecycleStartScope, RaptorLifecycleStopScope {
 
+	private var _coroutineContext: CoroutineContext? = null
 	private val stateRef = atomic(State.stopped)
 
-	override val coroutineContext: CoroutineContext = SupervisorJob() + CoroutineName("Raptor: lifecycle") // FIXME ok?
+	override val coroutineContext: CoroutineContext
+		get() = checkNotNull(_coroutineContext)
 
 
-	override suspend fun start() {
+	override suspend fun startIn(scope: CoroutineScope) {
 		check(stateRef.compareAndSet(expect = State.stopped, update = State.starting)) {
 			"Lifecycle can only be started when stopped but it's ${stateRef.value}."
 		}
+
+		_coroutineContext = scope.coroutineContext + Job(parent = scope.coroutineContext[Job]) + CoroutineName("Raptor: lifecycle") // FIXME ok?
 
 		for (action in startActions)
 			action()
@@ -39,11 +43,14 @@ internal class DefaultRaptorLifecycle(
 			"Lifecycle can only be stopped when started but it's ${stateRef.value}."
 		}
 
+		val coroutineContext = checkNotNull(_coroutineContext)
+
 		for (action in stopActions)
 			action()
 
 		coroutineContext.cancel(CancellationException("Raptor was stopped."))
 
+		_coroutineContext = null
 		stateRef.value = State.stopped
 	}
 

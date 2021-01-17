@@ -22,6 +22,6 @@ public fun RaptorComponentSet<RaptorDIGeneratingComponent>.di(configuration: Rap
 // FIXME throw if feature not installed?
 @RaptorDsl
 @Suppress("unused")
-public fun RaptorConfigurationEndScope.diFactory(name: String, component: RaptorDIGeneratingComponent): RaptorDIFactory =
+public fun RaptorConfigurationEndScope.diFactory(name: String, component: RaptorDIGeneratingComponent): RaptorDI.Factory =
 	component.componentRegistry.oneOrNull(DIFactoryRaptorComponent.Key)?.toFactory(name = name)
-		?: DefaultRaptorDIFactory(modules = emptyList())
+		?: DefaultRaptorDI.Factory(modules = emptyList())

@@ -4,7 +4,7 @@ import com.typesafe.config.*
 
 
 internal class HoconRaptorSettings private constructor(
-	private val hocon: Config
+	private val hocon: Config,
 ) : RaptorSettings {
 
 	constructor(resourcePath: String) :
@@ -22,8 +22,16 @@ internal class HoconRaptorSettings private constructor(
 
 	private class Value(
 		private val hocon: Config,
-		private val path: String
+		private val path: String,
 	) : RaptorSettings.Value {
+
+		override fun int(): Int =
+			hocon.getInt(path)
+
+
+		override fun intList(): List<Int> =
+			hocon.getIntList(path)
+
 
 		override fun settings() =
 			HoconRaptorSettings(hocon = hocon.getConfig(path))
@@ -43,5 +51,5 @@ internal class HoconRaptorSettings private constructor(
 }
 
 
-fun RaptorSettings.Companion.hocon(resourcePath: String): RaptorSettings =
+public fun RaptorSettings.Companion.hocon(resourcePath: String): RaptorSettings =
 	HoconRaptorSettings(resourcePath = resourcePath)

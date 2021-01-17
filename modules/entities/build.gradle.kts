@@ -8,9 +8,9 @@ fluidLibraryModule(description = "FIXME") {
 	targets {
 		jvm {
 			dependencies {
-				implementation(project(":raptor-bson"))
+				implementation(project(":raptor-bson")) // FIXME extract to own
 				implementation(project(":raptor-di"))
-				implementation(project(":raptor-graphql"))
+				implementation(project(":raptor-graphql")) // FIXME extract to own
 				implementation(project(":raptor-transactions"))
 				implementation(fluid("stdlib", "0.10.3"))
 

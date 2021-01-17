@@ -1,10 +1,10 @@
 package io.fluidsonic.raptor
 
 
-interface RaptorTransactionFactory {
+public interface RaptorTransactionFactory {
 
-	fun createTransaction(context: RaptorContext, configuration: RaptorTransactionConfigurationScope.() -> Unit = {}): RaptorTransaction
+	public fun createTransaction(context: RaptorContext, configuration: RaptorTransactionConfigurationScope.() -> Unit = {}): RaptorTransaction
 
 
-	companion object
+	public companion object
 }

@@ -3,6 +3,7 @@ package io.fluidsonic.raptor
 import kotlin.internal.*
 import kotlin.properties.*
 import kotlin.reflect.*
+import kotlin.reflect.full.*
 
 
 public interface RaptorDI {
@@ -16,6 +17,48 @@ public interface RaptorDI {
 
 
 	override fun toString(): String
+
+
+	public companion object {
+
+		@InternalRaptorApi
+		public fun factory(modules: List<Module>): Factory =
+			DefaultRaptorDI.Factory(modules = modules.toList())
+
+		@InternalRaptorApi
+		public fun module(name: String, providers: List<Provider>): Module =
+			DefaultRaptorDI.Module(name = name, providers = providers.toList())
+
+
+		@InternalRaptorApi
+		public fun provider(type: KType, provide: RaptorDI.() -> Any?): Provider =
+			DefaultRaptorDI.Provider(provide = provide, type = type)
+	}
+
+
+	// TODO Make public if it's actually useful and after API was revisited.
+	@InternalRaptorApi
+	public interface Factory {
+
+		public fun createDI(context: RaptorContext, configuration: RaptorDIBuilder.() -> Unit = {}): RaptorDI
+	}
+
+
+	@InternalRaptorApi
+	public interface Module {
+
+		public val name: String
+		public val providers: List<Provider>
+	}
+
+
+	@InternalRaptorApi
+	public interface Provider {
+
+		public val type: KType
+
+		public fun provide(di: RaptorDI): Any?
+	}
 }
 
 
@@ -36,6 +79,10 @@ public inline operator fun <reified Value> RaptorDI.invoke(): PropertyDelegatePr
 		override fun provideDelegate(thisRef: Any?, property: KProperty<*>): Lazy<Value> =
 			lazy { get(type) as Value }
 	}
+
+
+public fun RaptorDI.Module.providerForType(type: KType): RaptorDI.Provider? =
+	providers.lastOrNull { it.type.isSubtypeOf(type) }
 
 
 @RaptorDsl

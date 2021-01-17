@@ -13,6 +13,9 @@ public interface RaptorBsonReader {
 	public fun boolean(): Boolean
 
 	@RaptorDsl
+	public fun byteArray(): ByteArray
+
+	@RaptorDsl
 	public fun bsonType(): BsonType
 
 	@RaptorDsl
@@ -147,6 +150,31 @@ public fun RaptorBsonReader.booleanOrNull(field: String): Boolean? {
 	fieldName(field)
 
 	return booleanOrNull()
+}
+
+
+@RaptorDsl
+public fun RaptorBsonReader.byteArray(field: String): ByteArray {
+	fieldName(field)
+
+	return byteArray()
+}
+
+
+@RaptorDsl
+public fun RaptorBsonReader.byteArrayOrNull(): ByteArray? {
+	if (bsonType() == BsonType.NULL) // FIXME probably wrong
+		return null
+
+	return byteArray()
+}
+
+
+@RaptorDsl
+public fun RaptorBsonReader.byteArrayOrNull(field: String): ByteArray? {
+	fieldName(field)
+
+	return byteArrayOrNull()
 }
 
 
@@ -413,4 +441,12 @@ public inline fun <reified Value> RaptorBsonReader.value(field: String): Value {
 	fieldName(field)
 
 	return value()
+}
+
+
+@RaptorDsl
+public fun <Value> RaptorBsonReader.value(field: String, type: KType): Value {
+	fieldName(field)
+
+	return value(type)
 }

@@ -1,4 +1,5 @@
 package io.fluidsonic.raptor
 
 
-interface RaptorPropertyKey<Value : Any> : RaptorKey<Value>
+// FIXME interface vs. class
+public interface RaptorPropertyKey<Value : Any> : RaptorKey<Value>

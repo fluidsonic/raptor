@@ -1,37 +1,29 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.raptor.RaptorDI.*
 import kotlin.reflect.*
 import kotlin.reflect.full.*
 
 
 internal class DefaultRaptorDIBuilder : RaptorDIBuilder {
 
-	private val providerByKey: MutableMap<KType, RaptorDI.() -> Any> = hashMapOf()
+	private val providers: MutableList<Provider> = mutableListOf()
 
 
 	fun createModule(name: String) =
-		DefaultRaptorDIModule(
-			name = name,
-			provideByType = HashMap(providerByKey)
-		)
+		RaptorDI.module(name = name, providers = providers)
 
 
 	override fun provide(type: KType, provide: RaptorDI.() -> Any) {
 		validateType(type)
 
-		@Suppress("NAME_SHADOWING")
-		val type = type.withNullability(false)
-
-		providerByKey[type] = provide
-
-		// FIXME How to handle collisions & unit testing?
-//		providerByKey.put(type, provide)?.let {
-//			error("A dependency for type '$type' has already been registered.")
-//		}
+		providers += RaptorDI.provider(type = type, provide = provide)
 	}
 
 
 	private fun validateType(type: KType) {
+		require(!type.isMarkedNullable) { "Cannot provide a dependency for nullable type '$type'." }
+
 		when (val classifier = type.classifier) {
 			Any::class, Unit::class -> error("Cannot provide a dependency for type '$type'.")
 

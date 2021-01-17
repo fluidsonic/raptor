@@ -1,22 +1,22 @@
 package io.fluidsonic.raptor
 
 
-interface RaptorTransaction {
+public interface RaptorTransaction {
 
-	val context: RaptorTransactionContext
+	public val context: RaptorTransactionContext
 
 
-	companion object
+	public companion object
 }
 
 
-fun RaptorTransaction.createTransaction(): RaptorTransaction =
+public fun RaptorTransaction.createTransaction(): RaptorTransaction =
 	context.createTransaction()
 
 
-operator fun <Value : Any> RaptorTransaction.get(key: RaptorPropertyKey<out Value>) =
+public operator fun <Value : Any> RaptorTransaction.get(key: RaptorPropertyKey<out Value>): Value? =
 	properties[key]
 
 
-val RaptorTransaction.properties: RaptorPropertySet
+public val RaptorTransaction.properties: RaptorPropertySet
 	get() = context.properties

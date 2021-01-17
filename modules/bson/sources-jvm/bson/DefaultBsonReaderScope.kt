@@ -15,8 +15,16 @@ internal class DefaultBsonReaderScope(
 	private val underlyingReader = reader
 
 
+	override fun boolean(): Boolean =
+		underlyingReader.readBoolean()
+
+
 	override fun bsonType(): BsonType =
 		underlyingReader.currentBsonType
+
+
+	override fun byteArray(): ByteArray =
+		underlyingReader.readBinaryData().data
 
 
 	private fun <Value, Destination : MutableCollection<Value>> collectionValue(type: KType, destination: Destination): Destination {
@@ -28,6 +36,10 @@ internal class DefaultBsonReaderScope(
 
 		return destination
 	}
+
+
+	override fun double(): Double =
+		underlyingReader.readDouble()
 
 
 	override fun endArray() {
@@ -44,20 +56,12 @@ internal class DefaultBsonReaderScope(
 		underlyingReader.readName()
 
 
-	override fun internal(): BsonReader =
-		underlyingReader
-
-
-	override fun boolean(): Boolean =
-		underlyingReader.readBoolean()
-
-
-	override fun double(): Double =
-		underlyingReader.readDouble()
-
-
 	override fun int(): Int =
 		underlyingReader.readInt32()
+
+
+	override fun internal(): BsonReader =
+		underlyingReader
 
 
 	override fun invalidValue(message: String): Nothing {

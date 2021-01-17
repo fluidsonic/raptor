@@ -72,7 +72,7 @@ internal class RaptorKtorServerImpl(
 	suspend fun start() {
 		check(stateRef.compareAndSet(expect = State.initial, update = State.starting)) { "Cannot start Ktor server unless it's in 'initial' state." }
 
-		withContext(Dispatchers.Default) {
+		withContext(configuration.startStopDispatcher) {
 			startEngineBlocking()
 		}
 
@@ -117,7 +117,7 @@ internal class RaptorKtorServerImpl(
 	suspend fun stop() {
 		check(stateRef.compareAndSet(expect = State.started, update = State.stopping)) { "Cannot start Ktor server unless it's in 'started' state." }
 
-		withContext(Dispatchers.Default) {
+		withContext(configuration.startStopDispatcher) {
 			stopEngineBlocking()
 		}
 
@@ -163,7 +163,10 @@ internal class RaptorKtorServerImpl(
 		install(XForwardedHeaderSupport)
 		if (!configuration.insecure)
 			install(EncryptionEnforcementKtorFeature)
-		install(RaptorTransactionKtorFeature(serverContext = this@RaptorKtorServerImpl.context))
+		install(RaptorTransactionKtorFeature(
+			serverContext = this@RaptorKtorServerImpl.context,
+			transactionFactory = configuration.transactionFactory,
+		))
 
 		for (customConfiguration in configuration.customConfigurations)
 			customConfiguration()

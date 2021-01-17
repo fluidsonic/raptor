@@ -6,8 +6,8 @@ internal class DIFactoryRaptorComponent : RaptorComponent.Default<DIFactoryRapto
 	val builder = DefaultRaptorDIBuilder()
 
 
-	fun toFactory(name: String): RaptorDIFactory =
-		DefaultRaptorDIFactory(modules = listOf(builder.createModule(name = name)))
+	fun toFactory(name: String): RaptorDI.Factory =
+		DefaultRaptorDI.Factory(modules = listOf(builder.createModule(name = name)))
 
 
 	override fun toString() = "DI configuration"

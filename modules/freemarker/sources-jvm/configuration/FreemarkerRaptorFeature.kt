@@ -3,9 +3,9 @@ package io.fluidsonic.raptor
 import freemarker.template.*
 
 
-object FreemarkerRaptorFeature : RaptorFeature { // FIXME rn
+public object FreemarkerRaptorFeature : RaptorFeature { // FIXME rn
 
-	override val id = raptorFreemarkerFeatureId
+	override val id: RaptorFeatureId = raptorFreemarkerFeatureId
 
 
 	override fun RaptorFeatureConfigurationScope.beginConfiguration() {
@@ -20,9 +20,9 @@ object FreemarkerRaptorFeature : RaptorFeature { // FIXME rn
 }
 
 
-const val raptorFreemarkerFeatureId: RaptorFeatureId = "raptor.freemarker"
+public const val raptorFreemarkerFeatureId: RaptorFeatureId = "raptor.freemarker"
 
 
-val RaptorContext.freemarker: Configuration
+public val RaptorContext.freemarker: Configuration
 	get() = properties[FreemarkerRaptorPropertyKey]
 		?: error("You must install ${FreemarkerRaptorFeature::class.simpleName} for enabling Freemarker functionality.")

@@ -4,6 +4,7 @@ import io.ktor.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import java.io.*
+import kotlinx.coroutines.*
 
 
 public class RaptorKtorServerComponent internal constructor(
@@ -19,6 +20,7 @@ public class RaptorKtorServerComponent internal constructor(
 	internal val connectors: MutableList<KtorServerConfiguration.Connector> = mutableListOf()
 	internal val customConfigurations: MutableList<Application.() -> Unit> = mutableListOf()
 	internal val features: MutableList<KtorServerFeature> = mutableListOf()
+	internal var startStopDispatcher: CoroutineDispatcher? = null
 
 	internal lateinit var scopes: Scopes
 
@@ -49,6 +51,7 @@ public class RaptorKtorServerComponent internal constructor(
 			engineFactory = engineFactory ?: { embeddedServer(Netty, it) },
 			insecure = insecure,
 			rootRouteConfiguration = rootRouteConfiguration,
+			startStopDispatcher = startStopDispatcher ?: Dispatchers.Default,
 			tags = tags(this@RaptorKtorServerComponent),
 			transactionFactory = transactionFactory(this@RaptorKtorServerComponent),
 		)
@@ -64,11 +67,18 @@ public class RaptorKtorServerComponent internal constructor(
 
 
 	override fun RaptorComponentConfigurationStartScope.onConfigurationStarted() {
-		Scopes(
+		scopes = Scopes(
 			globalScope = globalScope,
 			propertyRegistry = propertyRegistry,
-			serverComponentRegistry = componentRegistry
+			serverComponentRegistry = componentRegistry,
 		)
+
+		transactions.di {
+			provide {
+				// FIXME improve
+				get<RaptorTransactionContext>()[RaptorTransactionKtorFeature.CallPropertyKey] ?: error("Cannot find Ktor ApplicationCall.")
+			}
+		}
 	}
 
 
@@ -238,4 +248,15 @@ public fun RaptorComponentSet<RaptorKtorServerComponent>.routes(recursive: Boole
 @RaptorDsl
 public fun RaptorComponentSet<RaptorKtorServerComponent>.routes(recursive: Boolean, configure: KtorRouteRaptorComponent.() -> Unit) {
 	routes(recursive = recursive).invoke(configure)
+}
+
+
+@RaptorDsl
+internal fun RaptorComponentSet<RaptorKtorServerComponent>.startStopDispatcher(
+	dispatcher: CoroutineDispatcher,
+) {
+	configure {
+		check(startStopDispatcher == null)
+		startStopDispatcher = dispatcher
+	}
 }

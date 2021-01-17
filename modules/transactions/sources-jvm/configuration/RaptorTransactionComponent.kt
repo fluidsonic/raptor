@@ -1,7 +1,7 @@
 package io.fluidsonic.raptor
 
 
-class RaptorTransactionComponent internal constructor() : RaptorComponent.Default<RaptorTransactionComponent>() {
+public class RaptorTransactionComponent internal constructor() : RaptorComponent.Default<RaptorTransactionComponent>() {
 
 	internal val configurations: MutableList<RaptorTransactionConfigurationScope.() -> Unit> = mutableListOf()
 
@@ -10,10 +10,10 @@ class RaptorTransactionComponent internal constructor() : RaptorComponent.Defaul
 		DefaultRaptorTransactionFactory(configurations = configurations.toList())
 
 
-	override fun toString() = "transaction"
+	override fun toString(): String = "transaction"
 
 
-	companion object;
+	public companion object;
 
 
 	internal object Key : RaptorComponentKey<RaptorTransactionComponent> {
@@ -24,12 +24,14 @@ class RaptorTransactionComponent internal constructor() : RaptorComponent.Defaul
 
 
 @RaptorDsl
-fun RaptorComponentSet<RaptorTransactionComponent>.onCreate(action: RaptorTransactionConfigurationScope.() -> Unit) = configure {
-	configurations += action
+public fun RaptorComponentSet<RaptorTransactionComponent>.onCreate(action: RaptorTransactionConfigurationScope.() -> Unit) {
+	configure {
+		configurations += action
+	}
 }
 
 
 // FIXME (includeNested = false)
 @RaptorDsl
-val RaptorTopLevelConfigurationScope.transactions
+public val RaptorTopLevelConfigurationScope.transactions: RaptorComponentSet<RaptorTransactionComponent>
 	get() = componentRegistry.configure(RaptorTransactionComponent.Key)

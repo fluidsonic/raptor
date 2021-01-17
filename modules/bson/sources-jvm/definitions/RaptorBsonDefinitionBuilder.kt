@@ -1,6 +1,9 @@
+@file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
+
 package io.fluidsonic.raptor
 
 import io.fluidsonic.raptor.bson.internal.*
+import kotlin.internal.*
 import kotlin.reflect.*
 
 
@@ -64,7 +67,8 @@ public class RaptorBsonDefinitionBuilder<Value : Any> internal constructor(
 	}
 
 
-	// TODO add primitive overloads to avoid codecs
+	// TODO add more primitive overloads to avoid codecs
+	@LowPriorityInOverloadResolution
 	@RaptorDsl
 	public inline fun <reified DecodedValue : Any> decode(noinline decode: (value: DecodedValue) -> Value) {
 		decode {
@@ -73,7 +77,26 @@ public class RaptorBsonDefinitionBuilder<Value : Any> internal constructor(
 	}
 
 
-	// TODO add primitive overloads to avoid codecs
+	@JvmName("decodeInt")
+	@LowPriorityInOverloadResolution
+	@RaptorDsl
+	public fun decode(decode: (value: Int) -> Value) {
+		decode {
+			decode(reader.int())
+		}
+	}
+
+
+	@JvmName("decodeLong")
+	@LowPriorityInOverloadResolution
+	@RaptorDsl
+	public fun decode(decode: (value: Long) -> Value) {
+		decode {
+			decode(reader.long())
+		}
+	}
+
+
 	@RaptorDsl
 	public fun encode(includingSubclasses: Boolean = false, encode: RaptorBsonWriterScope.(value: Value) -> Unit) {
 		check(this.encode == null) { "Cannot provide multiple `encode { … }` blocks." }
@@ -83,8 +106,30 @@ public class RaptorBsonDefinitionBuilder<Value : Any> internal constructor(
 	}
 
 
+	// TODO add more primitive overloads to avoid codecs
+	@LowPriorityInOverloadResolution
 	@RaptorDsl
 	public fun <EncodedValue : Any> encode(encode: (value: Value) -> EncodedValue) {
+		encode { value ->
+			writer.value(encode(value))
+		}
+	}
+
+
+	@JvmName("encodeInt")
+	@LowPriorityInOverloadResolution
+	@RaptorDsl
+	public fun encode(encode: (value: Value) -> Int) {
+		encode { value ->
+			writer.value(encode(value))
+		}
+	}
+
+
+	@JvmName("encodeLong")
+	@LowPriorityInOverloadResolution
+	@RaptorDsl
+	public fun encode(encode: (value: Value) -> Long) {
 		encode { value ->
 			writer.value(encode(value))
 		}

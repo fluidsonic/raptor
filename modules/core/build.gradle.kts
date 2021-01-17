@@ -6,6 +6,12 @@ fluidLibraryModule(description = "FIXME") {
 	}
 
 	targets {
+		common {
+			dependencies {
+				api(project(":raptor-dsl"))
+			}
+		}
+
 		jvm()
 	}
 }

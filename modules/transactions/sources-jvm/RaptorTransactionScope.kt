@@ -1,7 +1,7 @@
 package io.fluidsonic.raptor
 
 
-interface RaptorTransactionScope : RaptorScope {
+public interface RaptorTransactionScope : RaptorScope {
 
 	@RaptorDsl
 	override val context: RaptorTransactionContext

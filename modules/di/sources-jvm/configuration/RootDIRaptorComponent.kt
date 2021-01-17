@@ -11,7 +11,7 @@ internal class RootDIRaptorComponent : RaptorComponent.Default<RootDIRaptorCompo
 
 	override fun RaptorComponentConfigurationEndScope.onConfigurationEnded() {
 		val module = builder.createModule("raptor")
-		val factory = DefaultRaptorDIFactory(modules = listOf(module))
+		val factory = DefaultRaptorDI.Factory(modules = listOf(module))
 		val di = factory.createDI(context = lazyContext)
 
 		propertyRegistry.register(DIRaptorPropertyKey, di)

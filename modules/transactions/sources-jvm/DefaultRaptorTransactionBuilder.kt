@@ -2,7 +2,7 @@ package io.fluidsonic.raptor
 
 
 internal class DefaultRaptorTransactionBuilder(
-	override val parentContext: RaptorContext
+	override val parentContext: RaptorContext,
 ) : RaptorTransactionConfigurationScope {
 
 	override val lazyContext = LazyRaptorTransactionContext(parent = parentContext)
@@ -10,13 +10,18 @@ internal class DefaultRaptorTransactionBuilder(
 
 
 	fun build(): DefaultRaptorTransaction {
+		val lazyTransaction = LazyRaptorTransaction()
+		propertyRegistry.register(DefaultRaptorTransaction.PropertyKey, lazyTransaction)
+
 		val context = DefaultRaptorTransactionContext(
 			parent = parentContext,
 			properties = propertyRegistry.toSet().withFallback(parentContext.properties)
 		)
-
 		lazyContext.resolve(context)
 
-		return DefaultRaptorTransaction(context = context)
+		val transaction = DefaultRaptorTransaction(context = context)
+		lazyTransaction.resolve(transaction)
+
+		return transaction
 	}
 }

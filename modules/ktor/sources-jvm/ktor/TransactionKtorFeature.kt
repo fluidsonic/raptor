@@ -7,6 +7,7 @@ import io.ktor.util.*
 // FIXME rework
 internal class RaptorTransactionKtorFeature(
 	private val serverContext: RaptorContext,
+	private val transactionFactory: RaptorTransactionFactory,
 ) : ApplicationFeature<ApplicationCallPipeline, Unit, Unit> {
 
 	override val key = AttributeKey<Unit>("Raptor: transaction feature")
@@ -17,7 +18,9 @@ internal class RaptorTransactionKtorFeature(
 		Unit.configure()
 
 		pipeline.intercept(ApplicationCallPipeline.Setup) {
-			val transaction = serverContext.createTransaction()
+			val transaction = transactionFactory.createTransaction(serverContext.createTransaction().context) {
+				propertyRegistry.register(CallPropertyKey, call)
+			}
 			call.attributes.put(attributeKey, transaction)
 
 			try {
@@ -33,6 +36,12 @@ internal class RaptorTransactionKtorFeature(
 	companion object {
 
 		internal val attributeKey = AttributeKey<RaptorTransaction>("Raptor: server transaction")
+	}
+
+
+	internal object CallPropertyKey : RaptorPropertyKey<ApplicationCall> {
+
+		override fun toString() = "Ktor application call"
 	}
 }
 

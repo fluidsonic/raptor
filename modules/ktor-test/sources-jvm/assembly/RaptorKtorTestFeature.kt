@@ -1,6 +1,7 @@
 package io.fluidsonic.raptor
 
 import io.ktor.server.testing.*
+import kotlinx.coroutines.*
 
 
 public object RaptorKtorTestFeature : RaptorFeature {
@@ -15,6 +16,7 @@ public object RaptorKtorTestFeature : RaptorFeature {
 		ktor.servers {
 			engineEnvironmentFactory(::createTestEnvironment)
 			engineFactory(::TestApplicationEngine)
+			startStopDispatcher(Dispatchers.Unconfined)
 		}
 	}
 }

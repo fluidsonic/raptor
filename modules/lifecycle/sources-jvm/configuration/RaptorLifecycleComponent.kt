@@ -1,7 +1,7 @@
 package io.fluidsonic.raptor
 
 
-class RaptorLifecycleComponent internal constructor() : RaptorComponent.Default<RaptorLifecycleComponent>() {
+public class RaptorLifecycleComponent internal constructor() : RaptorComponent.Default<RaptorLifecycleComponent>() {
 
 	internal val startActions: MutableList<suspend RaptorLifecycleStartScope.() -> Unit> = mutableListOf()
 	internal val stopActions: MutableList<suspend RaptorLifecycleStopScope.() -> Unit> = mutableListOf()
@@ -16,10 +16,10 @@ class RaptorLifecycleComponent internal constructor() : RaptorComponent.Default<
 	}
 
 
-	override fun toString() = "lifecycle"
+	override fun toString(): String = "lifecycle"
 
 
-	companion object;
+	public companion object;
 
 
 	internal object Key : RaptorComponentKey<RaptorLifecycleComponent> {
@@ -30,17 +30,21 @@ class RaptorLifecycleComponent internal constructor() : RaptorComponent.Default<
 
 
 @RaptorDsl
-fun RaptorComponentSet<RaptorLifecycleComponent>.onStart(action: suspend RaptorLifecycleStartScope.() -> Unit) = configure {
-	startActions += action
+public fun RaptorComponentSet<RaptorLifecycleComponent>.onStart(action: suspend RaptorLifecycleStartScope.() -> Unit) {
+	configure {
+		startActions += action
+	}
 }
 
 
 @RaptorDsl
-fun RaptorComponentSet<RaptorLifecycleComponent>.onStop(action: suspend RaptorLifecycleStopScope.() -> Unit) = configure {
-	stopActions += action
+public fun RaptorComponentSet<RaptorLifecycleComponent>.onStop(action: suspend RaptorLifecycleStopScope.() -> Unit) {
+	configure {
+		stopActions += action
+	}
 }
 
 
 @RaptorDsl
-val RaptorTopLevelConfigurationScope.lifecycle
+public val RaptorTopLevelConfigurationScope.lifecycle: RaptorComponentSet<RaptorLifecycleComponent>
 	get() = componentRegistry.configure(RaptorLifecycleComponent.Key)

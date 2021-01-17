@@ -1,18 +1,17 @@
 package io.fluidsonic.raptor
 
-import kotlin.coroutines.*
+import kotlinx.coroutines.*
 
 
-interface RaptorLifecycle {
+public interface RaptorLifecycle : CoroutineScope {
 
-	val coroutineContext: CoroutineContext
-	val state: State
+	public val state: State
 
-	suspend fun start()
-	suspend fun stop()
+	public suspend fun startIn(scope: CoroutineScope)
+	public suspend fun stop()
 
 
-	enum class State {
+	public enum class State {
 
 		started,
 		starting,
@@ -21,5 +20,5 @@ interface RaptorLifecycle {
 	}
 
 
-	companion object
+	public companion object
 }

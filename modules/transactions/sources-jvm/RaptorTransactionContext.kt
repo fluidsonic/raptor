@@ -1,7 +1,7 @@
 package io.fluidsonic.raptor
 
 
-interface RaptorTransactionContext : RaptorContext, RaptorTransactionScope {
+public interface RaptorTransactionContext : RaptorContext, RaptorTransactionScope {
 
 	override fun toString(): String
 
@@ -17,8 +17,8 @@ interface RaptorTransactionContext : RaptorContext, RaptorTransactionScope {
 	override val parent: RaptorContext
 
 
-	companion object
+	public companion object;
 
 
-	interface Lazy : RaptorTransactionContext, RaptorContext.Lazy
+	public interface Lazy : RaptorTransactionContext, RaptorContext.Lazy
 }

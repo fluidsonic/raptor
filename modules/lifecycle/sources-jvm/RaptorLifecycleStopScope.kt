@@ -1,4 +1,4 @@
 package io.fluidsonic.raptor
 
 
-interface RaptorLifecycleStopScope : RaptorScope
+public interface RaptorLifecycleStopScope : RaptorLifecycleScope

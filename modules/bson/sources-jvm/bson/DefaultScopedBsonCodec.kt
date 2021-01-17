@@ -9,13 +9,9 @@ import org.bson.codecs.*
 internal class DefaultScopedBsonCodec<Value : Any>(
 	private val codec: RaptorBsonCodec<Value>,
 	private val scope: RaptorBsonScope,
-) : Codec<Value> {
+) : CodecEx<Value> {
 
-	override fun decode(reader: BsonReader, decoderContext: DecoderContext): Value =
-		decode(reader = reader, decoderContext = decoderContext, arguments = null)
-
-
-	fun decode(reader: BsonReader, decoderContext: DecoderContext, arguments: List<KTypeProjection>?): Value =
+	override fun decode(reader: BsonReader, decoderContext: DecoderContext, arguments: List<KTypeProjection>?): Value =
 		with(codec) {
 			reader.asScope().decode(arguments)
 		}

@@ -2,6 +2,7 @@ package io.fluidsonic.raptor
 
 import io.ktor.server.engine.*
 import java.io.*
+import kotlinx.coroutines.*
 
 
 internal class KtorServerConfiguration(
@@ -11,8 +12,9 @@ internal class KtorServerConfiguration(
 	val engineFactory: (environment: ApplicationEngineEnvironment) -> ApplicationEngine,
 	val insecure: Boolean,
 	val rootRouteConfiguration: KtorRouteConfiguration?,
+	val startStopDispatcher: CoroutineDispatcher,
 	val tags: Set<Any>,
-	val transactionFactory: RaptorTransactionFactory, // FIXME use
+	val transactionFactory: RaptorTransactionFactory,
 ) {
 
 	sealed class Connector(

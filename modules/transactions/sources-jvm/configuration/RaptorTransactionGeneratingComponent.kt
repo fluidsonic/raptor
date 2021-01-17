@@ -1,15 +1,15 @@
 package io.fluidsonic.raptor
 
 
-interface RaptorTransactionGeneratingComponent : RaptorComponent {
+public interface RaptorTransactionGeneratingComponent : RaptorComponent {
 
-	companion object
+	public companion object
 }
 
 
 // FIXME includeNested
 @RaptorDsl
-val RaptorComponentSet<RaptorTransactionGeneratingComponent>.transactions: RaptorComponentSet<RaptorTransactionComponent>
+public val RaptorComponentSet<RaptorTransactionGeneratingComponent>.transactions: RaptorComponentSet<RaptorTransactionComponent>
 	get() = withComponentAuthoring {
 		map {
 			componentRegistry.oneOrRegister(RaptorTransactionComponent.Key) { RaptorTransactionComponent() }
@@ -20,6 +20,6 @@ val RaptorComponentSet<RaptorTransactionGeneratingComponent>.transactions: Rapto
 // FIXME throw if feature not installed?
 @RaptorDsl
 @Suppress("unused")
-fun RaptorConfigurationEndScope.transactionFactory(component: RaptorTransactionGeneratingComponent): RaptorTransactionFactory =
+public fun RaptorConfigurationEndScope.transactionFactory(component: RaptorTransactionGeneratingComponent): RaptorTransactionFactory =
 	component.componentRegistry.oneOrNull(RaptorTransactionComponent.Key)?.toFactory()
 		?: DefaultRaptorTransactionFactory(configurations = emptyList())

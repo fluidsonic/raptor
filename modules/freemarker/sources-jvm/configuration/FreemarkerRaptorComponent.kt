@@ -5,7 +5,7 @@ import freemarker.template.*
 import kotlin.reflect.*
 
 
-class FreemarkerRaptorComponent : RaptorComponent.Default<FreemarkerRaptorComponent>() {
+public class FreemarkerRaptorComponent : RaptorComponent.Default<FreemarkerRaptorComponent>() {
 
 	internal val objectWrappers: MutableMap<KClass<*>, RaptorFreemarkerObjectWrapper<*>> = hashMapOf()
 	internal val templateLoaders: MutableList<TemplateLoader> = mutableListOf()
@@ -36,22 +36,22 @@ class FreemarkerRaptorComponent : RaptorComponent.Default<FreemarkerRaptorCompon
 
 
 @RaptorDsl
-val RaptorTopLevelConfigurationScope.freemarker: RaptorComponentSet<FreemarkerRaptorComponent>
+public val RaptorTopLevelConfigurationScope.freemarker: RaptorComponentSet<FreemarkerRaptorComponent>
 	get() = componentRegistry.configure(FreemarkerRaptorComponent.Key)
 
 
 @RaptorDsl
-inline fun <reified Value : Any> RaptorComponentSet<FreemarkerRaptorComponent>.objectWrapper(
-	wrapper: RaptorFreemarkerObjectWrapper<Value>
+public inline fun <reified Value : Any> RaptorComponentSet<FreemarkerRaptorComponent>.objectWrapper(
+	wrapper: RaptorFreemarkerObjectWrapper<Value>,
 ) {
 	objectWrapper(valueClass = Value::class, wrapper = wrapper)
 }
 
 
 @RaptorDsl
-fun <Value : Any> RaptorComponentSet<FreemarkerRaptorComponent>.objectWrapper(
+public fun <Value : Any> RaptorComponentSet<FreemarkerRaptorComponent>.objectWrapper(
 	valueClass: KClass<out Value>,
-	wrapper: RaptorFreemarkerObjectWrapper<Value>
+	wrapper: RaptorFreemarkerObjectWrapper<Value>,
 ) {
 	configure {
 		objectWrappers[valueClass] = wrapper // FIXME catch duplicates
@@ -60,12 +60,13 @@ fun <Value : Any> RaptorComponentSet<FreemarkerRaptorComponent>.objectWrapper(
 
 
 @RaptorDsl
-inline fun <reified ResourceClass : Any> RaptorComponentSet<FreemarkerRaptorComponent>.resourceLoader(packagePath: String = "") =
+public inline fun <reified ResourceClass : Any> RaptorComponentSet<FreemarkerRaptorComponent>.resourceLoader(packagePath: String = "") {
 	resourceLoader(loader = ResourceClass::class, packagePath = packagePath)
+}
 
 
 @RaptorDsl
-fun RaptorComponentSet<FreemarkerRaptorComponent>.resourceLoader(loader: KClass<*>, packagePath: String = "") {
+public fun RaptorComponentSet<FreemarkerRaptorComponent>.resourceLoader(loader: KClass<*>, packagePath: String = "") {
 	configure {
 		templateLoaders += ClassTemplateLoader(loader.java, packagePath)
 	}
@@ -73,7 +74,7 @@ fun RaptorComponentSet<FreemarkerRaptorComponent>.resourceLoader(loader: KClass<
 
 
 @RaptorDsl
-fun RaptorComponentSet<FreemarkerRaptorComponent>.resourceLoader(loader: ClassLoader, packagePath: String = "") {
+public fun RaptorComponentSet<FreemarkerRaptorComponent>.resourceLoader(loader: ClassLoader, packagePath: String = "") {
 	configure {
 		templateLoaders += ClassTemplateLoader(loader, packagePath)
 	}

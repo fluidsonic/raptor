@@ -1,14 +1,14 @@
 package io.fluidsonic.raptor
 
 
-interface RaptorTransactionConfigurationScope {
+public interface RaptorTransactionConfigurationScope {
 
 	@RaptorDsl
-	val lazyContext: RaptorTransactionContext
+	public val lazyContext: RaptorTransactionContext
 
 	@RaptorDsl
-	val parentContext: RaptorContext
+	public val parentContext: RaptorContext
 
 	@RaptorDsl
-	val propertyRegistry: RaptorPropertyRegistry
+	public val propertyRegistry: RaptorPropertyRegistry
 }

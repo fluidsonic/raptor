@@ -2,6 +2,7 @@ package io.fluidsonic.raptor
 
 
 // FIXME inject with DI? or should this only be used at assembly-time?
+// FIXME refactor
 public interface RaptorSettings {
 
 	public fun hasValue(path: String): Boolean
@@ -37,14 +38,40 @@ public interface RaptorSettings {
 
 
 		@RaptorDsl
+		public fun set(key: String, value: Int) {
+			values[key] = Value.of(value)
+		}
+
+
+		@RaptorDsl
 		public fun set(key: String, value: String) {
 			values[key] = Value.of(value)
+		}
+
+
+		@RaptorDsl
+		public infix fun String.by(value: Int) {
+			values[this] = Value.of(value)
+		}
+
+
+		@RaptorDsl
+		public infix fun String.by(value: String) {
+			values[this] = Value.of(value)
+		}
+
+
+		@RaptorDsl
+		public operator fun String.invoke(values: Builder.() -> Unit) {
+			this@Builder.values[this] = Value.of(Builder().apply(values).build())
 		}
 	}
 
 
 	public interface Value {
 
+		public fun int(): Int
+		public fun intList(): List<Int>
 		public fun settings(): RaptorSettings
 		public fun settingsList(): List<RaptorSettings>
 		public fun string(): String
@@ -53,18 +80,88 @@ public interface RaptorSettings {
 
 		public companion object {
 
+			public fun of(string: Int): Value =
+				IntValue(string)
+
+
 			public fun of(string: String): Value =
 				StringValue(string)
 
 
-			private class StringValue(val value: String) : Value {
+			public fun of(settings: RaptorSettings): Value =
+				SettingsValue(settings)
+
+
+			private class IntValue(val value: Int) : Value {
+
+				override fun int() =
+					value
+
+
+				override fun intList() =
+					listOf(value)
+
 
 				override fun settings() =
-					error("String value '$value' cannot be converted to settings.")
+					error("Int value cannot be converted to settings: $value")
 
 
 				override fun settingsList() =
-					error("String value '$value' cannot be converted to settings.")
+					error("Int value cannot be converted to settings: $value")
+
+
+				override fun string() =
+					error("Int value cannot be converted to string: $value")
+
+
+				override fun stringList() =
+					error("Int value cannot be converted to string: $value")
+			}
+
+
+			private class SettingsValue(private val value: RaptorSettings) : Value {
+
+				override fun int() =
+					error("Settings value cannot be converted to int: $value")
+
+
+				override fun intList() =
+					error("Settings value cannot be converted to int: $value")
+
+
+				override fun settings() =
+					value
+
+
+				override fun settingsList() =
+					listOf(value)
+
+
+				override fun string() =
+					error("Settings value cannot be converted to string: $value")
+
+
+				override fun stringList() =
+					error("Settings value cannot be converted to string: $value")
+			}
+
+
+			private class StringValue(val value: String) : Value {
+
+				override fun int() =
+					error("String value cannot be converted to int: $value")
+
+
+				override fun intList() =
+					error("String value cannot be converted to int: $value")
+
+
+				override fun settings() =
+					error("String value cannot be converted to settings: $value")
+
+
+				override fun settingsList() =
+					error("String value cannot be converted to settings: $value")
 
 
 				override fun string() =
@@ -77,6 +174,14 @@ public interface RaptorSettings {
 		}
 	}
 }
+
+
+public fun RaptorSettings.int(path: String): Int =
+	value(path).int()
+
+
+public fun RaptorSettings.intList(path: String): List<Int> =
+	value(path).intList()
 
 
 public fun RaptorSettings.settings(path: String): RaptorSettings =
@@ -93,6 +198,10 @@ public operator fun RaptorSettings.get(path: String): RaptorSettings.Value? =
 
 public fun RaptorSettings.string(path: String): String =
 	value(path).string()
+
+
+public fun RaptorSettings.stringOrNull(path: String): String? =
+	valueOrNull(path)?.string()
 
 
 public fun RaptorSettings.stringList(path: String): List<String> =
@@ -114,7 +223,8 @@ public fun RaptorRootComponent.install(settings: RaptorSettings) {
 
 
 @RaptorDsl
-public fun raptorSettings(configure: RaptorSettings.Builder.() -> Unit): RaptorSettings =
+@Suppress("unused")
+public fun RaptorGlobalDsl.settings(configure: RaptorSettings.Builder.() -> Unit): RaptorSettings =
 	RaptorSettings.Builder().apply(configure).build()
 
 
