@@ -1,4 +1,4 @@
 package io.fluidsonic.raptor
 
 
-interface RaptorComponentKey<Component : RaptorComponent> : RaptorKey<Component>
+public interface RaptorComponentKey<Component : RaptorComponent> : RaptorKey<Component>

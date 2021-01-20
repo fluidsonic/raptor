@@ -16,8 +16,5 @@ public const val raptorDIFeatureId: RaptorFeatureId = "raptor.di"
 
 
 @RaptorDsl
-public fun RaptorTopLevelConfigurationScope.di(configuration: RaptorDIBuilder.() -> Unit) {
-	componentRegistry.configure(RootDIRaptorComponent.Key) {
-		builder.apply(configuration)
-	}
-}
+public val RaptorTopLevelConfigurationScope.di: RaptorComponentSet<RaptorDIComponent>
+	get() = componentRegistry.configure(RootDIRaptorComponent.Key)

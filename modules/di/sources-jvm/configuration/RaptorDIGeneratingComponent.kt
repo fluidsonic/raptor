@@ -10,18 +10,15 @@ public interface RaptorDIGeneratingComponent : RaptorComponent {
 
 
 @RaptorDsl
-public fun RaptorComponentSet<RaptorDIGeneratingComponent>.di(configuration: RaptorDIBuilder.() -> Unit) {
-	configure {
-		componentRegistry.oneOrRegister(DIFactoryRaptorComponent.Key) { DIFactoryRaptorComponent() }.configure {
-			builder.apply(configuration)
-		}
+public val RaptorComponentSet<RaptorDIGeneratingComponent>.di: RaptorComponentSet<RaptorDIComponent>
+	get() = withComponentAuthoring {
+		map { componentRegistry.oneOrRegister(RaptorDIFactoryComponent.Key, ::RaptorDIFactoryComponent) }
 	}
-}
 
 
 // FIXME throw if feature not installed?
 @RaptorDsl
 @Suppress("unused")
 public fun RaptorConfigurationEndScope.diFactory(name: String, component: RaptorDIGeneratingComponent): RaptorDI.Factory =
-	component.componentRegistry.oneOrNull(DIFactoryRaptorComponent.Key)?.toFactory(name = name)
+	component.componentRegistry.oneOrNull(RaptorDIFactoryComponent.Key)?.toFactory(name = name)
 		?: DefaultRaptorDI.Factory(modules = emptyList())

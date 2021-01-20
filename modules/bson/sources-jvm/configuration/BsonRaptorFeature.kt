@@ -9,7 +9,7 @@ public object BsonRaptorFeature : RaptorFeature.Configurable<BsonRaptorComponent
 	override val id: RaptorFeatureId = raptorBsonFeatureId
 
 
-	override fun RaptorTopLevelConfigurationScope.configure(action: BsonRaptorComponent.() -> Unit) {
+	override fun RaptorFeatureConfigurationScope.beginConfiguration(action: BsonRaptorComponent.() -> Unit) {
 		componentRegistry.configure(key = BsonRaptorComponent.Key, action = action)
 	}
 

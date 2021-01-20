@@ -15,6 +15,6 @@ public interface RaptorFeature {
 
 	public interface Configurable<out ConfigurationScope : Any> : RaptorFeature {
 
-		public fun RaptorTopLevelConfigurationScope.configure(action: ConfigurationScope.() -> Unit)
+		public fun RaptorFeatureConfigurationScope.beginConfiguration(action: ConfigurationScope.() -> Unit)
 	}
 }

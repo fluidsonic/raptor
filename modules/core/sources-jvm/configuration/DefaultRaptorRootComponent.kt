@@ -74,7 +74,7 @@ internal class DefaultRaptorRootComponent : RaptorComponent.Default<RaptorRootCo
 	) {
 		install(feature = feature)
 
-		with(feature) { configure(configuration) }
+		with(feature) { beginConfiguration(configuration) }
 	}
 
 

@@ -1,12 +1,20 @@
 package io.fluidsonic.raptor
 
-
-internal class RootDIRaptorComponent : RaptorComponent.Default<RootDIRaptorComponent>() {
-
-	val builder = DefaultRaptorDIBuilder()
+import kotlin.reflect.*
 
 
-	override fun toString() = "DI configuration"
+internal class RootDIRaptorComponent : RaptorComponent.Default<RaptorDIComponent>(), RaptorDIComponent {
+
+	private val builder = DefaultRaptorDIBuilder()
+
+
+	override fun provide(type: KType, provide: RaptorDI.() -> Any) {
+		builder.provide(type = type, provide = provide)
+	}
+
+
+	override fun toString(): String =
+		"DI configuration"
 
 
 	override fun RaptorComponentConfigurationEndScope.onConfigurationEnded() {
@@ -20,6 +28,6 @@ internal class RootDIRaptorComponent : RaptorComponent.Default<RootDIRaptorCompo
 
 	object Key : RaptorComponentKey<RootDIRaptorComponent> {
 
-		override fun toString() = "di"
+		override fun toString() = "DI"
 	}
 }
