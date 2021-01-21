@@ -4,7 +4,7 @@ fluidLibraryModule(description = "FIXME") {
 	targets {
 		common {
 			dependencies {
-				api(fluid("time", "0.13.0"))
+				api(fluid("time", "0.13.1"))
 			}
 		}
 

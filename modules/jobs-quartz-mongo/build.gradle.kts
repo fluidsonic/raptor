@@ -4,7 +4,7 @@ fluidLibraryModule(description = "FIXME") {
 	targets {
 		common {
 			dependencies {
-				implementation(fluid("stdlib", "0.10.3"))
+				implementation(fluid("stdlib", "0.10.4"))
 			}
 		}
 

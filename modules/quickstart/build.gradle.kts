@@ -17,8 +17,8 @@ fluidLibraryModule(description = "FIXME") {
 				api(project(":raptor-settings-hocon"))
 				api(fluid("country", "0.9.3"))
 				api(fluid("currency", "0.9.3"))
-				api(fluid("stdlib", "0.10.3"))
-				api(fluid("time", "0.13.0"))
+				api(fluid("stdlib", "0.10.4"))
+				api(fluid("time", "0.13.1"))
 			}
 		}
 	}
