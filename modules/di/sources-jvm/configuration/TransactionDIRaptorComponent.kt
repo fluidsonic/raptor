@@ -1,13 +1,21 @@
 package io.fluidsonic.raptor
 
-
-internal class TransactionDIRaptorComponent : RaptorComponent.Default<TransactionDIRaptorComponent>() {
-
-	val builder = DefaultRaptorDIBuilder()
-	val factoryPropertyKey: RaptorPropertyKey<RaptorDI.Factory> = FactoryPropertyKey()
+import kotlin.reflect.*
 
 
-	override fun toString() = "transaction DI configuration"
+internal class TransactionDIRaptorComponent : RaptorComponent.Default<RaptorDIComponent>(), RaptorDIComponent {
+
+	private val builder = DefaultRaptorDIBuilder()
+	internal val factoryPropertyKey: RaptorPropertyKey<RaptorDI.Factory> = FactoryPropertyKey()
+
+
+	override fun provide(type: KType, provide: RaptorDI.() -> Any) {
+		builder.provide(type = type, provide = provide)
+	}
+
+
+	override fun toString() =
+		"transaction DI configuration"
 
 
 	override fun RaptorComponentConfigurationEndScope.onConfigurationEnded() {
@@ -30,27 +38,20 @@ internal class TransactionDIRaptorComponent : RaptorComponent.Default<Transactio
 
 
 @RaptorDsl
-public fun RaptorComponentSet<RaptorTransactionComponent>.di(configuration: RaptorDIBuilder.() -> Unit) {
-	configure {
-		val diComponent = componentRegistry.oneOrNull(TransactionDIRaptorComponent.Key) ?: run {
-			TransactionDIRaptorComponent().also { diComponent ->
-				componentRegistry.register(TransactionDIRaptorComponent.Key, diComponent)
+public val RaptorComponentSet<RaptorTransactionComponent>.di: RaptorComponentSet<RaptorDIComponent>
+	get() = withComponentAuthoring {
+		map {
+			componentRegistry.oneOrRegister(TransactionDIRaptorComponent.Key) {
+				TransactionDIRaptorComponent().also { diComponent ->
+					val factoryPropertyKey = diComponent.factoryPropertyKey
 
-				val factoryPropertyKey = diComponent.factoryPropertyKey
+					onCreate {
+						val factory = parentContext[factoryPropertyKey]
+							?: error("Cannot find dependency injection factory.")
 
-				onCreate {
-					// TODO Do we want to support nested transactions here?. raptor-ktor uses them (root tx -> route tx -> route tx -> …)
-//					if (parentContext.parent != null)
-//						return@onCreate
-
-					val factory = parentContext[factoryPropertyKey]
-						?: error("Cannot find dependency injection factory.")
-
-					propertyRegistry.register(DIRaptorPropertyKey, factory.createDI(context = lazyContext))
+						propertyRegistry.register(DIRaptorPropertyKey, factory.createDI(context = lazyContext))
+					}
 				}
 			}
 		}
-
-		diComponent.builder.apply(configuration)
 	}
-}

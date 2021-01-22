@@ -17,7 +17,6 @@ fluidLibraryModule(description = "FIXME") {
 				api(project(":raptor-di"))
 				api(project(":raptor-lifecycle"))
 				api(project(":raptor-transactions"))
-				api(ktor("auth-jwt"))
 				api(ktor("server-core"))
 
 				implementation(kotlinx("atomicfu", "0.14.4", usePrefix = false))
