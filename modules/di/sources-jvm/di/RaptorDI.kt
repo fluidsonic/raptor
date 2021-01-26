@@ -6,6 +6,7 @@ import kotlin.reflect.*
 import kotlin.reflect.full.*
 
 
+@RaptorDsl
 public interface RaptorDI {
 
 	@RaptorDsl
