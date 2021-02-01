@@ -2,6 +2,7 @@ package io.fluidsonic.raptor
 
 import com.mongodb.client.*
 import io.fluidsonic.raptor.RaptorJobsQuartzMongoFeature.Configuration
+import io.fluidsonic.stdlib.*
 import kotlinx.coroutines.*
 
 
@@ -14,20 +15,18 @@ public object RaptorJobsQuartzMongoFeature : RaptorFeature.Configurable<Configur
 		install(RaptorJobsFeature)
 		install(RaptorLifecycleFeature)
 
-		di {
-			provide {
-				QuartzJobScheduler(
-					context = get(),
-					dispatcher = configuration.dispatcher,
-					database = configuration.database(this),
-					registry = get(),
-				)
-			}
+		di.provide<RaptorJobScheduler> {
+			QuartzJobScheduler(
+				context = get(),
+				dispatcher = configuration.dispatcher,
+				database = configuration.database(this),
+				registry = get(),
+			)
 		}
 
 		lifecycle {
-			onStart { di.get<QuartzJobScheduler>().start() }
-			onStop { di.get<QuartzJobScheduler>().stop() }
+			onStart { di.get<RaptorJobScheduler>().castOrNull<QuartzJobScheduler>()?.start() }
+			onStop { di.get<RaptorJobScheduler>().castOrNull<QuartzJobScheduler>()?.stop() }
 		}
 	}
 

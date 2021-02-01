@@ -50,7 +50,7 @@ internal class QuartzJobScheduler(
 		val executor = registry[key.group]
 			.ifNull { error("Cannot execute job '${key.name}' in group '${key.group}' as no executor has been registered for that group.") }
 			.let { it as RaptorJobExecutor<Any?> }
-
+		// FIXME logging
 		if (executor.group.serializer === Unit.serializer())
 			executor.execute(context, Unit)
 		else {
