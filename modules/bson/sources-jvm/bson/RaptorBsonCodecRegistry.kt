@@ -6,7 +6,7 @@ import org.bson.codecs.configuration.*
 
 public interface RaptorBsonCodecRegistry {
 
-	@InternalRaptorApi
+	@RaptorInternalApi
 	public fun internal(): CodecRegistry
 
 

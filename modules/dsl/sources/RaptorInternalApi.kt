@@ -9,4 +9,4 @@ package io.fluidsonic.raptor
 )
 @Retention(value = AnnotationRetention.BINARY)
 @Target(AnnotationTarget.CLASS, AnnotationTarget.FUNCTION, AnnotationTarget.PROPERTY, AnnotationTarget.TYPEALIAS)
-public annotation class InternalRaptorApi
+public annotation class RaptorInternalApi

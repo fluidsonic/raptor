@@ -26,12 +26,10 @@ internal suspend fun <Document : Any> MongoCollection<Document>.execute(update: 
 }
 
 
-@RaptorDsl
 public suspend inline fun <Document : Any> MongoCollection<Document>.updateOne(configure: RaptorMongodbUpdateBuilder.() -> Unit): Document? =
 	execute(RaptorMongodbUpdateBuilder().apply(configure).build())
 
 
-@RaptorDsl
 public suspend fun <Document : Any> MongoCollection<Document>.updateOneById(id: Any?, configure: RaptorMongodbUpdateBuilder.() -> Unit): Document? =
 	updateOne {
 		filter { id(id) }
@@ -40,12 +38,10 @@ public suspend fun <Document : Any> MongoCollection<Document>.updateOneById(id: 
 	}
 
 
-@RaptorDsl
 public suspend inline fun <Document : Any> MongoCollection<Document>.upsertOne(configure: RaptorMongodbUpdateBuilder.() -> Unit): Document =
 	execute(RaptorMongodbUpdateBuilder(isUpsert = true).apply(configure).build())!!
 
 
-@RaptorDsl
 public suspend fun <Document : Any> MongoCollection<Document>.upsertOneById(id: Any?, configure: RaptorMongodbUpdateBuilder.() -> Unit): Document? =
 	upsertOne {
 		filter { id(id) }

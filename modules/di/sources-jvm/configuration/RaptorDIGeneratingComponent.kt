@@ -2,7 +2,7 @@ package io.fluidsonic.raptor
 
 
 // TODO Make public if it's actually useful and after API was revisited.
-@InternalRaptorApi
+@RaptorInternalApi
 public interface RaptorDIGeneratingComponent : RaptorComponent {
 
 	public companion object

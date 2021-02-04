@@ -22,30 +22,30 @@ public interface RaptorDI {
 
 	public companion object {
 
-		@InternalRaptorApi
+		@RaptorInternalApi
 		public fun factory(modules: List<Module>): Factory =
 			DefaultRaptorDI.Factory(modules = modules.toList())
 
-		@InternalRaptorApi
+		@RaptorInternalApi
 		public fun module(name: String, providers: List<Provider>): Module =
 			DefaultRaptorDI.Module(name = name, providers = providers.toList())
 
 
-		@InternalRaptorApi
+		@RaptorInternalApi
 		public fun provider(type: KType, provide: RaptorDI.() -> Any?): Provider =
 			DefaultRaptorDI.Provider(provide = provide, type = type)
 	}
 
 
 	// TODO Make public if it's actually useful and after API was revisited.
-	@InternalRaptorApi
+	@RaptorInternalApi
 	public interface Factory {
 
 		public fun createDI(context: RaptorContext, configuration: RaptorDIBuilder.() -> Unit = {}): RaptorDI
 	}
 
 
-	@InternalRaptorApi
+	@RaptorInternalApi
 	public interface Module {
 
 		public val name: String
@@ -53,7 +53,7 @@ public interface RaptorDI {
 	}
 
 
-	@InternalRaptorApi
+	@RaptorInternalApi
 	public interface Provider {
 
 		public val type: KType

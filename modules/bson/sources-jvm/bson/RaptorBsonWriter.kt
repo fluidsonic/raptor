@@ -17,7 +17,7 @@ public interface RaptorBsonWriter {
 	@RaptorDsl
 	public fun fieldName(name: String)
 
-	@InternalRaptorApi
+	@RaptorInternalApi
 	@RaptorDsl
 	public fun internal(): BsonWriter
 

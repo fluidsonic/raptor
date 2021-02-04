@@ -13,12 +13,12 @@ public interface RaptorBsonDefinition {
 
 	public companion object {
 
-		@InternalRaptorApi
+		@RaptorInternalApi
 		public fun of(codec: Codec<*>): RaptorBsonDefinition =
 			BsonCodecDefinition(codec)
 
 
-		@InternalRaptorApi
+		@RaptorInternalApi
 		public fun of(provider: CodecProvider): RaptorBsonDefinition =
 			BsonCodecProviderDefinition(provider)
 	}

@@ -33,7 +33,7 @@ public interface RaptorBsonReader {
 	@RaptorDsl
 	public fun int(): Int
 
-	@InternalRaptorApi
+	@RaptorInternalApi
 	@RaptorDsl
 	public fun internal(): BsonReader
 
