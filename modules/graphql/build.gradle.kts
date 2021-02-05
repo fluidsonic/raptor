@@ -8,14 +8,14 @@ fluidLibraryModule(description = "FIXME") {
 	targets {
 		jvm {
 			dependencies {
-				implementation(fluid("country", "0.9.3"))
-				implementation(fluid("currency", "0.9.3"))
-				implementation(fluid("graphql-execution", "0.9.6"))
-				implementation(fluid("i18n", "0.9.2"))
-				implementation(fluid("json-basic", "1.1.1"))
-				implementation(fluid("locale", "0.9.4"))
-				implementation(fluid("stdlib", "0.10.4"))
-				implementation(fluid("time", "0.13.1"))
+				implementation(fluid("country", Versions.fluid_country))
+				implementation(fluid("currency", Versions.fluid_currency))
+				implementation(fluid("graphql-execution", Versions.fluid_graphql))
+				implementation(fluid("i18n", Versions.fluid_i18n))
+				implementation(fluid("json-basic", Versions.fluid_json))
+				implementation(fluid("locale", Versions.fluid_locale))
+				implementation(fluid("stdlib", Versions.fluid_stdlib))
+				implementation(fluid("time", Versions.fluid_time))
 
 				api(project(":raptor-ktor"))
 			}

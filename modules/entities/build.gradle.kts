@@ -12,7 +12,7 @@ fluidLibraryModule(description = "FIXME") {
 				implementation(project(":raptor-di"))
 				implementation(project(":raptor-graphql")) // FIXME extract to own
 				implementation(project(":raptor-transactions"))
-				implementation(fluid("stdlib", "0.10.4"))
+				implementation(fluid("stdlib", Versions.fluid_stdlib))
 
 				api(project(":raptor-entities-core"))
 			}

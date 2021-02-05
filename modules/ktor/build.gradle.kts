@@ -19,7 +19,7 @@ fluidLibraryModule(description = "FIXME") {
 				api(project(":raptor-transactions"))
 				api(ktor("server-core"))
 
-				implementation(kotlinx("atomicfu", "0.14.4", usePrefix = false))
+				implementation(kotlinx("atomicfu", Versions.kotlinx_atomicfu, usePrefix = false))
 				implementation(ktor("websockets"))
 				implementation(ktor("server-netty"))
 				implementation("ch.qos.logback:logback-classic:1.2.3")
@@ -29,5 +29,5 @@ fluidLibraryModule(description = "FIXME") {
 }
 
 
-fun ktor(name: String, version: String = "1.5.1") =
+fun ktor(name: String, version: String = Versions.ktor) =
 	"io.ktor:ktor-$name:$version"

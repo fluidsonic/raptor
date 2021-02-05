@@ -3,7 +3,6 @@ package tests
 import io.fluidsonic.country.*
 import io.fluidsonic.currency.*
 import io.fluidsonic.raptor.*
-import org.bson.codecs.configuration.*
 import kotlin.test.*
 
 
@@ -14,7 +13,6 @@ class BsonTests {
 		val codec = DummyBsonCodec
 		val definition = Country.bsonDefinition()
 		val provider = DummyBsonCodecProvider
-		val registry = CodecRegistries.fromCodecs(codec)
 
 		val raptor = raptor {
 			install(BsonRaptorFeature) {
@@ -24,7 +22,6 @@ class BsonTests {
 
 			bson {
 				providers(provider)
-				registries(registry)
 			}
 		}
 
@@ -35,9 +32,8 @@ class BsonTests {
 				RaptorBsonDefinition.of(codec),
 				definition,
 				RaptorBsonDefinition.of(provider),
-				RaptorBsonDefinition.of(registry),
 			),
-			actual = configuration.definitions.underlyingDefinitions.toList()
+			actual = configuration.definitions.toList()
 		)
 	}
 
@@ -59,7 +55,7 @@ class BsonTests {
 
 		assertEquals(
 			expected = listOf(countryDefinition) + currencyDefinition + RaptorBsonDefaults.definitions,
-			actual = configuration.definitions.underlyingDefinitions
+			actual = configuration.definitions
 		)
 	}
 
@@ -72,7 +68,7 @@ class BsonTests {
 
 		val configuration = raptor.context.bsonConfiguration
 
-		assertEquals(expected = RaptorBsonDefinition.empty, actual = configuration.definitions)
+		assertEquals(expected = emptyList(), actual = configuration.definitions)
 	}
 
 

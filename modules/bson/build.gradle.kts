@@ -8,10 +8,10 @@ fluidLibraryModule(description = "FIXME") {
 	targets {
 		common {
 			dependencies {
-				implementation(fluid("country", "0.9.3"))
-				implementation(fluid("currency", "0.9.3"))
-				implementation(fluid("stdlib", "0.10.4"))
-				implementation(fluid("time", "0.13.1"))
+				implementation(fluid("country", Versions.fluid_country))
+				implementation(fluid("currency", Versions.fluid_currency))
+				implementation(fluid("stdlib", Versions.fluid_stdlib))
+				implementation(fluid("time", Versions.fluid_time))
 			}
 		}
 

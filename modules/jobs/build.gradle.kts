@@ -4,14 +4,14 @@ fluidLibraryModule(description = "FIXME") {
 	targets {
 		common {
 			dependencies {
-				api(fluid("time", "0.13.1"))
+				api(fluid("time", Versions.fluid_time))
 			}
 		}
 
 		jvm {
 			dependencies {
 				api(project(":raptor-core"))
-				api(kotlinx("serialization-core", "1.0.1"))
+				api(kotlinx("serialization-core", Versions.kotlinx_serialization))
 
 				implementation(project(":raptor-di"))
 			}

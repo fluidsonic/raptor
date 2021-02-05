@@ -4,7 +4,7 @@ fluidLibraryModule(description = "FIXME") {
 	targets {
 		common {
 			dependencies {
-				implementation(fluid("stdlib", "0.10.4"))
+				implementation(fluid("stdlib", Versions.fluid_stdlib))
 			}
 		}
 
@@ -14,9 +14,9 @@ fluidLibraryModule(description = "FIXME") {
 				api(project(":raptor-jobs"))
 				api(project(":raptor-lifecycle"))
 
-				implementation(kotlinx("atomicfu", "0.14.4", usePrefix = false))
-				implementation(kotlinx("coroutines-core", "1.4.2"))
-				implementation(kotlinx("serialization-json", "1.0.1"))
+				implementation(kotlinx("atomicfu", Versions.kotlinx_atomicfu, usePrefix = false))
+				implementation(kotlinx("coroutines-core", Versions.kotlinx_coroutines))
+				implementation(kotlinx("serialization-json", Versions.kotlinx_serialization))
 				implementation("com.novemberain:quartz-mongodb:2.2.0-rc2")
 				implementation("org.mongodb:mongodb-driver-sync:4.1.1")
 				implementation("org.quartz-scheduler:quartz:2.3.2")

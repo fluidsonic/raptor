@@ -1,6 +1,7 @@
 package io.fluidsonic.raptor
 
 import kotlin.reflect.*
+import kotlin.reflect.full.*
 
 
 @RaptorDsl
@@ -14,7 +15,8 @@ public interface RaptorDIBuilder {
 @OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
 public inline fun <reified Dependency : Any> RaptorDIBuilder.provide(noinline provide: RaptorDI.() -> Dependency) {
-	provide(typeOf<Dependency>(), provide = provide)
+	// withNullability(false) to work around https://youtrack.jetbrains.com/issue/KT-44726
+	provide(typeOf<Dependency>().withNullability(false), provide = provide)
 }
 
 

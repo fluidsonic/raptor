@@ -15,10 +15,10 @@ fluidLibraryModule(description = "FIXME") {
 				api(project(":raptor-mongodb"))
 				api(project(":raptor-security"))
 				api(project(":raptor-settings-hocon"))
-				api(fluid("country", "0.9.3"))
-				api(fluid("currency", "0.9.3"))
-				api(fluid("stdlib", "0.10.4"))
-				api(fluid("time", "0.13.1"))
+				api(fluid("country", Versions.fluid_country))
+				api(fluid("currency", Versions.fluid_currency))
+				api(fluid("stdlib", Versions.fluid_stdlib))
+				api(fluid("time", Versions.fluid_time))
 			}
 		}
 	}
