@@ -39,25 +39,37 @@ public interface RaptorSettings {
 
 		@RaptorDsl
 		public fun set(key: String, value: Int) {
-			values[key] = Value.of(value)
+			set(key, Value.of(value))
 		}
 
 
 		@RaptorDsl
 		public fun set(key: String, value: String) {
-			values[key] = Value.of(value)
+			set(key, Value.of(value))
+		}
+
+
+		@RaptorDsl
+		public fun set(key: String, value: Value) {
+			values[key] = value
 		}
 
 
 		@RaptorDsl
 		public infix fun String.by(value: Int) {
-			values[this] = Value.of(value)
+			this by Value.of(value)
 		}
 
 
 		@RaptorDsl
 		public infix fun String.by(value: String) {
-			values[this] = Value.of(value)
+			this by Value.of(value)
+		}
+
+
+		@RaptorDsl
+		public infix fun String.by(value: Value) {
+			set(this, value)
 		}
 
 

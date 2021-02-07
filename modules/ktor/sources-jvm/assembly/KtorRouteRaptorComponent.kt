@@ -5,6 +5,7 @@ import io.ktor.routing.*
 
 public class KtorRouteRaptorComponent internal constructor(
 	internal val globalScope: RaptorTopLevelConfigurationScope,
+	private val host: String?,
 	private val path: String,
 	internal val serverComponentRegistry: RaptorComponentRegistry,
 ) : RaptorComponent.Default<KtorRouteRaptorComponent>(),
@@ -33,6 +34,7 @@ public class KtorRouteRaptorComponent internal constructor(
 		return KtorRouteConfiguration(
 			children = children,
 			customConfigurations = customConfigurations.toList(),
+			host = host,
 			path = path,
 			properties = this@KtorRouteRaptorComponent.propertyRegistry.toSet(),
 			transactionFactory = transactionFactory(this@KtorRouteRaptorComponent),
@@ -131,6 +133,7 @@ public fun RaptorComponentSet<KtorRouteRaptorComponent>.newRoute(path: String): 
 		map {
 			KtorRouteRaptorComponent(
 				globalScope = globalScope,
+				host = null,
 				path = path,
 				serverComponentRegistry = serverComponentRegistry
 			)

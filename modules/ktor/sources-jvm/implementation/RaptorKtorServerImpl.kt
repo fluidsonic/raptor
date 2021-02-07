@@ -180,7 +180,11 @@ internal class RaptorKtorServerImpl(
 
 
 	private fun Route.configure(configuration: KtorRouteConfiguration) {
-		val wrapper: (Route.(next: Route.() -> Unit) -> Unit) = configuration.wrapper ?: { it() }
+		var wrapper: (Route.(next: Route.() -> Unit) -> Unit) = configuration.wrapper ?: { it() }
+		configuration.host?.let { host ->
+			wrapper = { host(host, build = it) }
+		}
+
 		wrapper {
 			route(configuration.path) {
 				for (customConfiguration in configuration.customConfigurations)

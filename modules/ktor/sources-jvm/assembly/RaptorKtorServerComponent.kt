@@ -37,6 +37,7 @@ public class RaptorKtorServerComponent internal constructor(
 				KtorRouteConfiguration(
 					children = it,
 					customConfigurations = emptyList(),
+					host = null,
 					path = "",
 					properties = RaptorPropertySet.empty(),
 					transactionFactory = null,
@@ -194,11 +195,12 @@ public fun RaptorComponentSet<RaptorKtorServerComponent>.install(feature: KtorSe
 
 
 @RaptorDsl
-public fun RaptorComponentSet<RaptorKtorServerComponent>.newRoute(path: String = ""): RaptorComponentSet<KtorRouteRaptorComponent> =
+public fun RaptorComponentSet<RaptorKtorServerComponent>.newRoute(path: String = "", host: String? = null): RaptorComponentSet<KtorRouteRaptorComponent> =
 	withComponentAuthoring {
 		map {
 			KtorRouteRaptorComponent(
 				globalScope = globalScope,
+				host = host,
 				path = path,
 				serverComponentRegistry = componentRegistry
 			)
@@ -208,16 +210,8 @@ public fun RaptorComponentSet<RaptorKtorServerComponent>.newRoute(path: String =
 
 
 @RaptorDsl
-public fun RaptorComponentSet<RaptorKtorServerComponent>.newRoute(path: String = "", configure: KtorRouteRaptorComponent.() -> Unit) {
-	configure {
-		KtorRouteRaptorComponent(
-			globalScope = globalScope,
-			path = path,
-			serverComponentRegistry = componentRegistry
-		)
-			.also { componentRegistry.register(KtorRouteRaptorComponent.Key, it) }
-			.also(configure)
-	}
+public fun RaptorComponentSet<RaptorKtorServerComponent>.newRoute(path: String = "", host: String? = null, configure: KtorRouteRaptorComponent.() -> Unit) {
+	newRoute(path = path, host = host).configure(configure)
 }
 
 
