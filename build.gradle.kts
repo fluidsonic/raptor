@@ -7,7 +7,6 @@ plugins {
 allprojects {
 	repositories {
 		jcenter() // FIXME remove
-//		mavenLocal() // FIXME remove
 	}
 }
 
