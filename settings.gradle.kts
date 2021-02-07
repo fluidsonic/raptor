@@ -1,7 +1,6 @@
 rootProject.name = "raptor"
 
 //includeBuild("../fluid-graphql") // https://youtrack.jetbrains.com/issue/KT-41370
-includeBuild("../fluid-gradle")
 
 file("modules")
 	.listFiles()!!
