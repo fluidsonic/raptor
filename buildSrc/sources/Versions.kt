@@ -1,6 +1,5 @@
 object Versions {
 
-	const val bson = "4.2.0"
 	const val fluid_country = "0.9.4"
 	const val fluid_currency = "0.9.4"
 	const val fluid_graphql = "0.9.7"
