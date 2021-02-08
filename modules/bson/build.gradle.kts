@@ -18,7 +18,7 @@ fluidLibraryModule(description = "FIXME") {
 		jvm {
 			dependencies {
 				api(project(":raptor-core"))
-				api("org.mongodb:bson:4.1.1")
+				api("org.mongodb:bson:${Versions.bson}")
 
 				implementation(project(":raptor-di"))
 			}
