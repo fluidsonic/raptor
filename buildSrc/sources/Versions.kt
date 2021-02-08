@@ -14,4 +14,5 @@ object Versions {
 	const val kotlinx_coroutines = "1.4.2"
 	const val kotlinx_serialization = "1.1.0-RC"
 	const val ktor = "1.5.1"
+	const val mongodb = "4.2.0"
 }
