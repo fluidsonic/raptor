@@ -150,15 +150,16 @@ internal class RaptorKtorServerImpl(
 			header(HttpHeaders.Server, "Raptor")
 		}
 
-		install(CORS) {
-			allowNonSimpleContentTypes = true
-
-			anyHost()
-			exposeHeader(HttpHeaders.WWWAuthenticate)
-			header(HttpHeaders.Authorization)
-			method(HttpMethod.Delete)
-			method(HttpMethod.Patch)
-		}
+		// FIXME Make configurable.
+//		install(CORS) {
+//			allowNonSimpleContentTypes = true
+//
+//			anyHost()
+//			exposeHeader(HttpHeaders.WWWAuthenticate)
+//			header(HttpHeaders.Authorization)
+//			method(HttpMethod.Delete)
+//			method(HttpMethod.Patch)
+//		}
 
 		install(XForwardedHeaderSupport)
 		if (!configuration.insecure)
