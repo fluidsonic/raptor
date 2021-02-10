@@ -3,6 +3,7 @@ package io.fluidsonic.raptor
 import com.mongodb.client.*
 import com.novemberain.quartz.mongodb.*
 import io.fluidsonic.stdlib.*
+import io.fluidsonic.time.*
 import java.util.*
 import kotlin.collections.set
 import kotlin.time.*
@@ -134,8 +135,14 @@ internal class QuartzJobScheduler(
 					.newTrigger()
 					.withIdentity(triggerKey)
 					.forJob(key)
-					.startNow()
 					.withSchedule(timing.createSchedule())
+					.run {
+						when (timing) {
+							is RaptorJobTiming.AtDateTime -> startAt(Timestamp.fromEpochSeconds(0).toJavaDate())
+							is RaptorJobTiming.AtInterval -> startNow()
+							is RaptorJobTiming.DailyAtTime -> startNow()
+						}
+					}
 					.build()
 
 				if (existingTrigger == null) {
@@ -241,7 +248,7 @@ private fun RaptorJobTiming.isValidTrigger(trigger: Trigger) =
 
 
 private val RaptorJobTiming.AtDateTime.cronExpression
-	get() = "${dateTime.second} ${dateTime.minute} ${dateTime.hour} ${dateTime.dayOfMonth} ${dateTime.monthNumber - 1} ? ${dateTime.year}"
+	get() = "${dateTime.second} ${dateTime.minute} ${dateTime.hour} ${dateTime.dayOfMonth} ${dateTime.monthNumber} ? ${dateTime.year}"
 
 
 private val RaptorJobTiming.DailyAtTime.cronExpression
