@@ -240,7 +240,6 @@ public fun RaptorGlobalDsl.settings(configure: RaptorSettings.Builder.() -> Unit
 	RaptorSettings.Builder().apply(configure).build()
 
 
-// FIXME install(settings) w/o settings installed will lead the error below
 @RaptorDsl
 public val RaptorTopLevelConfigurationScope.settings: RaptorSettings
 	get() = componentRegistry.root.oneOrNull(RaptorSettingsComponent.Key)?.settings
