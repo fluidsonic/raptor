@@ -109,8 +109,11 @@ public inline fun <Reader : RaptorBsonReader, Value> Reader.arrayOrNull(read: Re
 		callsInPlace(read, InvocationKind.EXACTLY_ONCE)
 	}
 
-	if (bsonType() == BsonType.NULL) // FIXME probably wrong
+	if (bsonType() == BsonType.NULL) {
+		skipValue()
+
 		return null
+	}
 
 	return array(read)
 }
@@ -138,8 +141,11 @@ public fun RaptorBsonReader.boolean(field: String): Boolean {
 
 @RaptorDsl
 public fun RaptorBsonReader.booleanOrNull(): Boolean? {
-	if (bsonType() == BsonType.NULL) // FIXME probably wrong
+	if (bsonType() == BsonType.NULL) {
+		skipValue()
+
 		return null
+	}
 
 	return boolean()
 }
@@ -163,8 +169,11 @@ public fun RaptorBsonReader.byteArray(field: String): ByteArray {
 
 @RaptorDsl
 public fun RaptorBsonReader.byteArrayOrNull(): ByteArray? {
-	if (bsonType() == BsonType.NULL) // FIXME probably wrong
+	if (bsonType() == BsonType.NULL) {
+		skipValue()
+
 		return null
+	}
 
 	return byteArray()
 }
@@ -233,8 +242,11 @@ public inline fun <Reader : RaptorBsonReader, Value> Reader.documentOrNull(read:
 		callsInPlace(read, InvocationKind.EXACTLY_ONCE)
 	}
 
-	if (bsonType() == BsonType.NULL) // FIXME probably wrong
+	if (bsonType() == BsonType.NULL) {
+		skipValue()
+
 		return null
+	}
 
 	startDocument()
 
@@ -264,8 +276,11 @@ public fun RaptorBsonReader.double(field: String): Double {
 
 @RaptorDsl
 public fun RaptorBsonReader.doubleOrNull(): Double? {
-	if (bsonType() == BsonType.NULL) // FIXME probably wrong
+	if (bsonType() == BsonType.NULL) {
+		skipValue()
+
 		return null
+	}
 
 	return double()
 }
@@ -297,8 +312,11 @@ public fun RaptorBsonReader.int(field: String): Int {
 
 @RaptorDsl
 public fun RaptorBsonReader.intOrNull(): Int? {
-	if (bsonType() == BsonType.NULL) // FIXME probably wrong
+	if (bsonType() == BsonType.NULL) {
+		skipValue()
+
 		return null
+	}
 
 	return int()
 }
@@ -322,8 +340,11 @@ public fun RaptorBsonReader.long(field: String): Long {
 
 @RaptorDsl
 public fun RaptorBsonReader.longOrNull(): Long? {
-	if (bsonType() == BsonType.NULL) // FIXME probably wrong
+	if (bsonType() == BsonType.NULL) {
+		skipValue()
+
 		return null
+	}
 
 	return long()
 }
@@ -347,8 +368,11 @@ public fun RaptorBsonReader.objectId(field: String): ObjectId {
 
 @RaptorDsl
 public fun RaptorBsonReader.objectIdOrNull(): ObjectId? {
-	if (bsonType() == BsonType.NULL) // FIXME probably wrong
+	if (bsonType() == BsonType.NULL) {
+		skipValue()
+
 		return null
+	}
 
 	return objectId()
 }
@@ -386,8 +410,11 @@ public fun RaptorBsonReader.string(field: String): String {
 
 @RaptorDsl
 public fun RaptorBsonReader.stringOrNull(): String? {
-	if (bsonType() == BsonType.NULL) // FIXME probably wrong
+	if (bsonType() == BsonType.NULL) {
+		skipValue()
+
 		return null
+	}
 
 	return string()
 }
@@ -411,8 +438,11 @@ public fun RaptorBsonReader.timestamp(field: String): Timestamp {
 
 @RaptorDsl
 public fun RaptorBsonReader.timestampOrNull(): Timestamp? {
-	if (bsonType() == BsonType.NULL) // FIXME probably wrong
+	if (bsonType() == BsonType.NULL) {
+		skipValue()
+
 		return null
+	}
 
 	return timestamp()
 }
@@ -429,8 +459,11 @@ public fun RaptorBsonReader.timestampOrNull(field: String): Timestamp? {
 @OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
 public inline fun <reified Value> RaptorBsonReader.value(): Value {
-	if (bsonType() == BsonType.NULL && typeOf<Value>().isMarkedNullable)
+	if (bsonType() == BsonType.NULL && typeOf<Value>().isMarkedNullable) {
+		skipValue()
+
 		return null as Value
+	}
 
 	return value(typeOf<Value>())
 }
