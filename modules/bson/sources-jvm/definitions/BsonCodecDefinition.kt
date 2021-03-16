@@ -18,6 +18,18 @@ internal class BsonCodecDefinition<Value : Any>(
 			?.let { it as RaptorBsonCodec<Value> }
 
 
+	override fun equals(other: Any?) =
+		this === other || (other is BsonCodecDefinition<*> && codec == other.codec)
+
+
+	override fun hashCode() =
+		codec.hashCode()
+
+
+	override fun toString() =
+		"Raptor BSON definition ($codec)"
+
+
 	override fun RaptorBsonReaderScope.decode(arguments: List<KTypeProjection>?): Value =
 		if (codec is DefaultScopedBsonCodec<Value>)
 			codec.decode(reader.internal(), defaultDecoderContext, arguments = arguments)

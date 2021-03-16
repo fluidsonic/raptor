@@ -13,4 +13,16 @@ internal class BsonCodecProviderDefinition(
 	override fun <Value : Any> codecForValueClass(valueClass: KClass<Value>, registry: RaptorBsonCodecRegistry) =
 		codecProvider.get(valueClass.java, registry.internal())
 			?.let { BsonCodecDefinition(it) }
+
+
+	override fun equals(other: Any?) =
+		this === other || (other is BsonCodecProviderDefinition && codecProvider == other.codecProvider)
+
+
+	override fun hashCode() =
+		codecProvider.hashCode()
+
+
+	override fun toString() =
+		"Raptor BSON definition ($codecProvider)"
 }
