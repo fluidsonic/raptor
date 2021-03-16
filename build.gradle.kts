@@ -10,7 +10,7 @@ allprojects {
 	}
 }
 
-fluidLibrary(name = "raptor", version = "0.9.9", prefixName = false) {
+fluidLibrary(name = "raptor", version = "0.9.10", prefixName = false) {
 	allModules {
 		language {
 			withExperimentalApi("io.fluidsonic.raptor.RaptorInternalApi")
