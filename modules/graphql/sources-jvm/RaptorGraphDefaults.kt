@@ -5,16 +5,18 @@ import io.fluidsonic.currency.*
 import io.fluidsonic.locale.*
 import io.fluidsonic.time.*
 import io.ktor.http.*
+import kotlin.time.*
 import kotlinx.datetime.*
 
 
 public object RaptorGraphDefaults {
 
-	public val definitions: Collection<RaptorGraphDefinition> = listOf<RaptorGraphDefinition>(
+	@OptIn(ExperimentalTime::class)
+	public val definitions: Collection<RaptorGraphDefinition> = listOf(
 		Country.graphDefinition(),
 		CountryCode.graphDefinition(),
 		Currency.graphDefinition(),
-//		Duration.graphDefinition(), // FIXME
+		Duration.graphDefinition(),
 		LocalDate.graphDefinition(),
 		LocalDateTime.graphDefinition(),
 		LocalTime.graphDefinition(),

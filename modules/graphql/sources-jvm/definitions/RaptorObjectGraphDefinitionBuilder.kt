@@ -3,7 +3,6 @@ package io.fluidsonic.raptor
 import io.fluidsonic.raptor.graphql.internal.*
 import io.fluidsonic.stdlib.*
 import kotlin.reflect.*
-import kotlin.reflect.jvm.*
 
 
 @RaptorDsl
@@ -79,7 +78,7 @@ public class RaptorObjectGraphDefinitionBuilder<Type : Any> internal constructor
 	) {
 		field(
 			name = function.name,
-			type = function.reflect()!!.returnType, // FIXME
+			type = function.returnType,
 			stackTrace = stackTrace(skipCount = 1),
 			implicitResolver = { function(it as Type, context) }, // FIXME
 			configure = configure
@@ -95,7 +94,7 @@ public class RaptorObjectGraphDefinitionBuilder<Type : Any> internal constructor
 	) {
 		field(
 			name = function.name,
-			type = function.reflect()!!.returnType, // FIXME
+			type = function.returnType,
 			stackTrace = stackTrace(skipCount = 1),
 			implicitResolver = { function(it as Type, context) }, // FIXME
 			configure = configure

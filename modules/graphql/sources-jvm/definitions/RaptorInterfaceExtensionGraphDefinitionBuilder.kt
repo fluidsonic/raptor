@@ -3,7 +3,6 @@ package io.fluidsonic.raptor
 import io.fluidsonic.raptor.graphql.internal.*
 import io.fluidsonic.stdlib.*
 import kotlin.reflect.*
-import kotlin.reflect.jvm.*
 
 
 @RaptorDsl
@@ -51,7 +50,7 @@ public class RaptorInterfaceExtensionGraphDefinitionBuilder<Type : Any> internal
 		function: KSuspendFunction2<Type, RaptorGraphContext, FieldType>,
 		noinline configure: RaptorGraphFieldBuilder.() -> Unit = {},
 	) {
-		field(name = function.name, type = function.reflect()!!.returnType, configure = configure) // FIXME
+		field(name = function.name, type = function.returnType, configure = configure)
 	}
 
 

@@ -7,32 +7,22 @@ public object RaptorEntitiesFeature : RaptorFeature {
 
 
 	override fun RaptorFeatureConfigurationScope.completeConfiguration() {
-//		val definitions = componentRegistry.one(RaptorEntitiesComponent.Key).complete()
-//
-//		ifInstalled(raptorBsonFeatureId) {
-//			bson {
-//				definitions(definitions.map { it.bsonDefinition })
-//				definitions(RaptorTypedEntityId.bsonDefinition(definitions = definitions))
-//			}
-//		}
-//
+		// FIXME
 //		ifInstalled(raptorDIFeatureId) {
 //			di {
 //				provide { RaptorAnyEntityResolver(definitions = definitions, context = get()) }
 //			}
 //		}
-//
-//		ifInstalled(raptorKtorFeatureId) {
-//			// ifInstalled(raptorGraphFeatureId) { FIXME make compileOnly
-//			graphs.definitions(definitions.map { it.graphDefinition() })
-//			// FIXME
-////			graphs.definitions(
-////				RaptorEntity.graphDefinition(),
-////				RaptorEntityId.graphDefinition()
-////			)
-//			// }
-//		}
-//
+
+		ifInstalled(raptorKtorFeatureId) {
+			// ifInstalled(raptorGraphFeatureId) { FIXME make compileOnly
+			graphs.definitions(
+				RaptorEntity.graphDefinition(),
+//				RaptorEntityId.graphDefinition()
+			)
+			// }
+		}
+
 //		ifInstalled(raptorTransactionFeatureId) {
 //			transactions.di {
 //				provide { RaptorAnyEntityResolver(definitions = definitions, context = get()) }

@@ -33,18 +33,3 @@ internal fun RaptorTypedEntityId.Companion.bsonDefinition(
 		}
 	}
 }
-
-
-@RaptorDsl
-public fun RaptorComponentSet<BsonRaptorComponent>.definition(
-	definition: RaptorEntityId.Definition<*>,
-	priority: RaptorBsonDefinition.Priority = RaptorBsonDefinition.Priority.normal,
-) {
-	definitions(definition.bsonDefinition(), priority = priority)
-
-	configure {
-		componentRegistry.oneOrRegister(RaptorEntitiesBsonComponent.Key) {
-			RaptorEntitiesBsonComponent(bsonComponent = this)
-		}.addIdDefinition(definition)
-	}
-}

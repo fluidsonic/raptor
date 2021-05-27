@@ -3,9 +3,9 @@ package io.fluidsonic.raptor
 import kotlin.reflect.*
 
 
-internal class RaptorEntitiesBsonComponent internal constructor(
-	private val bsonComponent: BsonRaptorComponent,
-) : RaptorComponent.Default<RaptorEntitiesBsonComponent>() {
+internal class RaptorEntitiesGraphComponent internal constructor(
+	private val graphComponent: GraphRaptorComponent,
+) : RaptorComponent.Default<RaptorEntitiesGraphComponent>() {
 
 	private var idDefinitionsByDiscriminator: MutableMap<String, RaptorEntityId.Definition<*>> = hashMapOf()
 	private var idDefinitionsByInstanceClass: MutableMap<KClass<out RaptorEntityId>, RaptorEntityId.Definition<*>> = hashMapOf()
@@ -41,11 +41,11 @@ internal class RaptorEntitiesBsonComponent internal constructor(
 
 	override fun RaptorComponentConfigurationEndScope.onConfigurationEnded() {
 		if (idDefinitionsByDiscriminator.isNotEmpty())
-			bsonComponent.definitions(RaptorTypedEntityId.bsonDefinition(idDefinitionsByDiscriminator.values))
+			graphComponent.definitions(RaptorEntityId.graphDefinition(idDefinitionsByDiscriminator.values))
 	}
 
 
-	internal object Key : RaptorComponentKey<RaptorEntitiesBsonComponent> {
+	internal object Key : RaptorComponentKey<RaptorEntitiesGraphComponent> {
 
 		override fun toString() = "entities"
 	}
@@ -53,15 +53,12 @@ internal class RaptorEntitiesBsonComponent internal constructor(
 
 
 @RaptorDsl
-public fun RaptorComponentSet<BsonRaptorComponent>.definition(
-	definition: RaptorEntityId.Definition<*>,
-	priority: RaptorBsonDefinition.Priority = RaptorBsonDefinition.Priority.normal,
-) {
-	definitions(definition.bsonDefinition(), priority = priority)
+public fun RaptorComponentSet<GraphRaptorComponent>.definition(definition: RaptorEntityId.Definition<*>) {
+	definitions(definition.graphDefinition())
 
 	configure {
-		componentRegistry.oneOrRegister(RaptorEntitiesBsonComponent.Key) {
-			RaptorEntitiesBsonComponent(bsonComponent = this)
+		componentRegistry.oneOrRegister(RaptorEntitiesGraphComponent.Key) {
+			RaptorEntitiesGraphComponent(graphComponent = this)
 		}.addIdDefinition(definition)
 	}
 }

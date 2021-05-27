@@ -13,7 +13,9 @@ fluidLibraryModule(description = "FIXME") {
 		jvm {
 			dependencies {
 				api(project(":raptor-ktor"))
-				api(ktor("server-test-host"))
+				api(ktor("server-test-host")) {
+					exclude("org.jetbrains.kotlin", "kotlin-test-junit")
+				}
 			}
 		}
 	}

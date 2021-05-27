@@ -1,10 +1,9 @@
+import org.gradle.kotlin.dsl.support.*
+
 rootProject.name = "raptor"
 
-//includeBuild("../fluid-graphql") // https://youtrack.jetbrains.com/issue/KT-41370
-
 file("modules")
-	.listFiles()!!
-	.filter(File::isDirectory)
+	.listFilesOrdered(File::isDirectory)
 	.forEach { directory ->
 		val name = directory.name
 
