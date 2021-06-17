@@ -62,6 +62,12 @@ public class RaptorMongodbFilterBuilder @PublishedApi internal constructor() {
 
 
 	@RaptorDsl
+	public fun ne(fieldName: String, value: Any?) {
+		conditions += Filters.ne(fieldName, value)
+	}
+
+
+	@RaptorDsl
 	public inline fun not(conditions: RaptorMongodbFilterBuilder.() -> Unit) {
 		condition(Filters.not(RaptorMongodbFilterBuilder().apply(conditions).build() ?: return))
 	}

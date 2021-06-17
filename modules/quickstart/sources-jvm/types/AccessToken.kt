@@ -1,10 +1,11 @@
 package io.fluidsonic.raptor
 
 
-// Inline classes are still broken in Kotlin 1.3.72
-/* inline */ public data class AccessToken(val value: String) {
+@JvmInline
+public value class AccessToken(public val value: String) {
 
-	override fun toString(): String = value
+	override fun toString(): String =
+		"••••••"
 
 
 	public companion object {

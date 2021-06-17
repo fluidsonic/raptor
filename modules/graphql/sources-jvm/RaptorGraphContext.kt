@@ -1,7 +1,7 @@
 package io.fluidsonic.raptor
 
 
-interface RaptorGraphContext : RaptorTransactionContext, RaptorGraphScope {
+public interface RaptorGraphContext : RaptorTransactionContext, RaptorGraphScope {
 
 	override fun toString(): String
 
@@ -14,5 +14,5 @@ interface RaptorGraphContext : RaptorTransactionContext, RaptorGraphScope {
 		get() = this
 
 
-	companion object
+	public companion object
 }

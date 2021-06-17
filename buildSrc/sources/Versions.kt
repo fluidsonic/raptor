@@ -13,6 +13,6 @@ object Versions {
 	const val kotlinx_atomicfu = "0.15.1" // Ktor 1.5.4 uses 0.15.1
 	const val kotlinx_coroutines = "1.5.0"
 	const val kotlinx_serialization = "1.1.0"
-	const val ktor = "1.5.4"
+	const val ktor = "1.6.0"
 	const val mongodb = "4.2.3"
 }

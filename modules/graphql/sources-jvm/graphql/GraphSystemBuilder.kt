@@ -23,9 +23,10 @@ internal class GraphSystemBuilder private constructor(
 
 
 	// FIXME validate
-	private fun buildSchema() = GSchema(GDocument(
-		definitions = buildDirectiveDefinitions() + buildTypeDefinitions()
-	))
+	private fun buildSchema() = GSchema(
+		document = GDocument(definitions = buildDirectiveDefinitions() + buildTypeDefinitions()),
+		supportOptional = true,
+	)
 
 
 	@OptIn(ExperimentalStdlibApi::class)
@@ -37,7 +38,7 @@ internal class GraphSystemBuilder private constructor(
 				description = "An argument with this directive does not require a value. " +
 					"Providing no value may lead to a different behavior than providing a null value.",
 				name = GraphDirective.optional.name,
-				locations = setOf(GDirectiveLocation.ARGUMENT_DEFINITION)
+				locations = setOf(GDirectiveLocation.ARGUMENT_DEFINITION, GDirectiveLocation.INPUT_FIELD_DEFINITION)
 			))
 	}
 

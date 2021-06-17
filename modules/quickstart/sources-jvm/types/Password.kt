@@ -1,8 +1,8 @@
 package io.fluidsonic.raptor
 
 
-// Inline classes are still broken in Kotlin 1.3.72
-/* inline */ public data class Password(val value: String) {
+@JvmInline
+public value class Password(public val value: String) {
 
 	public inline fun ifEmpty(block: () -> Unit): Password = apply {
 		if (isEmpty()) block()
@@ -18,7 +18,7 @@ package io.fluidsonic.raptor
 
 
 	override fun toString(): String =
-		"Password(***)"
+		"••••••"
 
 
 	public companion object {
