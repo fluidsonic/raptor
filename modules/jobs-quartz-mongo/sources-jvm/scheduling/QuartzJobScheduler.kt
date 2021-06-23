@@ -211,7 +211,7 @@ private fun RaptorJobTiming.createSchedule() =
 
 		is RaptorJobTiming.AtInterval ->
 			SimpleScheduleBuilder.simpleSchedule()
-				.withIntervalInMilliseconds(interval.toLongMilliseconds())
+				.withIntervalInMilliseconds(interval.inWholeMilliseconds)
 				.withMisfireHandlingInstructionNowWithExistingCount()
 
 		is RaptorJobTiming.DailyAtTime ->
@@ -236,7 +236,7 @@ private fun RaptorJobTiming.isValidTrigger(trigger: Trigger) =
 				&& trigger.calendarName == null
 				&& trigger.endTime == null
 				&& trigger.repeatCount == SimpleTrigger.REPEAT_INDEFINITELY
-				&& trigger.repeatInterval == interval.toLongMilliseconds()
+				&& trigger.repeatInterval == interval.inWholeMilliseconds
 
 		is RaptorJobTiming.DailyAtTime ->
 			trigger is CronTrigger

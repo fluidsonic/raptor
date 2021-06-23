@@ -1,10 +1,19 @@
 package io.fluidsonic.raptor
 
 
-public interface RaptorEntityRepository<out Value : RaptorEntity, in Id : RaptorEntityId> {
+public interface RaptorEntityRepository<out Entity : RaptorEntity, in Id : RaptorEntityId> : RaptorEntityResolver<Entity, Id> {
 
-	public suspend fun queryOrNull(id: Id): Value?
-	public suspend fun queryOrSkip(ids: Iterable<Id>): Collection<Value>
+	public suspend fun queryOrNull(id: Id): Entity?
+	public suspend fun queryOrSkip(ids: Iterable<Id>): Collection<Entity>
+
+
+	// FIXME rework
+	override suspend fun resolveOrNull(id: Id): Entity? =
+		queryOrNull(id)
+
+
+	override suspend fun resolveOrSkip(ids: Collection<Id>): Collection<Entity> =
+		queryOrSkip(ids)
 }
 
 

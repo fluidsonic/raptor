@@ -16,7 +16,7 @@ public fun Country.Companion.graphDefinition(): RaptorGraphDefinition = graphObj
 		}
 
 		resolver { country ->
-			country.name(locale)
+			country.name(locale) ?: country.name
 		}
 	}
 }

@@ -7,12 +7,14 @@ public object RaptorEntitiesFeature : RaptorFeature {
 
 
 	override fun RaptorFeatureConfigurationScope.completeConfiguration() {
+		val resolverTypes = componentRegistry.oneOrNull(RaptorEntitiesComponent.Key)?.resolverTypes.orEmpty()
+
 		// FIXME
-//		ifInstalled(raptorDIFeatureId) {
-//			di {
-//				provide { RaptorAnyEntityResolver(definitions = definitions, context = get()) }
-//			}
-//		}
+		ifInstalled(raptorDIFeatureId) {
+			di.provide<RaptorEntityResolver<RaptorEntity, RaptorEntityId>> {
+				RaptorAnyEntityResolver(context = get(), resolverTypes = resolverTypes)
+			}
+		}
 
 		ifInstalled(raptorKtorFeatureId) {
 			// ifInstalled(raptorGraphFeatureId) { FIXME make compileOnly
@@ -22,14 +24,13 @@ public object RaptorEntitiesFeature : RaptorFeature {
 			)
 			// }
 		}
-
-//		ifInstalled(raptorTransactionFeatureId) {
-//			transactions.di {
-//				provide { RaptorAnyEntityResolver(definitions = definitions, context = get()) }
-//			}
-//		}
 	}
 }
+
+
+@RaptorDsl
+public val RaptorTopLevelConfigurationScope.entities: RaptorComponentSet<RaptorEntitiesComponent>
+	get() = componentRegistry.oneOrRegister(RaptorEntitiesComponent.Key, ::RaptorEntitiesComponent)
 
 
 public const val raptorEntitiesFeatureId: RaptorFeatureId = "io.fluidsonic.raptor.entities" // FIXME unify

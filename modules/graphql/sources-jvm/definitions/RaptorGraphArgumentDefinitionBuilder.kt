@@ -135,7 +135,7 @@ public class RaptorGraphArgumentDefinitionBuilder<Value> internal constructor(
 					containingType = parentKotlinType,
 					allowMaybe = true,
 					allowNull = true,
-					allowedVariance = KVariance.IN,
+					allowedVariance = KVariance.OUT,
 					requireSpecialization = true
 				),
 				resolver = resolver,

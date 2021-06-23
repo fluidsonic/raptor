@@ -8,5 +8,5 @@ public interface RaptorEntityResolver<out Value : RaptorEntity, in Id : RaptorEn
 }
 
 
-public val RaptorTransactionContext.entityResolver: RaptorEntityResolver<RaptorEntity, RaptorEntityId>
+public val RaptorScope.entityResolver: RaptorEntityResolver<RaptorEntity, RaptorEntityId>
 	get() = di.get()
