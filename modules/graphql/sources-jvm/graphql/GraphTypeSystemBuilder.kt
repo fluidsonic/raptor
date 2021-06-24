@@ -50,7 +50,7 @@ internal class GraphTypeSystemBuilder private constructor(
 				allowNull = false,
 				allowedVariance = KVariance.INVARIANT,
 				requireSpecialization = false
-			),
+			)!!, // FIXME
 			fields = definitions.map { buildField(it.fieldDefinition) },
 			name = operationType.gqlType.defaultObjectTypeName
 		)

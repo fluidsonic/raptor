@@ -20,7 +20,7 @@ internal data class KotlinType(
 
 
 	val isGeneric: Boolean
-		get() = classifier.typeParameters.isNotEmpty()
+		get() = classifier == Any::class || classifier.typeParameters.isNotEmpty()
 
 
 	val isSpecialized: Boolean
@@ -30,6 +30,9 @@ internal data class KotlinType(
 	fun specialize(): KotlinType {
 		if (isSpecialized)
 			return this // TODO ok?
+
+		if (classifier == Any::class)
+			error("Cannot specialize this type.")
 
 		return when (val typeArgument = typeArgument) {
 			null -> withTypeArgument(of(
@@ -48,6 +51,9 @@ internal data class KotlinType(
 	fun specialize(typeArgument: KotlinType): KotlinType {
 		if (isSpecialized)
 			return this // TODO ok?
+
+		if (classifier == Any::class)
+			return KotlinType(classifier = typeArgument.classifier, isNullable = isNullable || typeArgument.isNullable)
 
 		return when (val thisTypeArgument = this.typeArgument) {
 			null -> withTypeArgument(typeArgument)
@@ -101,7 +107,8 @@ internal data class KotlinType(
 				allowedVariance = allowedVariance,
 				requireSpecialization = requireSpecialization,
 				rootType = type
-			) ?: error("Type '$type' is not valid here.")
+			)// ?: error("Type '$type' is not valid here.")
+				?: KotlinType(classifier = Any::class, isNullable = type.isMarkedNullable) // FIXME so many hacks… basically means totally generic type, e.g. <Value>
 
 
 		private fun of(

@@ -48,7 +48,7 @@ internal class GraphSystemDefinitionBuilder private constructor(
 									allowNull = true,
 									allowedVariance = KVariance.OUT,
 									requireSpecialization = true
-								),
+								)!!, // FIXME
 								namePrefix = ""
 							)
 						}
