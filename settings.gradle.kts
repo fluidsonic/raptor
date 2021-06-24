@@ -2,6 +2,8 @@ import org.gradle.kotlin.dsl.support.*
 
 rootProject.name = "raptor"
 
+includeBuild("../fluid-graphql")
+
 file("modules")
 	.listFilesOrdered(File::isDirectory)
 	.forEach { directory ->

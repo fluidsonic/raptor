@@ -28,7 +28,7 @@ internal class ArgumentResolver(
 		val inputScope = object : RaptorGraphInputScope, RaptorGraphScope by context { // FIXME improve
 
 			override fun invalid(details: String?): Nothing =
-				error("invalid argument") // FIXME
+				error("invalid argument ($details)") // FIXME
 		}
 
 		var value = argumentValues[name]?.let { value ->
