@@ -3,6 +3,7 @@ package io.fluidsonic.raptor
 import io.ktor.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
+import io.netty.handler.codec.http.*
 import java.io.*
 import kotlinx.coroutines.*
 
@@ -49,7 +50,18 @@ public class RaptorKtorServerComponent internal constructor(
 			connectors = connectors.toList(),
 			customConfigurations = customConfigurations.toList(),
 			engineEnvironmentFactory = engineEnvironmentFactory ?: ::applicationEngineEnvironment,
-			engineFactory = engineFactory ?: { embeddedServer(Netty, it) },
+			engineFactory = engineFactory ?: {
+				// TODO make configurable
+				embeddedServer(Netty, it) {
+					httpServerCodec = {
+						HttpServerCodec(
+							4 * 4096, // for mmpt-k2-server project
+							HttpObjectDecoder.DEFAULT_MAX_HEADER_SIZE,
+							HttpObjectDecoder.DEFAULT_MAX_CHUNK_SIZE,
+						)
+					}
+				}
+			},
 			insecure = insecure,
 			rootRouteConfiguration = rootRouteConfiguration,
 			startStopDispatcher = startStopDispatcher ?: Dispatchers.Default,
