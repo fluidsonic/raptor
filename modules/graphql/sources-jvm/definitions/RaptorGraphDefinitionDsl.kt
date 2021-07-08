@@ -168,7 +168,7 @@ public fun <Type : Any> graphInputObjectDefinition(
 @RaptorDsl
 public inline fun <reified Type : Any> graphInterfaceDefinition(
 	name: String = RaptorGraphDefinition.defaultName,
-	@BuilderInference noinline configure: RaptorInterfaceGraphDefinitionBuilder<Type>.() -> Unit,
+	noinline configure: RaptorInterfaceGraphDefinitionBuilder<Type>.() -> Unit,
 ): RaptorGraphDefinition =
 	graphInterfaceDefinition(
 		name = name,

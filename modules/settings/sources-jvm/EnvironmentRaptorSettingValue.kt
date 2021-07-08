@@ -43,6 +43,7 @@ private class EnvironmentRaptorSettingValue(
 }
 
 
+// FIXME does it make sense to actually do that as Value? valueOrNull() will then return non-null even if env var isn't set.
 public fun RaptorSettings.Value.Companion.env(name: String, default: String? = null): RaptorSettings.Value =
 	EnvironmentRaptorSettingValue(name = name, default = default)
 

@@ -17,7 +17,7 @@ public sealed class RaptorGraphOperation<Input : Any, Output> {
 	internal fun defaultName() =
 		this::class.simpleName
 			?.removeSuffix(defaultNameSuffixToRemove)
-			?.decapitalize()
+			?.replaceFirstChar { it.lowercase() }
 
 
 	public companion object

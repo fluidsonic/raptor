@@ -38,7 +38,19 @@ public class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi inte
 
 		val description = description
 		val inputFactory = checkNotNull(inputFactory) { "The input must be defined: input { … } or inputObject { … }" }
+		val outputKotlinType = outputKotlinType
 		val operation = operation
+
+		// FIXME hack
+		if (outputKotlinType.classifier == RaptorUnion2::class) {
+			additionalDefinitions += UnionGraphDefinition(
+				additionalDefinitions = emptyList(),
+				description = null,
+				kotlinType = outputKotlinType,
+				name = defaultOutputObjectName(), // FIXME custom names
+				stackTrace = stackTrace,
+			)
+		}
 
 		return RaptorGraphOperationDefinitionBuilder<Output>(
 			additionalDefinitions = additionalDefinitions,
@@ -60,9 +72,13 @@ public class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi inte
 
 					val input = inputFactory(inputScope)
 
-					with(operation) {
+					val output = with(operation) {
 						this@resolver.execute(input)
 					}
+					if (output is RaptorUnion2<*, *>)
+						return@resolver output.value as Output
+
+					return@resolver output
 				}
 			}
 			.build()
@@ -70,11 +86,11 @@ public class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi inte
 
 
 	private fun defaultInputObjectName() =
-		name.capitalize() + "Input"
+		name.replaceFirstChar { it.uppercase() } + "Input"
 
 
 	internal fun defaultOutputObjectName() =
-		name.capitalize() + "Output"
+		name.replaceFirstChar { it.uppercase() } + "Output"
 
 
 	@RaptorDsl

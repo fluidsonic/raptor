@@ -12,7 +12,7 @@ internal class GraphSystemDefinitionBuilder private constructor(
 ) {
 
 	private val aliasTypeDefinition: MutableCollection<AliasGraphTypeDefinition> = mutableListOf()
-	private val definitionsToScanForGenericTypeReferences: MutableList<GraphTypeSystemDefinition> = mutableListOf()
+	private val definitionsToResolveReferences: MutableList<RaptorGraphDefinition> = mutableListOf()
 	private val inputTypeDefinitionRegistry = TypeDefinitionRegistry(inputOrOutput = "input")
 	private val operationDefinitionsByType: MutableMap<RaptorGraphOperationType, MutableMap<String, GraphOperationDefinition>> = mutableMapOf()
 	private val outputTypeDefinitionRegistry = TypeDefinitionRegistry(inputOrOutput = "output")
@@ -36,19 +36,21 @@ internal class GraphSystemDefinitionBuilder private constructor(
 					is GraphTypeSystemDefinition -> when (definition.kotlinType.isSpecialized) {
 						true -> definition
 						false -> {
-							val typeArgument = definition.kotlinType.classifier.typeParameters.single().upperBounds.single()
-							if (typeArgument.classifier == Any::class)
+							val typeArguments = definition.kotlinType.classifier.typeParameters.map { it.upperBounds.single() }
+							if (typeArguments.any { it.classifier == Any::class }) // FIXME ok?
 								return@mapNotNull null
 
 							definition.specialize(
-								typeArgument = KotlinType.of(
-									type = typeArgument,
-									containingType = null,
-									allowMaybe = false,
-									allowNull = true,
-									allowedVariance = KVariance.OUT,
-									requireSpecialization = true
-								)!!, // FIXME
+								typeArguments = typeArguments.map { typeArgument ->
+									KotlinType.of(
+										type = typeArgument,
+										containingType = null,
+										allowMaybe = false,
+										allowNull = true,
+										allowedVariance = KVariance.OUT,
+										requireSpecialization = true
+									)!! // FIXME
+								},
 								namePrefix = ""
 							)
 						}
@@ -118,6 +120,8 @@ internal class GraphSystemDefinitionBuilder private constructor(
 	private fun registerDefinition(definition: RaptorGraphDefinition) {
 		if (!registeredDefinitions.add(definition))
 			return
+
+		definitionsToResolveReferences += definition
 
 		when (definition) {
 			is GraphOperationDefinition -> registerOperationDefinition(definition)
@@ -204,8 +208,6 @@ internal class GraphSystemDefinitionBuilder private constructor(
 
 
 	private fun registerTypeSystemDefinition(definition: GraphTypeSystemDefinition) {
-		definitionsToScanForGenericTypeReferences += definition
-
 		if (!definition.kotlinType.isSpecialized)
 			unspecializedDefinitionsByClassifier.getOrPut(definition.kotlinType, ::mutableListOf).add(definition)
 
@@ -262,18 +264,20 @@ internal class GraphSystemDefinitionBuilder private constructor(
 
 
 	private tailrec fun resolveAllReferences() {
-		specializeForGenericTypeReferences(definitionsToScanForGenericTypeReferences.removeLastOrNull() ?: return)
+		resolveReferences(definitionsToResolveReferences.removeLastOrNull() ?: return)
 		resolveAllReferences()
 
 		// Recursive because specialization may add new type definitions as needed.
 	}
 
 
-	private fun specializeForGenericTypeReferences(definition: GraphTypeSystemDefinition) {
+	// FIXME rework
+	private fun resolveReferences(definition: RaptorGraphDefinition) {
 		when (definition) {
 			is AliasGraphTypeDefinition -> Unit
 			is EnumGraphDefinition -> Unit
 			is ScalarGraphDefinition -> Unit
+			is UnionGraphDefinition -> Unit
 
 			is InputObjectGraphDefinition -> definition.argumentDefinitions.forEach { argument ->
 				inputTypeDefinitionRegistry.resolve(argument.kotlinType, referee = argument)
@@ -302,6 +306,13 @@ internal class GraphSystemDefinitionBuilder private constructor(
 					outputTypeDefinitionRegistry.resolve(field.kotlinType, referee = field)
 				}
 			}
+
+			is GraphOperationDefinition -> {
+				val outputType = definition.fieldDefinition.kotlinType
+				val resolved = outputTypeDefinitionRegistry.resolve(outputType, referee = definition.fieldDefinition)
+				if (resolved == null && outputType.classifier != Collection::class && outputType.classifier != List::class) // FIXME
+					error("Cannot resolve output type of $definition")
+			}
 		}
 	}
 
@@ -311,7 +322,7 @@ internal class GraphSystemDefinitionBuilder private constructor(
 
 		val definitions = checkNotNull(unspecializedDefinitionsByClassifier[kotlinType.withNullable(false)])
 		for (definition in definitions)
-			registerDefinition(definition.specialize(typeArgument = typeArgument, namePrefix = argumentType.name))
+			registerDefinition(definition.specialize(typeArguments = listOf(typeArgument), namePrefix = argumentType.name)) // FIXME multiple
 	}
 
 
@@ -358,7 +369,7 @@ internal class GraphSystemDefinitionBuilder private constructor(
 				?.let { return it }
 
 			// FIXME nesting
-			val typeArgument = kotlinType.typeArgument ?: run {
+			val typeArgument = kotlinType.typeArguments.singleOrNull() ?: run { // FIXME
 				check(!unspecializedDefinitionsByClassifier.containsKey(kotlinType)) {
 					"A GraphQL definition cannot reference the generic Kotlin type '$kotlinType' without specifying a type argument:\n" +
 						"$referee\n---"
@@ -367,7 +378,7 @@ internal class GraphSystemDefinitionBuilder private constructor(
 				return null
 			}
 
-			val kotlinTypeWithoutTypeArgument = kotlinType.withoutTypeArgument()
+			val kotlinTypeWithoutTypeArgument = kotlinType.withoutTypeArguments()
 			val genericDefinition = definitionsByKotlinType[kotlinTypeWithoutTypeArgument]
 				?: return null
 

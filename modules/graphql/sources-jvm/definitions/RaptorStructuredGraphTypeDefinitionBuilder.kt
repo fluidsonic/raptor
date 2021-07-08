@@ -164,7 +164,7 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 		@RaptorDsl
 		public inline fun <reified Type : Any> objectDefinition(
 			name: String = RaptorGraphDefinition.defaultName,
-			@BuilderInference noinline configure: RaptorObjectGraphDefinitionBuilder<Type>.() -> Unit,
+			noinline configure: RaptorObjectGraphDefinitionBuilder<Type>.() -> Unit, // FIXME get rid of BuilderInference everywhere. too fragile.
 		) {
 			objectDefinition(
 				name = name,

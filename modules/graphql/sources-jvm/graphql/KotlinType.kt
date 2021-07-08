@@ -6,15 +6,14 @@ import kotlin.reflect.*
 
 internal data class KotlinType(
 	val classifier: KClass<*>,
-	val typeArgument: KotlinType? = null,
+	val typeArguments: List<KotlinType?> = emptyList(),
 	val isNullable: Boolean,
 ) {
 
 	init {
-		when (classifier.typeParameters.size) {
-			0 -> require(typeArgument == null) { "Non-generic classifier '${classifier.qualifiedName}' cannot have type argument '$typeArgument'." }
-			1 -> Unit
-			else -> error("Classifier '${classifier.qualifiedName}' must not have multiple type parameters.")
+		require(classifier.typeParameters.size == typeArguments.size) {
+			"Unexpected number of type arguments for classifier '${classifier.qualifiedName}': " +
+				"expected ${classifier.typeParameters.size}, got ${typeArguments.size}"
 		}
 	}
 
@@ -24,7 +23,7 @@ internal data class KotlinType(
 
 
 	val isSpecialized: Boolean
-		get() = !isGeneric || (typeArgument?.isSpecialized ?: false)
+		get() = !isGeneric || (typeArguments.isNotEmpty() && typeArguments.all { it != null && it.isSpecialized })
 
 
 	fun specialize(): KotlinType {
@@ -34,41 +33,48 @@ internal data class KotlinType(
 		if (classifier == Any::class)
 			error("Cannot specialize this type.")
 
-		return when (val typeArgument = typeArgument) {
-			null -> withTypeArgument(of(
-				type = classifier.typeParameters.single().upperBounds.single(),
-				containingType = null,
-				allowMaybe = false,
-				allowNull = true,
-				allowedVariance = KVariance.OUT,
-				requireSpecialization = true
-			))
-			else -> withTypeArgument(typeArgument.specialize())
-		}
+		return withTypeArguments(typeArguments.mapIndexed { index, typeArgument ->
+			when (typeArgument) {
+				null -> of(
+					type = classifier.typeParameters[index].upperBounds.single(),
+					containingType = null,
+					allowMaybe = false,
+					allowNull = true,
+					allowedVariance = KVariance.OUT,
+					requireSpecialization = true
+				)
+				else -> typeArgument.specialize()
+			}
+		})
 	}
 
 
-	fun specialize(typeArgument: KotlinType): KotlinType {
+	fun specialize(typeArguments: List<KotlinType>): KotlinType {
 		if (isSpecialized)
 			return this // TODO ok?
 
-		if (classifier == Any::class)
-			return KotlinType(classifier = typeArgument.classifier, isNullable = isNullable || typeArgument.isNullable)
+		if (classifier == Any::class) {
+			val typeArgument = typeArguments.singleOrNull()
+			require(typeArgument != null) { "Expected exactly 1 type argument but got ${typeArguments.size}." }
 
-		return when (val thisTypeArgument = this.typeArgument) {
-			null -> withTypeArgument(typeArgument)
-			else -> thisTypeArgument.specialize(typeArgument) // FIXME correct?
+			return KotlinType(classifier = typeArgument.classifier, isNullable = isNullable || typeArgument.isNullable)
 		}
+
+		// FIXME specialize arguments
+		return withTypeArguments(typeArguments)
+
+		// FIXME
+//		return when (val thisTypeArgument = this.typeArgument) {
+//			null -> withTypeArgument(typeArgument)
+//			else -> thisTypeArgument.specialize(typeArgument) // FIXME correct?
+//		}
 	}
 
 
 	override fun toString() = buildString {
 		append(classifier.qualifiedName ?: "(unnamed class)")
-		typeArgument?.let { typeArgument ->
-			append("<")
-			append(typeArgument)
-			append(">")
-		}
+		if (typeArguments.isNotEmpty())
+			typeArguments.joinTo(this, prefix = "<", separator = ", ", postfix = ">")
 		if (isNullable)
 			append("?")
 	}
@@ -80,12 +86,12 @@ internal data class KotlinType(
 	}
 
 
-	fun withTypeArgument(typeArgument: KotlinType?) =
-		copy(typeArgument = typeArgument)
+	fun withTypeArguments(typeArguments: List<KotlinType>) =
+		copy(typeArguments = typeArguments)
 
 
-	fun withoutTypeArgument() =
-		copy(typeArgument = null)
+	fun withoutTypeArguments() =
+		copy(typeArguments = typeArguments.map { null })
 
 
 	companion object {
@@ -125,8 +131,6 @@ internal data class KotlinType(
 				error("Type '$rootType' cannot be used here. The Kotlin type must not be nullable.")
 			if (!allowMaybe && type.classifier == Maybe::class)
 				error("Type '$rootType' cannot be used here. 'Maybe' is not allowed in this context.")
-			if (type.arguments.size > 1)
-				error("Type '$rootType' cannot be used here. Kotlin types with more than one type parameter are not supported.")
 
 			fun checkTypeVariance(variance: KVariance?) {
 				when (variance) {
@@ -151,7 +155,7 @@ internal data class KotlinType(
 					else -> KotlinType(
 						classifier = classifier,
 						isNullable = type.isMarkedNullable,
-						typeArgument = type.arguments.firstOrNull()?.let { projection ->
+						typeArguments = type.arguments.map { projection ->
 							checkTypeVariance(projection.variance ?: classifier.typeParameters.first().variance)
 
 							when (val argument = projection.type) {
