@@ -7,7 +7,7 @@ import io.fluidsonic.time.*
 import kotlinx.datetime.*
 
 
-public fun Instant.Companion.graphDefinitions(): RaptorGraphDefinition = graphScalarDefinition {
+public fun Instant.Companion.graphDefinitions(): RaptorGraphDefinition = graphScalarDefinition("Timestamp") {
 	parseString { parseOrNull(it) ?: invalid() }
 	serialize(Timestamp::toString)
 }
