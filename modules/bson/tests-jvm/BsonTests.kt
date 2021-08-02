@@ -25,7 +25,7 @@ class BsonTests {
 			}
 		}
 
-		val configuration = raptor.context.bsonConfiguration
+		val configuration = raptor.context.bson
 
 		assertEquals(
 			expected = listOf(
@@ -51,7 +51,7 @@ class BsonTests {
 			}
 		}
 
-		val configuration = raptor.context.bsonConfiguration
+		val configuration = raptor.context.bson
 
 		assertEquals(
 			expected = listOf(countryDefinition) + currencyDefinition + RaptorBsonDefaults.definitions,
@@ -66,7 +66,7 @@ class BsonTests {
 			install(BsonRaptorFeature)
 		}
 
-		val configuration = raptor.context.bsonConfiguration
+		val configuration = raptor.context.bson
 
 		assertEquals(expected = emptyList(), actual = configuration.definitions)
 	}
@@ -81,7 +81,7 @@ class BsonTests {
 		assertEquals(
 			expected = "You must install BsonRaptorFeature for enabling BSON functionality.",
 			actual = assertFails {
-				raptor.context.bsonConfiguration
+				raptor.context.bson
 			}.message
 		)
 	}

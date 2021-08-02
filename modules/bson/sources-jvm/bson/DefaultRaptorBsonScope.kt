@@ -4,9 +4,9 @@ import io.fluidsonic.raptor.*
 
 
 internal class DefaultRaptorBsonScope(
-	configuration: RaptorBsonConfiguration,
+	definitions: List<RaptorBsonDefinition>,
 	context: RaptorContext,
 ) : RaptorBsonScope, RaptorScope by context {
 
-	override val codecRegistry = DefaultBsonRootCodecRegistry(definitions = configuration.definitions, scope = this)
+	override val codecRegistry = DefaultBsonRootCodecRegistry(definitions = definitions, scope = this)
 }

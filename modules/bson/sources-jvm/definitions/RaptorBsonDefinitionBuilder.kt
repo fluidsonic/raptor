@@ -97,6 +97,16 @@ public class RaptorBsonDefinitionBuilder<Value : Any> internal constructor(
 	}
 
 
+	@JvmName("decodeString")
+	@LowPriorityInOverloadResolution
+	@RaptorDsl
+	public fun decode(decode: (value: String) -> Value) {
+		decode {
+			decode(reader.string())
+		}
+	}
+
+
 	@RaptorDsl
 	public fun encode(includingSubclasses: Boolean = false, encode: RaptorBsonWriterScope.(value: Value) -> Unit) {
 		check(this.encode == null) { "Cannot provide multiple `encode { … }` blocks." }
@@ -119,8 +129,8 @@ public class RaptorBsonDefinitionBuilder<Value : Any> internal constructor(
 	@JvmName("encodeInt")
 	@LowPriorityInOverloadResolution
 	@RaptorDsl
-	public fun encode(encode: (value: Value) -> Int) {
-		encode { value ->
+	public fun encode(encode: (value: Value) -> Int, includingSubclasses: Boolean = false) {
+		encode(includingSubclasses = includingSubclasses) { value ->
 			writer.value(encode(value))
 		}
 	}
@@ -129,8 +139,18 @@ public class RaptorBsonDefinitionBuilder<Value : Any> internal constructor(
 	@JvmName("encodeLong")
 	@LowPriorityInOverloadResolution
 	@RaptorDsl
-	public fun encode(encode: (value: Value) -> Long) {
-		encode { value ->
+	public fun encode(encode: (value: Value) -> Long, includingSubclasses: Boolean = false) {
+		encode(includingSubclasses = includingSubclasses) { value ->
+			writer.value(encode(value))
+		}
+	}
+
+
+	@JvmName("encodeString")
+	@LowPriorityInOverloadResolution
+	@RaptorDsl
+	public fun encode(encode: (value: Value) -> String, includingSubclasses: Boolean = false) {
+		encode(includingSubclasses = includingSubclasses) { value ->
 			writer.value(encode(value))
 		}
 	}

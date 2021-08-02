@@ -22,8 +22,8 @@ public class BsonRaptorComponent internal constructor() : RaptorComponent.Defaul
 				if (includesDefaultDefinitions) RaptorBsonDefaults.definitions else emptyList()
 
 		propertyRegistry.register(
-			RaptorBsonConfiguration.PropertyKey,
-			RaptorBsonConfiguration(definitions = definitions)
+			DefaultRaptorBsonProperties.Key,
+			DefaultRaptorBsonProperties(context = lazyContext, definitions = definitions)
 		)
 	}
 
