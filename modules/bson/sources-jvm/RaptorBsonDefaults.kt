@@ -14,6 +14,7 @@ public object RaptorBsonDefaults {
 
 	@OptIn(ExperimentalTime::class)
 	public val definitions: List<RaptorBsonDefinition> = listOf(
+		CollectionExtensions.bsonDefinition(),
 		Country.bsonDefinition(),
 		CountryCode.bsonDefinition(),
 		Currency.bsonDefinition(),
