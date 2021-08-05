@@ -1,5 +1,10 @@
 package io.fluidsonic.raptor
 
+import io.github.cdimascio.dotenv.*
+
+// FIXME Rework this & support multiplatform.
+private val env = dotenv { ignoreIfMissing = true }
+
 
 // FIXME Do we need to involve this in hasValue()?
 private class EnvironmentRaptorSettingValue(
@@ -31,7 +36,7 @@ private class EnvironmentRaptorSettingValue(
 
 
 	override fun string() =
-		System.getenv(name) ?: default ?: error("Environment variable '$name' is not set.")
+		env[name] ?: default ?: error("Environment variable '$name' is not set.")
 
 
 	override fun stringList() =
