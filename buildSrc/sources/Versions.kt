@@ -7,7 +7,7 @@ object Versions {
 	const val fluid_i18n = "0.10.0"
 	const val fluid_json = "1.2.1"
 	const val fluid_locale = "0.10.0"
-	const val fluid_mongo = "1.3.0"
+	const val fluid_mongo = "1.4.0"
 	const val fluid_stdlib = "0.10.6"
 	const val fluid_time = "0.14.0"
 	const val freemarker = "2.3.31"
