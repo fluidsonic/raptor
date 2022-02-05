@@ -4,7 +4,8 @@ package io.fluidsonic.raptor
 /**
  * A type that resolves to `ID` in a GraphQL schema.
  */
-public inline class GraphId(public val value: String) {
+@JvmInline
+public value class GraphId(public val value: String) {
 
 	override fun toString(): String =
 		value

@@ -1,9 +1,9 @@
 package io.fluidsonic.raptor
 
 
+@JvmInline
 @RaptorDsl
-@Suppress("NON_PUBLIC_PRIMARY_CONSTRUCTOR_OF_INLINE_CLASS")
-public inline class RaptorComponentAuthoring<Component : RaptorComponent>(
+public value class RaptorComponentAuthoring<Component : RaptorComponent>(
 	@RaptorDsl public val authoredSet: RaptorComponentSet<Component>,
 )
 

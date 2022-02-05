@@ -1,8 +1,8 @@
 package io.fluidsonic.raptor
 
 
-@Suppress("NON_PUBLIC_PRIMARY_CONSTRUCTOR_OF_INLINE_CLASS")
-public inline class RaptorTypedEntityId @PublishedApi internal constructor(
+@JvmInline
+public value class RaptorTypedEntityId internal constructor(
 	private val untyped: RaptorEntityId,
 ) {
 
