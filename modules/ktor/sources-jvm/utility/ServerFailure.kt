@@ -2,7 +2,7 @@ package io.fluidsonic.raptor
 
 
 // FIXME better move to quickstart & make usage in this module configurable
-public class ServerFailure private constructor(
+public open class ServerFailure(
 	public val code: String,
 	public val developerMessage: String,
 	public val internalMessage: String,

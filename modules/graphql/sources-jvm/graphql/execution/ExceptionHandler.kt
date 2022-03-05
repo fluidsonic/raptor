@@ -2,7 +2,6 @@ package io.fluidsonic.raptor.graphql.internal
 
 import io.fluidsonic.graphql.*
 import io.fluidsonic.raptor.*
-import io.fluidsonic.raptor.GraphSystem
 import org.slf4j.*
 
 
@@ -12,13 +11,17 @@ internal class ExceptionHandler : GExceptionHandler {
 		val failure = exception as? ServerFailure ?: ServerFailure.internal(exception)
 		LoggerFactory.getLogger(GraphSystem::class.java).error("Endpoint failure", failure) // FIXME
 
+		val extensions = hashMapOf(
+			"code" to failure.code,
+		)
+
+		if (failure.userMessage != failure.developerMessage)
+			extensions["userMessage"] = failure.userMessage
+
 		// FIXME origin/locations/nodes
 		return GError(
 			message = failure.developerMessage,
-			extensions = mapOf(
-				"code" to failure.code,
-				"userMessage" to failure.userMessage
-			)
+			extensions = extensions,
 		)
 	}
 }

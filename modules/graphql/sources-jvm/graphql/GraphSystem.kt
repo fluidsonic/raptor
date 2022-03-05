@@ -10,6 +10,7 @@ internal class GraphSystem(
 ) {
 
 	private val executor = GExecutor.default(
+		exceptionHandler = ExceptionHandler(), // FIXME improve
 		schema = schema,
 		nodeInputCoercer = NodeInputCoercer,
 		variableInputCoercer = VariableInputCoercer
