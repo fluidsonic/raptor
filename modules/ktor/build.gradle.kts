@@ -22,7 +22,7 @@ fluidLibraryModule(description = "FIXME") {
 				implementation(kotlinx("atomicfu", Versions.kotlinx_atomicfu, usePrefix = false))
 				implementation(ktor("websockets"))
 				implementation(ktor("server-netty"))
-				implementation("ch.qos.logback:logback-classic:1.2.10") // TODO Don't add concrete Slf4j implementation here.
+				implementation("ch.qos.logback:logback-classic:1.2.11") // TODO Don't add concrete Slf4j implementation here.
 			}
 		}
 	}
