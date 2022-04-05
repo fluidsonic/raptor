@@ -2,10 +2,10 @@ import io.fluidsonic.gradle.*
 import org.jetbrains.kotlin.gradle.targets.js.nodejs.*
 
 plugins {
-	id("io.fluidsonic.gradle") version "1.1.25"
+	id("io.fluidsonic.gradle") version "1.1.26"
 }
 
-fluidLibrary(name = "raptor", version = "0.11.1", prefixName = false) {
+fluidLibrary(name = "raptor", version = "0.12.0", prefixName = false) {
 	allModules {
 		language {
 			withExperimentalApi("io.fluidsonic.raptor.RaptorInternalApi")

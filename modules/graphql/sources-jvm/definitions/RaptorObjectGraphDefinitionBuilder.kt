@@ -144,6 +144,20 @@ public class RaptorObjectGraphDefinitionBuilder<Type : Any> internal constructor
 		)
 			.apply(configure)
 			.build()
+
+		if (type.classifier == RaptorUnion2::class)
+			nestedDefinitions += RaptorUnionGraphDefinitionBuilder<RaptorUnion2<*, *>>(
+				kotlinType = KotlinType.of(
+					type = type,
+					containingType = null,
+					allowMaybe = false,
+					allowNull = true,
+					allowedVariance = KVariance.OUT,
+					requireSpecialization = true,
+				),
+				name = "${this.name}_$name",
+				stackTrace = stackTrace,
+			)
 	}
 
 

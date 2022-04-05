@@ -1,6 +1,7 @@
 package io.fluidsonic.raptor
 
 import io.fluidsonic.raptor.graphql.internal.*
+import io.fluidsonic.stdlib.*
 
 
 @RaptorDsl
@@ -60,16 +61,26 @@ public open class RaptorGraphFieldBuilder internal constructor(
 		private var resolve: (suspend RaptorGraphOutputScope.(parent: Any) -> Any?)? = implicitResolver
 
 
-		override fun build(): GraphFieldDefinition =
-			GraphFieldDefinition.Resolvable(
+		override fun build(): GraphFieldDefinition {
+			val resolve = resolve ?: error("A resolver must be defined: resolve { … }")
+
+			return GraphFieldDefinition.Resolvable(
 				argumentDefinitions = argumentContainer.argumentDefinitions,
 				argumentResolver = argumentContainer.resolver,
 				description = description,
 				kotlinType = kotlinType,
 				name = name,
-				resolve = resolve ?: error("A resolver must be defined: resolve { … }"),
+				resolve = when (kotlinType.classifier) {
+					RaptorUnion2::class -> {
+						{ parent ->
+							resolve(parent)?.cast<RaptorUnion2<*, *>>()?.value
+						}
+					}
+					else -> resolve
+				},
 				stackTrace = stackTrace
 			)
+		}
 
 
 		@RaptorDsl

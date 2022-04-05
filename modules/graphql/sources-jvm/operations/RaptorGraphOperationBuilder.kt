@@ -14,7 +14,7 @@ public class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi inte
 ) {
 
 	internal val additionalDefinitions: MutableList<RaptorGraphDefinition> = mutableListOf()
-	internal var outputObjectDefinition: RaptorGraphDefinition? = null
+	internal var outputDefinition: RaptorGraphDefinition? = null
 
 	private val argumentContainer = RaptorGraphArgumentDefinitionBuilder.ContainerImpl(
 		factoryName = "factory",
@@ -147,7 +147,7 @@ public fun <Output : Any> RaptorGraphOperationBuilder<*, Output>.outputObject(
 	name: String = RaptorGraphDefinition.defaultName,
 	configure: RaptorObjectGraphDefinitionBuilder<Output>.() -> Unit,
 ) {
-	check(outputObjectDefinition === null) { "Cannot define multiple outputs." }
+	check(outputDefinition === null) { "Cannot define multiple outputs." }
 
 	@Suppress("UNCHECKED_CAST")
 	val definition = RaptorObjectGraphDefinitionBuilder<Output>(
@@ -159,5 +159,26 @@ public fun <Output : Any> RaptorGraphOperationBuilder<*, Output>.outputObject(
 		.build()
 
 	additionalDefinitions += definition
-	outputObjectDefinition = definition
+	outputDefinition = definition
+}
+
+
+@RaptorDsl
+public fun <Output : Any> RaptorGraphOperationBuilder<*, Output>.outputUnion(
+	name: String = RaptorGraphDefinition.defaultName,
+	configure: RaptorUnionGraphDefinitionBuilder<Output>.() -> Unit,
+) {
+	check(outputDefinition === null) { "Cannot define multiple outputs." }
+
+	@Suppress("UNCHECKED_CAST")
+	val definition = RaptorUnionGraphDefinitionBuilder<Output>(
+		kotlinType = outputKotlinType,
+		name = RaptorGraphDefinition.resolveName(name, defaultName = this::defaultOutputObjectName),
+		stackTrace = stackTrace(skipCount = 1)
+	)
+		.apply(configure)
+		.build()
+
+	additionalDefinitions += definition
+	outputDefinition = definition
 }
