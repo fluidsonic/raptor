@@ -3,6 +3,7 @@ package io.fluidsonic.raptor
 import io.fluidsonic.raptor.graphql.internal.*
 import io.fluidsonic.stdlib.*
 import kotlin.reflect.*
+import kotlin.reflect.full.*
 
 
 @RaptorDsl
@@ -148,10 +149,10 @@ public class RaptorObjectGraphDefinitionBuilder<Type : Any> internal constructor
 		if (type.classifier == RaptorUnion2::class)
 			nestedDefinitions += RaptorUnionGraphDefinitionBuilder<RaptorUnion2<*, *>>(
 				kotlinType = KotlinType.of(
-					type = type,
+					type = type.withNullability(false),
 					containingType = null,
 					allowMaybe = false,
-					allowNull = true,
+					allowNull = false,
 					allowedVariance = KVariance.OUT,
 					requireSpecialization = true,
 				),
