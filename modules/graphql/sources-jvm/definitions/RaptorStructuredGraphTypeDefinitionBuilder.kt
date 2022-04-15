@@ -239,12 +239,13 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 		public inline fun <reified Type : Any> unionDefinition(
 			name: String = RaptorGraphDefinition.defaultName,
 			@BuilderInference noinline configure: RaptorUnionGraphDefinitionBuilder<Type>.() -> Unit = {},
-		): RaptorGraphDefinition =
+		) {
 			unionDefinition(
 				name = name,
 				type = typeOf<Type>(),
 				configure = configure,
 			)
+		}
 
 
 		@RaptorDsl
@@ -252,8 +253,8 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 			name: String = RaptorGraphDefinition.defaultName,
 			type: KType,
 			configure: RaptorUnionGraphDefinitionBuilder<Type>.() -> Unit = {},
-		): RaptorGraphDefinition =
-			RaptorUnionGraphDefinitionBuilder<Type>(
+		) {
+			nestedDefinitions += RaptorUnionGraphDefinitionBuilder<Type>(
 				kotlinType = KotlinType.of(
 					type = type,
 					containingType = null,
@@ -270,6 +271,6 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 				stackTrace = stackTrace(skipCount = 1)
 			)
 				.apply(configure)
-				.build()
+		}
 	}
 }
