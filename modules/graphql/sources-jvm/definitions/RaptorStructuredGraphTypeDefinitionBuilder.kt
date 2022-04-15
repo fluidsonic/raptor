@@ -36,7 +36,6 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 	public inner class NestedBuilder internal constructor() {
 
 		// FIXME use global names (graphEnumDefinition) & scope or else users may accidentally use the wrong one!
-		@OptIn(ExperimentalStdlibApi::class)
 		@RaptorDsl
 		public inline fun <reified Type : Enum<Type>> enumDefinition(
 			name: String = RaptorGraphDefinition.defaultName,
@@ -79,7 +78,6 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 		}
 
 
-		@OptIn(ExperimentalStdlibApi::class)
 		@RaptorDsl
 		public inline fun <reified Type : Any> inputObjectDefinition(
 			name: String = RaptorGraphDefinition.defaultName,
@@ -119,7 +117,6 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 		}
 
 
-		@OptIn(ExperimentalStdlibApi::class)
 		@RaptorDsl
 		public inline fun <reified Type : Any> interfaceDefinition(
 			name: String = RaptorGraphDefinition.defaultName,
@@ -160,11 +157,10 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 		}
 
 
-		@OptIn(ExperimentalStdlibApi::class)
 		@RaptorDsl
 		public inline fun <reified Type : Any> objectDefinition(
 			name: String = RaptorGraphDefinition.defaultName,
-			noinline configure: RaptorObjectGraphDefinitionBuilder<Type>.() -> Unit, // FIXME get rid of BuilderInference everywhere. too fragile.
+			noinline configure: RaptorObjectGraphDefinitionBuilder<Type>.() -> Unit = {}, // FIXME get rid of BuilderInference everywhere. too fragile.
 		) {
 			objectDefinition(
 				name = name,
@@ -178,7 +174,7 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 		public fun <Type : Any> objectDefinition(
 			name: String = RaptorGraphDefinition.defaultName,
 			type: KType,
-			configure: RaptorObjectGraphDefinitionBuilder<Type>.() -> Unit,
+			configure: RaptorObjectGraphDefinitionBuilder<Type>.() -> Unit = {},
 		) {
 			nestedDefinitions += RaptorObjectGraphDefinitionBuilder<Type>(
 				kotlinType = KotlinType.of(
@@ -200,7 +196,6 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 		}
 
 
-		@OptIn(ExperimentalStdlibApi::class)
 		@RaptorDsl
 		public inline fun <reified Type : Any> scalarDefinition(
 			name: String = RaptorGraphDefinition.defaultName,
@@ -238,5 +233,43 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 			)
 				.apply(configure)
 		}
+
+
+		@RaptorDsl
+		public inline fun <reified Type : Any> unionDefinition(
+			name: String = RaptorGraphDefinition.defaultName,
+			@BuilderInference noinline configure: RaptorUnionGraphDefinitionBuilder<Type>.() -> Unit = {},
+		): RaptorGraphDefinition =
+			unionDefinition(
+				name = name,
+				type = typeOf<Type>(),
+				configure = configure,
+			)
+
+
+		@RaptorDsl
+		public fun <Type : Any> unionDefinition(
+			name: String = RaptorGraphDefinition.defaultName,
+			type: KType,
+			configure: RaptorUnionGraphDefinitionBuilder<Type>.() -> Unit = {},
+		): RaptorGraphDefinition =
+			RaptorUnionGraphDefinitionBuilder<Type>(
+				kotlinType = KotlinType.of(
+					type = type,
+					containingType = null,
+					allowMaybe = false,
+					allowNull = false,
+					allowedVariance = KVariance.OUT, // TODO prb. wrong
+					requireSpecialization = false
+				),
+				name = RaptorGraphDefinition.resolveName(
+					name,
+					defaultNamePrefix = this@RaptorStructuredGraphTypeDefinitionBuilder.name,
+					type = type
+				),
+				stackTrace = stackTrace(skipCount = 1)
+			)
+				.apply(configure)
+				.build()
 	}
 }

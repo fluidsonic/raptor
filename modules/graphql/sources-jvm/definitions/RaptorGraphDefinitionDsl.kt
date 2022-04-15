@@ -8,7 +8,6 @@ import kotlin.reflect.*
 // FIXME Can also improve automatic name generation.
 
 
-@OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
 public inline fun <reified Type : Any, reified ReferencedType : Any> graphAliasDefinition(
 	@BuilderInference noinline configure: RaptorAliasGraphDefinitionBuilder<Type, ReferencedType>.() -> Unit,
@@ -50,7 +49,6 @@ public fun <Type : Any, ReferencedType : Any> graphAliasDefinition(
 		.build()
 
 
-@OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
 public inline fun <reified Type : Enum<Type>> graphEnumDefinition(
 	name: String = RaptorGraphDefinition.defaultName,
@@ -88,7 +86,6 @@ public fun <Type : Enum<Type>> graphEnumDefinition(
 		.build()
 
 
-@OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
 public inline fun <reified Type : Any> graphIdAliasDefinition(
 	@BuilderInference noinline configure: RaptorAliasGraphDefinitionBuilder<Type, String>.() -> Unit,
@@ -99,7 +96,6 @@ public inline fun <reified Type : Any> graphIdAliasDefinition(
 	)
 
 
-@OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
 public fun <Type : Any> graphIdAliasDefinition(
 	type: KType,
@@ -129,7 +125,6 @@ public fun <Type : Any> graphIdAliasDefinition(
 		.build()
 
 
-@OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
 public inline fun <reified Type : Any> graphInputObjectDefinition(
 	name: String = RaptorGraphDefinition.defaultName,
@@ -164,7 +159,6 @@ public fun <Type : Any> graphInputObjectDefinition(
 		.build()
 
 
-@OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
 public inline fun <reified Type : Any> graphInterfaceDefinition(
 	name: String = RaptorGraphDefinition.defaultName,
@@ -199,7 +193,6 @@ public fun <Type : Any> graphInterfaceDefinition(
 		.build()
 
 
-@OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
 public inline fun <reified Type : Any> graphInterfaceExtensionDefinition(
 	@BuilderInference noinline configure: RaptorInterfaceExtensionGraphDefinitionBuilder<Type>.() -> Unit,
@@ -231,11 +224,10 @@ public fun <Type : Any> graphInterfaceExtensionDefinition(
 
 
 // FIXME put all dsl behind an object for grouping & reuse in nested{} blocks
-@OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
 public inline fun <reified Type : Any> graphObjectDefinition(
 	name: String = RaptorGraphDefinition.defaultName,
-	@BuilderInference noinline configure: RaptorObjectGraphDefinitionBuilder<Type>.() -> Unit,
+	@BuilderInference noinline configure: RaptorObjectGraphDefinitionBuilder<Type>.() -> Unit = {},
 ): RaptorGraphDefinition =
 	graphObjectDefinition(
 		name = name,
@@ -248,7 +240,7 @@ public inline fun <reified Type : Any> graphObjectDefinition(
 public fun <Type : Any> graphObjectDefinition(
 	name: String = RaptorGraphDefinition.defaultName,
 	type: KType,
-	configure: RaptorObjectGraphDefinitionBuilder<Type>.() -> Unit,
+	configure: RaptorObjectGraphDefinitionBuilder<Type>.() -> Unit = {},
 ): RaptorGraphDefinition =
 	RaptorObjectGraphDefinitionBuilder<Type>(
 		kotlinType = KotlinType.of(
@@ -266,7 +258,6 @@ public fun <Type : Any> graphObjectDefinition(
 		.build()
 
 
-@OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
 public inline fun <reified Type : Any> graphObjectExtensionDefinition(
 	@BuilderInference noinline configure: RaptorObjectExtensionGraphDefinitionBuilder<Type>.() -> Unit,
@@ -297,7 +288,6 @@ public fun <Type : Any> graphObjectExtensionDefinition(
 		.build()
 
 
-@OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
 public inline fun <reified Value> graphOperationDefinition(
 	name: String,
@@ -337,7 +327,6 @@ public fun <Value> graphOperationDefinition(
 		.build()
 
 
-@OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
 public inline fun <reified Value : Any> graphScalarDefinition(
 	name: String = RaptorGraphDefinition.defaultName,
@@ -372,7 +361,6 @@ public fun <Type : Any> graphScalarDefinition(
 		.build()
 
 
-@OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
 public inline fun <reified Type : Any> graphUnionDefinition(
 	name: String = RaptorGraphDefinition.defaultName,
@@ -405,4 +393,3 @@ public fun <Type : Any> graphUnionDefinition(
 	)
 		.apply(configure)
 		.build()
-

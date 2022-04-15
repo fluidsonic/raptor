@@ -20,19 +20,34 @@ public class RaptorObjectGraphDefinitionBuilder<Type : Any> internal constructor
 	private var hasInputObject = false
 
 
-	override fun build(description: String?, additionalDefinitions: Collection<RaptorGraphDefinition>) =
-		ObjectGraphDefinition(
+	override fun build(description: String?, additionalDefinitions: Collection<RaptorGraphDefinition>): ObjectGraphDefinition {
+		val fieldDefinitions = fieldDefinitions.toMutableList()
+		if (fieldDefinitions.isEmpty()) {
+			when (kotlinType.classifier.objectInstance) {
+				null -> error("At least one field must be defined: field(…)")
+				else -> fieldDefinitions += GraphFieldDefinition.Resolvable(
+					argumentDefinitions = emptyList(),
+					argumentResolver = ArgumentResolver(factoryName = "field"),
+					description = "Dummy. See https://github.com/graphql/graphql-spec/issues/568",
+					kotlinType = KotlinType(classifier = Unit::class, isNullable = false),
+					name = "_",
+					resolve = {},
+					stackTrace = stackTrace,
+				)
+			}
+		}
+
+		return ObjectGraphDefinition(
 			additionalDefinitions = additionalDefinitions,
 			description = description,
-			fieldDefinitions = fieldDefinitions.ifEmpty { null }
-				?: error("At least one field must be defined: field(…)"),
+			fieldDefinitions = fieldDefinitions,
 			kotlinType = kotlinType,
 			name = name,
 			stackTrace = stackTrace
 		)
+	}
 
 
-	@OptIn(ExperimentalStdlibApi::class)
 	@RaptorDsl
 	public inline fun <reified FieldType> field(
 		name: String,
@@ -42,7 +57,6 @@ public class RaptorObjectGraphDefinitionBuilder<Type : Any> internal constructor
 	}
 
 
-	@OptIn(ExperimentalStdlibApi::class)
 	@RaptorDsl
 	public inline fun <reified FieldType> field(
 		property: KProperty1<in Type, FieldType>,
