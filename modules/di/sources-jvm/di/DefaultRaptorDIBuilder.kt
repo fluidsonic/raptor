@@ -14,7 +14,7 @@ internal class DefaultRaptorDIBuilder : RaptorDIBuilder {
 		RaptorDI.module(name = name, providers = providers)
 
 
-	override fun provide(type: KType, provide: RaptorDI.() -> Any) {
+	override fun provide(type: KType, provide: RaptorDI.() -> Any?) {
 		validateType(type)
 
 		providers += RaptorDI.provider(type = type, provide = provide)

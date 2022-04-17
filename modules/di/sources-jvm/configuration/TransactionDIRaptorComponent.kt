@@ -9,7 +9,7 @@ internal class TransactionDIRaptorComponent : RaptorComponent.Default<RaptorDICo
 	internal val factoryPropertyKey: RaptorPropertyKey<RaptorDI.Factory> = FactoryPropertyKey()
 
 
-	override fun provide(type: KType, provide: RaptorDI.() -> Any) {
+	override fun provide(type: KType, provide: RaptorDI.() -> Any?) {
 		builder.provide(type = type, provide = provide)
 	}
 

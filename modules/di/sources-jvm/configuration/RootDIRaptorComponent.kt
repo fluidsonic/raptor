@@ -8,7 +8,7 @@ internal class RootDIRaptorComponent : RaptorComponent.Default<RaptorDIComponent
 	private val builder = DefaultRaptorDIBuilder()
 
 
-	override fun provide(type: KType, provide: RaptorDI.() -> Any) {
+	override fun provide(type: KType, provide: RaptorDI.() -> Any?) {
 		builder.provide(type = type, provide = provide)
 	}
 
