@@ -18,7 +18,7 @@ public val RaptorGlobalDsl.bson: RaptorBsonDsl
 public inline fun <reified Value : Any> RaptorBsonDsl.definition(
 	/* @BuilderInference */
 	noinline configure: RaptorBsonDefinitionBuilder<Value>.() -> Unit,
-): RaptorBsonDefinition =
+): RaptorBsonDefinition.ForValue<Value> =
 	definition(valueClass = Value::class, configure = configure)
 
 
@@ -27,5 +27,5 @@ public inline fun <reified Value : Any> RaptorBsonDsl.definition(
 public fun <Value : Any> RaptorBsonDsl.definition(
 	valueClass: KClass<Value>,
 	configure: RaptorBsonDefinitionBuilder<Value>.() -> Unit,
-): RaptorBsonDefinition =
+): RaptorBsonDefinition.ForValue<Value> =
 	RaptorBsonDefinitionBuilder(valueClass = valueClass).apply(configure).build()

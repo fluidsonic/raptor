@@ -12,7 +12,6 @@ import org.bson.codecs.jsr310.*
 
 public object RaptorBsonDefaults {
 
-	@OptIn(ExperimentalTime::class)
 	public val definitions: List<RaptorBsonDefinition> = listOf(
 		CollectionExtensions.bsonDefinition(),
 		Country.bsonDefinition(),

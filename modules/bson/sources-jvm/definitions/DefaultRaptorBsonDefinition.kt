@@ -9,8 +9,8 @@ internal class DefaultRaptorBsonDefinition<Value : Any>(
 	private val decode: (RaptorBsonReaderScope.(arguments: List<KTypeProjection>?) -> Value)?,
 	private val encode: (RaptorBsonWriterScope.(value: Value) -> Unit)?,
 	private val encodesSubclasses: Boolean,
-	private val valueClass: KClass<Value>,
-) : RaptorBsonDefinition {
+	override val valueClass: KClass<Value>,
+) : RaptorBsonDefinition.ForValue<Value> {
 
 	private fun <Value : Any> additionalCodeForValueClass(valueClass: KClass<Value>, registry: RaptorBsonCodecRegistry): RaptorBsonCodec<Value>? {
 		for (definition in additionalDefinitions)

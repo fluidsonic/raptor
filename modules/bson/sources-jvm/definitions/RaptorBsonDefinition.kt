@@ -30,4 +30,10 @@ public interface RaptorBsonDefinition {
 		normal,
 		low
 	}
+
+
+	public interface ForValue<Value : Any> : RaptorBsonDefinition {
+
+		public val valueClass: KClass<Value>
+	}
 }

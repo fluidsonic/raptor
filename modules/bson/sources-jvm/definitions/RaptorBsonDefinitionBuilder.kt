@@ -18,7 +18,7 @@ public class RaptorBsonDefinitionBuilder<Value : Any> internal constructor(
 	private var encodesSubclasses = false
 
 
-	internal fun build(): RaptorBsonDefinition {
+	internal fun build(): RaptorBsonDefinition.ForValue<Value> {
 		check(decode != null || encode != null) { "A `decode { … }` block, an `encode { … }` block, or both must be provided." }
 
 		return DefaultRaptorBsonDefinition(
