@@ -27,7 +27,6 @@
             <option value="$PROJECT_DIR$/modules/quickstart" />
             <option value="$PROJECT_DIR$/modules/security" />
             <option value="$PROJECT_DIR$/modules/settings" />
-            <option value="$PROJECT_DIR$/modules/settings-hocon" />
             <option value="$PROJECT_DIR$/modules/transactions" />
           </set>
         </option>

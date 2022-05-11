@@ -1,12 +1,12 @@
 package io.fluidsonic.raptor
 
+import kotlin.reflect.*
 
-// FIXME inject with DI? or should this only be used at assembly-time?
-// FIXME refactor
+
+// TODO inject with DI? or should this only be used at assembly-time?
 public interface RaptorSettings {
 
-	public fun hasValue(path: String): Boolean
-	public fun valueOrNull(path: String): Value?
+	public fun valueProvider(path: String): ValueProvider<*>?
 
 
 	public companion object {
@@ -26,202 +26,106 @@ public interface RaptorSettings {
 	@RaptorDsl
 	public class Builder internal constructor() {
 
-		private val values: MutableMap<String, Value> = hashMapOf()
+		private val valueProviders: MutableMap<String, ValueProvider<*>> = hashMapOf()
 
 
 		internal fun build(): RaptorSettings {
-			if (values.isEmpty())
+			if (valueProviders.isEmpty())
 				return empty
 
-			return DefaultRaptorSettings(values = values.toMap(hashMapOf()))
+			return MapRaptorSettings(valueProviders = valueProviders.toMap(hashMapOf()))
 		}
 
 
 		@RaptorDsl
-		public fun set(key: String, value: Int) {
-			set(key, Value.of(value))
+		public fun set(key: String, value: Any?) {
+			valueProviders[key] = value as? ValueProvider<*> ?: ValueProvider.constant(value)
 		}
 
 
 		@RaptorDsl
-		public fun set(key: String, value: String) {
-			set(key, Value.of(value))
-		}
-
-
-		@RaptorDsl
-		public fun set(key: String, value: Value) {
-			values[key] = value
-		}
-
-
-		@RaptorDsl
-		public infix fun String.by(value: Int) {
-			this by Value.of(value)
-		}
-
-
-		@RaptorDsl
-		public infix fun String.by(value: String) {
-			this by Value.of(value)
-		}
-
-
-		@RaptorDsl
-		public infix fun String.by(value: Value) {
+		public infix fun String.by(value: Any?) {
 			set(this, value)
 		}
 
 
 		@RaptorDsl
 		public operator fun String.invoke(values: Builder.() -> Unit) {
-			this@Builder.values[this] = Value.of(Builder().apply(values).build())
+			set(this, Builder().apply(values).build())
 		}
 	}
 
 
-	public interface Value {
+	public interface ValueProvider<out Value : Any> {
 
-		public fun int(): Int
-		public fun intList(): List<Int>
-		public fun settings(): RaptorSettings
-		public fun settingsList(): List<RaptorSettings>
-		public fun string(): String
-		public fun stringList(): List<String>
+		public val description: String
+		public val value: Value?
 
 
-		public companion object {
-
-			public fun of(string: Int): Value =
-				IntValue(string)
-
-
-			public fun of(string: String): Value =
-				StringValue(string)
-
-
-			public fun of(settings: RaptorSettings): Value =
-				SettingsValue(settings)
-
-
-			private class IntValue(val value: Int) : Value {
-
-				override fun int() =
-					value
-
-
-				override fun intList() =
-					listOf(value)
-
-
-				override fun settings() =
-					error("Int value cannot be converted to settings: $value")
-
-
-				override fun settingsList() =
-					error("Int value cannot be converted to settings: $value")
-
-
-				override fun string() =
-					error("Int value cannot be converted to string: $value")
-
-
-				override fun stringList() =
-					error("Int value cannot be converted to string: $value")
-			}
-
-
-			private class SettingsValue(private val value: RaptorSettings) : Value {
-
-				override fun int() =
-					error("Settings value cannot be converted to int: $value")
-
-
-				override fun intList() =
-					error("Settings value cannot be converted to int: $value")
-
-
-				override fun settings() =
-					value
-
-
-				override fun settingsList() =
-					listOf(value)
-
-
-				override fun string() =
-					error("Settings value cannot be converted to string: $value")
-
-
-				override fun stringList() =
-					error("Settings value cannot be converted to string: $value")
-			}
-
-
-			private class StringValue(val value: String) : Value {
-
-				override fun int() =
-					error("String value cannot be converted to int: $value")
-
-
-				override fun intList() =
-					error("String value cannot be converted to int: $value")
-
-
-				override fun settings() =
-					error("String value cannot be converted to settings: $value")
-
-
-				override fun settingsList() =
-					error("String value cannot be converted to settings: $value")
-
-
-				override fun string() =
-					value
-
-
-				override fun stringList() =
-					listOf(value)
-			}
-		}
+		public companion object
 	}
 }
 
 
+@Suppress("UNCHECKED_CAST")
+private fun <Value : Any> convert(valueProvider: RaptorSettings.ValueProvider<*>, path: String, value: Any, type: KClass<Value>): Value {
+	if (type == Int::class && value is String)
+		value.toIntOrNull()?.let { return it as Value }
+
+	return type.safeCast(value)
+		?: error("Settings value '$path' (${valueProvider.description}) has ${value::class} but $type was expected.")
+}
+
+
 public fun RaptorSettings.int(path: String): Int =
-	value(path).int()
+	value(path)
 
 
-public fun RaptorSettings.intList(path: String): List<Int> =
-	value(path).intList()
+public fun RaptorSettings.intOrNull(path: String): Int? =
+	valueOrNull(path)
 
 
 public fun RaptorSettings.settings(path: String): RaptorSettings =
-	value(path).settings()
+	value(path)
 
 
-public fun RaptorSettings.settingsList(path: String): List<RaptorSettings> =
-	value(path).settingsList()
-
-
-public operator fun RaptorSettings.get(path: String): RaptorSettings.Value? =
+public fun RaptorSettings.settingsOrNull(path: String): RaptorSettings? =
 	valueOrNull(path)
 
 
 public fun RaptorSettings.string(path: String): String =
-	value(path).string()
+	value(path)
 
 
 public fun RaptorSettings.stringOrNull(path: String): String? =
-	valueOrNull(path)?.string()
+	valueOrNull(path)
 
 
-public fun RaptorSettings.stringList(path: String): List<String> =
-	value(path).stringList()
+public inline fun <reified Value : Any> RaptorSettings.value(path: String): Value =
+	value(path = path, type = Value::class)
 
 
-public fun RaptorSettings.value(path: String): RaptorSettings.Value =
-	valueOrNull(path) ?: error("Settings are missing a value for path '$path'.")
+public fun <Value : Any> RaptorSettings.value(path: String, type: KClass<out Value>): Value {
+	val valueProvider = valueProvider(path)
+		?: error("Settings value '$path' is not defined.")
+
+	val anyValue = valueProvider.value
+		?: error("Settings value '$path' (${valueProvider.description}) is not set.")
+
+	return convert(valueProvider, path, anyValue, type)
+}
+
+
+public inline fun <reified Value : Any> RaptorSettings.valueOrNull(path: String): Value? =
+	valueOrNull(path = path, type = Value::class)
+
+
+public fun <Value : Any> RaptorSettings.valueOrNull(path: String, type: KClass<out Value>): Value? {
+	val valueProvider = valueProvider(path) ?: return null
+	val anyValue = valueProvider.value ?: return null
+
+	return convert(valueProvider, path, anyValue, type)
+}
 
 
 @RaptorDsl
