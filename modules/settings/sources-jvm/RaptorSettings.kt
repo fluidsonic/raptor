@@ -128,6 +128,20 @@ public fun <Value : Any> RaptorSettings.valueOrNull(path: String, type: KClass<o
 }
 
 
+public fun <Value : Any, TransformedValue : Any> RaptorSettings.ValueProvider<Value>.map(
+	transform: (value: Value) -> TransformedValue?,
+): RaptorSettings.ValueProvider<TransformedValue> =
+	object : RaptorSettings.ValueProvider<TransformedValue> {
+
+		override val description: String
+			get() = this@map.description
+
+
+		override val value: TransformedValue?
+			get() = this@map.value?.let(transform)
+	}
+
+
 @RaptorDsl
 public fun RaptorRootComponent.install(settings: RaptorSettings) {
 	componentRegistry.oneOrNull(RaptorSettingsComponent.Key)?.let {
