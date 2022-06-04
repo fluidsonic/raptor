@@ -2,6 +2,8 @@ package io.fluidsonic.raptor
 
 import io.ktor.application.*
 import io.ktor.features.*
+import io.ktor.http.*
+import io.ktor.response.*
 import io.ktor.util.*
 
 
@@ -14,13 +16,11 @@ internal object EncryptionEnforcementKtorFeature : ApplicationFeature<Applicatio
 		Unit.configure()
 
 		pipeline.intercept(ApplicationCallPipeline.Features) {
-			if (call.request.origin.scheme != "https")
-				error("FIXME") // FIXME
-//				throw BakuCommandFailure(
-//					code = "encryptedConnectionRequired",
-//					userMessage = BakuCommandFailure.genericUserMessage,
-//					developerMessage = "This API must only be used over an encrypted connection."
-//				)
+			val scheme = call.request.origin.scheme
+			if (scheme != "https" && scheme != "wss") {
+				call.respondText("The connection protocol is not secure.", status = HttpStatusCode.BadRequest)
+				finish()
+			}
 		}
 	}
 }
