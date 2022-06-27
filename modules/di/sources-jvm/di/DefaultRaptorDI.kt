@@ -150,7 +150,7 @@ internal class DefaultRaptorDI(
 		private val modules: List<RaptorDI.Module>,
 	) : RaptorDI.Factory {
 
-		override fun createDI(context: RaptorContext, configuration: RaptorDIBuilder.() -> Unit): RaptorDI {
+		override fun createDI(context: RaptorContext, type: KType, configuration: RaptorDIBuilder.() -> Unit): RaptorDI {
 			val parentContext = context.parent
 			val parentDI = when (context) {
 				is RaptorContext.Lazy -> parentContext?.di
@@ -159,7 +159,8 @@ internal class DefaultRaptorDI(
 
 			val contextModule = Module(
 				name = "raptor (context)",
-				providers = listOf(RaptorDI.provider(context::class.starProjectedType) {
+				providers = listOf(RaptorDI.provider(type) {
+					// TODO Looks type-unsafe.
 					(context as? RaptorContext.Lazy)?.context ?: context
 				})
 			)

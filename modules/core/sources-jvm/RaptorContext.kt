@@ -18,7 +18,7 @@ public interface RaptorContext : RaptorScope {
 		get() = this
 
 
-	public companion object
+	public companion object;
 
 
 	public interface Lazy : RaptorContext

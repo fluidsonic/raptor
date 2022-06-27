@@ -49,7 +49,7 @@ public val RaptorComponentSet<RaptorTransactionComponent>.di: RaptorComponentSet
 						val factory = parentContext[factoryPropertyKey]
 							?: error("Cannot find dependency injection factory.")
 
-						propertyRegistry.register(DIRaptorPropertyKey, factory.createDI(context = lazyContext))
+						propertyRegistry.register(DIRaptorPropertyKey, factory.createDI<RaptorTransactionContext>(context = lazyContext))
 					}
 				}
 			}

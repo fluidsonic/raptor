@@ -3,7 +3,6 @@ package io.fluidsonic.raptor
 import kotlin.internal.*
 import kotlin.properties.*
 import kotlin.reflect.*
-import kotlin.reflect.full.*
 
 
 @RaptorDsl
@@ -26,6 +25,7 @@ public interface RaptorDI {
 		public fun factory(modules: List<Module>): Factory =
 			DefaultRaptorDI.Factory(modules = modules.toList())
 
+
 		@RaptorInternalApi
 		public fun module(name: String, providers: List<Provider>): Module =
 			DefaultRaptorDI.Module(name = name, providers = providers.toList())
@@ -41,7 +41,7 @@ public interface RaptorDI {
 	@RaptorInternalApi
 	public interface Factory {
 
-		public fun createDI(context: RaptorContext, configuration: RaptorDIBuilder.() -> Unit = {}): RaptorDI
+		public fun createDI(context: RaptorContext, type: KType, configuration: RaptorDIBuilder.() -> Unit = {}): RaptorDI
 	}
 
 
@@ -63,13 +63,19 @@ public interface RaptorDI {
 }
 
 
-@OptIn(ExperimentalStdlibApi::class)
+@Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
+internal inline fun <reified Context : RaptorContext> RaptorDI.Factory.createDI(
+	context: @NoInfer Context,
+	noinline configuration: RaptorDIBuilder.() -> Unit = {},
+): RaptorDI =
+	createDI(context = context, type = typeOf<Context>(), configuration = configuration)
+
+
 @RaptorDsl
 public inline fun <reified Value> RaptorDI.get(): Value =
 	get(typeOf<Value>()) as Value
 
 
-@OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
 public inline operator fun <reified Value> RaptorDI.invoke(): PropertyDelegateProvider<Any?, Lazy<Value>> =
 	object : PropertyDelegateProvider<Any?, Lazy<Value>> {
@@ -83,7 +89,7 @@ public inline operator fun <reified Value> RaptorDI.invoke(): PropertyDelegatePr
 
 
 public fun RaptorDI.Module.providerForType(type: KType): RaptorDI.Provider? =
-	providers.lastOrNull { it.type.isSubtypeOf(type) }
+	providers.lastOrNull { it.type == type }
 
 
 @RaptorDsl
