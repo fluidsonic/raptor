@@ -29,7 +29,6 @@ internal class GraphSystemBuilder private constructor(
 	)
 
 
-	@OptIn(ExperimentalStdlibApi::class)
 	private fun buildDirectiveDefinitions(): List<GDirectiveDefinition> = buildList {
 		val referencedDirectiveNames = findReferencedDirectiveNames()
 
@@ -165,7 +164,6 @@ internal class GraphSystemBuilder private constructor(
 	)
 
 
-	@OptIn(ExperimentalStdlibApi::class)
 	private fun findReferencedDirectiveNames(): Set<String> =
 		typeSystem.types.flatMapTo(hashSetOf()) { type ->
 			when (type) {
@@ -196,10 +194,12 @@ internal class GraphSystemBuilder private constructor(
 	}
 
 
-	// FIXME Won't work for generic interfaces
 	private fun interfaceTypeNamesForObjectValueClass(kotlinType: KotlinType, target: MutableSet<String>) {
 		for (superType in kotlinType.classifier.supertypes) {
 			val superClass = superType.classifier as? KClass<*> ?: continue
+			if (superClass.typeParameters.isNotEmpty())
+				continue // TODO Won't work for generic interfaces
+
 			val superKotlinType = KotlinType(classifier = superClass, isNullable = false)
 
 			val gqlSuperClassName = interfaceTypesByKotlinType[superKotlinType]?.name
