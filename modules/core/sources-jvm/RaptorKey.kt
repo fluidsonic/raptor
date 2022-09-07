@@ -1,7 +1,7 @@
 package io.fluidsonic.raptor
 
 
-interface RaptorKey<Value : Any> {
+public interface RaptorKey<Value : Any> {
 
 	override fun toString(): String
 }

@@ -26,7 +26,7 @@ public val PipelineContext<*, out ApplicationCall>.raptorContext: RaptorTransact
 	get() = context.raptorContext
 
 
-public val Raptor.ktor: RaptorKtor
+public val RaptorContext.ktor: RaptorKtor
 	get() = properties[RaptorKtorImpl.PropertyKey]
 		?: error("You must install ${RaptorKtorFeature::class.simpleName} for enabling Ktor functionality.")
 

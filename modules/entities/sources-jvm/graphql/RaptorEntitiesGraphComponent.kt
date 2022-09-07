@@ -4,7 +4,7 @@ import kotlin.reflect.*
 
 
 internal class RaptorEntitiesGraphComponent internal constructor(
-	private val graphComponent: GraphRaptorComponent,
+	private val graphComponent: RaptorGraphComponent,
 ) : RaptorComponent.Default<RaptorEntitiesGraphComponent>() {
 
 	private var idDefinitionsByDiscriminator: MutableMap<String, RaptorEntityId.Definition<*>> = hashMapOf()
@@ -53,7 +53,7 @@ internal class RaptorEntitiesGraphComponent internal constructor(
 
 
 @RaptorDsl
-public fun RaptorComponentSet<GraphRaptorComponent>.definition(definition: RaptorEntityId.Definition<*>) {
+public fun RaptorComponentSet<RaptorGraphComponent>.definition(definition: RaptorEntityId.Definition<*>) {
 	definitions(definition.graphDefinition())
 
 	configure {

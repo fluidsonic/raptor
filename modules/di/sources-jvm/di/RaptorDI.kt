@@ -63,12 +63,9 @@ public interface RaptorDI {
 }
 
 
-@Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
-internal inline fun <reified Context : RaptorContext> RaptorDI.Factory.createDI(
-	context: @NoInfer Context,
-	noinline configuration: RaptorDIBuilder.() -> Unit = {},
-): RaptorDI =
-	createDI(context = context, type = typeOf<Context>(), configuration = configuration)
+@RaptorDsl
+public val RaptorDI.context: RaptorContext
+	get() = get()
 
 
 @RaptorDsl
@@ -86,6 +83,14 @@ public inline operator fun <reified Value> RaptorDI.invoke(): PropertyDelegatePr
 		override fun provideDelegate(thisRef: Any?, property: KProperty<*>): Lazy<Value> =
 			lazy { get(type) as Value }
 	}
+
+
+@Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
+internal inline fun <reified Context : RaptorContext> RaptorDI.Factory.createDI(
+	context: @NoInfer Context,
+	noinline configuration: RaptorDIBuilder.() -> Unit = {},
+): RaptorDI =
+	createDI(context = context, type = typeOf<Context>(), configuration = configuration)
 
 
 public fun RaptorDI.Module.providerForType(type: KType): RaptorDI.Provider? =

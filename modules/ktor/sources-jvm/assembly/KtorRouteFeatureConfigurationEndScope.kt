@@ -19,6 +19,9 @@ public interface KtorRouteFeatureConfigurationEndScope {
 		public val componentRegistry: RaptorComponentRegistry
 
 		@RaptorDsl
+		public val componentRegistry2: RaptorComponentRegistry2
+
+		@RaptorDsl
 		public val propertyRegistry: RaptorPropertyRegistry // FIXME support
 	}
 
@@ -27,6 +30,9 @@ public interface KtorRouteFeatureConfigurationEndScope {
 
 		@RaptorDsl
 		public val componentRegistry: RaptorComponentRegistry
+
+		@RaptorDsl
+		public val componentRegistry2: RaptorComponentRegistry2
 
 		@RaptorDsl
 		public val propertyRegistry: RaptorPropertyRegistry // FIXME support

@@ -4,10 +4,22 @@
   <component name="GradleSettings">
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
+        <compositeConfiguration>
+          <compositeBuild compositeDefinitionSource="SCRIPT">
+            <builds>
+              <build path="$PROJECT_DIR$/../fluid-gradle" name="fluid-gradle">
+                <projects>
+                  <project path="$PROJECT_DIR$/../fluid-gradle" />
+                </projects>
+              </build>
+            </builds>
+          </compositeBuild>
+        </compositeConfiguration>
         <option name="distributionType" value="DEFAULT_WRAPPED" />
         <option name="externalProjectPath" value="$PROJECT_DIR$" />
         <option name="modules">
           <set>
+            <option value="$PROJECT_DIR$/../fluid-gradle" />
             <option value="$PROJECT_DIR$" />
             <option value="$PROJECT_DIR$/buildSrc" />
             <option value="$PROJECT_DIR$/modules/bson" />
@@ -18,10 +30,12 @@
             <option value="$PROJECT_DIR$/modules/entities-core" />
             <option value="$PROJECT_DIR$/modules/environment" />
             <option value="$PROJECT_DIR$/modules/freemarker" />
+            <option value="$PROJECT_DIR$/modules/graph" />
             <option value="$PROJECT_DIR$/modules/graphql" />
             <option value="$PROJECT_DIR$/modules/jobs" />
             <option value="$PROJECT_DIR$/modules/jobs-quartz-mongo" />
             <option value="$PROJECT_DIR$/modules/ktor" />
+            <option value="$PROJECT_DIR$/modules/ktor-graph" />
             <option value="$PROJECT_DIR$/modules/ktor-test" />
             <option value="$PROJECT_DIR$/modules/lifecycle" />
             <option value="$PROJECT_DIR$/modules/mongodb" />

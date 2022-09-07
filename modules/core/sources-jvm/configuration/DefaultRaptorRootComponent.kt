@@ -2,22 +2,26 @@ package io.fluidsonic.raptor
 
 
 internal class DefaultRaptorRootComponent : RaptorComponent.Default<RaptorRootComponent>(),
-	RaptorRootComponent,
+	RaptorComponent2,
 	RaptorComponentConfigurationEndScope,
+	RaptorComponentConfigurationEndScope2,
 	RaptorFeatureConfigurationApplicationScope,
-	RaptorFeatureConfigurationScope {
+	RaptorFeatureConfigurationScope,
+	RaptorRootComponent {
 
 	private val featureIds: MutableSet<RaptorFeatureId> = mutableSetOf()
 	private val features: MutableSet<RaptorFeature> = mutableSetOf()
 	private val lazyFeatureConfigurations: MutableMap<RaptorFeatureId, MutableList<() -> Unit>> = hashMapOf()
 
 	override val componentRegistry = DefaultRaptorComponentRegistry()
+	override val componentRegistry2 = DefaultRaptorComponentRegistry2()
 	override val lazyContext = LazyRootRaptorContext()
 	override val propertyRegistry = DefaultRaptorPropertyRegistry()
 
 
 	init {
 		componentRegistry.register(Key, component = this)
+		componentRegistry2.register(Key2, component = this)
 	}
 
 
@@ -37,6 +41,7 @@ internal class DefaultRaptorRootComponent : RaptorComponent.Default<RaptorRootCo
 			}
 
 		componentRegistry.endConfiguration(scope = this)
+		componentRegistry2.endConfiguration(scope = this)
 
 		for (feature in features)
 			with(feature) {
@@ -91,6 +96,12 @@ internal class DefaultRaptorRootComponent : RaptorComponent.Default<RaptorRootCo
 
 
 	private object Key : RaptorComponentKey<DefaultRaptorRootComponent> {
+
+		override fun toString() = "core"
+	}
+
+
+	private object Key2 : RaptorComponentKey2<DefaultRaptorRootComponent> {
 
 		override fun toString() = "core"
 	}

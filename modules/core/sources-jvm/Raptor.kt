@@ -1,25 +1,25 @@
 package io.fluidsonic.raptor
 
 
-interface Raptor {
+public interface Raptor {
 
-	val context: RaptorContext
+	public val context: RaptorContext
 
 	override fun toString(): String
 
 
-	companion object
+	public companion object
 }
 
 
-operator fun <Value : Any> Raptor.get(key: RaptorPropertyKey<out Value>): Value? =
+public operator fun <Value : Any> Raptor.get(key: RaptorPropertyKey<out Value>): Value? =
 	context[key]
 
 
-val Raptor.properties
+public val Raptor.properties: RaptorPropertySet
 	get() = context.properties
 
 
 @RaptorDsl
-fun raptor(configure: RaptorRootComponent.() -> Unit): Raptor =
+public fun raptor(configure: RaptorRootComponent.() -> Unit): Raptor =
 	DefaultRaptorRootComponent().apply(configure).endConfiguration()
