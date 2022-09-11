@@ -32,13 +32,13 @@ public class RaptorMongodbFilterBuilder @PublishedApi internal constructor() {
 
 
 	@RaptorDsl
-	public fun gt(fieldName: String, value: Any?) {
+	public fun gt(fieldName: String, value: Any) {
 		conditions += Filters.gt(fieldName, value)
 	}
 
 
 	@RaptorDsl
-	public fun gte(fieldName: String, value: Any?) {
+	public fun gte(fieldName: String, value: Any) {
 		conditions += Filters.gte(fieldName, value)
 	}
 
@@ -50,13 +50,13 @@ public class RaptorMongodbFilterBuilder @PublishedApi internal constructor() {
 
 
 	@RaptorDsl
-	public fun lt(fieldName: String, value: Any?) {
+	public fun lt(fieldName: String, value: Any) {
 		conditions += Filters.lt(fieldName, value)
 	}
 
 
 	@RaptorDsl
-	public fun lte(fieldName: String, value: Any?) {
+	public fun lte(fieldName: String, value: Any) {
 		conditions += Filters.lte(fieldName, value)
 	}
 

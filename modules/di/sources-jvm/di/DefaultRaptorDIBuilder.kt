@@ -1,6 +1,7 @@
-package io.fluidsonic.raptor
+package io.fluidsonic.raptor.di
 
-import io.fluidsonic.raptor.RaptorDI.*
+import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.di.RaptorDI.*
 import kotlin.reflect.*
 import kotlin.reflect.full.*
 

@@ -1,4 +1,6 @@
-package io.fluidsonic.raptor
+package io.fluidsonic.raptor.transactions
+
+import io.fluidsonic.raptor.*
 
 
 internal class DefaultRaptorTransactionFactory(
@@ -14,10 +16,4 @@ internal class DefaultRaptorTransactionFactory(
 				configuration()
 			}
 			.build()
-
-
-	object PropertyKey : RaptorPropertyKey<DefaultRaptorTransactionFactory> {
-
-		override fun toString() = "transaction factory"
-	}
 }

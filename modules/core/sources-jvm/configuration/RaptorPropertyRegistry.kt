@@ -1,16 +1,16 @@
 package io.fluidsonic.raptor
 
 
-interface RaptorPropertyRegistry {
+public interface RaptorPropertyRegistry {
 
-	fun <Value : Any> register(key: RaptorPropertyKey<in Value>, value: Value)
-	fun toSet(): RaptorPropertySet
+	public fun <Value : Any> register(key: RaptorPropertyKey<in Value>, value: Value)
+	public fun toSet(): RaptorPropertySet
 	override fun toString(): String
 
 
-	companion object {
+	public companion object {
 
-		fun default(): RaptorPropertyRegistry =
+		public fun default(): RaptorPropertyRegistry =
 			DefaultRaptorPropertyRegistry()
 	}
 }

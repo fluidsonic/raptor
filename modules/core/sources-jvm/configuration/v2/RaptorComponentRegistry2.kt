@@ -9,6 +9,9 @@ public interface RaptorComponentRegistry2 {
 	public fun isEmpty(): Boolean
 	public fun <Component : RaptorComponent2> oneOrNull(key: RaptorComponentKey2<out Component>): Component?
 	public fun <Component : RaptorComponent2> many(key: RaptorComponentKey2<out Component>): List<Component>
+
+	@Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE") // FIXME
+	@kotlin.internal.LowPriorityInOverloadResolution
 	public fun <Component : RaptorComponent2> register(key: RaptorComponentKey2<in Component>, component: Component)
 	override fun toString(): String
 
@@ -37,7 +40,14 @@ public inline fun <Component : RaptorComponent2> RaptorComponentRegistry2.oneOrR
 	key: RaptorComponentKey2<Component>,
 	create: () -> Component,
 ): Component =
-	oneOrNull(key) ?: create().also { register(key, it) }
+	oneOrNull(key) ?: register(key, create)
+
+
+public inline fun <Component : RaptorComponent2> RaptorComponentRegistry2.register(
+	key: RaptorComponentKey2<in Component>,
+	create: () -> Component,
+): Component =
+	create().also { register(key, it) }
 
 
 public val RaptorComponentRegistry2.root: RaptorComponentRegistry2
@@ -45,6 +55,5 @@ public val RaptorComponentRegistry2.root: RaptorComponentRegistry2
 
 
 @RaptorDsl
-public val RaptorComponent.componentRegistry2: RaptorComponentRegistry2
-	get() = extensions[RaptorComponentRegistryExtensionKey2]
-		?: error("Cannot access the component registry of a component that hasn't been registered yet.")
+public val RaptorComponent2.componentRegistry2: RaptorComponentRegistry2
+	get() = registration.registry

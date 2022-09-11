@@ -5,13 +5,10 @@ import io.fluidsonic.raptor.*
 
 public object RaptorGraphFeature : RaptorFeature {
 
-	override val id: RaptorFeatureId = raptorGraphFeatureId
-
-
-	override fun RaptorFeatureConfigurationApplicationScope.applyConfiguration() {
-		propertyRegistry.register(RaptorGraphsPropertyKey, componentRegistry2.many(RaptorGraphComponent.Key).map { it.finalize() })
+	override fun RaptorFeatureConfigurationScope.beginConfiguration() {
+		componentRegistry2.register(RaptorGraphsComponent.Key) { RaptorGraphsComponent() }
 	}
+
+
+	override fun toString(): String = "graph"
 }
-
-
-public const val raptorGraphFeatureId: RaptorFeatureId = "raptor.graph"

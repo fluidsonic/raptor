@@ -1,10 +1,10 @@
-package io.fluidsonic.raptor
+package io.fluidsonic.raptor.ktor
 
+import io.fluidsonic.raptor.*
 import kotlinx.atomicfu.*
 
 
-// FIXME prevent multi-start in feature with clear message
-internal class RaptorKtorImpl(
+internal class DefaultRaptorKtor(
 	configuration: KtorConfiguration,
 	context: RaptorContext,
 ) : RaptorKtor {
@@ -39,7 +39,7 @@ internal class RaptorKtorImpl(
 	}
 
 
-	object PropertyKey : RaptorPropertyKey<RaptorKtorImpl> {
+	internal object PropertyKey : RaptorPropertyKey<DefaultRaptorKtor> {
 
 		override fun toString() = "ktor"
 	}
@@ -54,3 +54,7 @@ internal class RaptorKtorImpl(
 		stopping
 	}
 }
+
+
+internal val RaptorContext.ktorInternal: DefaultRaptorKtor?
+	get() = properties[DefaultRaptorKtor.PropertyKey]

@@ -1,21 +1,22 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.raptor.ktor.*
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.response.*
 import io.ktor.routing.*
 
 
-public object GraphKtorFeature : KtorRouteFeature {
+public object GraphKtorFeature : RaptorKtorRouteFeature {
 
-	override fun KtorRouteFeatureConfigurationEndScope.onConfigurationEnded() {
+	override fun RaptorKtorRouteFeatureConfigurationEndScope.onConfigurationEnded() {
 		route {
-			propertyRegistry.register(GraphRoute.PropertyKey, componentRegistry.one(GraphRaptorComponent.Key).toGraphRoute())
+			propertyRegistry.register(GraphRoute.PropertyKey, componentRegistry2.one(GraphRaptorComponent.Key).toGraphRoute())
 		}
 	}
 
 
-	override fun KtorRouteFeatureConfigurationStartScope.onConfigurationStarted() {
+	override fun RaptorKtorRouteFeatureConfigurationStartScope.onConfigurationStarted() {
 		route {
 			custom {
 				get {
@@ -31,23 +32,24 @@ public object GraphKtorFeature : KtorRouteFeature {
 }
 
 
-@RaptorDsl
-public val RaptorTopLevelConfigurationScope.graphs: RaptorComponentSet<GraphRaptorComponent>
-	get() = ktor.servers.routes(recursive = true).withComponentAuthoring {
-		map {
-			componentRegistry.configure(GraphRaptorComponent.Key)
-		}
-	}
+// FIXME
+//@RaptorDsl
+//public val RaptorTopLevelConfigurationScope.graphs: RaptorComponentSet2<GraphRaptorComponent>
+//	get() = ktor.servers.all.routes.new(recursive = true).withComponentAuthoring {
+//		map {
+//			componentRegistry.configure(GraphRaptorComponent.Key)
+//		}
+//	}
 
 
 @RaptorDsl
-public fun KtorRouteRaptorComponent.newGraph(provideSchema: Boolean = false, configuration: GraphRaptorComponent.() -> Unit = {}) {
+public fun RaptorKtorRouteComponent.newGraph(provideSchema: Boolean = false, configuration: GraphRaptorComponent.() -> Unit = {}) {
 	GraphRaptorComponent()
-		.also { componentRegistry.register(GraphRaptorComponent.Key, it) }
+		.also { componentRegistry2.register(GraphRaptorComponent.Key, it) }
 		.also(configuration)
 
-	if (provideSchema) {
-		newRoute("schema") {
+	if (provideSchema)
+		routes.new("schema") {
 			custom {
 				get {
 					val schema = raptorContext[GraphRoute.PropertyKey]!!.system.schema
@@ -56,5 +58,4 @@ public fun KtorRouteRaptorComponent.newGraph(provideSchema: Boolean = false, con
 				}
 			}
 		}
-	}
 }

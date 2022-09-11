@@ -11,7 +11,6 @@ fluidLibraryModule(description = "FIXME") {
 
 	targets {
 		jvm {
-			@Suppress("SpellCheckingInspection")
 			dependencies {
 				api(project(":raptor-core"))
 				api(project(":raptor-di"))
@@ -20,6 +19,7 @@ fluidLibraryModule(description = "FIXME") {
 				api(ktor("server-core"))
 
 				implementation(kotlinx("atomicfu", Versions.kotlinx_atomicfu, usePrefix = false))
+				implementation(kotlinx("coroutines-core", Versions.kotlinx_coroutines))
 				implementation(ktor("websockets"))
 				implementation(ktor("server-netty"))
 				implementation("ch.qos.logback:logback-classic:1.2.11") // TODO Don't add concrete Slf4j implementation here.

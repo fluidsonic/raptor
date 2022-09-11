@@ -1,5 +1,6 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.raptor.di.*
 import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.reflect.*

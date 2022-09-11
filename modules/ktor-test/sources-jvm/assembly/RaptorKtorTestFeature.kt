@@ -1,19 +1,17 @@
-package io.fluidsonic.raptor
+package io.fluidsonic.raptor.ktor
 
+import io.fluidsonic.raptor.*
 import io.ktor.server.testing.*
 import kotlinx.coroutines.*
 
 
 public object RaptorKtorTestFeature : RaptorFeature {
 
-	override val id: RaptorFeatureId = "raptor.ktor.test"
-
-
 	@Suppress("INVISIBLE_MEMBER")
 	override fun RaptorFeatureConfigurationScope.beginConfiguration() {
 		install(RaptorKtorFeature)
 
-		ktor.servers {
+		ktor.servers.all {
 			engineEnvironmentFactory(::createTestEnvironment)
 			engineFactory(::TestApplicationEngine)
 			startStopDispatcher(Dispatchers.Unconfined)

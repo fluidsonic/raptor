@@ -9,10 +9,4 @@ public interface RaptorFeatureConfigurationApplicationScope : RaptorConfiguratio
 
 	@RaptorDsl
 	public val componentRegistry2: RaptorComponentRegistry2
-
-	@RaptorDsl
-	public val lazyContext: RaptorContext
-
-	@RaptorDsl
-	public val propertyRegistry: RaptorPropertyRegistry
 }

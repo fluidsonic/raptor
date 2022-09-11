@@ -1,12 +1,12 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.raptor.di.*
+import io.fluidsonic.raptor.graph.*
+import io.fluidsonic.raptor.ktor.*
 import io.ktor.http.*
 
 
 public object RaptorQuickstartFeature : RaptorFeature {
-
-	override val id: RaptorFeatureId = raptorQuickstartFeatureId
-
 
 	override fun RaptorFeatureConfigurationScope.beginConfiguration() {
 		install(BsonRaptorFeature)
@@ -24,7 +24,7 @@ public object RaptorQuickstartFeature : RaptorFeature {
 			)
 		}
 
-		graphs {
+		graphs.all {
 			includeDefaultDefinitions()
 
 			definitions(
@@ -38,6 +38,3 @@ public object RaptorQuickstartFeature : RaptorFeature {
 		}
 	}
 }
-
-
-public const val raptorQuickstartFeatureId: RaptorFeatureId = "raptor.quickstart"

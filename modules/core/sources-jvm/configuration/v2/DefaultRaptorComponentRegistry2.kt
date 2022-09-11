@@ -22,20 +22,18 @@ internal class DefaultRaptorComponentRegistry2(
 	}
 
 
-	fun endConfiguration(scope: RaptorComponentConfigurationEndScope2) {
+	fun endConfiguration(scope: RaptorConfigurationEndScope) {
 		checkIsConfigurable { "The configuration phase has already ended." }
 
 		configurationEnded = true
 
 		for (set in setsByKey.values)
 			for (registration in set)
-				registration.registry.endConfiguration(scope = scope)
+				registration.registry.endConfiguration(scope)
 
 		for (set in setsByKey.values)
 			for (registration in set)
-				with(registration.component) {
-					scope.onConfigurationEnded()
-				}
+				registration.endConfiguration(scope)
 	}
 
 
@@ -75,10 +73,8 @@ internal class DefaultRaptorComponentRegistry2(
 		getOrCreateSet(key).add(
 			component = component,
 			registry = DefaultRaptorComponentRegistry2(parent = this)
-		) { registration ->
+		) {
 			with(component) {
-				extensions[RaptorComponentRegistryExtensionKey2] = registration.registry
-
 				StartScope.onConfigurationStarted()
 			}
 		}
@@ -123,8 +119,8 @@ internal class DefaultRaptorComponentRegistry2(
 
 	private inner class RegistrationSet<Component : RaptorComponent2>(
 		private val key: RaptorComponentKey2<Component>,
-		private val registrations: MutableList<Registration<Component>> = mutableListOf(),
-	) : RaptorComponentSet2<Component>, List<Registration<Component>> by registrations {
+		private val registrations: MutableList<RaptorComponentRegistration<Component>> = mutableListOf(),
+	) : RaptorComponentSet2<Component>, List<RaptorComponentRegistration<Component>> by registrations {
 
 		private val configurations: MutableList<Component.() -> Unit> = mutableListOf()
 
@@ -132,7 +128,7 @@ internal class DefaultRaptorComponentRegistry2(
 		inline fun add(
 			component: Component,
 			registry: DefaultRaptorComponentRegistry2,
-			beforeConfiguration: (registration: Registration<Component>) -> Unit,
+			beforeConfiguration: (registration: RaptorComponentRegistration<Component>) -> Unit,
 		) {
 			registrations.firstOrNull { it.component == component }?.let { existingComponent ->
 				error(
@@ -142,7 +138,7 @@ internal class DefaultRaptorComponentRegistry2(
 				)
 			}
 
-			val registration = Registration(
+			val registration = RaptorComponentRegistration(
 				component = component,
 				registry = registry
 			)
@@ -205,13 +201,6 @@ internal class DefaultRaptorComponentRegistry2(
 			}
 		}
 	}
-
-
-	private class Registration<Component : RaptorComponent2>(
-		val component: Component,
-		var configurationStarted: Boolean = false,
-		val registry: DefaultRaptorComponentRegistry2,
-	)
 
 
 	private object StartScope : RaptorComponentConfigurationStartScope2

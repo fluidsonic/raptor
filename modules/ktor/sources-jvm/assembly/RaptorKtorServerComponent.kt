@@ -1,5 +1,9 @@
-package io.fluidsonic.raptor
+package io.fluidsonic.raptor.ktor
 
+import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.di.*
+import io.fluidsonic.raptor.ktor.*
+import io.fluidsonic.raptor.transactions.*
 import io.ktor.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
@@ -9,31 +13,98 @@ import kotlinx.coroutines.*
 
 
 public class RaptorKtorServerComponent internal constructor(
-	internal val globalScope: RaptorTopLevelConfigurationScope,
-	internal val insecure: Boolean,
-) : RaptorComponent.Default<RaptorKtorServerComponent>(), RaptorTaggableComponent, RaptorTransactionGeneratingComponent {
+	internal val forceEncryptedConnection: Boolean,
+) : RaptorComponent2.Base(), RaptorTaggableComponent2, RaptorTransactionGeneratingComponent {
 
-	// FIXME ok not to specify parent?
-	private val propertyRegistry = RaptorPropertyRegistry.default() // FIXME actually use!
-
-	internal var engineEnvironmentFactory: ((configure: ApplicationEngineEnvironmentBuilder.() -> Unit) -> ApplicationEngineEnvironment)? = null
-	internal var engineFactory: ((environment: ApplicationEngineEnvironment) -> ApplicationEngine)? = null
-	internal val connectors: MutableList<KtorServerConfiguration.Connector> = mutableListOf()
-	internal val customConfigurations: MutableList<Application.() -> Unit> = mutableListOf()
-	internal val features: MutableList<KtorServerFeature> = mutableListOf()
-	internal var startStopDispatcher: CoroutineDispatcher? = null
-
-	internal lateinit var scopes: Scopes
+	private val connectors: MutableList<KtorServerConfiguration.Connector> = mutableListOf()
+	private val customConfigurations: MutableList<Application.() -> Unit> = mutableListOf()
+	private var engineEnvironmentFactory: ((configure: ApplicationEngineEnvironmentBuilder.() -> Unit) -> ApplicationEngineEnvironment)? = null
+	private var engineFactory: ((environment: ApplicationEngineEnvironment) -> ApplicationEngine)? = null
+	private val features: MutableList<RaptorKtorServerFeature> = mutableListOf()
+	private var startStopDispatcher: CoroutineDispatcher? = null
 
 
-	internal fun RaptorComponentConfigurationEndScope.toServerConfigurations(): KtorServerConfiguration {
-		val rootRouteConfiguration = componentRegistry.many(KtorRouteRaptorComponent.Key)
-			.map { routeComponent ->
+	@RaptorDsl
+	public fun custom(configuration: RaptorKtorInitializationScope.() -> Unit) {
+		customConfigurations += configuration
+	}
+
+
+	@RaptorDsl
+	internal fun engineEnvironmentFactory(factory: (configure: ApplicationEngineEnvironmentBuilder.() -> Unit) -> ApplicationEngineEnvironment) {
+		check(engineEnvironmentFactory == null) { "Factory already set." }
+		engineEnvironmentFactory = factory
+	}
+
+
+	@RaptorDsl
+	internal fun engineFactory(factory: (environment: ApplicationEngineEnvironment) -> ApplicationEngine) {
+		check(engineFactory == null) { "Factory already set." }
+		engineFactory = factory
+	}
+
+
+	@RaptorDsl
+	public fun httpConnector(host: String = "0.0.0.0", port: Int = 80) {
+		connectors += KtorServerConfiguration.Connector.Http(
+			host = host,
+			port = port
+		)
+	}
+
+
+	@RaptorDsl
+	public fun httpsConnector(
+		host: String = "0.0.0.0",
+		port: Int = 443,
+		keyAlias: String,
+		keyStoreFile: File,
+		keyStorePassword: String,
+		privateKeyPassword: String,
+	) {
+		connectors += KtorServerConfiguration.Connector.Https(
+			host = host,
+			port = port,
+			keyAlias = keyAlias,
+			keyStoreFile = keyStoreFile,
+			keyStorePassword = keyStorePassword,
+			privateKeyPassword = privateKeyPassword
+		)
+	}
+
+
+	@RaptorDsl
+	public fun install(feature: RaptorKtorServerFeature) {
+		if (features.add(feature))
+			with(feature) {
+				ConfigurationStartScope().onConfigurationStarted()
+			}
+	}
+
+
+	@RaptorDsl
+	internal fun startStopDispatcher(dispatcher: CoroutineDispatcher) {
+		check(startStopDispatcher == null) { "Dispatcher already set." }
+		startStopDispatcher = dispatcher
+	}
+
+
+	@RaptorDsl
+	public val routes: RaptorKtorRoutesComponent
+		get() = componentRegistry2.oneOrRegister(RaptorKtorRoutesComponent.Key, ::RaptorKtorRoutesComponent)
+
+
+	// FIXME rn
+	internal fun RaptorComponentConfigurationEndScope2.toServerConfigurations(): KtorServerConfiguration {
+		val rootRouteConfiguration = componentRegistry2.oneOrNull(RaptorKtorRoutesComponent.Key)
+			?.componentRegistry2
+			?.many(RaptorKtorRouteComponent.Key)
+			?.map { routeComponent ->
 				with(routeComponent) {
 					toRouteConfigurations()
 				}
 			}
-			.ifEmpty { null }
+			?.ifEmpty { null }
 			?.let {
 				KtorRouteConfiguration(
 					children = it,
@@ -42,7 +113,7 @@ public class RaptorKtorServerComponent internal constructor(
 					path = "",
 					properties = RaptorPropertySet.empty(),
 					transactionFactory = null,
-					wrapper = null
+					wrapper = null,
 				)
 			}
 
@@ -62,7 +133,7 @@ public class RaptorKtorServerComponent internal constructor(
 					}
 				}
 			},
-			insecure = insecure,
+			forceEncryptedConnection = forceEncryptedConnection,
 			rootRouteConfiguration = rootRouteConfiguration,
 			startStopDispatcher = startStopDispatcher ?: Dispatchers.Default,
 			tags = tags(this@RaptorKtorServerComponent),
@@ -71,198 +142,49 @@ public class RaptorKtorServerComponent internal constructor(
 	}
 
 
-	override fun RaptorComponentConfigurationEndScope.onConfigurationEnded() {
+	override fun RaptorComponentConfigurationEndScope2.onConfigurationEnded() {
+		if (features.isEmpty())
+			return
+
+		val scope = ConfigurationEndScope(parent = this)
+
 		for (feature in features)
 			with(feature) {
-				scopes.onConfigurationEnded()
+				scope.onConfigurationEnded()
 			}
 	}
 
 
-	override fun RaptorComponentConfigurationStartScope.onConfigurationStarted() {
-		scopes = Scopes(
-			globalScope = globalScope,
-			propertyRegistry = propertyRegistry,
-			serverComponentRegistry = componentRegistry,
-		)
-
-		transactions.di {
-			provide {
-				// FIXME improve
-				get<RaptorTransactionContext>()[RaptorTransactionKtorFeature.CallPropertyKey] ?: error("Cannot find Ktor ApplicationCall.")
-			}
+	override fun RaptorComponentConfigurationStartScope2.onConfigurationStarted() {
+		transactions.di.provide {
+			// FIXME improve
+			get<RaptorTransactionContext>()[RaptorTransactionKtorFeature.CallPropertyKey] ?: error("Cannot find Ktor ApplicationCall.")
 		}
 	}
 
 
-	internal object Key : RaptorComponentKey<RaptorKtorServerComponent> {
+	internal object Key : RaptorComponentKey2<RaptorKtorServerComponent> {
 
-		override fun toString() = "ktor server"
+		override fun toString() = "server"
 	}
 
 
-	internal class Scopes(
-		private val globalScope: RaptorTopLevelConfigurationScope,
-		propertyRegistry: RaptorPropertyRegistry,
-		serverComponentRegistry: RaptorComponentRegistry,
-	) : KtorServerFeatureConfigurationEndScope,
-		KtorServerFeatureConfigurationStartScope {
+	private class ConfigurationEndScope(parent: RaptorComponentConfigurationEndScope2) : RaptorKtorServerFeatureConfigurationEndScope {
 
-		private val serverScope = ServerScope(componentRegistry = serverComponentRegistry, propertyRegistry = propertyRegistry)
+		private val serverScope = object :
+			RaptorKtorServerFeatureConfigurationEndScope.ServerScope,
+			RaptorComponentConfigurationEndScope2 by parent {}
 
 
-		override fun global(configuration: RaptorTopLevelConfigurationScope.() -> Unit) {
-			globalScope.configuration()
-		}
-
-
-		override fun server(configuration: KtorServerFeatureConfigurationEndScope.ServerScope.() -> Unit) {
+		override fun server(configuration: RaptorKtorServerFeatureConfigurationEndScope.ServerScope.() -> Unit) {
 			serverScope.configuration()
 		}
-
-
-		private class ServerScope(
-			override val componentRegistry: RaptorComponentRegistry,
-			override val propertyRegistry: RaptorPropertyRegistry,
-		) : KtorServerFeatureConfigurationEndScope.ServerScope
-	}
-}
-
-
-@RaptorDsl
-public fun RaptorComponentSet<RaptorKtorServerComponent>.custom(configuration: RaptorKtorInitializationScope.() -> Unit) {
-	configure {
-		customConfigurations += configuration
-	}
-}
-
-
-@RaptorDsl
-internal fun RaptorComponentSet<RaptorKtorServerComponent>.engineEnvironmentFactory(
-	factory: (configure: ApplicationEngineEnvironmentBuilder.() -> Unit) -> ApplicationEngineEnvironment,
-) {
-	configure {
-		check(engineEnvironmentFactory == null)
-		engineEnvironmentFactory = factory
-	}
-}
-
-
-@RaptorDsl
-internal fun RaptorComponentSet<RaptorKtorServerComponent>.engineFactory(
-	factory: (environment: ApplicationEngineEnvironment) -> ApplicationEngine,
-) {
-	configure {
-		check(engineFactory == null)
-		engineFactory = factory
-	}
-}
-
-
-@RaptorDsl
-public fun RaptorComponentSet<RaptorKtorServerComponent>.httpConnector(
-	host: String = "0.0.0.0",
-	port: Int = 80,
-) {
-	configure {
-		connectors += KtorServerConfiguration.Connector.Http(
-			host = host,
-			port = port
-		)
-	}
-}
-
-
-@RaptorDsl
-public fun RaptorComponentSet<RaptorKtorServerComponent>.httpsConnector(
-	host: String = "0.0.0.0",
-	port: Int = 443,
-	keyAlias: String,
-	keyStoreFile: File,
-	keyStorePassword: String,
-	privateKeyPassword: String,
-) {
-	configure {
-		connectors += KtorServerConfiguration.Connector.Https(
-			host = host,
-			port = port,
-			keyAlias = keyAlias,
-			keyStoreFile = keyStoreFile,
-			keyStorePassword = keyStorePassword,
-			privateKeyPassword = privateKeyPassword
-		)
-	}
-}
-
-
-@RaptorDsl
-public fun RaptorComponentSet<RaptorKtorServerComponent>.install(feature: KtorServerFeature) {
-	configure {
-		if (features.add(feature))
-			with(feature) {
-				scopes.onConfigurationStarted()
-			}
-	}
-}
-
-
-@RaptorDsl
-public fun RaptorComponentSet<RaptorKtorServerComponent>.newRoute(path: String = "", host: String? = null): RaptorComponentSet<KtorRouteRaptorComponent> =
-	withComponentAuthoring {
-		map {
-			KtorRouteRaptorComponent(
-				globalScope = globalScope,
-				host = host,
-				path = path,
-				serverComponentRegistry = componentRegistry
-			)
-				.also { componentRegistry.register(KtorRouteRaptorComponent.Key, it) }
-		}
 	}
 
 
-@RaptorDsl
-public fun RaptorComponentSet<RaptorKtorServerComponent>.newRoute(path: String = "", host: String? = null, configure: KtorRouteRaptorComponent.() -> Unit) {
-	newRoute(path = path, host = host).configure(configure)
-}
+	private inner class ConfigurationStartScope : RaptorKtorServerFeatureConfigurationStartScope {
 
-
-@RaptorDsl
-public val RaptorComponentSet<RaptorKtorServerComponent>.routes: RaptorComponentSet<KtorRouteRaptorComponent>
-	get() = withComponentAuthoring {
-		map {
-			componentRegistry.configure(KtorRouteRaptorComponent.Key)
-		}
-	}
-
-
-@RaptorDsl
-public fun RaptorComponentSet<RaptorKtorServerComponent>.routes(recursive: Boolean): RaptorComponentSet<KtorRouteRaptorComponent> =
-	withComponentAuthoring {
-		when (recursive) {
-			true -> componentSet { action ->
-				authoredSet.routes {
-					action()
-					routes(recursive = true).configure(action)
-				}
-			}
-			false -> authoredSet.routes
-		}
-	}
-
-
-@RaptorDsl
-public fun RaptorComponentSet<RaptorKtorServerComponent>.routes(recursive: Boolean, configure: KtorRouteRaptorComponent.() -> Unit) {
-	routes(recursive = recursive).invoke(configure)
-}
-
-
-@RaptorDsl
-internal fun RaptorComponentSet<RaptorKtorServerComponent>.startStopDispatcher(
-	dispatcher: CoroutineDispatcher,
-) {
-	configure {
-		check(startStopDispatcher == null)
-		startStopDispatcher = dispatcher
+		override val server: RaptorKtorServerComponent
+			get() = this@RaptorKtorServerComponent
 	}
 }

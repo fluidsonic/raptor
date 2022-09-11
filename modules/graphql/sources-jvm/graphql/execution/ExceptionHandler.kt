@@ -2,6 +2,7 @@ package io.fluidsonic.raptor.graphql.internal
 
 import io.fluidsonic.graphql.*
 import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.ktor.*
 import org.slf4j.*
 
 

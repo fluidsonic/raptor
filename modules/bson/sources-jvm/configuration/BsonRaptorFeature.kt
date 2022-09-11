@@ -1,11 +1,10 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.raptor.di.*
+
 
 // FIXME name order
 public object BsonRaptorFeature : RaptorFeature.Configurable<BsonRaptorComponent> {
-
-	override val id: RaptorFeatureId = raptorBsonFeatureId
-
 
 	override fun RaptorFeatureConfigurationScope.beginConfiguration(action: BsonRaptorComponent.() -> Unit) {
 		componentRegistry.configure(key = BsonRaptorComponent.Key, action = action)
@@ -15,7 +14,7 @@ public object BsonRaptorFeature : RaptorFeature.Configurable<BsonRaptorComponent
 	override fun RaptorFeatureConfigurationScope.beginConfiguration() {
 		componentRegistry.register(BsonRaptorComponent.Key, BsonRaptorComponent())
 
-		ifInstalled(raptorDIFeatureId) {
+		ifFeature(RaptorDIFeature) {
 			di {
 				provide { get<RaptorBsonProperties>().codecRegistry }
 				provide { get<RaptorBsonProperties>().scope }
@@ -24,9 +23,6 @@ public object BsonRaptorFeature : RaptorFeature.Configurable<BsonRaptorComponent
 		}
 	}
 }
-
-
-public const val raptorBsonFeatureId: RaptorFeatureId = "raptor.bson"
 
 
 @RaptorDsl

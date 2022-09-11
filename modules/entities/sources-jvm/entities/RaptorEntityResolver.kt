@@ -1,5 +1,7 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.raptor.di.*
+
 
 public interface RaptorEntityResolver<out Value : RaptorEntity, in Id : RaptorEntityId> {
 

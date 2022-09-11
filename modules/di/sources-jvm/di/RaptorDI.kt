@@ -1,5 +1,6 @@
-package io.fluidsonic.raptor
+package io.fluidsonic.raptor.di
 
+import io.fluidsonic.raptor.*
 import kotlin.internal.*
 import kotlin.properties.*
 import kotlin.reflect.*
@@ -42,6 +43,12 @@ public interface RaptorDI {
 	public interface Factory {
 
 		public fun createDI(context: RaptorContext, type: KType, configuration: RaptorDIBuilder.() -> Unit = {}): RaptorDI
+
+
+		public companion object {
+
+			public val empty: Factory = DefaultRaptorDI.Factory(modules = emptyList())
+		}
 	}
 
 

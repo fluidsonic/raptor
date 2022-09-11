@@ -3,19 +3,35 @@ package io.fluidsonic.raptor.graph
 import io.fluidsonic.raptor.*
 
 
-public class RaptorGraphsComponent internal constructor(
-	private val componentRegistry: RaptorComponentRegistry2,
-) : RaptorComponent2.Base(), RaptorComponentSet2<RaptorGraphComponent> by componentRegistry.all(RaptorGraphComponent.Key) {
+public class RaptorGraphsComponent internal constructor() : RaptorComponent2.Base(), RaptorComponentSet2<RaptorGraphComponent> {
+
+	@RaptorDsl
+	override fun all(configure: RaptorGraphComponent.() -> Unit) {
+		componentRegistry2.all(RaptorGraphComponent.Key, configure)
+	}
+
 
 	@RaptorDsl
 	public fun new(): RaptorGraphComponent =
 		RaptorGraphComponent()
-			.also { componentRegistry.register(RaptorGraphComponent.Key, it) }
+			.also { componentRegistry2.register(RaptorGraphComponent.Key, it) }
 
 
 	@RaptorDsl
 	public fun new(configure: RaptorGraphComponent.() -> Unit = {}) {
 		new().configure()
+	}
+
+
+	override fun RaptorComponentConfigurationEndScope2.onConfigurationEnded() {
+		propertyRegistry.register(
+			key = RaptorGraphsPropertyKey,
+			value = componentRegistry2.many(RaptorGraphComponent.Key).map { component ->
+				component.endConfiguration()
+
+				checkNotNull(component.graph)
+			}
+		)
 	}
 
 
@@ -28,4 +44,4 @@ public class RaptorGraphsComponent internal constructor(
 
 @RaptorDsl
 public val RaptorTopLevelConfigurationScope.graphs: RaptorGraphsComponent
-	get() = componentRegistry2.oneOrRegister(RaptorGraphsComponent.Key) { RaptorGraphsComponent(componentRegistry2) }
+	get() = componentRegistry2.oneOrNull(RaptorGraphsComponent.Key) ?: throw RaptorFeatureNotInstalledException(RaptorGraphFeature)

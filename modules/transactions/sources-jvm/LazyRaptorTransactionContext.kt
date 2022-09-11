@@ -1,8 +1,10 @@
-package io.fluidsonic.raptor
+package io.fluidsonic.raptor.transactions
+
+import io.fluidsonic.raptor.*
 
 
 internal class LazyRaptorTransactionContext(
-	override val parent: RaptorContext
+	override val parent: RaptorContext,
 ) : RaptorTransactionContext.Lazy {
 
 	private var delegate: RaptorTransactionContext? = null

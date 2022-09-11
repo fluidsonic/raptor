@@ -1,17 +1,15 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.raptor.di.*
 import kotlinx.coroutines.*
 
 
 public object RaptorLifecycleFeature : RaptorFeature {
 
-	override val id: RaptorFeatureId = raptorLifecycleFeatureId
-
-
 	override fun RaptorFeatureConfigurationScope.beginConfiguration() {
 		componentRegistry.register(RaptorLifecycleComponent.Key, RaptorLifecycleComponent())
 
-		ifInstalled(raptorDIFeatureId) {
+		ifFeature(RaptorDIFeature) {
 			di {
 				provide { get<RaptorContext>()[DefaultRaptorLifecycle.PropertyKey]!!.coroutineContext }
 				provide { CoroutineScope(get()) }
@@ -19,9 +17,6 @@ public object RaptorLifecycleFeature : RaptorFeature {
 		}
 	}
 }
-
-
-public const val raptorLifecycleFeatureId: RaptorFeatureId = "raptor.lifecycle"
 
 
 public val Raptor.lifecycle: RaptorLifecycle

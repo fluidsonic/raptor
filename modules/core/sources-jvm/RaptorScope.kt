@@ -1,8 +1,8 @@
 package io.fluidsonic.raptor
 
 
-interface RaptorScope {
+public interface RaptorScope {
 
 	@RaptorDsl
-	val context: RaptorContext
+	public val context: RaptorContext
 }

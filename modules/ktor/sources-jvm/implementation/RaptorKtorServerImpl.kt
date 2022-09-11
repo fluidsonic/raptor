@@ -1,5 +1,6 @@
-package io.fluidsonic.raptor
+package io.fluidsonic.raptor.ktor
 
+import io.fluidsonic.raptor.*
 import io.ktor.application.*
 import io.ktor.features.*
 import io.ktor.http.*
@@ -161,7 +162,7 @@ internal class RaptorKtorServerImpl(
 //		}
 
 		install(XForwardedHeaderSupport)
-		if (!configuration.insecure)
+		if (configuration.forceEncryptedConnection)
 			install(EncryptionEnforcementKtorFeature)
 		install(RaptorTransactionKtorFeature(
 			serverContext = this@RaptorKtorServerImpl.context,

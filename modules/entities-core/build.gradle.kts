@@ -9,7 +9,7 @@ fluidLibraryModule(description = "FIXME") {
 			}
 		}
 
-//		js()
+		js()
 		jvm()
 	}
 }

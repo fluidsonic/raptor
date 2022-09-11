@@ -1,16 +1,16 @@
 package io.fluidsonic.raptor
 
 
-interface RaptorPropertySet {
+public interface RaptorPropertySet {
 
-	operator fun <Value : Any> get(key: RaptorPropertyKey<out Value>): Value?
-	fun isEmpty(): Boolean
+	public operator fun <Value : Any> get(key: RaptorPropertyKey<out Value>): Value?
+	public fun isEmpty(): Boolean
 	override fun toString(): String
 
 
-	companion object {
+	public companion object {
 
-		fun empty(): RaptorPropertySet =
+		public fun empty(): RaptorPropertySet =
 			EmptyRaptorPropertySet
 	}
 }
@@ -32,7 +32,7 @@ private object EmptyRaptorPropertySet : RaptorPropertySet {
 
 private class FallbackRaptorPropertySet(
 	private val set: RaptorPropertySet,
-	private val fallback: RaptorPropertySet
+	private val fallback: RaptorPropertySet,
 ) : RaptorPropertySet {
 
 	override fun <Value : Any> get(key: RaptorPropertyKey<out Value>): Value? =
@@ -48,7 +48,7 @@ private class FallbackRaptorPropertySet(
 }
 
 
-fun RaptorPropertySet.withFallback(fallback: RaptorPropertySet): RaptorPropertySet {
+public fun RaptorPropertySet.withFallback(fallback: RaptorPropertySet): RaptorPropertySet {
 	check(fallback !== this) { "A property set cannot fall back to itself." }
 
 	return when {

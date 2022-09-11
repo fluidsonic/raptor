@@ -1,5 +1,7 @@
-package io.fluidsonic.raptor
+package io.fluidsonic.raptor.ktor
 
+import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.transactions.*
 import io.ktor.application.*
 import io.ktor.routing.*
 import io.ktor.util.pipeline.*
@@ -24,11 +26,6 @@ public val ApplicationCall.raptorContext: RaptorTransactionContext
 @RaptorDsl
 public val PipelineContext<*, out ApplicationCall>.raptorContext: RaptorTransactionContext
 	get() = context.raptorContext
-
-
-public val RaptorContext.ktor: RaptorKtor
-	get() = properties[RaptorKtorImpl.PropertyKey]
-		?: error("You must install ${RaptorKtorFeature::class.simpleName} for enabling Ktor functionality.")
 
 
 @RaptorDsl

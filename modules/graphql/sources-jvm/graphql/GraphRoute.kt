@@ -2,6 +2,7 @@ package io.fluidsonic.raptor
 
 import io.fluidsonic.graphql.*
 import io.fluidsonic.json.*
+import io.fluidsonic.raptor.ktor.*
 import io.ktor.application.*
 import io.ktor.http.*
 import io.ktor.request.*

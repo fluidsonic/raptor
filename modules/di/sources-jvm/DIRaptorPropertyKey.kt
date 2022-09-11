@@ -1,4 +1,6 @@
-package io.fluidsonic.raptor
+package io.fluidsonic.raptor.di
+
+import io.fluidsonic.raptor.*
 
 
 internal object DIRaptorPropertyKey : RaptorPropertyKey<RaptorDI> {

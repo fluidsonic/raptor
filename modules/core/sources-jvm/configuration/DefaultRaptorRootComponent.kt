@@ -4,14 +4,13 @@ package io.fluidsonic.raptor
 internal class DefaultRaptorRootComponent : RaptorComponent.Default<RaptorRootComponent>(),
 	RaptorComponent2,
 	RaptorComponentConfigurationEndScope,
-	RaptorComponentConfigurationEndScope2,
+	RaptorConfigurationEndScope,
 	RaptorFeatureConfigurationApplicationScope,
 	RaptorFeatureConfigurationScope,
 	RaptorRootComponent {
 
-	private val featureIds: MutableSet<RaptorFeatureId> = mutableSetOf()
-	private val features: MutableSet<RaptorFeature> = mutableSetOf()
-	private val lazyFeatureConfigurations: MutableMap<RaptorFeatureId, MutableList<() -> Unit>> = hashMapOf()
+	private var configurationEnded = false
+	private val featureConfigurators: MutableMap<RaptorFeature, FeatureConfigurator> = hashMapOf()
 
 	override val componentRegistry = DefaultRaptorComponentRegistry()
 	override val componentRegistry2 = DefaultRaptorComponentRegistry2()
@@ -25,28 +24,19 @@ internal class DefaultRaptorRootComponent : RaptorComponent.Default<RaptorRootCo
 	}
 
 
-	private fun applyLazyFeatureConfigurations(featureId: RaptorFeatureId) {
-		val pendingConfigurations = lazyFeatureConfigurations.remove(featureId)
-		if (pendingConfigurations != null)
-			for (configuration in pendingConfigurations)
-				configuration()
-	}
-
-
 	internal fun endConfiguration(): Raptor {
-		// FIXME prevent installing more features
-		for (feature in features)
-			with(feature) {
-				completeConfiguration()
-			}
+		requireConfigurable()
+
+		configurationEnded = true
+
+		for (configurator in featureConfigurators.values)
+			configurator.completeConfiguration()
 
 		componentRegistry.endConfiguration(scope = this)
 		componentRegistry2.endConfiguration(scope = this)
 
-		for (feature in features)
-			with(feature) {
-				applyConfiguration()
-			}
+		for (configurator in featureConfigurators.values)
+			configurator.endConfiguration()
 
 		val context = DefaultRaptorContext(properties = propertyRegistry.toSet())
 		val raptor = DefaultRaptor(context = context)
@@ -57,19 +47,19 @@ internal class DefaultRaptorRootComponent : RaptorComponent.Default<RaptorRootCo
 	}
 
 
+	private fun featureConfigurator(feature: RaptorFeature) =
+		featureConfigurators.getOrPut(feature) { FeatureConfigurator(feature) }
+
+
+	override fun ifFeature(feature: RaptorFeature, action: () -> Unit) {
+		requireConfigurable()
+		featureConfigurator(feature).configure(required = false, action = action)
+	}
+
+
 	override fun install(feature: RaptorFeature) {
-		if (!features.add(feature))
-			return
-
-		val id = feature.id
-		if (id != null && !featureIds.add(id))
-			error("Multiple features cannot have the same ID '$id'.") // FIXME report which ones
-
-		with(feature) {
-			beginConfiguration()
-		}
-
-		id?.let(this::applyLazyFeatureConfigurations)
+		requireConfigurable()
+		featureConfigurator(feature).install()
 	}
 
 
@@ -77,32 +67,121 @@ internal class DefaultRaptorRootComponent : RaptorComponent.Default<RaptorRootCo
 		feature: Feature,
 		configuration: ConfigurationScope.() -> Unit,
 	) {
-		install(feature = feature)
+		install(feature)
 
-		with(feature) { beginConfiguration(configuration) }
+		with(feature) {
+			beginConfiguration(configuration)
+		}
+	}
+
+
+	private fun requireConfigurable() {
+		check(!configurationEnded) { "The configuration phase has already ended." }
+	}
+
+
+	override fun requireFeature(feature: RaptorFeature, action: () -> Unit) {
+		requireConfigurable()
+		featureConfigurator(feature).configure(required = true, action = action)
+	}
+
+
+	override fun RaptorComponent2.endConfiguration() {
+		// TODO Refactor.
+		registration.endConfiguration(this@DefaultRaptorRootComponent)
 	}
 
 
 	override fun toString() =
-		"default core"
+		"root"
 
 
-	override fun Unit.ifInstalled(featureId: RaptorFeatureId, action: () -> Unit) {
-		if (featureIds.contains(featureId))
-			action()
-		else
-			lazyFeatureConfigurations.getOrPut(featureId) { mutableListOf() }.add(action)
+	private inner class FeatureConfigurator(private val feature: RaptorFeature) {
+
+		private var configurations: MutableList<() -> Unit>? = null
+		private var isInstalled = false
+		private var notInstalledException: RaptorFeatureNotInstalledException? = null
+
+
+		fun configure(required: Boolean, action: () -> Unit) {
+			when (isInstalled) {
+				true -> action()
+				false -> {
+					if (required && notInstalledException == null)
+						notInstalledException = RaptorFeatureNotInstalledException(feature)
+
+					ensureConfigurations().add(action)
+				}
+			}
+		}
+
+
+		private fun applyConfigurations() {
+			val configurations = configurations ?: return
+			this.configurations = null
+
+			for (configure in configurations)
+				configure()
+
+			// Configurations may have added new configurations.
+			applyConfigurations()
+		}
+
+
+		private fun beginConfiguration() {
+			with(feature) {
+				this@DefaultRaptorRootComponent.beginConfiguration()
+				this@DefaultRaptorRootComponent.applyConfiguration()
+			}
+		}
+
+
+		fun completeConfiguration() {
+			if (!isInstalled) {
+				notInstalledException?.let { throw it }
+				return
+			}
+
+			with(feature) {
+				this@DefaultRaptorRootComponent.completeConfiguration()
+			}
+		}
+
+
+		fun endConfiguration() {
+			if (!isInstalled)
+				return
+
+			with(feature) {
+				this@DefaultRaptorRootComponent.completeConfiguration()
+			}
+		}
+
+
+		private fun ensureConfigurations() =
+			configurations ?: mutableListOf<() -> Unit>().also { configurations = it }
+
+
+		fun install() {
+			if (isInstalled)
+				return
+
+			notInstalledException = null
+
+			beginConfiguration()
+			applyConfigurations()
+		}
 	}
 
 
 	private object Key : RaptorComponentKey<DefaultRaptorRootComponent> {
 
-		override fun toString() = "core"
+		override fun toString() = "root"
 	}
 
 
 	private object Key2 : RaptorComponentKey2<DefaultRaptorRootComponent> {
 
-		override fun toString() = "core"
+		override fun toString() = "root"
 	}
 }

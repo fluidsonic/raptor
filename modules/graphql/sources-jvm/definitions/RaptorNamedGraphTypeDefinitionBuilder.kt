@@ -5,7 +5,7 @@ import io.fluidsonic.raptor.graphql.internal.*
 
 @Suppress("EXPOSED_PROPERTY_TYPE_IN_CONSTRUCTOR")
 public abstract class RaptorNamedGraphTypeDefinitionBuilder<Type : Any> internal constructor(
-	protected val kotlinType: KotlinType,
+	internal val kotlinType: KotlinType,
 	protected val name: String,
 ) {
 

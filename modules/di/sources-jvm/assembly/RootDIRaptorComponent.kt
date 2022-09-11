@@ -1,9 +1,10 @@
-package io.fluidsonic.raptor
+package io.fluidsonic.raptor.di
 
+import io.fluidsonic.raptor.*
 import kotlin.reflect.*
 
 
-internal class RootDIRaptorComponent : RaptorComponent.Default<RaptorDIComponent>(), RaptorDIComponent {
+internal class RootDIRaptorComponent : RaptorComponent2.Base(), RaptorDIComponent {
 
 	private val builder = DefaultRaptorDIBuilder()
 
@@ -17,7 +18,7 @@ internal class RootDIRaptorComponent : RaptorComponent.Default<RaptorDIComponent
 		"DI configuration"
 
 
-	override fun RaptorComponentConfigurationEndScope.onConfigurationEnded() {
+	override fun RaptorComponentConfigurationEndScope2.onConfigurationEnded() {
 		val module = builder.createModule("raptor")
 		val factory = DefaultRaptorDI.Factory(modules = listOf(module))
 		val di = factory.createDI<RaptorContext>(context = lazyContext)
@@ -26,7 +27,7 @@ internal class RootDIRaptorComponent : RaptorComponent.Default<RaptorDIComponent
 	}
 
 
-	object Key : RaptorComponentKey<RootDIRaptorComponent> {
+	object Key : RaptorComponentKey2<RootDIRaptorComponent> {
 
 		override fun toString() = "DI"
 	}

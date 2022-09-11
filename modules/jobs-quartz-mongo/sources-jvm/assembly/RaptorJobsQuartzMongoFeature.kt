@@ -2,6 +2,7 @@ package io.fluidsonic.raptor
 
 import com.mongodb.client.*
 import io.fluidsonic.raptor.RaptorJobsQuartzMongoFeature.Configuration
+import io.fluidsonic.raptor.di.*
 import io.fluidsonic.stdlib.*
 import kotlinx.coroutines.*
 

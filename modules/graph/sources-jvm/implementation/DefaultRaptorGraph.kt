@@ -1,7 +1,7 @@
 package io.fluidsonic.raptor.graph
 
 import io.fluidsonic.graphql.*
-import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.transactions.*
 
 
 internal class DefaultRaptorGraph(

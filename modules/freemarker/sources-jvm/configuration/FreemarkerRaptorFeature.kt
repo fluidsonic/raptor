@@ -1,26 +1,21 @@
 package io.fluidsonic.raptor
 
 import freemarker.template.*
+import io.fluidsonic.raptor.di.*
 
 
 public object FreemarkerRaptorFeature : RaptorFeature { // FIXME rn
 
-	override val id: RaptorFeatureId = raptorFreemarkerFeatureId
-
-
 	override fun RaptorFeatureConfigurationScope.beginConfiguration() {
 		componentRegistry.register(FreemarkerRaptorComponent.Key, FreemarkerRaptorComponent())
 
-		ifInstalled(raptorDIFeatureId) {
+		ifFeature(RaptorDIFeature) {
 			di {
 				provide { get<RaptorContext>().freemarker }
 			}
 		}
 	}
 }
-
-
-public const val raptorFreemarkerFeatureId: RaptorFeatureId = "raptor.freemarker"
 
 
 public val RaptorContext.freemarker: Configuration

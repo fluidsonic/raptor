@@ -1,6 +1,7 @@
 package tests
 
 import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.di.*
 import io.fluidsonic.raptor.graph.*
 import kotlin.test.*
 

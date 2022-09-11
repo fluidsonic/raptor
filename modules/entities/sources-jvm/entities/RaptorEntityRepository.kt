@@ -1,5 +1,7 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.raptor.ktor.*
+
 
 public interface RaptorEntityRepository<out Entity : RaptorEntity, in Id : RaptorEntityId> : RaptorEntityResolver<Entity, Id> {
 

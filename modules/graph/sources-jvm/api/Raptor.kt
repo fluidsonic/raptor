@@ -4,8 +4,7 @@ import io.fluidsonic.raptor.*
 
 
 public val RaptorContext.graphs: Collection<RaptorGraph>
-	get() = properties[RaptorGraphsPropertyKey]
-		?: error("You must install ${RaptorGraphFeature::class.simpleName} for enabling GraphQL functionality.")
+	get() = properties[RaptorGraphsPropertyKey] ?: throw RaptorFeatureNotInstalledException(RaptorGraphFeature)
 
 
 public fun RaptorContext.graph(tag: Any): RaptorGraph =

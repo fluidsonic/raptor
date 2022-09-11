@@ -10,7 +10,7 @@ fluidLibraryModule(description = "FIXME") {
 			dependencies {
 				api(project(":raptor-di"))
 				api(project(":raptor-entities"))
-				api(project(":raptor-graphql"))
+				api(project(":raptor-graph"))
 				api(project(":raptor-ktor"))
 				api(project(":raptor-mongodb"))
 				api(project(":raptor-security"))

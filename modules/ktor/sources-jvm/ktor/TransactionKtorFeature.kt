@@ -1,5 +1,7 @@
-package io.fluidsonic.raptor
+package io.fluidsonic.raptor.ktor
 
+import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.transactions.*
 import io.ktor.application.*
 import io.ktor.util.*
 
@@ -13,7 +15,6 @@ internal class RaptorTransactionKtorFeature(
 	override val key = AttributeKey<Unit>("Raptor: transaction feature")
 
 
-	@Suppress("UNCHECKED_CAST")
 	override fun install(pipeline: ApplicationCallPipeline, configure: Unit.() -> Unit) {
 		Unit.configure()
 

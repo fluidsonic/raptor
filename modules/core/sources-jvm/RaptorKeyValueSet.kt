@@ -1,12 +1,12 @@
 package io.fluidsonic.raptor
 
 
-interface RaptorKeyValueSet {
+public interface RaptorKeyValueSet {
 
-	operator fun <Value : Any> get(key: RaptorKey<out Value>): Value?
-	fun isEmpty(): Boolean
+	public operator fun <Value : Any> get(key: RaptorKey<out Value>): Value?
+	public fun isEmpty(): Boolean
 	override fun toString(): String
 
 
-	companion object
+	public companion object
 }

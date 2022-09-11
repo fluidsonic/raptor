@@ -7,11 +7,11 @@ import io.fluidsonic.stdlib.*
 @RaptorDsl
 @Suppress("EXPOSED_PROPERTY_TYPE_IN_CONSTRUCTOR")
 public open class RaptorGraphFieldBuilder internal constructor(
-	protected val kotlinType: KotlinType,
+	internal val kotlinType: KotlinType,
 	protected val name: String,
 	parentKotlinType: KotlinType,
 	protected val stackTrace: List<StackTraceElement>,
-	protected val argumentContainer: RaptorGraphArgumentDefinitionBuilder.ContainerImpl = RaptorGraphArgumentDefinitionBuilder.ContainerImpl(
+	internal val argumentContainer: RaptorGraphArgumentDefinitionBuilder.ContainerImpl = RaptorGraphArgumentDefinitionBuilder.ContainerImpl(
 		factoryName = "-",
 		parentKotlinType = parentKotlinType
 	),
@@ -76,6 +76,7 @@ public open class RaptorGraphFieldBuilder internal constructor(
 							resolve(parent)?.cast<RaptorUnion2<*, *>>()?.value
 						}
 					}
+
 					else -> resolve
 				},
 				stackTrace = stackTrace
