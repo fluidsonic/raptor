@@ -2,6 +2,7 @@ package io.fluidsonic.raptor.bson.internal
 
 import io.fluidsonic.raptor.*
 import io.fluidsonic.time.*
+import kotlin.reflect.*
 import org.bson.*
 import org.bson.types.*
 
@@ -46,7 +47,7 @@ internal class DefaultBsonWriterScope(
 			return
 		}
 
-		codecRegistry.encode(scope = this, value = value)
+		valueAs(value, valueClass = value::class)
 	}
 
 
@@ -97,6 +98,16 @@ internal class DefaultBsonWriterScope(
 
 	override fun value(value: Timestamp) {
 		writeDateTime(value.toEpochMilliseconds())
+	}
+
+
+	override fun <Value : Any> valueAs(value: Value?, valueClass: KClass<out Value>) {
+		if (value == null) {
+			writeNull()
+			return
+		}
+
+		codecRegistry.encode(scope = this, value = value, valueClass = valueClass)
 	}
 
 

@@ -13,7 +13,7 @@ public class RaptorMongodbUpdateBuilder @PublishedApi internal constructor(
 	private val changes: MutableList<Bson> = mutableListOf()
 
 	@PublishedApi
-	internal val filterBuilder = RaptorMongodbFilterBuilder()
+	internal val filterBuilder: RaptorMongodbFilterBuilder = RaptorMongodbFilterBuilder()
 
 
 	@RaptorDsl
@@ -29,7 +29,7 @@ public class RaptorMongodbUpdateBuilder @PublishedApi internal constructor(
 
 
 	@PublishedApi
-	internal fun build() =
+	internal fun build(): RaptorMongoUpdate =
 		RaptorMongoUpdate(
 			filter = filterBuilder.build(),
 			changes = changes.ifEmpty { null }?.let(Updates::combine),

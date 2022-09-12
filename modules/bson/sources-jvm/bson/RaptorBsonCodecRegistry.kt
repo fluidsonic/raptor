@@ -32,8 +32,12 @@ public fun <Value : Any> RaptorBsonCodecRegistry.decode(
 
 
 @Suppress("UNCHECKED_CAST")
-public fun <Value : Any> RaptorBsonCodecRegistry.encode(scope: RaptorBsonWriterScope, value: Value) {
-	this[value::class]
+public fun <Value : Any> RaptorBsonCodecRegistry.encode(
+	scope: RaptorBsonWriterScope,
+	value: Value,
+	valueClass: KClass<out Value> = value::class,
+) {
+	this[valueClass]
 		.let { it as RaptorBsonCodec<Value> }
 		.encode(scope = scope, value = value)
 }

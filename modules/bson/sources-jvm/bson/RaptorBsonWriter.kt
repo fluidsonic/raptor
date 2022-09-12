@@ -2,6 +2,7 @@ package io.fluidsonic.raptor
 
 import io.fluidsonic.time.*
 import kotlin.contracts.*
+import kotlin.reflect.*
 import org.bson.*
 import org.bson.types.*
 
@@ -59,6 +60,9 @@ public interface RaptorBsonWriter {
 
 	@RaptorDsl
 	public fun value(value: Timestamp)
+
+	@RaptorDsl
+	public fun <Value : Any> valueAs(value: Value?, valueClass: KClass<out Value>)
 }
 
 
@@ -287,4 +291,35 @@ public fun RaptorBsonWriter.value(field: String, value: Timestamp?, preserveNull
 		null -> value(null)
 		else -> value(value)
 	}
+}
+
+
+@RaptorDsl
+public inline fun <reified Value : Any> RaptorBsonWriter.valueAs(value: Value?) {
+	valueAs(value = value, valueClass = Value::class)
+}
+
+
+@RaptorDsl
+public inline fun <reified Value : Any> RaptorBsonWriter.valueAs(
+	field: String,
+	value: Value?,
+	preserveNull: Boolean = false,
+	valueClass: KClass<out Value>,
+) {
+	if (value == null && !preserveNull)
+		return
+
+	fieldName(field)
+
+	when (value) {
+		null -> value(null)
+		else -> valueAs(value, valueClass = valueClass)
+	}
+}
+
+
+@RaptorDsl
+public inline fun <reified Value : Any> RaptorBsonWriter.valueAs(field: String, value: Value?, preserveNull: Boolean = false) {
+	valueAs(field = field, value = value, preserveNull = preserveNull, valueClass = Value::class)
 }

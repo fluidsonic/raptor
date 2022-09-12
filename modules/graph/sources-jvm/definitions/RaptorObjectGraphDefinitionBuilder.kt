@@ -59,6 +59,35 @@ public class RaptorObjectGraphDefinitionBuilder<Type : Any> internal constructor
 
 	@RaptorDsl
 	public inline fun <reified FieldType> field(
+		property: KProperty0<FieldType>,
+		noinline configure: RaptorGraphFieldBuilder.WithResolver<FieldType, Type>.() -> Unit = {},
+	) {
+		field(
+			property = property,
+			type = typeOf<FieldType>(),
+			configure = configure,
+		)
+	}
+
+
+	@RaptorDsl
+	public fun <FieldType> field(
+		property: KProperty0<FieldType>,
+		type: KType,
+		configure: RaptorGraphFieldBuilder.WithResolver<FieldType, Type>.() -> Unit = {},
+	) {
+		field(
+			name = property.name,
+			type = type,
+			stackTrace = stackTrace(skipCount = 1),
+			implicitResolver = { property.get() },
+			configure = configure,
+		)
+	}
+
+
+	@RaptorDsl
+	public inline fun <reified FieldType> field(
 		property: KProperty1<in Type, FieldType>,
 		noinline configure: RaptorGraphFieldBuilder.WithResolver<FieldType, Type>.() -> Unit = {},
 	) {
