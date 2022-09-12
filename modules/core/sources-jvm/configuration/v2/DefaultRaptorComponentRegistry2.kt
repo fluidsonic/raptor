@@ -52,7 +52,7 @@ internal class DefaultRaptorComponentRegistry2(
 
 
 	override fun <Component : RaptorComponent2> many(key: RaptorComponentKey2<out Component>): List<Component> =
-		getSet(key)?.map { it.component }.orEmpty()
+		getSet(key)?.asCollection()?.map { it.component }.orEmpty()
 
 
 	override fun <Component : RaptorComponent2> oneOrNull(key: RaptorComponentKey2<out Component>): Component? =
@@ -120,7 +120,9 @@ internal class DefaultRaptorComponentRegistry2(
 	private inner class RegistrationSet<Component : RaptorComponent2>(
 		private val key: RaptorComponentKey2<Component>,
 		private val registrations: MutableList<RaptorComponentRegistration<Component>> = mutableListOf(),
-	) : RaptorComponentSet2<Component>, List<RaptorComponentRegistration<Component>> by registrations {
+	) : RaptorComponentSet2<Component>,
+		RaptorAssemblyQuery2<Component>,
+		List<RaptorComponentRegistration<Component>> by registrations {
 
 		private val configurations: MutableList<Component.() -> Unit> = mutableListOf()
 
@@ -159,7 +161,15 @@ internal class DefaultRaptorComponentRegistry2(
 		}
 
 
-		override fun all(configure: Component.() -> Unit) {
+		fun asCollection(): Collection<RaptorComponentRegistration<Component>> =
+			registrations
+
+
+		override val all: RaptorAssemblyQuery2<Component>
+			get() = this
+
+
+		override fun invoke(configure: Component.() -> Unit) {
 			checkIsConfigurable { "Cannot configure a component after the configuration phase has ended." }
 
 			configurations += configure

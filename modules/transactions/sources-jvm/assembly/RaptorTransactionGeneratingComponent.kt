@@ -15,6 +15,12 @@ public val RaptorTransactionGeneratingComponent.transactions: RaptorTransactionC
 	get() = componentRegistry2.oneOrRegister(RaptorTransactionComponent.Key) { RaptorTransactionComponent() }
 
 
+// FIXME includeNested
+@RaptorDsl
+public val RaptorAssemblyQuery2<RaptorTransactionGeneratingComponent>.transactions: RaptorAssemblyQuery2<RaptorTransactionComponent>
+	get() = map { it.transactions }
+
+
 // FIXME throw if feature not installed?
 @RaptorDsl
 @Suppress("UnusedReceiverParameter")

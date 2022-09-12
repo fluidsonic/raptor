@@ -6,9 +6,8 @@ import io.fluidsonic.raptor.*
 public class RaptorGraphsComponent internal constructor() : RaptorComponent2.Base(), RaptorComponentSet2<RaptorGraphComponent> {
 
 	@RaptorDsl
-	override fun all(configure: RaptorGraphComponent.() -> Unit) {
-		componentRegistry2.all(RaptorGraphComponent.Key, configure)
-	}
+	override val all: RaptorAssemblyQuery2<RaptorGraphComponent>
+		get() = componentRegistry2.all(RaptorGraphComponent.Key).all
 
 
 	@RaptorDsl

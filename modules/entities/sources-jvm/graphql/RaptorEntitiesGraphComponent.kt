@@ -42,7 +42,7 @@ internal class RaptorEntitiesGraphComponent internal constructor(
 
 	override fun RaptorComponentConfigurationEndScope2.onConfigurationEnded() {
 		if (idDefinitionsByDiscriminator.isNotEmpty())
-			graphComponent.definitions(RaptorEntityId.graphDefinition(idDefinitionsByDiscriminator.values))
+			graphComponent.definitions.add(RaptorEntityId.graphDefinition(idDefinitionsByDiscriminator.values))
 	}
 
 
@@ -55,7 +55,7 @@ internal class RaptorEntitiesGraphComponent internal constructor(
 
 @RaptorDsl
 public fun RaptorGraphComponent.definition(definition: RaptorEntityId.Definition<*>) {
-	definitions(definition.graphDefinition())
+	definitions.add(definition.graphDefinition())
 
 	componentRegistry2.oneOrRegister(RaptorEntitiesGraphComponent.Key) {
 		RaptorEntitiesGraphComponent(graphComponent = this)

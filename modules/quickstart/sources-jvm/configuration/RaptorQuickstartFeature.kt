@@ -24,10 +24,10 @@ public object RaptorQuickstartFeature : RaptorFeature {
 			)
 		}
 
-		graphs.all {
-			includeDefaultDefinitions()
+		graphs.all.definitions {
+			includeDefault()
 
-			definitions(
+			add(
 				AccessToken.graphDefinition(),
 				Password.graphDefinition()
 			)

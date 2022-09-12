@@ -6,9 +6,8 @@ import io.fluidsonic.raptor.*
 public class RaptorKtorServersComponent internal constructor() : RaptorComponent2.Base(), RaptorComponentSet2<RaptorKtorServerComponent> {
 
 	@RaptorDsl
-	override fun all(configure: RaptorKtorServerComponent.() -> Unit) {
-		componentRegistry2.all(RaptorKtorServerComponent.Key, configure)
-	}
+	override val all: RaptorAssemblyQuery2<RaptorKtorServerComponent>
+		get() = componentRegistry2.all(RaptorKtorServerComponent.Key).all
 
 
 	@RaptorDsl
@@ -25,5 +24,23 @@ public class RaptorKtorServersComponent internal constructor() : RaptorComponent
 	internal object Key : RaptorComponentKey2<RaptorKtorServersComponent> {
 
 		override fun toString() = "servers"
+	}
+}
+
+
+@RaptorDsl
+public fun RaptorAssemblyQuery2<RaptorKtorServersComponent>.new(
+	forceEncryptedConnection: Boolean = true,
+): RaptorAssemblyQuery2<RaptorKtorServerComponent> =
+	map { it.new(forceEncryptedConnection = forceEncryptedConnection) }
+
+
+@RaptorDsl
+public fun RaptorAssemblyQuery2<RaptorKtorServersComponent>.new(
+	forceEncryptedConnection: Boolean = true,
+	configure: RaptorKtorServerComponent.() -> Unit = {},
+) {
+	this {
+		new(forceEncryptedConnection = forceEncryptedConnection).configure()
 	}
 }

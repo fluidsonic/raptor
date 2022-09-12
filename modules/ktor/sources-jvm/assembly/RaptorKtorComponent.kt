@@ -33,3 +33,8 @@ public class RaptorKtorComponent internal constructor() : RaptorComponent2.Base(
 		override fun toString() = "ktor"
 	}
 }
+
+
+@RaptorDsl
+public val RaptorAssemblyQuery2<RaptorKtorComponent>.servers: RaptorAssemblyQuery2<RaptorKtorServersComponent>
+	get() = map { it.servers }

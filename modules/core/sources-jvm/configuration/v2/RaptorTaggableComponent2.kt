@@ -11,9 +11,59 @@ public fun RaptorTaggableComponent2.tag(vararg tags: Any) {
 }
 
 
+// TODO Support multiple tags with OR combination. OR: tagged(A, B) - AND: tagged(A).tagged(B)
 @RaptorDsl
-public fun <Component : RaptorTaggableComponent2> RaptorComponentSet2<Component>.tagged(tag: Any): RaptorComponentSet2<Component> =
-	RaptorTagMatchingComponentSet2(source = this, tagsToMatch = setOf(tag))
+public fun <Component : RaptorTaggableComponent2> RaptorComponentSet2<Component>.tagged(vararg tags: Any): RaptorAssemblyQuery2<Component> =
+	all.tagged(*tags)
+
+
+// TODO Support multiple tags with OR combination. OR: tagged(A, B) - AND: tagged(A).tagged(B)
+@RaptorDsl
+public fun <Component : RaptorTaggableComponent2> RaptorComponentSet2<Component>.tagged(
+	vararg tags: Any,
+	configure: Component.() -> Unit,
+) {
+	tagged(*tags)(configure)
+}
+
+
+// TODO Support multiple tags with OR combination. OR: tagged(A, B) - AND: tagged(A).tagged(B)
+@RaptorDsl
+public fun <Component : RaptorTaggableComponent2> RaptorAssemblyQuery2<Component>.tagged(vararg tags: Any): RaptorAssemblyQuery2<Component> =
+	when {
+		tags.isEmpty() -> this
+		else -> RaptorTagMatchingAssemblyQuery2(source = this, tagsToMatch = setOf(tags))
+	}
+
+
+// TODO Support multiple tags with OR combination. OR: tagged(A, B) - AND: tagged(A).tagged(B)
+@RaptorDsl
+public fun <Component : RaptorTaggableComponent2> RaptorAssemblyQuery2<Component>.tagged(
+	vararg tags: Any,
+	configure: Component.() -> Unit,
+) {
+	tagged(tags)(configure)
+}
+
+
+// TODO Support multiple tags with OR combination. OR: tagged(A, B) - AND: tagged(A).tagged(B)
+@JvmName("taggedSetQuery")
+@RaptorDsl
+public fun <Component : RaptorTaggableComponent2> RaptorAssemblyQuery2<RaptorComponentSet2<Component>>.tagged(
+	vararg tags: Any,
+): RaptorAssemblyQuery2<Component> =
+	all.tagged(*tags)
+
+
+// TODO Support multiple tags with OR combination. OR: tagged(A, B) - AND: tagged(A).tagged(B)
+@JvmName("taggedSetQuery")
+@RaptorDsl
+public fun <Component : RaptorTaggableComponent2> RaptorAssemblyQuery2<RaptorComponentSet2<Component>>.tagged(
+	vararg tags: Any,
+	configure: Component.() -> Unit,
+) {
+	tagged(*tags)(configure)
+}
 
 
 // TODO Use RaptorTaggableComponent.tags with RaptorComponentConfigurationEndScope context receiver.

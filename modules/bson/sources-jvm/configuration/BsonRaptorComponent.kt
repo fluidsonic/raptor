@@ -56,6 +56,15 @@ public fun RaptorComponentSet<BsonRaptorComponent>.codecs(
 }
 
 
+// FIXME Enable BuilderInference once fixed: https://youtrack.jetbrains.com/issue/KT-41595
+@RaptorDsl
+public inline fun <reified Value : Any> RaptorComponentSet<BsonRaptorComponent>.definition(
+	@BuilderInference noinline configure: RaptorBsonDefinitionBuilder<Value>.() -> Unit,
+) {
+	definitions(raptor.bson.definition(configure))
+}
+
+
 @RaptorDsl
 public fun RaptorComponentSet<BsonRaptorComponent>.definitions(
 	vararg definitions: RaptorBsonDefinition,

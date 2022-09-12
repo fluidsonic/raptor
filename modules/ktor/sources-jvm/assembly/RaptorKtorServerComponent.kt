@@ -90,8 +90,8 @@ public class RaptorKtorServerComponent internal constructor(
 
 
 	@RaptorDsl
-	public val routes: RaptorKtorRoutesComponent
-		get() = componentRegistry2.oneOrRegister(RaptorKtorRoutesComponent.Key, ::RaptorKtorRoutesComponent)
+	public val routes: RaptorKtorRoutesComponent.Root
+		get() = componentRegistry2.oneOrRegister(RaptorKtorRoutesComponent.Root.Key, RaptorKtorRoutesComponent::Root)
 
 
 	// FIXME rn
@@ -186,5 +186,84 @@ public class RaptorKtorServerComponent internal constructor(
 
 		override val server: RaptorKtorServerComponent
 			get() = this@RaptorKtorServerComponent
+	}
+}
+
+
+@RaptorDsl
+public fun RaptorAssemblyQuery2<RaptorKtorServerComponent>.custom(configuration: RaptorKtorInitializationScope.() -> Unit) {
+	this {
+		custom(configuration)
+	}
+}
+
+
+@RaptorDsl
+internal fun RaptorAssemblyQuery2<RaptorKtorServerComponent>.engineEnvironmentFactory(
+	factory: (
+		configure: ApplicationEngineEnvironmentBuilder.() -> Unit,
+	) -> ApplicationEngineEnvironment,
+) {
+	this {
+		engineEnvironmentFactory(factory)
+	}
+}
+
+
+@RaptorDsl
+internal fun RaptorAssemblyQuery2<RaptorKtorServerComponent>.engineFactory(factory: (environment: ApplicationEngineEnvironment) -> ApplicationEngine) {
+	this {
+		engineFactory(factory)
+	}
+}
+
+
+@RaptorDsl
+public fun RaptorAssemblyQuery2<RaptorKtorServerComponent>.httpConnector(host: String = "0.0.0.0", port: Int = 80) {
+	this {
+		httpConnector(host = host, port = port)
+	}
+}
+
+
+@RaptorDsl
+public fun RaptorAssemblyQuery2<RaptorKtorServerComponent>.httpsConnector(
+	host: String = "0.0.0.0",
+	port: Int = 443,
+	keyAlias: String,
+	keyStoreFile: File,
+	keyStorePassword: String,
+	privateKeyPassword: String,
+) {
+	this {
+		httpsConnector(
+			host = host,
+			port = port,
+			keyAlias = keyAlias,
+			keyStoreFile = keyStoreFile,
+			keyStorePassword = keyStorePassword,
+			privateKeyPassword = privateKeyPassword
+		)
+	}
+}
+
+
+@RaptorDsl
+public fun RaptorAssemblyQuery2<RaptorKtorServerComponent>.install(feature: RaptorKtorServerFeature) {
+	this {
+		install(feature)
+	}
+}
+
+
+@RaptorDsl
+public val RaptorAssemblyQuery2<RaptorKtorServerComponent>.routes: RaptorAssemblyQuery2<RaptorKtorRoutesComponent.Root>
+	get() = map { it.routes }
+
+
+@RaptorDsl
+internal fun RaptorAssemblyQuery2<RaptorKtorServerComponent>.startStopDispatcher(dispatcher: CoroutineDispatcher) {
+	this {
+		startStopDispatcher(dispatcher)
 	}
 }

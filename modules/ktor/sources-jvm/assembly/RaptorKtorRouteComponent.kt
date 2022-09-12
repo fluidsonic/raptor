@@ -113,3 +113,32 @@ public class RaptorKtorRouteComponent internal constructor(
 			get() = this@RaptorKtorRouteComponent
 	}
 }
+
+
+@RaptorDsl
+public fun RaptorAssemblyQuery2<RaptorKtorRouteComponent>.custom(configure: RaptorKtorRouteInitializationScope.() -> Unit) {
+	this{
+		custom(configure)
+	}
+}
+
+
+@RaptorDsl
+public fun RaptorAssemblyQuery2<RaptorKtorRouteComponent>.install(feature: RaptorKtorRouteFeature) {
+	this{
+		install(feature)
+	}
+}
+
+
+@RaptorDsl
+public val RaptorAssemblyQuery2<RaptorKtorRouteComponent>.routes: RaptorAssemblyQuery2<RaptorKtorRoutesComponent>
+	get() = map { it.routes }
+
+
+@RaptorDsl
+public fun RaptorAssemblyQuery2<RaptorKtorRouteComponent>.wrap(wrapper: RaptorKtorRouteInitializationScope.(next: Route.() -> Unit) -> Unit) {
+	this {
+		wrap(wrapper)
+	}
+}

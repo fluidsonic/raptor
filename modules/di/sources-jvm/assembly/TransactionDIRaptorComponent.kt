@@ -54,3 +54,8 @@ public val RaptorTransactionComponent.di: RaptorDIComponent
 			}
 		}
 	}
+
+
+@RaptorDsl
+public val RaptorAssemblyQuery2<RaptorTransactionComponent>.di: RaptorAssemblyQuery2<RaptorDIComponent>
+	get() = map { it.di }

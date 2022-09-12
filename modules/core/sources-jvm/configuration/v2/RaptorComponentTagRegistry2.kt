@@ -13,7 +13,7 @@ internal class RaptorComponentTagRegistry2<Component : RaptorTaggableComponent2>
 
 	fun addConfiguration(configuration: RaptorTaggableComponentConfiguration2<Component>) {
 		when {
-			configuration.tagsToMatch.all(tags::contains) -> configuration.configure(component)
+			configuration.tagsToMatch.any(tags::contains) -> configuration.configure(component)
 			else -> pendingConfigurations = pendingConfigurations + configuration
 		}
 	}
@@ -30,7 +30,7 @@ internal class RaptorComponentTagRegistry2<Component : RaptorTaggableComponent2>
 
 		for (configuration in pendingConfigurations)
 			when {
-				configuration.tagsToMatch.all(tags::contains) -> matchingConfigurations += configuration
+				configuration.tagsToMatch.any(tags::contains) -> matchingConfigurations += configuration
 				else -> stillPendingConfigurations += configuration
 			}
 

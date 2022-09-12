@@ -4,7 +4,7 @@ import io.fluidsonic.raptor.*
 
 
 class NodeComponent(
-	@RaptorDsl val name: String
+	@RaptorDsl val name: String,
 ) : RaptorComponent.Default<NodeComponent>(), TaggableComponent {
 
 	fun toNode(): Node = Node(
@@ -57,6 +57,7 @@ fun RaptorComponentSet<NodeComponent>.nodes(recursive: Boolean): RaptorComponent
 					nodes(recursive = true).configure(action)
 				}
 			}
+
 			false -> authoredSet.nodes
 		}
 	}

@@ -1,44 +1,54 @@
 package io.fluidsonic.raptor.graph
 
 import io.fluidsonic.raptor.*
+import kotlin.reflect.*
 
 
 public class RaptorGraphComponent internal constructor() : RaptorComponent2.Base(), RaptorTaggableComponent2 {
-
-	private val definitions: MutableList<RaptorGraphDefinition> = mutableListOf()
-	private var includesDefaultDefinitions = false
 
 	internal var graph: RaptorGraph? = null
 		private set
 
 
 	@RaptorDsl
-	public fun definitions(vararg definitions: RaptorGraphDefinition) {
-		definitions(definitions.asIterable())
-	}
-
-
-	@RaptorDsl
-	public fun definitions(definitions: Iterable<RaptorGraphDefinition>) {
-		this.definitions += definitions
-	}
-
-
-	@RaptorDsl
-	public fun includeDefaultDefinitions() {
-		if (includesDefaultDefinitions)
-			return
-
-		includesDefaultDefinitions = true
-
-		definitions(RaptorGraphDefaults.definitions)
-	}
+	public val definitions: Definitions = Definitions()
 
 
 	override fun RaptorComponentConfigurationEndScope2.onConfigurationEnded() {
-		graph = GraphSystemDefinitionBuilder.build(definitions)
+		graph = GraphSystemDefinitionBuilder.build(definitions.list)
 			.let(GraphTypeSystemBuilder::build)
 			.let { GraphSystemBuilder.build(tags = tags(this@RaptorGraphComponent), typeSystem = it) }
+	}
+
+
+	public inner class Definitions : RaptorAssemblyQuery2<Definitions> {
+
+		private var includesDefault = false
+
+		internal val list: MutableList<RaptorGraphDefinition> = mutableListOf()
+
+
+		@RaptorDsl
+		public fun add(definitions: Iterable<RaptorGraphDefinition>) {
+			list += definitions
+		}
+
+
+		@RaptorDsl
+		public fun includeDefault() {
+			if (includesDefault)
+				return
+
+			includesDefault = true
+
+			add(RaptorGraphDefaults.definitions)
+		}
+
+
+		@RaptorDsl
+		override fun invoke(configure: Definitions.() -> Unit) {
+			configure()
+		}
 	}
 
 
@@ -49,7 +59,97 @@ public class RaptorGraphComponent internal constructor() : RaptorComponent2.Base
 }
 
 
-// FIXME Other functions won't reliably resolve the right graph. It depends on the order that components are completed.
+@RaptorDsl
+public val RaptorAssemblyQuery2<RaptorGraphComponent>.definitions: RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>
+	get() = map { it.definitions }
+
+
+@RaptorDsl
+public fun RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.add(vararg definitions: RaptorGraphDefinition) {
+	add(definitions.asIterable())
+}
+
+
+@RaptorDsl
+public fun RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.add(definitions: Iterable<RaptorGraphDefinition>) {
+	this {
+		add(definitions)
+	}
+}
+
+
+@RaptorDsl
+public fun RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.includeDefault() {
+	this {
+		includeDefault()
+	}
+}
+
+
+@RaptorDsl
+public inline fun <reified Type : Enum<Type>> RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.newEnum(
+	name: String = RaptorGraphDefinition.defaultName,
+	@BuilderInference noinline configure: RaptorEnumGraphDefinitionBuilder<Type>.() -> Unit = {},
+) {
+	add(graphEnumDefinition(
+		name = name,
+		type = typeOf<Type>(),
+		values = enumValues<Type>().toList(),
+		configure = configure
+	))
+}
+
+
+@RaptorDsl
+public inline fun <reified Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.newIdAlias(
+	@BuilderInference noinline configure: RaptorAliasGraphDefinitionBuilder<Type, String>.() -> Unit,
+) {
+	add(graphIdAliasDefinition(
+		type = typeOf<Type>(),
+		configure = configure
+	))
+}
+
+
+@RaptorDsl
+public inline fun <reified Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.newInputObject(
+	name: String = RaptorGraphDefinition.defaultName,
+	@BuilderInference noinline configure: RaptorInputObjectGraphDefinitionBuilder<Type>.() -> Unit,
+) {
+	add(graphInputObjectDefinition(
+		name = name,
+		type = typeOf<Type>(),
+		configure = configure
+	))
+}
+
+
+@RaptorDsl
+public inline fun <reified Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.newObject(
+	name: String = RaptorGraphDefinition.defaultName,
+	@BuilderInference noinline configure: RaptorObjectGraphDefinitionBuilder<Type>.() -> Unit = {},
+) {
+	add(graphObjectDefinition(
+		name = name,
+		type = typeOf<Type>(),
+		configure = configure
+	))
+}
+
+
+@RaptorDsl
+public inline fun <reified Value : Any> RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.newScalar(
+	name: String = RaptorGraphDefinition.defaultName,
+	noinline configure: RaptorScalarGraphDefinitionBuilder<Value>.() -> Unit,
+) {
+	add(graphScalarDefinition(
+		name = name,
+		type = typeOf<Value>(),
+		configure = configure
+	))
+}
+
+
 // We can either use two phases:
 //  1. complete conf (create RaptorGraph)
 //  2. end conf (reference RaptorGraph from other component)
