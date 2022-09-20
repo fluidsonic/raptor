@@ -95,7 +95,7 @@ public inline fun <reified Type : Enum<Type>> RaptorAssemblyQuery2<RaptorGraphCo
 		name = name,
 		type = typeOf<Type>(),
 		values = enumValues<Type>().toList(),
-		configure = configure
+		configure = configure,
 	))
 }
 
@@ -106,7 +106,7 @@ public inline fun <reified Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent
 ) {
 	add(graphIdAliasDefinition(
 		type = typeOf<Type>(),
-		configure = configure
+		configure = configure,
 	))
 }
 
@@ -119,7 +119,7 @@ public inline fun <reified Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent
 	add(graphInputObjectDefinition(
 		name = name,
 		type = typeOf<Type>(),
-		configure = configure
+		configure = configure,
 	))
 }
 
@@ -132,7 +132,7 @@ public inline fun <reified Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent
 	add(graphObjectDefinition(
 		name = name,
 		type = typeOf<Type>(),
-		configure = configure
+		configure = configure,
 	))
 }
 
@@ -145,7 +145,20 @@ public inline fun <reified Value : Any> RaptorAssemblyQuery2<RaptorGraphComponen
 	add(graphScalarDefinition(
 		name = name,
 		type = typeOf<Value>(),
-		configure = configure
+		configure = configure,
+	))
+}
+
+
+@RaptorDsl
+public inline fun <reified Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.newUnion(
+	name: String = RaptorGraphDefinition.defaultName,
+	@BuilderInference noinline configure: RaptorUnionGraphDefinitionBuilder<Type>.() -> Unit = {},
+) {
+	add(graphUnionDefinition(
+		name = name,
+		type = typeOf<Type>(),
+		configure = configure,
 	))
 }
 
