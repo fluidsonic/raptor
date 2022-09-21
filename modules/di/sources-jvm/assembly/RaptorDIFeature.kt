@@ -5,7 +5,7 @@ import io.fluidsonic.raptor.*
 
 public object RaptorDIFeature : RaptorFeature {
 
-	override fun RaptorFeatureConfigurationScope.beginConfiguration() {
+	override fun RaptorFeatureScope.installed() {
 		componentRegistry2.register(RootDIRaptorComponent.Key, ::RootDIRaptorComponent)
 	}
 

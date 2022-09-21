@@ -22,7 +22,7 @@ fluidLibraryModule(description = "FIXME") {
 				implementation(kotlinx("coroutines-core", Versions.kotlinx_coroutines))
 				implementation(ktor("websockets"))
 				implementation(ktor("server-netty"))
-				implementation("ch.qos.logback:logback-classic:1.2.11") // TODO Don't add concrete Slf4j implementation here.
+				implementation("org.slf4j:slf4j-api:2.0.1") // FIXME version property
 			}
 		}
 	}
