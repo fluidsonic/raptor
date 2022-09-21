@@ -1,10 +1,8 @@
-// https://youtrack.jetbrains.com/issue/KT-12495
-@file:JvmName("Country@bson")
-
-package io.fluidsonic.raptor
+package io.fluidsonic.raptor.bson
 
 import io.fluidsonic.country.*
 import io.fluidsonic.country.Country.*
+import io.fluidsonic.raptor.*
 
 
 public fun Companion.bsonDefinition(): RaptorBsonDefinition = raptor.bson.definition<Country> {

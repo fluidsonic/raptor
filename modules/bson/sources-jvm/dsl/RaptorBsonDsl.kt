@@ -1,5 +1,6 @@
-package io.fluidsonic.raptor
+package io.fluidsonic.raptor.bson
 
+import io.fluidsonic.raptor.*
 import kotlin.reflect.*
 
 
@@ -7,7 +8,7 @@ public object RaptorBsonDsl
 
 
 @RaptorDsl
-@Suppress("unused")
+@Suppress("UnusedReceiverParameter")
 public val RaptorGlobalDsl.bson: RaptorBsonDsl
 	get() = RaptorBsonDsl
 
@@ -23,7 +24,7 @@ public inline fun <reified Value : Any> RaptorBsonDsl.definition(
 
 
 @RaptorDsl
-@Suppress("unused")
+@Suppress("UnusedReceiverParameter")
 public fun <Value : Any> RaptorBsonDsl.definition(
 	valueClass: KClass<Value>,
 	configure: RaptorBsonDefinitionBuilder<Value>.() -> Unit,

@@ -1,8 +1,8 @@
 @file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
 
-package io.fluidsonic.raptor
+package io.fluidsonic.raptor.bson
 
-import io.fluidsonic.raptor.bson.internal.*
+import io.fluidsonic.raptor.*
 import kotlin.internal.*
 import kotlin.reflect.*
 

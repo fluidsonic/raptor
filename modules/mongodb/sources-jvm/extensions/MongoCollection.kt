@@ -1,4 +1,4 @@
-package io.fluidsonic.raptor
+package io.fluidsonic.raptor.mongo
 
 import com.mongodb.client.model.*
 import com.mongodb.client.model.Filters.*

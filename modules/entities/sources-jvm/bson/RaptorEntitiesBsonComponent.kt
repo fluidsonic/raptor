@@ -1,11 +1,12 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.raptor.bson.*
 import kotlin.reflect.*
 
 
 internal class RaptorEntitiesBsonComponent internal constructor(
-	private val bsonComponent: BsonRaptorComponent,
-) : RaptorComponent.Default<RaptorEntitiesBsonComponent>() {
+	private val bsonComponent: RaptorBsonComponent,
+) : RaptorComponent2.Base() {
 
 	private var idDefinitionsByDiscriminator: MutableMap<String, RaptorEntityId.Definition<*>> = hashMapOf()
 	private var idDefinitionsByInstanceClass: MutableMap<KClass<out RaptorEntityId>, RaptorEntityId.Definition<*>> = hashMapOf()
@@ -39,13 +40,13 @@ internal class RaptorEntitiesBsonComponent internal constructor(
 	}
 
 
-	override fun RaptorComponentConfigurationEndScope.onConfigurationEnded() {
+	override fun RaptorComponentConfigurationEndScope2.onConfigurationEnded() {
 		if (idDefinitionsByDiscriminator.isNotEmpty())
 			bsonComponent.definitions(RaptorTypedEntityId.bsonDefinition(idDefinitionsByDiscriminator.values))
 	}
 
 
-	internal object Key : RaptorComponentKey<RaptorEntitiesBsonComponent> {
+	internal object Key : RaptorComponentKey2<RaptorEntitiesBsonComponent> {
 
 		override fun toString() = "entities"
 	}
@@ -53,15 +54,24 @@ internal class RaptorEntitiesBsonComponent internal constructor(
 
 
 @RaptorDsl
-public fun RaptorComponentSet<BsonRaptorComponent>.definition(
+public fun RaptorBsonComponent.definition(
 	definition: RaptorEntityId.Definition<*>,
 	priority: RaptorBsonDefinition.Priority = RaptorBsonDefinition.Priority.normal,
 ) {
 	definitions(definition.bsonDefinition(), priority = priority)
 
-	configure {
-		componentRegistry.oneOrRegister(RaptorEntitiesBsonComponent.Key) {
-			RaptorEntitiesBsonComponent(bsonComponent = this)
-		}.addIdDefinition(definition)
+	componentRegistry2.oneOrRegister(RaptorEntitiesBsonComponent.Key) {
+		RaptorEntitiesBsonComponent(bsonComponent = this)
+	}.addIdDefinition(definition)
+}
+
+
+@RaptorDsl
+public fun RaptorAssemblyQuery2<RaptorBsonComponent>.definition(
+	definition: RaptorEntityId.Definition<*>,
+	priority: RaptorBsonDefinition.Priority = RaptorBsonDefinition.Priority.normal,
+) {
+	this {
+		definition(definition, priority = priority)
 	}
 }

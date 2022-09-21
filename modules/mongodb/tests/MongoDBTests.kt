@@ -2,6 +2,7 @@ package tests
 
 import com.mongodb.*
 import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.bson.*
 import kotlin.test.*
 
 
@@ -10,7 +11,7 @@ class MongoDBTests {
 	@Test
 	fun testDefaultCodecs() {
 		val raptor = raptor {
-			install(BsonRaptorFeature) {
+			install(RaptorBsonFeature) {
 				includeMongoClientDefaultCodecs()
 			}
 		}

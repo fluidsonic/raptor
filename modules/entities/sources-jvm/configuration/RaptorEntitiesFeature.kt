@@ -7,7 +7,7 @@ import io.fluidsonic.raptor.ktor.*
 public object RaptorEntitiesFeature : RaptorFeature {
 
 	override fun RaptorFeatureConfigurationScope.completeConfiguration() {
-		val resolverTypes = componentRegistry.oneOrNull(RaptorEntitiesComponent.Key)?.resolverTypes.orEmpty()
+		val resolverTypes = componentRegistry2.oneOrNull(RaptorEntitiesComponent.Key)?.resolverTypes.orEmpty()
 
 		// FIXME
 		ifFeature(RaptorDIFeature) {
@@ -30,5 +30,5 @@ public object RaptorEntitiesFeature : RaptorFeature {
 
 
 @RaptorDsl
-public val RaptorTopLevelConfigurationScope.entities: RaptorComponentSet<RaptorEntitiesComponent>
-	get() = componentRegistry.oneOrRegister(RaptorEntitiesComponent.Key, ::RaptorEntitiesComponent)
+public val RaptorTopLevelConfigurationScope.entities: RaptorEntitiesComponent
+	get() = componentRegistry2.oneOrRegister(RaptorEntitiesComponent.Key, ::RaptorEntitiesComponent)

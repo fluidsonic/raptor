@@ -1,9 +1,16 @@
-package io.fluidsonic.raptor
+package io.fluidsonic.raptor.bson
 
-import io.fluidsonic.raptor.bson.internal.*
+import io.fluidsonic.country.*
+import io.fluidsonic.currency.*
+import io.fluidsonic.raptor.*
+import io.fluidsonic.stdlib.*
+import io.fluidsonic.time.*
 import kotlin.reflect.*
+import kotlin.time.*
+import kotlinx.datetime.*
 import org.bson.codecs.*
 import org.bson.codecs.configuration.*
+import org.bson.codecs.jsr310.*
 
 
 public interface RaptorBsonDefinition {
@@ -12,6 +19,27 @@ public interface RaptorBsonDefinition {
 
 
 	public companion object {
+
+		public val defaults: List<RaptorBsonDefinition> = listOf(
+			CollectionExtensions.bsonDefinition(),
+			Country.bsonDefinition(),
+			CountryCode.bsonDefinition(),
+			Currency.bsonDefinition(),
+			CurrencyCode.bsonDefinition(),
+			DayOfWeek_bsonDefinition(),
+			Duration.bsonDefinition(),
+			GeoCoordinate.bsonDefinition(),
+			LocalDate.bsonDefinition(),
+			LocalDateTime.bsonDefinition(),
+			LocalTime.bsonDefinition(),
+			Timestamp.bsonDefinition(),
+			TimeZone.bsonDefinition(),
+			of(ValueCodecProvider()),
+			of(BsonValueCodecProvider()),
+			of(Jsr310CodecProvider()),
+			of(BsonCodecProvider())
+		)
+
 
 		@RaptorInternalApi
 		public fun of(codec: Codec<*>): RaptorBsonDefinition =

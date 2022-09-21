@@ -4,12 +4,12 @@ import kotlin.collections.set
 import kotlin.reflect.*
 
 
-public class RaptorEntitiesComponent internal constructor() : RaptorComponent.Default<RaptorEntitiesComponent>() {
+public class RaptorEntitiesComponent internal constructor() : RaptorComponent2.Base() {
 
 	internal val resolverTypes: MutableMap<KClass<out RaptorEntityId>, KType> = hashMapOf()
 
 
-	internal object Key : RaptorComponentKey<RaptorEntitiesComponent> {
+	internal object Key : RaptorComponentKey2<RaptorEntitiesComponent> {
 
 		override fun toString() = "entities"
 	}
@@ -17,14 +17,13 @@ public class RaptorEntitiesComponent internal constructor() : RaptorComponent.De
 
 
 // FIXME
-@OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
-public inline fun <reified Id : RaptorEntityId, reified Resolver : RaptorEntityResolver<*, Id>> RaptorComponentSet<RaptorEntitiesComponent>.resolver() {
+public inline fun <reified Id : RaptorEntityId, reified Resolver : RaptorEntityResolver<*, Id>> RaptorAssemblyQuery2<RaptorEntitiesComponent>.resolver() {
 	resolver(id = Id::class, resolverType = typeOf<Resolver>())
 }
 
 
 @RaptorDsl
-public fun RaptorComponentSet<RaptorEntitiesComponent>.resolver(id: KClass<out RaptorEntityId>, resolverType: KType) {
-	configure { this.resolverTypes[id] = resolverType } // FIXME check collision
+public fun RaptorAssemblyQuery2<RaptorEntitiesComponent>.resolver(id: KClass<out RaptorEntityId>, resolverType: KType) {
+	this { this.resolverTypes[id] = resolverType } // FIXME check collision
 }

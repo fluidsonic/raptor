@@ -1,6 +1,5 @@
-package io.fluidsonic.raptor.bson.internal
+package io.fluidsonic.raptor.bson
 
-import io.fluidsonic.raptor.*
 import io.fluidsonic.time.*
 import kotlin.reflect.*
 import org.bson.*
@@ -130,6 +129,7 @@ internal class DefaultBsonReaderScope(
 					true -> null as Value
 					false -> error("Cannot decode BSON null value as type '$type'.")
 				}
+
 				else -> {
 					val valueClass = type.classifier as? KClass<*>
 						?: error("Cannot decode type '$type'.")

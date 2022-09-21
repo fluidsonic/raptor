@@ -1,4 +1,4 @@
-package io.fluidsonic.raptor.bson.internal
+package io.fluidsonic.raptor.bson
 
 import io.fluidsonic.raptor.*
 

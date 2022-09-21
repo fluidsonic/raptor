@@ -1,4 +1,4 @@
-package io.fluidsonic.raptor
+package io.fluidsonic.raptor.bson
 
 import kotlin.reflect.*
 

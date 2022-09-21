@@ -1,4 +1,6 @@
-package io.fluidsonic.raptor
+package io.fluidsonic.raptor.bson
+
+import io.fluidsonic.raptor.*
 
 
 internal object CollectionExtensions {

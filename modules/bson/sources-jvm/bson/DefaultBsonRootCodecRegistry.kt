@@ -1,6 +1,5 @@
-package io.fluidsonic.raptor.bson.internal
+package io.fluidsonic.raptor.bson
 
-import io.fluidsonic.raptor.*
 import io.fluidsonic.stdlib.*
 import java.util.concurrent.*
 import kotlin.reflect.*

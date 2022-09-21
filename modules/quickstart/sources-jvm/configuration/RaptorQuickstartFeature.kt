@@ -1,5 +1,6 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.raptor.bson.*
 import io.fluidsonic.raptor.di.*
 import io.fluidsonic.raptor.graph.*
 import io.fluidsonic.raptor.ktor.*
@@ -9,7 +10,7 @@ import io.ktor.http.*
 public object RaptorQuickstartFeature : RaptorFeature {
 
 	override fun RaptorFeatureConfigurationScope.beginConfiguration() {
-		install(BsonRaptorFeature)
+		install(RaptorBsonFeature)
 		install(RaptorDIFeature)
 		install(RaptorEntitiesFeature)
 		install(RaptorKtorFeature)

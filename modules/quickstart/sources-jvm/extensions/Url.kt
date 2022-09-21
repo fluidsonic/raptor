@@ -2,6 +2,7 @@
 
 package io.fluidsonic.raptor
 
+import io.fluidsonic.raptor.bson.*
 import io.ktor.http.*
 import io.ktor.http.Url.*
 

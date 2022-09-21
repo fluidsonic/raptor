@@ -1,6 +1,5 @@
-package io.fluidsonic.raptor.bson.internal
+package io.fluidsonic.raptor.bson
 
-import io.fluidsonic.raptor.*
 import kotlin.reflect.*
 
 
@@ -27,11 +26,13 @@ internal class DefaultRaptorBsonDefinition<Value : Any>(
 			encode = encode as (RaptorBsonWriterScope.(value: Value) -> Unit)?,
 			valueClass = valueClass
 		)
+
 		encodesSubclasses && this.valueClass.java.isAssignableFrom(valueClass.java) -> DefaultRaptorBsonCodec(
 			decode = null,
 			encode = encode as (RaptorBsonWriterScope.(value: Value) -> Unit)?,
 			valueClass = valueClass
 		)
+
 		else -> additionalCodeForValueClass(valueClass, registry = registry)
 	}
 

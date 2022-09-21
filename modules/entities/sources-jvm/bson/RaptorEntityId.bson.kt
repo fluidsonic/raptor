@@ -1,5 +1,6 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.raptor.bson.*
 import org.bson.*
 import org.bson.types.*
 

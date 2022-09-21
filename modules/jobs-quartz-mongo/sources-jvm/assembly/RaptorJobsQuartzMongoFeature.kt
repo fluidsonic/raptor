@@ -12,10 +12,6 @@ public object RaptorJobsQuartzMongoFeature : RaptorFeature.Configurable<Configur
 	public override fun RaptorFeatureConfigurationScope.beginConfiguration(action: Configuration.Builder.() -> Unit) {
 		val configuration = Configuration.Builder().apply(action).build()
 
-		install(RaptorDIFeature)
-		install(RaptorJobsFeature)
-		install(RaptorLifecycleFeature)
-
 		di.provide<RaptorJobScheduler> {
 			QuartzJobScheduler(
 				context = get(),

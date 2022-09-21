@@ -1,5 +1,6 @@
-package io.fluidsonic.raptor
+package io.fluidsonic.raptor.bson
 
+import io.fluidsonic.raptor.*
 import io.fluidsonic.stdlib.*
 import io.fluidsonic.stdlib.GeoCoordinate.*
 
@@ -17,6 +18,7 @@ public fun Companion.bsonDefinition(): RaptorBsonDefinition = raptor.bson.defini
 
 					GeoCoordinate(latitude = latitude, longitude = longitude)
 				}
+
 				"type" -> type = string()
 				else -> skipValue()
 			}

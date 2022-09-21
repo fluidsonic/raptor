@@ -1,13 +1,13 @@
-package io.fluidsonic.raptor
+package io.fluidsonic.raptor.mongo
 
 import io.fluidsonic.mongo.*
+import io.fluidsonic.raptor.bson.*
 import kotlin.reflect.*
 import org.bson.*
 import org.bson.codecs.*
 import org.bson.codecs.configuration.*
 
 
-@OptIn(ExperimentalStdlibApi::class)
 public inline fun <reified TDocument : Any> MongoDatabase.getCollectionOfGeneric(name: String): MongoCollection<TDocument> =
 	getCollectionOfGeneric(name = name, type = typeOf<TDocument>())
 

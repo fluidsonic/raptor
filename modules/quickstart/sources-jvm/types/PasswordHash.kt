@@ -1,5 +1,7 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.raptor.bson.*
+
 
 @JvmInline
 public value class PasswordHash(public val value: String) {

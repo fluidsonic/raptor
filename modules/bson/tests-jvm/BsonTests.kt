@@ -3,6 +3,7 @@ package tests
 import io.fluidsonic.country.*
 import io.fluidsonic.currency.*
 import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.bson.*
 import kotlin.test.*
 
 
@@ -15,7 +16,7 @@ class BsonTests {
 		val provider = DummyBsonCodecProvider
 
 		val raptor = raptor {
-			install(BsonRaptorFeature) {
+			install(RaptorBsonFeature) {
 				codecs(codec)
 				definitions(definition)
 			}
@@ -44,7 +45,7 @@ class BsonTests {
 		val currencyDefinition = Currency.bsonDefinition()
 
 		val raptor = raptor {
-			install(BsonRaptorFeature) {
+			install(RaptorBsonFeature) {
 				definitions(countryDefinition)
 				includeDefaultDefinitions()
 				definitions(currencyDefinition)
@@ -63,7 +64,7 @@ class BsonTests {
 	@Test
 	fun testEmpty() {
 		val raptor = raptor {
-			install(BsonRaptorFeature)
+			install(RaptorBsonFeature)
 		}
 
 		val configuration = raptor.context.bson

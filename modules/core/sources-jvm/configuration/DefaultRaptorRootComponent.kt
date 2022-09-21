@@ -130,7 +130,7 @@ internal class DefaultRaptorRootComponent : RaptorComponent.Default<RaptorRootCo
 
 		private fun beginConfiguration() {
 			with(feature) {
-				this@DefaultRaptorRootComponent.beginConfiguration()
+				this@DefaultRaptorRootComponent.installed()
 				this@DefaultRaptorRootComponent.applyConfiguration()
 			}
 		}

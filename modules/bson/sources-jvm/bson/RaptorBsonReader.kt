@@ -1,5 +1,6 @@
-package io.fluidsonic.raptor
+package io.fluidsonic.raptor.bson
 
+import io.fluidsonic.raptor.*
 import io.fluidsonic.time.*
 import kotlin.contracts.*
 import kotlin.reflect.*
