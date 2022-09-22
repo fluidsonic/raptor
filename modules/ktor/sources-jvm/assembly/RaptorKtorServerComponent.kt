@@ -13,7 +13,7 @@ import kotlinx.coroutines.*
 
 public class RaptorKtorServerComponent internal constructor(
 	internal val forceEncryptedConnection: Boolean,
-) : RaptorComponent2.Base(), RaptorTaggableComponent2, RaptorTransactionGeneratingComponent {
+) : RaptorComponent2.Base<RaptorKtorServerComponent>(), RaptorTaggableComponent2, RaptorTransactionGeneratingComponent {
 
 	private val connectors: MutableList<KtorServerConfiguration.Connector> = mutableListOf()
 	private val customConfigurations: MutableList<Application.() -> Unit> = mutableListOf()
@@ -90,7 +90,7 @@ public class RaptorKtorServerComponent internal constructor(
 
 	@RaptorDsl
 	public val routes: RaptorKtorRoutesComponent.Root
-		get() = componentRegistry2.oneOrRegister(RaptorKtorRoutesComponent.Root.Key, RaptorKtorRoutesComponent::Root)
+		get() = componentRegistry2.oneOrRegister(RaptorKtorRoutesComponent.Root.Key) { RaptorKtorRoutesComponent.Root() }
 
 
 	// FIXME rn

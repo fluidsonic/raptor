@@ -4,7 +4,7 @@ import io.fluidsonic.raptor.*
 import kotlin.reflect.*
 
 
-public class RaptorGraphComponent internal constructor() : RaptorComponent2.Base(), RaptorTaggableComponent2 {
+public class RaptorGraphComponent internal constructor() : RaptorComponent2.Base<RaptorGraphComponent>(), RaptorTaggableComponent2 {
 
 	internal var graph: RaptorGraph? = null
 		private set
@@ -35,6 +35,12 @@ public class RaptorGraphComponent internal constructor() : RaptorComponent2.Base
 
 
 		@RaptorDsl
+		override fun each(configure: Definitions.() -> Unit) {
+			configure()
+		}
+
+
+		@RaptorDsl
 		public fun includeDefault() {
 			if (includesDefault)
 				return
@@ -42,12 +48,6 @@ public class RaptorGraphComponent internal constructor() : RaptorComponent2.Base
 			includesDefault = true
 
 			add(RaptorGraphDefaults.definitions)
-		}
-
-
-		@RaptorDsl
-		override fun invoke(configure: Definitions.() -> Unit) {
-			configure()
 		}
 	}
 

@@ -3,7 +3,7 @@ package io.fluidsonic.raptor.graph
 import io.fluidsonic.raptor.*
 
 
-public class RaptorGraphsComponent internal constructor() : RaptorComponent2.Base(), RaptorComponentSet2<RaptorGraphComponent> {
+public class RaptorGraphsComponent internal constructor() : RaptorComponent2.Base<RaptorGraphsComponent>(), RaptorComponentSet2<RaptorGraphComponent> {
 
 	@RaptorDsl
 	override val all: RaptorAssemblyQuery2<RaptorGraphComponent>

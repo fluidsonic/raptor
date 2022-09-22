@@ -43,7 +43,7 @@ class ConfigurationLifecycleTests {
 				}
 
 
-				override fun RaptorFeatureConfigurationScope.beginConfiguration() = Unit
+				override fun RaptorFeatureScope.installed() {}
 			})
 		}
 	}

@@ -10,7 +10,7 @@ import io.ktor.http.*
 
 public object RaptorQuickstartFeature : RaptorFeature {
 
-	override fun RaptorFeatureConfigurationScope.beginConfiguration() {
+	override fun RaptorFeatureScope.installed() {
 		install(RaptorBsonFeature)
 		install(RaptorDIFeature)
 		install(RaptorEntitiesFeature)

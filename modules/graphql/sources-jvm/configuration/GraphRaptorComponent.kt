@@ -4,7 +4,7 @@ import io.fluidsonic.raptor.graphql.internal.*
 
 
 // FIXME taggable
-public class GraphRaptorComponent internal constructor() : RaptorComponent2.Base(), RaptorTaggableComponent2 {
+public class GraphRaptorComponent internal constructor() : RaptorComponent2.Base<GraphRaptorComponent>(), RaptorTaggableComponent2 {
 
 	private val definitions: MutableList<RaptorGraphDefinition> = mutableListOf()
 	private var includesDefaultDefinitions = false

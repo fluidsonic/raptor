@@ -169,7 +169,7 @@ internal class DefaultRaptorComponentRegistry2(
 			get() = this
 
 
-		override fun invoke(configure: Component.() -> Unit) {
+		override fun each(configure: Component.() -> Unit) {
 			checkIsConfigurable { "Cannot configure a component after the configuration phase has ended." }
 
 			configurations += configure

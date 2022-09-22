@@ -4,7 +4,7 @@ import kotlin.collections.set
 import kotlin.reflect.*
 
 
-public class RaptorEntitiesComponent internal constructor() : RaptorComponent2.Base() {
+public class RaptorEntitiesComponent internal constructor() : RaptorComponent2.Base<RaptorEntitiesComponent>() {
 
 	internal val resolverTypes: MutableMap<KClass<out RaptorEntityId>, KType> = hashMapOf()
 

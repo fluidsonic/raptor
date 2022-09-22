@@ -3,7 +3,9 @@ package io.fluidsonic.raptor.ktor
 import io.fluidsonic.raptor.*
 
 
-public open class RaptorKtorRoutesComponent internal constructor() : RaptorComponent2.Base(), RaptorComponentSet2<RaptorKtorRouteComponent> {
+public abstract class RaptorKtorRoutesComponent<Component : RaptorKtorRoutesComponent<Component>> internal constructor() :
+	RaptorComponent2.Base<Component>(),
+	RaptorComponentSet2<RaptorKtorRouteComponent> {
 
 	@RaptorDsl
 	override val all: RaptorAssemblyQuery2<RaptorKtorRouteComponent>
@@ -21,7 +23,10 @@ public open class RaptorKtorRoutesComponent internal constructor() : RaptorCompo
 	}
 
 
-	public class Root internal constructor() : RaptorKtorRoutesComponent() {
+	public class NonRoot internal constructor() : RaptorKtorRoutesComponent<NonRoot>()
+
+
+	public class Root internal constructor() : RaptorKtorRoutesComponent<Root>() {
 
 		@RaptorDsl
 		public fun new(host: String? = null): RaptorKtorRouteComponent =
@@ -41,7 +46,7 @@ public open class RaptorKtorRoutesComponent internal constructor() : RaptorCompo
 	}
 
 
-	internal object Key : RaptorComponentKey2<RaptorKtorRoutesComponent> {
+	internal object Key : RaptorComponentKey2<NonRoot> {
 
 		override fun toString() = "routes"
 	}
@@ -49,12 +54,12 @@ public open class RaptorKtorRoutesComponent internal constructor() : RaptorCompo
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery2<RaptorKtorRoutesComponent>.new(path: String, host: String? = null): RaptorAssemblyQuery2<RaptorKtorRouteComponent> =
+public fun RaptorAssemblyQuery2<RaptorKtorRoutesComponent<*>>.new(path: String, host: String? = null): RaptorAssemblyQuery2<RaptorKtorRouteComponent> =
 	map { it.new(path = path, host = host) }
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery2<RaptorKtorRoutesComponent>.new(
+public fun RaptorAssemblyQuery2<RaptorKtorRoutesComponent<*>>.new(
 	path: String,
 	host: String? = null,
 	configure: RaptorKtorRouteComponent.() -> Unit = {},

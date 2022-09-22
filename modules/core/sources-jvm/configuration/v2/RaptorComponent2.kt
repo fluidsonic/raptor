@@ -15,15 +15,16 @@ public interface RaptorComponent2 {
 
 
 	@RaptorDsl
-	public abstract class Base : RaptorComponent2 {
+	public abstract class Base<Component : RaptorComponent2> : RaptorComponent2, RaptorAssemblyQuery2<Component> {
 
 		@RaptorDsl
 		final override val extensions: RaptorComponentExtensionSet = DefaultRaptorComponentExtensionSet()
+
+
+		@RaptorDsl
+		@Suppress("UNCHECKED_CAST")
+		override fun each(configure: Component.() -> Unit) {
+			(this as Component).configure()
+		}
 	}
-}
-
-
-@RaptorDsl
-public operator fun <Component : RaptorComponent2> Component.invoke(block: Component.() -> Unit) {
-	apply(block)
 }

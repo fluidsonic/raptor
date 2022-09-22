@@ -6,7 +6,7 @@ import io.fluidsonic.raptor.di.*
 
 public object FreemarkerRaptorFeature : RaptorFeature { // FIXME rn
 
-	override fun RaptorFeatureConfigurationScope.beginConfiguration() {
+	override fun RaptorFeatureScope.installed() {
 		componentRegistry.register(FreemarkerRaptorComponent.Key, FreemarkerRaptorComponent())
 
 		ifFeature(RaptorDIFeature) {

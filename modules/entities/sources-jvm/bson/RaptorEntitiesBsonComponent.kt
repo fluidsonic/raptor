@@ -6,7 +6,7 @@ import kotlin.reflect.*
 
 internal class RaptorEntitiesBsonComponent internal constructor(
 	private val bsonComponent: RaptorBsonComponent,
-) : RaptorComponent2.Base() {
+) : RaptorComponent2.Base<RaptorEntitiesBsonComponent>() {
 
 	private var idDefinitionsByDiscriminator: MutableMap<String, RaptorEntityId.Definition<*>> = hashMapOf()
 	private var idDefinitionsByInstanceClass: MutableMap<KClass<out RaptorEntityId>, RaptorEntityId.Definition<*>> = hashMapOf()

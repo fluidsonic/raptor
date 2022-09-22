@@ -6,7 +6,7 @@ import kotlin.reflect.*
 
 internal class RaptorEntitiesGraphComponent internal constructor(
 	private val graphComponent: RaptorGraphComponent,
-) : RaptorComponent2.Base() {
+) : RaptorComponent2.Base<RaptorEntitiesGraphComponent>() {
 
 	private var idDefinitionsByDiscriminator: MutableMap<String, RaptorEntityId.Definition<*>> = hashMapOf()
 	private var idDefinitionsByInstanceClass: MutableMap<KClass<out RaptorEntityId>, RaptorEntityId.Definition<*>> = hashMapOf()

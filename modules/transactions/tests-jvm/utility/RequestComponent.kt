@@ -4,7 +4,7 @@ import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.transactions.*
 
 
-class RequestComponent : RaptorComponent2.Base(), RaptorTransactionGeneratingComponent {
+class RequestComponent : RaptorComponent2.Base<RequestComponent>(), RaptorTransactionGeneratingComponent {
 
 	object Key : RaptorComponentKey2<RequestComponent> {
 

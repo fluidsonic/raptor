@@ -4,7 +4,7 @@ import io.fluidsonic.raptor.*
 import kotlin.reflect.*
 
 
-internal class RootDIRaptorComponent : RaptorComponent2.Base(), RaptorDIComponent {
+internal class RootDIRaptorComponent : RaptorComponent2.Base<RootDIRaptorComponent>(), RaptorDIComponent {
 
 	private val builder = DefaultRaptorDIBuilder()
 

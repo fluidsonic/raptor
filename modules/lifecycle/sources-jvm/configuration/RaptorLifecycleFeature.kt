@@ -6,7 +6,7 @@ import kotlinx.coroutines.*
 
 public object RaptorLifecycleFeature : RaptorFeature {
 
-	override fun RaptorFeatureConfigurationScope.beginConfiguration() {
+	override fun RaptorFeatureScope.installed() {
 		componentRegistry.register(RaptorLifecycleComponent.Key, RaptorLifecycleComponent())
 
 		ifFeature(RaptorDIFeature) {

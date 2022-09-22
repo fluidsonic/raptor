@@ -26,7 +26,7 @@ class FeatureTests {
 
 			install(object : RaptorFeature {
 
-				override fun RaptorFeatureConfigurationScope.beginConfiguration() {
+				override fun RaptorFeatureScope.installed() {
 					textCollection {
 						append("This is working!")
 					}
@@ -45,7 +45,7 @@ class FeatureTests {
 		raptor {
 			val feature = object : RaptorFeature {
 
-				override fun RaptorFeatureConfigurationScope.beginConfiguration() {
+				override fun RaptorFeatureScope.installed() {
 					installCount += 1
 				}
 			}

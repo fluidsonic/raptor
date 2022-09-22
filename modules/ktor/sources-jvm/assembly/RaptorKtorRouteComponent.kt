@@ -10,7 +10,7 @@ import io.ktor.server.routing.*
 public class RaptorKtorRouteComponent internal constructor(
 	private val host: String?,
 	private val path: String,
-) : RaptorComponent2.Base(), RaptorTaggableComponent2, RaptorTransactionGeneratingComponent {
+) : RaptorComponent2.Base<RaptorKtorRouteComponent>(), RaptorTaggableComponent2, RaptorTransactionGeneratingComponent {
 
 	private val customConfigurations = mutableListOf<Route.() -> Unit>()
 	private val features = mutableSetOf<RaptorKtorRouteFeature>()
@@ -33,8 +33,8 @@ public class RaptorKtorRouteComponent internal constructor(
 
 
 	@RaptorDsl
-	public val routes: RaptorKtorRoutesComponent
-		get() = componentRegistry2.oneOrRegister(RaptorKtorRoutesComponent.Key, ::RaptorKtorRoutesComponent)
+	public val routes: RaptorKtorRoutesComponent<*>
+		get() = componentRegistry2.oneOrRegister(RaptorKtorRoutesComponent.Key) { RaptorKtorRoutesComponent.NonRoot() }
 
 
 	@RaptorDsl
@@ -132,7 +132,7 @@ public fun RaptorAssemblyQuery2<RaptorKtorRouteComponent>.install(feature: Rapto
 
 
 @RaptorDsl
-public val RaptorAssemblyQuery2<RaptorKtorRouteComponent>.routes: RaptorAssemblyQuery2<RaptorKtorRoutesComponent>
+public val RaptorAssemblyQuery2<RaptorKtorRouteComponent>.routes: RaptorAssemblyQuery2<RaptorKtorRoutesComponent<*>>
 	get() = map { it.routes }
 
 

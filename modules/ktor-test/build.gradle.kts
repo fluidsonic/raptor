@@ -5,10 +5,6 @@ fluidLibraryModule(description = "FIXME") {
 		explicitApi()
 	}
 
-	language {
-		withExperimentalApi("io.ktor.util.KtorExperimentalAPI")
-	}
-
 	targets {
 		jvm {
 			dependencies {

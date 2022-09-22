@@ -8,7 +8,7 @@ import kotlinx.coroutines.*
 public object RaptorKtorTestFeature : RaptorFeature {
 
 	@Suppress("INVISIBLE_MEMBER")
-	override fun RaptorFeatureConfigurationScope.beginConfiguration() {
+	override fun RaptorFeatureScope.installed() {
 		install(RaptorKtorFeature)
 
 		ktor.servers.all {

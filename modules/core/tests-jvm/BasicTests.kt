@@ -79,8 +79,7 @@ class BasicTests {
 					)
 				}
 
-
-				override fun RaptorFeatureConfigurationScope.beginConfiguration() = Unit
+				override fun RaptorFeatureScope.installed() {}
 			})
 		}
 
@@ -100,7 +99,7 @@ class BasicTests {
 
 			install(object : RaptorFeature {
 
-				override fun RaptorFeatureConfigurationScope.beginConfiguration() {
+				override fun RaptorFeatureScope.installed() {
 					textCollection {
 						append("working!")
 					}

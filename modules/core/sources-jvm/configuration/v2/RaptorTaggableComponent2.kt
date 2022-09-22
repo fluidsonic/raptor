@@ -32,7 +32,7 @@ public fun <Component : RaptorTaggableComponent2> RaptorComponentSet2<Component>
 public fun <Component : RaptorTaggableComponent2> RaptorAssemblyQuery2<Component>.tagged(vararg tags: Any): RaptorAssemblyQuery2<Component> =
 	when {
 		tags.isEmpty() -> this
-		else -> RaptorTagMatchingAssemblyQuery2(source = this, tagsToMatch = tags.toHashSet())
+		else -> RaptorTagMatchingComponentQuery2(source = this, tagsToMatch = tags.toHashSet())
 	}
 
 
@@ -47,8 +47,10 @@ public fun <Component : RaptorTaggableComponent2> RaptorAssemblyQuery2<Component
 
 
 // TODO Support multiple tags with OR combination. OR: tagged(A, B) - AND: tagged(A).tagged(B)
+@kotlin.internal.LowPriorityInOverloadResolution
 @JvmName("taggedSetQuery")
 @RaptorDsl
+@Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
 public fun <Component : RaptorTaggableComponent2> RaptorAssemblyQuery2<RaptorComponentSet2<Component>>.tagged(
 	vararg tags: Any,
 ): RaptorAssemblyQuery2<Component> =

@@ -3,7 +3,7 @@ package io.fluidsonic.raptor.transactions
 import io.fluidsonic.raptor.*
 
 
-public class RaptorTransactionComponent internal constructor() : RaptorComponent2.Base() {
+public class RaptorTransactionComponent internal constructor() : RaptorComponent2.Base<RaptorTransactionComponent>() {
 
 	private val configurations: MutableList<RaptorTransactionConfigurationScope.() -> Unit> = mutableListOf()
 

@@ -5,7 +5,7 @@ import io.fluidsonic.raptor.transactions.*
 import kotlin.reflect.*
 
 
-internal class TransactionDIRaptorComponent : RaptorComponent2.Base(), RaptorDIComponent {
+internal class TransactionDIRaptorComponent : RaptorComponent2.Base<TransactionDIRaptorComponent>(), RaptorDIComponent {
 
 	private val builder = DefaultRaptorDIBuilder()
 

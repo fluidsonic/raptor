@@ -113,7 +113,7 @@ class DebuggingTests {
 				}
 
 
-				override fun RaptorFeatureConfigurationScope.beginConfiguration() {
+				override fun RaptorFeatureScope.installed() {
 					componentRegistry.register(DummyComponent.Key, DummyComponent("z"))
 					componentRegistry.register(DummyComponent.Key, DummyComponent("1").apply {
 						extensions[AnyRaptorComponentExtensionKey] = "dummy extension"

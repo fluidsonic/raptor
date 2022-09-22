@@ -3,7 +3,7 @@ package io.fluidsonic.raptor.ktor
 import io.fluidsonic.raptor.*
 
 
-public class RaptorKtorComponent internal constructor() : RaptorComponent2.Base() {
+public class RaptorKtorComponent internal constructor() : RaptorComponent2.Base<RaptorKtorComponent>() {
 
 	override fun RaptorComponentConfigurationEndScope2.onConfigurationEnded() {
 		val servers = componentRegistry2.oneOrNull(RaptorKtorServersComponent.Key)

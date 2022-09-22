@@ -11,14 +11,10 @@ public interface RaptorTransactionGeneratingComponent : RaptorComponent2 {
 
 // FIXME includeNested
 @RaptorDsl
-public val RaptorTransactionGeneratingComponent.transactions: RaptorTransactionComponent
-	get() = componentRegistry2.oneOrRegister(RaptorTransactionComponent.Key) { RaptorTransactionComponent() }
-
-
-// FIXME includeNested
-@RaptorDsl
 public val RaptorAssemblyQuery2<RaptorTransactionGeneratingComponent>.transactions: RaptorAssemblyQuery2<RaptorTransactionComponent>
-	get() = map { it.transactions }
+	get() = map { component ->
+		component.componentRegistry2.oneOrRegister(RaptorTransactionComponent.Key, ::RaptorTransactionComponent)
+	}
 
 
 // FIXME throw if feature not installed?

@@ -3,7 +3,9 @@ package io.fluidsonic.raptor.ktor
 import io.fluidsonic.raptor.*
 
 
-public class RaptorKtorServersComponent internal constructor() : RaptorComponent2.Base(), RaptorComponentSet2<RaptorKtorServerComponent> {
+public class RaptorKtorServersComponent internal constructor() :
+	RaptorComponent2.Base<RaptorKtorServersComponent>(),
+	RaptorComponentSet2<RaptorKtorServerComponent> {
 
 	@RaptorDsl
 	override val all: RaptorAssemblyQuery2<RaptorKtorServerComponent>
