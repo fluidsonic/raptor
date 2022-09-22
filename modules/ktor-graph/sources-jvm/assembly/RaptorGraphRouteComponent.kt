@@ -29,7 +29,8 @@ public class RaptorGraphRouteComponent internal constructor(
 
 	override fun RaptorComponentConfigurationEndScope2.onConfigurationEnded() {
 		val graph = checkNotNull(graph(tag)) { if (tag != null) "Cannot find graph with tag: $tag" else "Cannot find any graph" }
-		propertyRegistry.register(PropertyKey, GraphRoute(graph))
+		// FIXME
+//		propertyRegistry.register(PropertyKey, GraphRoute(graph))
 	}
 
 

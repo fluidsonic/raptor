@@ -10,6 +10,8 @@ import kotlinx.coroutines.*
 public object RaptorJobsQuartzMongoFeature : RaptorFeature.Configurable<Configuration.Builder> {
 
 	public override fun RaptorFeatureConfigurationScope.beginConfiguration(action: Configuration.Builder.() -> Unit) {
+		install(RaptorJobsFeature)
+
 		val configuration = Configuration.Builder().apply(action).build()
 
 		di.provide<RaptorJobScheduler> {

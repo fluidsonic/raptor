@@ -149,8 +149,8 @@ internal data class KotlinType(
 			}
 
 			return when (val classifier = type.classifier) {
-				is KClass<*> -> when (classifier) {
-					Any::class, Nothing::class ->
+				is KClass<*> -> when {
+					(classifier == Any::class && !requireSpecialization) || classifier == Nothing::class ->
 						error("Type '$rootType' cannot be used here. '${classifier.simpleName}' cannot be used for GraphQL type mapping.")
 
 					else -> KotlinType(

@@ -125,15 +125,44 @@ public inline fun <reified Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent
 
 
 @RaptorDsl
+public fun <Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.newInterface(
+	name: String = RaptorGraphDefinition.defaultName,
+	type: KType,
+	configure: RaptorInterfaceGraphDefinitionBuilder<Type>.() -> Unit,
+) {
+	add(graphInterfaceDefinition(name = name, type = type, configure = configure))
+}
+
+
+@RaptorDsl
+public inline fun <reified Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.newInterface(
+	name: String = RaptorGraphDefinition.defaultName,
+	noinline configure: RaptorInterfaceGraphDefinitionBuilder<Type>.() -> Unit,
+) {
+	newInterface(
+		name = name,
+		type = typeOf<Type>(),
+		configure = configure
+	)
+}
+
+
+@RaptorDsl
+public fun <Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.newObject(
+	name: String = RaptorGraphDefinition.defaultName,
+	type: KType,
+	configure: RaptorObjectGraphDefinitionBuilder<Type>.() -> Unit = {},
+) {
+	add(graphObjectDefinition(name = name, type = type, configure = configure))
+}
+
+
+@RaptorDsl
 public inline fun <reified Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.newObject(
 	name: String = RaptorGraphDefinition.defaultName,
 	@BuilderInference noinline configure: RaptorObjectGraphDefinitionBuilder<Type>.() -> Unit = {},
 ) {
-	add(graphObjectDefinition(
-		name = name,
-		type = typeOf<Type>(),
-		configure = configure,
-	))
+	newObject(name = name, type = typeOf<Type>(), configure = configure)
 }
 
 
