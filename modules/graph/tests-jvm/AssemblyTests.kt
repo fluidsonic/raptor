@@ -15,14 +15,18 @@ class AssemblyTests {
 
 			graphs.new {
 				tag("A")
-				definitions(Dummy1.graphDefinition())
-				definitions(listOf(Dummy2.graphDefinition()))
+				definitions {
+					add(Dummy1.graphDefinition())
+					add(listOf(Dummy2.graphDefinition()))
+				}
 			}
 
 			graphs.new().apply {
 				tag("B")
-				definitions(Dummy3.graphDefinition())
-				definitions(listOf(Dummy4.graphDefinition()))
+				definitions {
+					add(Dummy3.graphDefinition())
+					add(listOf(Dummy4.graphDefinition()))
+				}
 			}
 		}
 
@@ -58,7 +62,7 @@ class AssemblyTests {
 
 			graphs.new {
 				tag("A")
-				includeDefaultDefinitions()
+				definitions.includeDefault()
 			}
 
 			graphs.new().apply {
@@ -129,16 +133,16 @@ class AssemblyTests {
 				tag("B", "C")
 			}
 
-			graphs.tagged("A").all {
+			graphs.tagged("A") {
 				aTagged += 1
 			}
-			graphs.tagged("B").all {
+			graphs.tagged("B") {
 				bTagged += 1
 			}
-			graphs.tagged("C").all {
+			graphs.tagged("C") {
 				cTagged += 1
 			}
-			graphs.tagged("D").all {
+			graphs.tagged("D") {
 				dTagged += 1
 			}
 

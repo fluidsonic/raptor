@@ -67,7 +67,6 @@ class DebuggingTests {
 					assertEquals(
 						expected = """
 							[component registry] ->
-								[core] -> default core
 								[counter] ->
 									counter (1) -> 
 										[any] -> counter extension
@@ -88,6 +87,9 @@ class DebuggingTests {
 															node (a2)
 												node (b)
 												node (c)
+								[root] ->
+									root -> 
+										[registration] -> component registration <root>
 								[text collection] -> text collection (foo)
 						""".trimIndent(),
 						actual = componentRegistry.toString()

@@ -1,11 +1,12 @@
 package tests
 
 import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.transactions.*
 
 
-class RequestComponent : RaptorComponent.Default<RequestComponent>(), RaptorTransactionGeneratingComponent {
+class RequestComponent : RaptorComponent2.Base(), RaptorTransactionGeneratingComponent {
 
-	object Key : RaptorComponentKey<RequestComponent> {
+	object Key : RaptorComponentKey2<RequestComponent> {
 
 		override fun toString() = "request"
 	}
@@ -14,4 +15,4 @@ class RequestComponent : RaptorComponent.Default<RequestComponent>(), RaptorTran
 
 @RaptorDsl
 val RaptorTopLevelConfigurationScope.requests
-	get() = componentRegistry.configure(RequestComponent.Key)
+	get() = componentRegistry2.all(RequestComponent.Key)

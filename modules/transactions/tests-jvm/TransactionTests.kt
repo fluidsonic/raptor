@@ -1,8 +1,9 @@
 package tests
 
 import io.fluidsonic.raptor.*
-import tests.utility.*
+import io.fluidsonic.raptor.transactions.*
 import kotlin.test.*
+import tests.utility.*
 
 
 class TransactionTests {
@@ -31,7 +32,7 @@ class TransactionTests {
 				}
 			}
 
-			requests {
+			requests.all {
 				transactions {
 					onCreate {
 						val parentId = parentContext[IdRaptorPropertyKey]
@@ -77,6 +78,7 @@ class TransactionTests {
 							"level 1" -> Unit
 							else -> error("Unexpected context")
 						}
+
 						else -> propertyRegistry.register(IdRaptorPropertyKey, "root")
 					}
 				}
@@ -167,7 +169,7 @@ class TransactionTests {
 		val raptor = raptor {}
 
 		assertEquals(
-			expected = "You must install RaptorTransactionFeature for enabling transaction functionality.",
+			expected = "Feature io.fluidsonic.raptor.transactions.RaptorTransactionFeature is not installed.",
 			actual = assertFails {
 				raptor.createTransaction()
 			}.message

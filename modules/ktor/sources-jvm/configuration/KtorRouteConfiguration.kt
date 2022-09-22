@@ -2,7 +2,7 @@ package io.fluidsonic.raptor.ktor
 
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.transactions.*
-import io.ktor.routing.*
+import io.ktor.server.routing.*
 
 
 internal class KtorRouteConfiguration(

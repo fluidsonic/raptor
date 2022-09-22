@@ -4,10 +4,10 @@ import io.fluidsonic.graphql.*
 import io.fluidsonic.json.*
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.graph.*
-import io.ktor.application.*
 import io.ktor.http.*
-import io.ktor.request.*
-import io.ktor.response.*
+import io.ktor.server.application.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
 import kotlin.system.*
 import org.slf4j.*
 

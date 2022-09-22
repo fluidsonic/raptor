@@ -4,10 +4,10 @@ import io.fluidsonic.graphql.*
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.graph.*
 import io.fluidsonic.raptor.ktor.*
-import io.ktor.application.*
 import io.ktor.http.*
-import io.ktor.response.*
-import io.ktor.routing.*
+import io.ktor.server.application.*
+import io.ktor.server.response.*
+import io.ktor.server.routing.*
 
 
 public class RaptorGraphSchemaRouteComponent internal constructor(
@@ -26,6 +26,7 @@ public class RaptorGraphSchemaRouteComponent internal constructor(
 
 
 	override fun RaptorComponentConfigurationEndScope2.onConfigurationEnded() {
+		// FIXME Won't work unless we make the property registry and the context hierarchical.
 		val graph = checkNotNull(graph(tag)) { if (tag != null) "Cannot find graph with tag: $tag" else "Cannot find any graph" }
 		propertyRegistry.register(PropertyKey, graph.schema)
 	}

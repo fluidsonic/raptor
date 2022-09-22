@@ -3,12 +3,11 @@ package io.fluidsonic.raptor
 import io.fluidsonic.graphql.*
 import io.fluidsonic.json.*
 import io.fluidsonic.raptor.ktor.*
-import io.ktor.application.*
 import io.ktor.http.*
-import io.ktor.request.*
-import io.ktor.response.*
+import io.ktor.server.application.*
+import io.ktor.server.request.*
+import io.ktor.server.response.*
 import kotlin.system.*
-import kotlin.time.*
 import org.slf4j.*
 
 
@@ -16,7 +15,6 @@ internal class GraphRoute(
 	internal val system: GraphSystem,
 ) {
 
-	@OptIn(ExperimentalTime::class)
 	suspend fun handle(call: ApplicationCall) {
 		// FIXME rewrite JSON parsing
 		// FIXME disallow mutation for GET

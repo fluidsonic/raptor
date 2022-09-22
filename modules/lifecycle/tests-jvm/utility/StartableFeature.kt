@@ -5,13 +5,8 @@ import io.fluidsonic.raptor.*
 
 object StartableFeature : RaptorFeature.Configurable<StartableComponent> {
 
-	override fun RaptorTopLevelConfigurationScope.configure(action: StartableComponent.() -> Unit) {
-		componentRegistry.configure(key = StartableComponent.Key, action = action)
-	}
-
-
-	override fun RaptorFeatureConfigurationStartScope.onConfigurationStarted() {
-		componentRegistry.register(StartableComponent.Key, StartableComponent())
+	override fun RaptorFeatureConfigurationScope.beginConfiguration(action: StartableComponent.() -> Unit) {
+		componentRegistry.oneOrRegister(StartableComponent.Key, ::StartableComponent).action()
 
 		lifecycle.onStart {
 			context[StartableRaptorPropertyKey]!!.start()

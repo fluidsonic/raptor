@@ -1,4 +1,5 @@
 import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.di.*
 import kotlin.test.*
 
 
@@ -28,28 +29,6 @@ class DITests {
 
 
 	@Test
-	fun testImplicit() {
-		val di = raptor {
-			install(RaptorDIFeature)
-			di {
-				provide { FooImpl1 }
-				provide(BarImpl1)
-			}
-		}.context.di
-
-		assertEquals(expected = FooImpl1, actual = di.get<Foo>())
-		assertEquals(expected = FooImpl1, actual = di.get<Foo?>())
-		assertEquals(expected = FooImpl1, actual = di.get<FooImpl1>())
-		assertEquals(expected = FooImpl1, actual = di.get<FooImpl1?>())
-
-		assertEquals(expected = BarImpl1, actual = di.get<Bar>())
-		assertEquals(expected = BarImpl1, actual = di.get<Bar?>())
-		assertEquals(expected = BarImpl1, actual = di.get<BarImpl1>())
-		assertEquals(expected = BarImpl1, actual = di.get<BarImpl1?>())
-	}
-
-
-	@Test
 	fun testLazyResolutionExplicit() {
 		var resolutionCount = 0
 		val di = raptor {
@@ -57,6 +36,7 @@ class DITests {
 			di {
 				provide<Foo> { resolutionCount += 1; FooImpl1 }
 				provide(BarImpl1)
+				provide<Bar> { get<BarImpl1>() }
 			}
 		}.context.di
 
@@ -80,7 +60,9 @@ class DITests {
 			install(RaptorDIFeature)
 			di {
 				provide { resolutionCount += 1; FooImpl1 }
+				provide<Foo> { get<FooImpl1>() }
 				provide(BarImpl1)
+				provide<Bar> { get<BarImpl1>() }
 			}
 		}.context.di
 
@@ -113,6 +95,7 @@ class DITests {
 				provide { implResolutionCount += 1; FooImpl1 }
 				provide<Foo> { resolutionCount += 1; get<FooImpl1>() }
 				provide(BarImpl1)
+				provide<Bar> { get<BarImpl1>() }
 			}
 		}.context.di
 
@@ -137,7 +120,6 @@ class DITests {
 	}
 
 
-	@Suppress("USELESS_IS_CHECK")
 	@Test
 	fun testOverrideExplicit() {
 		val di = raptor {
@@ -164,9 +146,14 @@ class DITests {
 			install(RaptorDIFeature)
 			di {
 				provide { FooImpl1 }
+				provide<Foo> { get<FooImpl1>() }
 				provide { FooImpl2 }
+				provide<Foo> { get<FooImpl2>() }
+
 				provide(BarImpl1)
+				provide<Bar> { get<BarImpl1>() }
 				provide(BarImpl2)
+				provide<Bar> { get<BarImpl2>() }
 			}
 		}.context.di
 
@@ -192,9 +179,13 @@ class DITests {
 			install(RaptorDIFeature)
 			di {
 				provide { FooImpl1 }
+				provide<Foo> { get<FooImpl1>() }
 				provide { FooImpl2 }
+				provide<Foo> { get<FooImpl2>() }
 				provide(BarImpl1)
+				provide<Bar> { get<BarImpl1>() }
 				provide(BarImpl2)
+				provide<Bar> { get<BarImpl2>() }
 			}
 		}.context.di
 

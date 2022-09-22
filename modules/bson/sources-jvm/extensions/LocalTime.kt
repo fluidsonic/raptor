@@ -2,14 +2,13 @@ package io.fluidsonic.raptor.bson
 
 import io.fluidsonic.raptor.*
 import io.fluidsonic.time.*
-import io.fluidsonic.time.LocalTime.*
 import kotlinx.datetime.*
 
 
 private val referenceDate = LocalDate(1970, 1, 1)
 
 
-public fun Companion.bsonDefinition(): RaptorBsonDefinition = raptor.bson.definition<LocalTime> {
+public fun LocalTime.Companion.bsonDefinition(): RaptorBsonDefinition = raptor.bson.definition {
 	decode {
 		reader.timestamp().toLocalTime(TimeZone.UTC)
 	}

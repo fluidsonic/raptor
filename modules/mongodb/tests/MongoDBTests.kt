@@ -3,6 +3,7 @@ package tests
 import com.mongodb.*
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.bson.*
+import io.fluidsonic.raptor.mongo.*
 import kotlin.test.*
 
 
@@ -16,11 +17,11 @@ class MongoDBTests {
 			}
 		}
 
-		val configuration = raptor.context.bsonConfiguration
+		val bson = raptor.context.bson
 
 		assertEquals(
-			expected = RaptorBsonDefinition.of(MongoClientSettings.getDefaultCodecRegistry()),
-			actual = configuration.definitions
+			expected = listOf(RaptorBsonDefinition.of(MongoClientSettings.getDefaultCodecRegistry())),
+			actual = bson.definitions,
 		)
 	}
 }

@@ -32,7 +32,7 @@ public fun <Component : RaptorTaggableComponent2> RaptorComponentSet2<Component>
 public fun <Component : RaptorTaggableComponent2> RaptorAssemblyQuery2<Component>.tagged(vararg tags: Any): RaptorAssemblyQuery2<Component> =
 	when {
 		tags.isEmpty() -> this
-		else -> RaptorTagMatchingAssemblyQuery2(source = this, tagsToMatch = setOf(tags))
+		else -> RaptorTagMatchingAssemblyQuery2(source = this, tagsToMatch = tags.toHashSet())
 	}
 
 

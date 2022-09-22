@@ -11,7 +11,6 @@ import kotlinx.datetime.*
 
 public object RaptorGraphDefaults {
 
-	@OptIn(ExperimentalTime::class)
 	public val definitions: Collection<RaptorGraphDefinition> = listOf(
 		Country.graphDefinition(),
 		CountryCode.graphDefinition(),

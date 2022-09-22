@@ -3,7 +3,8 @@ package io.fluidsonic.raptor.graph
 import io.fluidsonic.time.*
 
 
-public fun LocalTime.Companion.graphDefinition(): RaptorGraphDefinition = graphScalarDefinition {
+// TODO For some reason IDEA removes the kotlinx.datetime.* import when optimizing imports.
+public fun kotlinx.datetime.LocalTime.Companion.graphDefinition(): RaptorGraphDefinition = graphScalarDefinition {
 	parseString { parseOrNull(it) ?: invalid() }
-	serialize(LocalTime::toString)
+	serialize(kotlinx.datetime.LocalTime::toString)
 }

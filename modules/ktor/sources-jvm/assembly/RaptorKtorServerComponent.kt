@@ -2,9 +2,8 @@ package io.fluidsonic.raptor.ktor
 
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.di.*
-import io.fluidsonic.raptor.ktor.*
 import io.fluidsonic.raptor.transactions.*
-import io.ktor.application.*
+import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import io.ktor.server.netty.*
 import io.netty.handler.codec.http.*
@@ -158,7 +157,7 @@ public class RaptorKtorServerComponent internal constructor(
 	override fun RaptorComponentConfigurationStartScope2.onConfigurationStarted() {
 		transactions.di.provide {
 			// FIXME improve
-			get<RaptorTransactionContext>()[RaptorTransactionKtorFeature.CallPropertyKey] ?: error("Cannot find Ktor ApplicationCall.")
+			get<RaptorTransactionContext>().ktorCall ?: error("Cannot find Ktor ApplicationCall.")
 		}
 	}
 

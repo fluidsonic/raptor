@@ -4,6 +4,7 @@ import io.fluidsonic.raptor.bson.*
 import io.fluidsonic.raptor.di.*
 import io.fluidsonic.raptor.graph.*
 import io.fluidsonic.raptor.ktor.*
+import io.fluidsonic.raptor.mongo.*
 import io.ktor.http.*
 
 

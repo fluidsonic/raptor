@@ -1,17 +1,18 @@
 package tests
 
 import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.transactions.*
 
 
 object RequestFeature : RaptorFeature {
 
 	override fun RaptorFeatureConfigurationApplicationScope.applyConfiguration() {
-		propertyRegistry.register(RequestTransactionFactoryRaptorPropertyKey, transactionFactory(componentRegistry.one(RequestComponent.Key)))
+		propertyRegistry.register(RequestTransactionFactoryRaptorPropertyKey, transactionFactory(componentRegistry2.one(RequestComponent.Key)))
 	}
 
 
-	override fun RaptorFeatureConfigurationScope.beginConfiguration() {
-		componentRegistry.register(RequestComponent.Key, RequestComponent())
+	override fun RaptorFeatureScope.installed() {
+		componentRegistry2.register(RequestComponent.Key, RequestComponent())
 	}
 
 

@@ -20,9 +20,13 @@ fluidLibraryModule(description = "FIXME") {
 
 				implementation(kotlinx("atomicfu", Versions.kotlinx_atomicfu, usePrefix = false))
 				implementation(kotlinx("coroutines-core", Versions.kotlinx_coroutines))
-				implementation(ktor("websockets"))
+				implementation(ktor("server-call-logging"))
+				implementation(ktor("server-compression"))
+				implementation(ktor("server-default-headers"))
+				implementation(ktor("server-forwarded-header"))
 				implementation(ktor("server-netty"))
-				implementation("org.slf4j:slf4j-api:2.0.1") // FIXME version property
+				implementation(ktor("server-websockets"))
+				implementation("org.slf4j:slf4j-api:${Versions.slf4j}")
 			}
 		}
 	}

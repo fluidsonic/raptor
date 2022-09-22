@@ -11,10 +11,3 @@ fluidLibrary(name = "raptor", version = "0.17.0", prefixName = false) {
 		}
 	}
 }
-
-// FIXME remove
-allprojects {
-	repositories {
-		mavenLocal()
-	}
-}

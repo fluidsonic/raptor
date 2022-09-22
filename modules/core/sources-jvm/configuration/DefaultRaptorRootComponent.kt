@@ -131,7 +131,6 @@ internal class DefaultRaptorRootComponent : RaptorComponent.Default<RaptorRootCo
 		private fun beginConfiguration() {
 			with(feature) {
 				this@DefaultRaptorRootComponent.installed()
-				this@DefaultRaptorRootComponent.applyConfiguration()
 			}
 		}
 
@@ -153,7 +152,7 @@ internal class DefaultRaptorRootComponent : RaptorComponent.Default<RaptorRootCo
 				return
 
 			with(feature) {
-				this@DefaultRaptorRootComponent.completeConfiguration()
+				this@DefaultRaptorRootComponent.applyConfiguration()
 			}
 		}
 
@@ -166,6 +165,7 @@ internal class DefaultRaptorRootComponent : RaptorComponent.Default<RaptorRootCo
 			if (isInstalled)
 				return
 
+			isInstalled = true
 			notInstalledException = null
 
 			beginConfiguration()

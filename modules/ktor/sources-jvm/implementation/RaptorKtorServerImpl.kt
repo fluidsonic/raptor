@@ -1,11 +1,14 @@
 package io.fluidsonic.raptor.ktor
 
 import io.fluidsonic.raptor.*
-import io.ktor.application.*
-import io.ktor.features.*
 import io.ktor.http.*
-import io.ktor.routing.*
+import io.ktor.server.application.*
 import io.ktor.server.engine.*
+import io.ktor.server.plugins.callloging.*
+import io.ktor.server.plugins.compression.*
+import io.ktor.server.plugins.defaultheaders.*
+import io.ktor.server.plugins.forwardedheaders.*
+import io.ktor.server.routing.*
 import io.ktor.util.*
 import java.io.*
 import java.security.*
@@ -161,13 +164,15 @@ internal class RaptorKtorServerImpl(
 //			method(HttpMethod.Patch)
 //		}
 
-		install(XForwardedHeaderSupport)
+		install(XForwardedHeaders)
+
 		if (configuration.forceEncryptedConnection)
-			install(EncryptionEnforcementKtorFeature)
-		install(RaptorTransactionKtorFeature(
-			serverContext = this@RaptorKtorServerImpl.context,
-			transactionFactory = configuration.transactionFactory,
-		))
+			install(EncryptionEnforcementKtorPlugin)
+
+		install(RaptorTransactionKtorPlugin) {
+			serverContext(this@RaptorKtorServerImpl.context)
+			transactionFactory(configuration.transactionFactory)
+		}
 
 		for (customConfiguration in configuration.customConfigurations)
 			customConfiguration()
@@ -191,27 +196,26 @@ internal class RaptorKtorServerImpl(
 				for (customConfiguration in configuration.customConfigurations)
 					customConfiguration()
 
+				// FIXME Rework.
 				configuration.transactionFactory?.let { transactionFactory ->
 					intercept(ApplicationCallPipeline.Setup) {
-						val parentTransaction = context.attributes.getOrNull(RaptorTransactionKtorFeature.attributeKey)
-							?: return@intercept
-
+						val parentTransaction = context.raptorTransaction // FIXME What if not set?
 						val parentContext = parentTransaction.context
 
 						val transaction = transactionFactory.createTransaction(
 							context = RaptorKtorRouteContextImpl(
 								parent = parentTransaction.context,
-								properties = configuration.properties.withFallback(parentContext.properties)
+								properties = configuration.properties.withFallback(parentContext.properties),
 							)
 						)
 
-						call.attributes.put(RaptorTransactionKtorFeature.attributeKey, transaction)
+						call.raptorTransaction = transaction
 
 						try {
 							proceed()
 						}
 						finally {
-							call.attributes.put(RaptorTransactionKtorFeature.attributeKey, parentTransaction)
+							call.raptorTransaction = parentTransaction
 						}
 					}
 				}

@@ -30,6 +30,10 @@ internal class RaptorComponentRegistration<Component : RaptorComponent2>(
 			componentScope.onConfigurationEnded()
 		}
 	}
+
+
+	override fun toString() =
+		"component registration <$component>"
 }
 
 

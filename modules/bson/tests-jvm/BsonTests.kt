@@ -55,7 +55,7 @@ class BsonTests {
 		val configuration = raptor.context.bson
 
 		assertEquals(
-			expected = listOf(countryDefinition) + currencyDefinition + RaptorBsonDefaults.definitions,
+			expected = listOf(countryDefinition) + currencyDefinition + RaptorBsonDefinition.defaults,
 			actual = configuration.definitions
 		)
 	}
@@ -75,12 +75,10 @@ class BsonTests {
 
 	@Test
 	fun testWithoutInstallationFails() {
-		val raptor = raptor {
-			bson.definitions(Country.bsonDefinition())
-		}
+		val raptor = raptor {}
 
 		assertEquals(
-			expected = "You must install BsonRaptorFeature for enabling BSON functionality.",
+			expected = "Feature io.fluidsonic.raptor.bson.RaptorBsonFeature is not installed.",
 			actual = assertFails {
 				raptor.context.bson
 			}.message

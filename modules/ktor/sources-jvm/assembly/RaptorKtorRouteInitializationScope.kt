@@ -1,7 +1,7 @@
 package io.fluidsonic.raptor.ktor
 
 import io.fluidsonic.raptor.*
-import io.ktor.routing.*
+import io.ktor.server.routing.*
 
 
 @RaptorDsl

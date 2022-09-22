@@ -2,8 +2,9 @@ package io.fluidsonic.raptor.ktor
 
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.transactions.*
-import io.ktor.application.*
-import io.ktor.routing.*
+import io.ktor.server.application.*
+import io.ktor.server.routing.*
+import io.ktor.server.websocket.*
 import io.ktor.util.pipeline.*
 import io.ktor.websocket.*
 

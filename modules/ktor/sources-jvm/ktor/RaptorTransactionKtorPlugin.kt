@@ -1,0 +1,70 @@
+package io.fluidsonic.raptor.ktor
+
+import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.transactions.*
+import io.ktor.server.application.*
+import io.ktor.server.application.hooks.*
+import io.ktor.util.*
+
+
+private val attributeKey = AttributeKey<RaptorTransaction>("Raptor: server transaction")
+
+
+internal val RaptorTransactionKtorPlugin = createApplicationPlugin(
+	name = "Raptor: transaction feature",
+	createConfiguration = ::RaptorTransactionKtorPluginConfig,
+) {
+	val serverContext = checkNotNull(pluginConfig.serverContext) { "serverConfig() not set." }
+	val transactionFactory = checkNotNull(pluginConfig.transactionFactory) { "transactionFactory() not set." }
+
+	on(CallSetup) { call ->
+		call.attributes.put(attributeKey, transactionFactory.createTransaction(serverContext.createTransaction().context) {
+			propertyRegistry.register(RaptorTransactionCallPropertyKey, call)
+		})
+	}
+
+	on(CallFailed) { call, _ ->
+		call.attributes.remove(attributeKey)
+	}
+
+	on(ResponseSent) { call ->
+		call.attributes.remove(attributeKey)
+	}
+}
+
+
+public class RaptorTransactionKtorPluginConfig {
+
+	internal var serverContext: RaptorContext? = null
+		private set
+
+	internal var transactionFactory: RaptorTransactionFactory? = null
+		private set
+
+
+	public fun serverContext(value: RaptorContext) {
+		serverContext = value
+	}
+
+
+	public fun transactionFactory(value: RaptorTransactionFactory) {
+		transactionFactory = value
+	}
+}
+
+
+private object RaptorTransactionCallPropertyKey : RaptorPropertyKey<ApplicationCall> {
+
+	override fun toString() = "Ktor application call"
+}
+
+
+internal var ApplicationCall.raptorTransaction: RaptorTransaction
+	get() = attributes.getOrNull(attributeKey) ?: throw RaptorFeatureNotInstalledException(RaptorKtorFeature)
+	set(value) {
+		attributes.put(attributeKey, value)
+	}
+
+
+internal val RaptorTransactionScope.ktorCall: ApplicationCall?
+	get() = context[RaptorTransactionCallPropertyKey]
