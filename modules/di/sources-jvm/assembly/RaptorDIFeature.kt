@@ -3,10 +3,13 @@ package io.fluidsonic.raptor.di
 import io.fluidsonic.raptor.*
 
 
+private val rootComponentKey = RaptorComponentKey<RootDIRaptorComponent>("DI")
+
+
 public object RaptorDIFeature : RaptorFeature {
 
 	override fun RaptorFeatureScope.installed() {
-		componentRegistry2.register(RootDIRaptorComponent.Key, ::RootDIRaptorComponent)
+		componentRegistry.register(rootComponentKey, ::RootDIRaptorComponent)
 	}
 
 
@@ -15,5 +18,5 @@ public object RaptorDIFeature : RaptorFeature {
 
 
 @RaptorDsl
-public val RaptorTopLevelConfigurationScope.di: RaptorDIComponent
-	get() = componentRegistry2.oneOrNull(RootDIRaptorComponent.Key) ?: throw RaptorFeatureNotInstalledException(RaptorDIFeature)
+public val RaptorTopLevelConfigurationScope.di: RaptorDIComponent<*>
+	get() = componentRegistry.oneOrNull(rootComponentKey) ?: throw RaptorFeatureNotInstalledException(RaptorDIFeature)

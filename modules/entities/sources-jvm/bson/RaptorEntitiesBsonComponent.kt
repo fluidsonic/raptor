@@ -6,7 +6,7 @@ import kotlin.reflect.*
 
 internal class RaptorEntitiesBsonComponent internal constructor(
 	private val bsonComponent: RaptorBsonComponent,
-) : RaptorComponent2.Base<RaptorEntitiesBsonComponent>() {
+) : RaptorComponent.Base<RaptorEntitiesBsonComponent>() {
 
 	private var idDefinitionsByDiscriminator: MutableMap<String, RaptorEntityId.Definition<*>> = hashMapOf()
 	private var idDefinitionsByInstanceClass: MutableMap<KClass<out RaptorEntityId>, RaptorEntityId.Definition<*>> = hashMapOf()
@@ -40,15 +40,15 @@ internal class RaptorEntitiesBsonComponent internal constructor(
 	}
 
 
-	override fun RaptorComponentConfigurationEndScope2.onConfigurationEnded() {
+	override fun RaptorComponentConfigurationEndScope<RaptorEntitiesBsonComponent>.onConfigurationEnded() {
 		if (idDefinitionsByDiscriminator.isNotEmpty())
 			bsonComponent.definitions(RaptorTypedEntityId.bsonDefinition(idDefinitionsByDiscriminator.values))
 	}
 
 
-	internal object Key : RaptorComponentKey2<RaptorEntitiesBsonComponent> {
+	internal companion object {
 
-		override fun toString() = "entities"
+		val key = RaptorComponentKey<RaptorEntitiesBsonComponent>("entities")
 	}
 }
 
@@ -60,14 +60,14 @@ public fun RaptorBsonComponent.definition(
 ) {
 	definitions(definition.bsonDefinition(), priority = priority)
 
-	componentRegistry2.oneOrRegister(RaptorEntitiesBsonComponent.Key) {
+	componentRegistry.oneOrRegister(RaptorEntitiesBsonComponent.key) {
 		RaptorEntitiesBsonComponent(bsonComponent = this)
 	}.addIdDefinition(definition)
 }
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery2<RaptorBsonComponent>.definition(
+public fun RaptorAssemblyQuery<RaptorBsonComponent>.definition(
 	definition: RaptorEntityId.Definition<*>,
 	priority: RaptorBsonDefinition.Priority = RaptorBsonDefinition.Priority.normal,
 ) {

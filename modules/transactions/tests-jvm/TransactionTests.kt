@@ -3,17 +3,24 @@ package tests
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.transactions.*
 import kotlin.test.*
-import tests.utility.*
+import kotlinx.coroutines.*
+import kotlinx.coroutines.test.*
 
 
+private val propertyKey = RaptorPropertyKey<String>("id")
+
+
+@OptIn(ExperimentalCoroutinesApi::class)
 class TransactionTests {
 
 	@Test
 	fun testConfigurationWithoutInstallation() {
 		raptor {
+			install(RaptorTransactionFeature)
+
 			transactions {
 				onCreate {
-					propertyRegistry.register(IdRaptorPropertyKey, "ignored")
+					propertyRegistry.register(propertyKey, "ignored")
 				}
 			}
 		}
@@ -28,30 +35,30 @@ class TransactionTests {
 
 			transactions {
 				onCreate {
-					propertyRegistry.register(IdRaptorPropertyKey, "root")
+					propertyRegistry.register(propertyKey, "root")
 				}
 			}
 
 			requests.all {
 				transactions {
 					onCreate {
-						val parentId = parentContext[IdRaptorPropertyKey]
+						val parentId = parentContext[propertyKey]
 
-						propertyRegistry.register(IdRaptorPropertyKey, if (parentId != null) "request in $parentId" else "request")
+						propertyRegistry.register(propertyKey, if (parentId != null) "request in $parentId" else "request")
 					}
 				}
 			}
 		}
 
-		val rootTransaction = raptor.createTransaction()
+		val rootTransaction = raptor.transaction()
 		val requestInRootTransaction = rootTransaction.createTransaction(Request(id = "foo"))
 		val requestTransaction = raptor.context.createTransaction(Request(id = "bar"))
 
-		assertEquals(expected = "root", actual = rootTransaction[IdRaptorPropertyKey])
-		assertEquals(expected = "request in root", actual = requestInRootTransaction[IdRaptorPropertyKey])
-		assertEquals(expected = "request", actual = requestTransaction[IdRaptorPropertyKey])
-		assertEquals(expected = "foo", actual = requestInRootTransaction[RequestRaptorPropertyKey]?.id)
-		assertEquals(expected = "bar", actual = requestTransaction[RequestRaptorPropertyKey]?.id)
+		assertEquals(expected = "root", actual = rootTransaction[propertyKey])
+		assertEquals(expected = "request in root", actual = requestInRootTransaction[propertyKey])
+		assertEquals(expected = "request", actual = requestTransaction[propertyKey])
+		assertEquals(expected = "foo", actual = requestInRootTransaction[Request.propertyKey]?.id)
+		assertEquals(expected = "bar", actual = requestTransaction[Request.propertyKey]?.id)
 		assertSame(expected = rootTransaction.context, actual = requestInRootTransaction.context.parent)
 		assertSame(expected = raptor.context, actual = requestTransaction.context.parent)
 	}
@@ -73,25 +80,25 @@ class TransactionTests {
 			transactions {
 				onCreate {
 					when (val context = parentContext) {
-						is RaptorTransactionContext -> when (context[IdRaptorPropertyKey]) {
-							"root" -> propertyRegistry.register(IdRaptorPropertyKey, "level 1")
+						is RaptorTransactionContext -> when (context[propertyKey]) {
+							"root" -> propertyRegistry.register(propertyKey, "level 1")
 							"level 1" -> Unit
 							else -> error("Unexpected context")
 						}
 
-						else -> propertyRegistry.register(IdRaptorPropertyKey, "root")
+						else -> propertyRegistry.register(propertyKey, "root")
 					}
 				}
 			}
 		}
 
-		val transaction1 = raptor.createTransaction()
-		val transaction2 = transaction1.createTransaction()
-		val transaction3 = transaction2.createTransaction()
+		val transaction1 = raptor.transaction()
+		val transaction2 = transaction1.transaction()
+		val transaction3 = transaction2.transaction()
 
-		assertEquals(expected = "root", actual = transaction1[IdRaptorPropertyKey])
-		assertEquals(expected = "level 1", actual = transaction2[IdRaptorPropertyKey])
-		assertEquals(expected = "level 1", actual = transaction3[IdRaptorPropertyKey])
+		assertEquals(expected = "root", actual = transaction1[propertyKey])
+		assertEquals(expected = "level 1", actual = transaction2[propertyKey])
+		assertEquals(expected = "level 1", actual = transaction3[propertyKey])
 		assertSame(expected = raptor.context, actual = transaction1.context.parent)
 		assertSame(expected = transaction1.context, actual = transaction2.context.parent)
 		assertSame(expected = transaction2.context, actual = transaction3.context.parent)
@@ -99,15 +106,15 @@ class TransactionTests {
 
 
 	@Test
-	fun testRaptorExtensions() {
+	fun testRaptorExtensions() = runTest {
 		val raptor = raptor {
 			install(RaptorTransactionFeature)
 		}
 
 		@Suppress("USELESS_IS_CHECK")
-		assertTrue(raptor.createTransaction() is RaptorTransaction)
+		assertTrue(raptor.transaction() is RaptorTransaction)
 
-		raptor.withNewTransaction {
+		raptor.transaction {
 			@Suppress("USELESS_IS_CHECK")
 			assertTrue(this is RaptorTransactionScope)
 		}
@@ -115,27 +122,27 @@ class TransactionTests {
 
 
 	@Test
-	fun testRaptorContextExtensions() {
+	fun testRaptorContextExtensions() = runTest {
 		val raptor = raptor {
 			install(RaptorTransactionFeature)
 		}
 
 		@Suppress("USELESS_IS_CHECK")
-		assertTrue(raptor.context.createTransaction() is RaptorTransaction)
+		assertTrue(raptor.context.transaction() is RaptorTransaction)
 
-		raptor.context.withNewTransaction {
+		raptor.context.transaction {
 			@Suppress("USELESS_IS_CHECK")
 			assertTrue(this is RaptorTransactionScope)
 		}
 	}
 
 	@Test
-	fun testRaptorScopeExtensions() {
+	fun testRaptorScopeExtensions() = runTest {
 		val raptor = raptor {
 			install(RaptorTransactionFeature)
 		}
 
-		raptor.context.withNewTransaction {
+		raptor.context.transaction {
 			@Suppress("USELESS_IS_CHECK")
 			assertTrue(this is RaptorTransactionScope)
 		}
@@ -151,16 +158,16 @@ class TransactionTests {
 				var lastId = 0
 
 				onCreate {
-					propertyRegistry.register(IdRaptorPropertyKey, (++lastId).toString())
+					propertyRegistry.register(propertyKey, (++lastId).toString())
 				}
 			}
 		}
 
-		val transaction1 = raptor.createTransaction()
-		val transaction2 = raptor.createTransaction()
+		val transaction1 = raptor.transaction()
+		val transaction2 = raptor.transaction()
 
-		assertEquals(expected = "1", actual = transaction1[IdRaptorPropertyKey])
-		assertEquals(expected = "2", actual = transaction2[IdRaptorPropertyKey])
+		assertEquals(expected = "1", actual = transaction1[propertyKey])
+		assertEquals(expected = "2", actual = transaction2[propertyKey])
 	}
 
 
@@ -171,7 +178,7 @@ class TransactionTests {
 		assertEquals(
 			expected = "Feature io.fluidsonic.raptor.transactions.RaptorTransactionFeature is not installed.",
 			actual = assertFails {
-				raptor.createTransaction()
+				raptor.transaction()
 			}.message
 		)
 	}

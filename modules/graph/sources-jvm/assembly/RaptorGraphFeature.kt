@@ -6,7 +6,7 @@ import io.fluidsonic.raptor.*
 public object RaptorGraphFeature : RaptorFeature {
 
 	override fun RaptorFeatureScope.installed() {
-		componentRegistry2.register(RaptorGraphsComponent.Key) { RaptorGraphsComponent() }
+		componentRegistry.register(RaptorGraphsComponent.key) { RaptorGraphsComponent() }
 	}
 
 

@@ -6,6 +6,9 @@ import kotlin.properties.*
 import kotlin.reflect.*
 
 
+private val propertyKey = RaptorPropertyKey<RaptorDI>("DI")
+
+
 @RaptorDsl
 public interface RaptorDI {
 
@@ -104,10 +107,14 @@ public fun RaptorDI.Module.providerForType(type: KType): RaptorDI.Provider? =
 	providers.lastOrNull { it.type == type }
 
 
+internal fun RaptorPropertyRegistry.register(di: RaptorDI) {
+	register(propertyKey, di)
+}
+
+
 @RaptorDsl
 public val RaptorScope.di: RaptorDI
-	get() = context.properties[DIRaptorPropertyKey]
-		?: error("You must install ${RaptorDIFeature::class.simpleName} for enabling dependency injection functionality.")
+	get() = context.properties[propertyKey] ?: throw RaptorFeatureNotInstalledException(RaptorDIFeature)
 
 
 @LowPriorityInOverloadResolution

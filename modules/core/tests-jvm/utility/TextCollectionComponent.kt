@@ -3,33 +3,41 @@ package tests
 import io.fluidsonic.raptor.*
 
 
-class TextCollectionComponent : RaptorComponent.Default<TextCollectionComponent>() {
+class TextCollectionComponent : RaptorComponent.Base<TextCollectionComponent>() {
 
-	var _text = ""
-
-
-	override fun toString() =
-		"text collection ($_text)"
+	private var text = ""
 
 
-	override fun RaptorComponentConfigurationEndScope.onConfigurationEnded() {
-		propertyRegistry.register(TextRaptorPropertyKey, _text)
+	@RaptorDsl
+	fun append(fragment: String) {
+		text += fragment
 	}
 
 
-	object Key : RaptorComponentKey<TextCollectionComponent> {
+	override fun toString() =
+		"text collection ($text)"
 
-		override fun toString() = "text collection"
+
+	override fun RaptorComponentConfigurationEndScope<TextCollectionComponent>.onConfigurationEnded() {
+		propertyRegistry.register(textPropertyKey, text)
+	}
+
+
+	companion object {
+
+		val key = RaptorComponentKey<TextCollectionComponent>("text collection")
 	}
 }
 
 
 @RaptorDsl
-fun RaptorComponentSet<TextCollectionComponent>.append(fragment: String) = configure {
-	_text += fragment
+fun RaptorAssemblyQuery<TextCollectionComponent>.append(fragment: String) {
+	this {
+		append(fragment)
+	}
 }
 
 
 @RaptorDsl
 val RaptorTopLevelConfigurationScope.textCollection
-	get() = componentRegistry.configure(TextCollectionComponent.Key)
+	get() = componentRegistry.all(TextCollectionComponent.key)

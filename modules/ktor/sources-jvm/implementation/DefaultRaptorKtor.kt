@@ -39,12 +39,6 @@ internal class DefaultRaptorKtor(
 	}
 
 
-	internal object PropertyKey : RaptorPropertyKey<DefaultRaptorKtor> {
-
-		override fun toString() = "ktor"
-	}
-
-
 	private enum class State {
 
 		initial,
@@ -54,7 +48,3 @@ internal class DefaultRaptorKtor(
 		stopping
 	}
 }
-
-
-internal val RaptorContext.ktorInternal: DefaultRaptorKtor?
-	get() = properties[DefaultRaptorKtor.PropertyKey]

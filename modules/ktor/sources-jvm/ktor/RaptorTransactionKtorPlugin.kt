@@ -8,6 +8,7 @@ import io.ktor.util.*
 
 
 private val attributeKey = AttributeKey<RaptorTransaction>("Raptor: server transaction")
+private val ktorCallPropertyKey = RaptorPropertyKey<ApplicationCall>("Ktor call")
 
 
 internal val RaptorTransactionKtorPlugin = createApplicationPlugin(
@@ -18,8 +19,8 @@ internal val RaptorTransactionKtorPlugin = createApplicationPlugin(
 	val transactionFactory = checkNotNull(pluginConfig.transactionFactory) { "transactionFactory() not set." }
 
 	on(CallSetup) { call ->
-		call.attributes.put(attributeKey, transactionFactory.createTransaction(serverContext.createTransaction().context) {
-			propertyRegistry.register(RaptorTransactionCallPropertyKey, call)
+		call.attributes.put(attributeKey, transactionFactory.createTransaction(serverContext.transaction().context) {
+			propertyRegistry.register(ktorCallPropertyKey, call)
 		})
 	}
 
@@ -53,12 +54,6 @@ public class RaptorTransactionKtorPluginConfig {
 }
 
 
-private object RaptorTransactionCallPropertyKey : RaptorPropertyKey<ApplicationCall> {
-
-	override fun toString() = "Ktor application call"
-}
-
-
 internal var ApplicationCall.raptorTransaction: RaptorTransaction
 	get() = attributes.getOrNull(attributeKey) ?: throw RaptorFeatureNotInstalledException(RaptorKtorFeature)
 	set(value) {
@@ -67,4 +62,4 @@ internal var ApplicationCall.raptorTransaction: RaptorTransaction
 
 
 internal val RaptorTransactionScope.ktorCall: ApplicationCall?
-	get() = context[RaptorTransactionCallPropertyKey]
+	get() = context[ktorCallPropertyKey]

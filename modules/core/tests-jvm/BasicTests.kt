@@ -31,19 +31,19 @@ class BasicTests {
 					Node("d")
 				))
 			)),
-			raptor[RootNodeRaptorKey]
+			raptor[Node.rootPropertyKey]
 		)
 	}
 
 
 	@Test
-	fun testConfigure() {
+	fun testEach() {
 		raptor {
 			val component = this
 
-			configure {
-				configure {
-					configure {
+			each {
+				each {
+					each {
 						assertSame(expected = component, actual = this)
 					}
 				}
@@ -56,7 +56,7 @@ class BasicTests {
 	fun testEmpty() {
 		val raptor = raptor {}
 
-		assertNull(raptor[TextRaptorPropertyKey])
+		assertNull(raptor[textPropertyKey])
 		assertTrue(raptor.properties.isEmpty())
 	}
 
@@ -69,7 +69,7 @@ class BasicTests {
 			install(object : RaptorFeature {
 
 				override fun RaptorFeatureConfigurationApplicationScope.applyConfiguration() {
-					propertyRegistry.register(CountRaptorPropertyKey, 1)
+					propertyRegistry.register(countPropertyKey, 1)
 
 					lazyContext = this.lazyContext
 
@@ -92,7 +92,7 @@ class BasicTests {
 		val raptor = raptor {
 			install(TextCollectionFeature)
 
-			textCollection {
+			textCollection.all {
 				append("This ")
 				append("is ")
 			}
@@ -100,13 +100,13 @@ class BasicTests {
 			install(object : RaptorFeature {
 
 				override fun RaptorFeatureScope.installed() {
-					textCollection {
+					textCollection.all {
 						append("working!")
 					}
 				}
 			})
 		}
 
-		assertEquals(expected = "This is working!", actual = raptor[TextRaptorPropertyKey])
+		assertEquals(expected = "This is working!", actual = raptor[textPropertyKey])
 	}
 }

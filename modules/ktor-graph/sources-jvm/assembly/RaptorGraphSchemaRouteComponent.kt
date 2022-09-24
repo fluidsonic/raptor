@@ -13,41 +13,36 @@ import io.ktor.server.routing.*
 public class RaptorGraphSchemaRouteComponent internal constructor(
 	private val route: RaptorKtorRouteComponent,
 	private val tag: Any? = null,
-) : RaptorComponent2.Base<RaptorGraphSchemaRouteComponent>() {
+) : RaptorComponent.Base<RaptorGraphSchemaRouteComponent>() {
 
-	override fun RaptorComponentConfigurationStartScope2.onConfigurationStarted() {
+	override fun RaptorComponentConfigurationStartScope.onConfigurationStarted() {
 		route.custom {
 			get {
-				val schema = checkNotNull(raptorContext[PropertyKey])
+				val schema = checkNotNull(raptorContext[propertyKey])
 				call.respondText(schema.toString(), ContentType.Text.Plain)
 			}
 		}
 	}
 
 
-	override fun RaptorComponentConfigurationEndScope2.onConfigurationEnded() {
+	override fun RaptorComponentConfigurationEndScope<RaptorGraphSchemaRouteComponent>.onConfigurationEnded() {
 		// FIXME Won't work unless we make the property registry and the context hierarchical.
 		val graph = checkNotNull(graph(tag)) { if (tag != null) "Cannot find graph with tag: $tag" else "Cannot find any graph" }
-		propertyRegistry.register(PropertyKey, graph.schema)
+		propertyRegistry.register(propertyKey, graph.schema)
 	}
 
 
-	internal object Key : RaptorComponentKey2<RaptorGraphSchemaRouteComponent> {
+	internal companion object {
 
-		override fun toString() = "graph schema"
-	}
-
-
-	private object PropertyKey : RaptorPropertyKey<GSchema> {
-
-		override fun toString() = "graph schema"
+		val key = RaptorComponentKey<RaptorGraphSchemaRouteComponent>("graph schema")
+		val propertyKey = RaptorPropertyKey<GSchema>("graph schema")
 	}
 }
 
 
 @RaptorDsl
 public fun RaptorKtorRouteComponent.graphSchema(tag: Any? = null): RaptorGraphSchemaRouteComponent =
-	componentRegistry2.oneOrRegister(RaptorGraphSchemaRouteComponent.Key) { RaptorGraphSchemaRouteComponent(route = this, tag = tag) }
+	componentRegistry.oneOrRegister(RaptorGraphSchemaRouteComponent.key) { RaptorGraphSchemaRouteComponent(route = this, tag = tag) }
 
 
 @RaptorDsl

@@ -24,7 +24,7 @@ class LifecycleTests {
 		}
 
 		val lifecycle = raptor.lifecycle
-		val startable = raptor[StartableRaptorPropertyKey]!!
+		val startable = raptor[Startable.propertyKey]!!
 
 		repeat(10) {
 			assertEquals(expected = State.stopped, actual = lifecycle.state)
@@ -129,7 +129,7 @@ class LifecycleTests {
 		val raptor = raptor {}
 
 		assertEquals(
-			expected = "You must install RaptorLifecycleFeature for enabling lifecycle functionality.",
+			expected = "Feature io.fluidsonic.raptor.RaptorLifecycleFeature is not installed.",
 			actual = assertFails {
 				raptor.lifecycle
 			}.message

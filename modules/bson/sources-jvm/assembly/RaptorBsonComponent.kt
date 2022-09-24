@@ -7,7 +7,10 @@ import org.bson.codecs.*
 import org.bson.codecs.configuration.*
 
 
-public class RaptorBsonComponent internal constructor() : RaptorComponent2.Base<RaptorBsonComponent>() {
+private val bsonPropertyKey = RaptorPropertyKey<RaptorBson>("bson")
+
+
+public class RaptorBsonComponent internal constructor() : RaptorComponent.Base<RaptorBsonComponent>() {
 
 	private val definitionsByPriority: MutableMap<Priority, MutableList<RaptorBsonDefinition>> = EnumMap(Priority::class.java)
 	private var includesDefaultDefinitions = false
@@ -66,7 +69,7 @@ public class RaptorBsonComponent internal constructor() : RaptorComponent2.Base<
 	}
 
 
-	override fun RaptorComponentConfigurationEndScope2.onConfigurationEnded() {
+	override fun RaptorComponentConfigurationEndScope<RaptorBsonComponent>.onConfigurationEnded() {
 		// These codecs must come last to allow all other codecs to override default behavior.
 		// Also, MongoDB would freak out with StackOverflowError if their own codecs don't come before these!
 		val definitions =
@@ -75,22 +78,13 @@ public class RaptorBsonComponent internal constructor() : RaptorComponent2.Base<
 				definitionsByPriority[Priority.low].orEmpty() +
 				if (includesDefaultDefinitions) RaptorBsonDefinition.defaults else emptyList()
 
-		propertyRegistry.register(RaptorBsonKey, DefaultRaptorBson(context = lazyContext, definitions = definitions))
-	}
-
-
-	public companion object;
-
-
-	internal object Key : RaptorComponentKey2<RaptorBsonComponent> {
-
-		override fun toString() = "bson"
+		propertyRegistry.register(bsonPropertyKey, DefaultRaptorBson(context = lazyContext, definitions = definitions))
 	}
 }
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery2<RaptorBsonComponent>.codecs(
+public fun RaptorAssemblyQuery<RaptorBsonComponent>.codecs(
 	vararg codecs: Codec<*>,
 	priority: Priority = Priority.normal,
 ) {
@@ -99,7 +93,7 @@ public fun RaptorAssemblyQuery2<RaptorBsonComponent>.codecs(
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery2<RaptorBsonComponent>.codecs(
+public fun RaptorAssemblyQuery<RaptorBsonComponent>.codecs(
 	codecs: Iterable<Codec<*>>,
 	priority: Priority = Priority.normal,
 ) {
@@ -108,7 +102,7 @@ public fun RaptorAssemblyQuery2<RaptorBsonComponent>.codecs(
 
 
 @RaptorDsl
-public inline fun <reified Value : Any> RaptorAssemblyQuery2<RaptorBsonComponent>.definition(
+public inline fun <reified Value : Any> RaptorAssemblyQuery<RaptorBsonComponent>.definition(
 	@BuilderInference noinline configure: RaptorBsonDefinitionBuilder<Value>.() -> Unit,
 ) {
 	definitions(raptor.bson.definition(configure))
@@ -116,7 +110,7 @@ public inline fun <reified Value : Any> RaptorAssemblyQuery2<RaptorBsonComponent
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery2<RaptorBsonComponent>.definitions(
+public fun RaptorAssemblyQuery<RaptorBsonComponent>.definitions(
 	vararg definitions: RaptorBsonDefinition,
 	priority: Priority = Priority.normal,
 ) {
@@ -125,7 +119,7 @@ public fun RaptorAssemblyQuery2<RaptorBsonComponent>.definitions(
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery2<RaptorBsonComponent>.definitions(
+public fun RaptorAssemblyQuery<RaptorBsonComponent>.definitions(
 	definitions: Iterable<RaptorBsonDefinition>,
 	priority: Priority = Priority.normal,
 ) {
@@ -136,7 +130,7 @@ public fun RaptorAssemblyQuery2<RaptorBsonComponent>.definitions(
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery2<RaptorBsonComponent>.includeDefaultDefinitions() {
+public fun RaptorAssemblyQuery<RaptorBsonComponent>.includeDefaultDefinitions() {
 	this {
 		includeDefaultDefinitions()
 	}
@@ -144,7 +138,7 @@ public fun RaptorAssemblyQuery2<RaptorBsonComponent>.includeDefaultDefinitions()
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery2<RaptorBsonComponent>.providers(
+public fun RaptorAssemblyQuery<RaptorBsonComponent>.providers(
 	vararg providers: CodecProvider,
 	priority: Priority = Priority.normal,
 ) {
@@ -153,9 +147,13 @@ public fun RaptorAssemblyQuery2<RaptorBsonComponent>.providers(
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery2<RaptorBsonComponent>.providers(
+public fun RaptorAssemblyQuery<RaptorBsonComponent>.providers(
 	providers: Iterable<CodecProvider>,
 	priority: Priority = Priority.normal,
 ) {
 	definitions(providers.map(RaptorBsonDefinition::of), priority = priority)
 }
+
+
+public val RaptorContext.bson: RaptorBson
+	get() = properties[bsonPropertyKey] ?: throw RaptorFeatureNotInstalledException(RaptorBsonFeature)

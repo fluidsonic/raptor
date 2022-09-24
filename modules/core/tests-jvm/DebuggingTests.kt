@@ -24,14 +24,14 @@ class DebuggingTests {
 	fun testEmptyRegistriesToString() {
 		assertEquals(
 			expected = "[component registry] -> (empty)",
-			actual = DefaultRaptorComponentRegistry()
-				.also { it.configure(DummyComponent.Key) }
+			actual = DefaultComponentRegistry()
+				.also { it.all(DummyComponent.key) }
 				.toString()
 		)
 
 		assertEquals(
 			expected = "[property registry] -> (empty)",
-			actual = DefaultRaptorPropertyRegistry().toString()
+			actual = DefaultPropertyRegistry().toString()
 		)
 	}
 
@@ -40,14 +40,14 @@ class DebuggingTests {
 	fun testRegistriesToString() {
 		raptor {
 			install(TextCollectionFeature)
-			textCollection {
+			textCollection.all {
 				append("foo")
 			}
 
 			install(CounterFeature) {
 				increment()
 
-				extensions[AnyRaptorComponentExtensionKey] = "counter extension"
+				extensions[anyComponentExtensionKey] = "counter extension"
 			}
 
 			install(NodeFeature) {
@@ -55,17 +55,20 @@ class DebuggingTests {
 					node("a1")
 					node("a2")
 
-					extensions[AnyRaptorComponentExtensionKey] = "node extension"
+					extensions[anyComponentExtensionKey] = "node extension"
 				}
 				node("b")
 				node("c")
 			}
 
-			install(object : RaptorFeature {
+			requireFeature(NodeFeature) {
+				requireFeature(CounterFeature) {
+					requireFeature(TextCollectionFeature) {
+						install(object : RaptorFeature {
 
-				override fun RaptorFeatureConfigurationApplicationScope.applyConfiguration() {
-					assertEquals(
-						expected = """
+							override fun RaptorFeatureConfigurationApplicationScope.applyConfiguration() {
+								assertEquals(
+									expected = """
 							[component registry] ->
 								[counter] ->
 									counter (1) -> 
@@ -87,16 +90,14 @@ class DebuggingTests {
 															node (a2)
 												node (b)
 												node (c)
-								[root] ->
-									root -> 
-										[registration] -> component registration <root>
+								[root] -> root
 								[text collection] -> text collection (foo)
 						""".trimIndent(),
-						actual = componentRegistry.toString()
-					)
+									actual = componentRegistry.toString()
+								)
 
-					assertEquals(
-						expected = """
+								assertEquals(
+									expected = """
 							[property registry] ->
 								[count] -> 1
 								[root node] ->
@@ -108,22 +109,25 @@ class DebuggingTests {
 										node(c)
 								[text] -> foo
 						""".trimIndent(),
-						actual = propertyRegistry.toString()
-					)
+									actual = propertyRegistry.toString()
+								)
+							}
+
+
+							override fun RaptorFeatureScope.installed() {
+								componentRegistry.register(DummyComponent.key, DummyComponent("z"))
+								componentRegistry.register(DummyComponent.key, DummyComponent("1").apply {
+									extensions[anyComponentExtensionKey] = "dummy extension"
+								})
+								componentRegistry.register(DummyComponent.key, DummyComponent("a"))
+							}
+
+
+							override fun toString() = "debugging tests feature"
+						})
+					}
 				}
-
-
-				override fun RaptorFeatureScope.installed() {
-					componentRegistry.register(DummyComponent.Key, DummyComponent("z"))
-					componentRegistry.register(DummyComponent.Key, DummyComponent("1").apply {
-						extensions[AnyRaptorComponentExtensionKey] = "dummy extension"
-					})
-					componentRegistry.register(DummyComponent.Key, DummyComponent("a"))
-				}
-
-
-				override fun toString() = "debugging tests feature"
-			})
+			}
 		}
 	}
 
@@ -132,7 +136,7 @@ class DebuggingTests {
 	fun testRaptorToString() {
 		val raptor = raptor {
 			install(TextCollectionFeature)
-			textCollection {
+			textCollection.all {
 				append("foo")
 			}
 

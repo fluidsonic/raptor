@@ -53,10 +53,4 @@ internal class DefaultRaptorLifecycle(
 		_coroutineContext = null
 		stateRef.value = State.stopped
 	}
-
-
-	object PropertyKey : RaptorPropertyKey<DefaultRaptorLifecycle> {
-
-		override fun toString() = "lifecycle"
-	}
 }

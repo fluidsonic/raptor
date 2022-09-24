@@ -19,8 +19,5 @@ public interface RaptorTransactionContext : RaptorContext, RaptorTransactionScop
 	override val parent: RaptorContext
 
 
-	public companion object;
-
-
 	public interface Lazy : RaptorTransactionContext, RaptorContext.Lazy
 }

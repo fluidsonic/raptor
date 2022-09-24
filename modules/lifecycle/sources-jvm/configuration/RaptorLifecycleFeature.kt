@@ -1,24 +1,26 @@
 package io.fluidsonic.raptor
 
 import io.fluidsonic.raptor.di.*
-import kotlinx.coroutines.*
+
+
+private val lifecycleComponentKey = RaptorComponentKey<RaptorLifecycleComponent>("lifecycle")
 
 
 public object RaptorLifecycleFeature : RaptorFeature {
 
 	override fun RaptorFeatureScope.installed() {
-		componentRegistry.register(RaptorLifecycleComponent.Key, RaptorLifecycleComponent())
+		componentRegistry.register(lifecycleComponentKey, RaptorLifecycleComponent())
 
 		ifFeature(RaptorDIFeature) {
 			di {
-				provide { get<RaptorContext>()[DefaultRaptorLifecycle.PropertyKey]!!.coroutineContext }
-				provide { CoroutineScope(get()) }
+				provide { get<RaptorLifecycle>().coroutineContext }
+				provide { context.lifecycle }
 			}
 		}
 	}
 }
 
 
-public val Raptor.lifecycle: RaptorLifecycle
-	get() = properties[DefaultRaptorLifecycle.PropertyKey]
-		?: error("You must install ${RaptorLifecycleFeature::class.simpleName} for enabling lifecycle functionality.")
+@RaptorDsl
+public val RaptorTopLevelConfigurationScope.lifecycle: RaptorLifecycleComponent
+	get() = componentRegistry.oneOrNull(lifecycleComponentKey) ?: throw RaptorFeatureNotInstalledException(RaptorLifecycleFeature)

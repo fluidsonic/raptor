@@ -13,7 +13,7 @@ public interface RaptorKtorServerFeatureConfigurationEndScope {
 	public interface ServerScope {
 
 		@RaptorDsl
-		public val componentRegistry2: RaptorComponentRegistry2
+		public val componentRegistry: RaptorComponentRegistry
 
 		@RaptorDsl
 		public val propertyRegistry: RaptorPropertyRegistry

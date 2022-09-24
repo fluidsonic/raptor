@@ -11,7 +11,7 @@ class ConfigurationLifecycleTests {
 		val component = ConfigurationLifecycleCounterComponent()
 
 		raptor {
-			componentRegistry.register(ConfigurationLifecycleCounterComponent.Key, component)
+			componentRegistry.register(ConfigurationLifecycleCounterComponent.key, component)
 		}
 
 		assertEquals(expected = 1, actual = component.onConfigurationEndedCallCount)
@@ -24,21 +24,21 @@ class ConfigurationLifecycleTests {
 		raptor {
 			install(TextCollectionFeature)
 
-			val textCollection = componentRegistry.configure(TextCollectionComponent.Key)
+			val textCollection = componentRegistry.all(TextCollectionComponent.key)
 
 			install(object : RaptorFeature {
 
 				override fun RaptorFeatureConfigurationApplicationScope.applyConfiguration() {
 					assertFails {
-						componentRegistry.configure(TextCollectionComponent.Key)
+						componentRegistry.all(TextCollectionComponent.key)
 					}
 
 					assertFails {
-						componentRegistry.register(DummyComponent.Key, DummyComponent())
+						componentRegistry.register(DummyComponent.key, DummyComponent())
 					}
 
 					assertFails {
-						textCollection {}
+						textCollection.all {}
 					}
 				}
 

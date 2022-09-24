@@ -4,15 +4,19 @@ import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.transactions.*
 
 
+private val requestComponentKey = RaptorComponentKey<RequestComponent>("request")
+private val requestTransactionFactoryPropertyKey = RaptorPropertyKey<RaptorTransactionFactory>("request transaction factory")
+
+
 object RequestFeature : RaptorFeature {
 
 	override fun RaptorFeatureConfigurationApplicationScope.applyConfiguration() {
-		propertyRegistry.register(RequestTransactionFactoryRaptorPropertyKey, transactionFactory(componentRegistry2.one(RequestComponent.Key)))
+		propertyRegistry.register(requestTransactionFactoryPropertyKey, componentRegistry.one(requestComponentKey).complete())
 	}
 
 
 	override fun RaptorFeatureScope.installed() {
-		componentRegistry2.register(RequestComponent.Key, RequestComponent())
+		componentRegistry.register(requestComponentKey, RequestComponent())
 	}
 
 
@@ -21,11 +25,16 @@ object RequestFeature : RaptorFeature {
 
 
 fun RaptorContext.createTransaction(request: Request): RaptorTransaction =
-	properties[RequestTransactionFactoryRaptorPropertyKey]?.createTransaction(context = this) {
-		propertyRegistry.register(RequestRaptorPropertyKey, request)
+	properties[requestTransactionFactoryPropertyKey]?.createTransaction(context = this) {
+		propertyRegistry.register(Request.propertyKey, request)
 	}
 		?: error("You must install RequestFeature for enabling request-scoped transaction functionality.")
 
 
 fun RaptorTransaction.createTransaction(request: Request): RaptorTransaction =
 	context.createTransaction(request)
+
+
+@RaptorDsl
+val RaptorTopLevelConfigurationScope.requests
+	get() = componentRegistry.all(requestComponentKey)

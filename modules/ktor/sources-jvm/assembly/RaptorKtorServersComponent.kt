@@ -3,42 +3,43 @@ package io.fluidsonic.raptor.ktor
 import io.fluidsonic.raptor.*
 
 
+private val serverComponentKey = RaptorComponentKey<RaptorKtorServerComponent>("server")
+
+
 public class RaptorKtorServersComponent internal constructor() :
-	RaptorComponent2.Base<RaptorKtorServersComponent>(),
-	RaptorComponentSet2<RaptorKtorServerComponent> {
+	RaptorComponent.Base<RaptorKtorServersComponent>(),
+	RaptorComponentSet<RaptorKtorServerComponent> {
 
 	@RaptorDsl
-	override val all: RaptorAssemblyQuery2<RaptorKtorServerComponent>
-		get() = componentRegistry2.all(RaptorKtorServerComponent.Key).all
+	override val all: RaptorAssemblyQuery<RaptorKtorServerComponent>
+		get() = componentRegistry.all(serverComponentKey).all
+
+
+	internal fun complete(): Collection<KtorServerConfiguration> =
+		componentRegistry.many(serverComponentKey).map { it.complete() }
 
 
 	@RaptorDsl
 	public fun new(forceEncryptedConnection: Boolean = true): RaptorKtorServerComponent =
-		componentRegistry2.register(RaptorKtorServerComponent.Key) { RaptorKtorServerComponent(forceEncryptedConnection = forceEncryptedConnection) }
+		componentRegistry.register(serverComponentKey) { RaptorKtorServerComponent(forceEncryptedConnection = forceEncryptedConnection) }
 
 
 	@RaptorDsl
 	public fun new(forceEncryptedConnection: Boolean = true, configure: RaptorKtorServerComponent.() -> Unit = {}) {
 		new(forceEncryptedConnection = forceEncryptedConnection).configure()
 	}
-
-
-	internal object Key : RaptorComponentKey2<RaptorKtorServersComponent> {
-
-		override fun toString() = "servers"
-	}
 }
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery2<RaptorKtorServersComponent>.new(
+public fun RaptorAssemblyQuery<RaptorKtorServersComponent>.new(
 	forceEncryptedConnection: Boolean = true,
-): RaptorAssemblyQuery2<RaptorKtorServerComponent> =
+): RaptorAssemblyQuery<RaptorKtorServerComponent> =
 	map { it.new(forceEncryptedConnection = forceEncryptedConnection) }
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery2<RaptorKtorServersComponent>.new(
+public fun RaptorAssemblyQuery<RaptorKtorServersComponent>.new(
 	forceEncryptedConnection: Boolean = true,
 	configure: RaptorKtorServerComponent.() -> Unit = {},
 ) {

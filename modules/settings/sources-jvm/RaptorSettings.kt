@@ -3,6 +3,9 @@ package io.fluidsonic.raptor
 import kotlin.reflect.*
 
 
+private val componentKey = RaptorComponentKey<RaptorSettingsComponent>("settings")
+
+
 // TODO inject with DI? or should this only be used at assembly-time?
 public interface RaptorSettings {
 
@@ -144,11 +147,11 @@ public fun <Value : Any, TransformedValue : Any> RaptorSettings.ValueProvider<Va
 
 @RaptorDsl
 public fun RaptorRootComponent.install(settings: RaptorSettings) {
-	componentRegistry.oneOrNull(RaptorSettingsComponent.Key)?.let {
+	componentRegistry.oneOrNull(componentKey)?.let {
 		error("Cannot set settings multiple times. Use RaptorSettings.lookup(…) to combine multiple settings.")
 	}
 
-	componentRegistry.register(RaptorSettingsComponent.Key, RaptorSettingsComponent(settings = settings))
+	componentRegistry.register(componentKey, RaptorSettingsComponent(settings = settings))
 }
 
 
@@ -160,5 +163,5 @@ public fun RaptorGlobalDsl.settings(configure: RaptorSettings.Builder.() -> Unit
 
 @RaptorDsl
 public val RaptorTopLevelConfigurationScope.settings: RaptorSettings
-	get() = componentRegistry.root.oneOrNull(RaptorSettingsComponent.Key)?.settings
+	get() = componentRegistry.root.oneOrNull(componentKey)?.settings
 		?: error("No settings have been registered. Use install(settings) inside raptor { … } before any other configuration.")

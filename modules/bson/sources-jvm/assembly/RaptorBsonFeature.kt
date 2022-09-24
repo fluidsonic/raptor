@@ -4,15 +4,18 @@ import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.di.*
 
 
+private val bsonComponentKey = RaptorComponentKey<RaptorBsonComponent>("bson")
+
+
 public object RaptorBsonFeature : RaptorFeature.Configurable<RaptorBsonComponent> {
 
 	override fun RaptorFeatureConfigurationScope.beginConfiguration(action: RaptorBsonComponent.() -> Unit) {
-		componentRegistry2.one(RaptorBsonComponent.Key).action()
+		componentRegistry.one(bsonComponentKey).action()
 	}
 
 
 	override fun RaptorFeatureScope.installed() {
-		componentRegistry2.register(RaptorBsonComponent.Key, RaptorBsonComponent())
+		componentRegistry.register(bsonComponentKey, RaptorBsonComponent())
 
 		ifFeature(RaptorDIFeature) {
 			di {
@@ -27,4 +30,4 @@ public object RaptorBsonFeature : RaptorFeature.Configurable<RaptorBsonComponent
 
 @RaptorDsl
 public val RaptorTopLevelConfigurationScope.bson: RaptorBsonComponent
-	get() = componentRegistry2.oneOrNull(RaptorBsonComponent.Key) ?: throw RaptorFeatureNotInstalledException(RaptorBsonFeature)
+	get() = componentRegistry.oneOrNull(bsonComponentKey) ?: throw RaptorFeatureNotInstalledException(RaptorBsonFeature)

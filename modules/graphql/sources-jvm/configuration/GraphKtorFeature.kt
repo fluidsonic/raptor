@@ -11,7 +11,7 @@ public object GraphKtorFeature : RaptorKtorRouteFeature {
 
 	override fun RaptorKtorRouteFeatureConfigurationEndScope.onConfigurationEnded() {
 		route {
-			propertyRegistry.register(GraphRoute.PropertyKey, componentRegistry2.one(GraphRaptorComponent.Key).toGraphRoute())
+			propertyRegistry.register(GraphRoute.propertyKey, componentRegistry.one(GraphRaptorComponent.key).toGraphRoute())
 		}
 	}
 
@@ -20,11 +20,11 @@ public object GraphKtorFeature : RaptorKtorRouteFeature {
 		route {
 			custom {
 				get {
-					checkNotNull(raptorContext[GraphRoute.PropertyKey]).handle(call)
+					checkNotNull(raptorContext[GraphRoute.propertyKey]).handle(call)
 				}
 
 				post {
-					checkNotNull(raptorContext[GraphRoute.PropertyKey]).handle(call)
+					checkNotNull(raptorContext[GraphRoute.propertyKey]).handle(call)
 				}
 			}
 		}
@@ -45,14 +45,14 @@ public object GraphKtorFeature : RaptorKtorRouteFeature {
 @RaptorDsl
 public fun RaptorKtorRouteComponent.newGraph(provideSchema: Boolean = false, configuration: GraphRaptorComponent.() -> Unit = {}) {
 	GraphRaptorComponent()
-		.also { componentRegistry2.register(GraphRaptorComponent.Key, it) }
+		.also { componentRegistry.register(GraphRaptorComponent.key, it) }
 		.also(configuration)
 
 	if (provideSchema)
 		routes.new("schema") {
 			custom {
 				get {
-					val schema = raptorContext[GraphRoute.PropertyKey]!!.system.schema
+					val schema = raptorContext[GraphRoute.propertyKey]!!.system.schema
 
 					call.respondText(schema.toString(), ContentType.Text.Plain)
 				}

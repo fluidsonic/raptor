@@ -53,7 +53,7 @@ class NestingTests {
 					Node("x2")
 				))
 			)),
-			raptor[RootNodeRaptorKey]
+			raptor[Node.rootPropertyKey]
 		)
 	}
 }

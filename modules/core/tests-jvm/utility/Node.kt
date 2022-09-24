@@ -1,5 +1,7 @@
 package tests
 
+import io.fluidsonic.raptor.*
+
 
 data class Node(
 	val name: String,
@@ -25,5 +27,11 @@ data class Node(
 				append(child.toString(indent = "$indent\t"))
 			}
 		}
+	}
+
+
+	companion object {
+
+		val rootPropertyKey = RaptorPropertyKey<Node>("root node")
 	}
 }

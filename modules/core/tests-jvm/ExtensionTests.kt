@@ -10,11 +10,11 @@ class ExtensionTests {
 	fun testExtension() {
 		raptor {
 			install(CounterFeature) {
-				extensions[AnyRaptorComponentExtensionKey] = "foo"
+				extensions[anyComponentExtensionKey] = "foo"
 			}
 
 			install(CounterFeature) {
-				assertEquals(expected = "foo", actual = extensions[AnyRaptorComponentExtensionKey])
+				assertEquals(expected = "foo", actual = extensions[anyComponentExtensionKey])
 			}
 		}
 	}
@@ -32,7 +32,7 @@ class ExtensionTests {
 					node("d").tags("tag d")
 				}
 
-				nodes.withTags("tag a", "tag c") {
+				nodes.all.withTags("tag a", "tag c") {
 					node("tagged 1")
 				}
 
@@ -57,7 +57,7 @@ class ExtensionTests {
 					Node("tagged 1")
 				))
 			)),
-			raptor[RootNodeRaptorKey]
+			raptor[Node.rootPropertyKey]
 		)
 	}
 }

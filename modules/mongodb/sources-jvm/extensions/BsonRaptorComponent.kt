@@ -4,11 +4,13 @@ import com.mongodb.*
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.bson.*
 
+private val mongoClientDefaultCodecsIncludedComponentExtensionKey = RaptorComponentExtensionKey<Boolean>("MongoClient default codecs included")
+
 
 @RaptorDsl
 public fun RaptorBsonComponent.includeMongoClientDefaultCodecs() {
-	if (extensions[MongoClientDefaultCodecsIncluded] != true) {
-		extensions[MongoClientDefaultCodecsIncluded] = true
+	if (extensions[mongoClientDefaultCodecsIncludedComponentExtensionKey] != true) {
+		extensions[mongoClientDefaultCodecsIncludedComponentExtensionKey] = true
 
 		providers(MongoClientSettings.getDefaultCodecRegistry(), priority = RaptorBsonDefinition.Priority.low)
 	}
@@ -16,14 +18,8 @@ public fun RaptorBsonComponent.includeMongoClientDefaultCodecs() {
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery2<RaptorBsonComponent>.includeMongoClientDefaultCodecs() {
+public fun RaptorAssemblyQuery<RaptorBsonComponent>.includeMongoClientDefaultCodecs() {
 	this {
 		includeMongoClientDefaultCodecs()
 	}
-}
-
-
-private object MongoClientDefaultCodecsIncluded : RaptorComponentExtensionKey<Boolean> {
-
-	override fun toString() = "MongoClient default codecs included"
 }

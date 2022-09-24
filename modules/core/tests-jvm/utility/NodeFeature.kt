@@ -6,12 +6,12 @@ import io.fluidsonic.raptor.*
 object NodeFeature : RaptorFeature.Configurable<NodeComponent> {
 
 	override fun RaptorFeatureConfigurationApplicationScope.applyConfiguration() {
-		propertyRegistry.register(RootNodeRaptorKey, componentRegistry.one(NodeComponent.Key).toNode())
+		propertyRegistry.register(Node.rootPropertyKey, componentRegistry.one(NodeComponent.key).toNode())
 	}
 
 
 	override fun RaptorFeatureConfigurationScope.beginConfiguration(action: NodeComponent.() -> Unit) {
-		componentRegistry.oneOrRegister(NodeComponent.Key) { NodeComponent(name = "root") }.action()
+		componentRegistry.oneOrRegister(NodeComponent.key) { NodeComponent(name = "root") }.action()
 	}
 
 

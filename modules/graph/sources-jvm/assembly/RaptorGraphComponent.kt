@@ -4,7 +4,9 @@ import io.fluidsonic.raptor.*
 import kotlin.reflect.*
 
 
-public class RaptorGraphComponent internal constructor() : RaptorComponent2.Base<RaptorGraphComponent>(), RaptorTaggableComponent2 {
+public class RaptorGraphComponent internal constructor() :
+	RaptorComponent.Base<RaptorGraphComponent>(),
+	RaptorTaggableComponent<RaptorGraphComponent> {
 
 	internal var graph: RaptorGraph? = null
 		private set
@@ -14,14 +16,14 @@ public class RaptorGraphComponent internal constructor() : RaptorComponent2.Base
 	public val definitions: Definitions = Definitions()
 
 
-	override fun RaptorComponentConfigurationEndScope2.onConfigurationEnded() {
+	override fun RaptorComponentConfigurationEndScope<RaptorGraphComponent>.onConfigurationEnded() {
 		graph = GraphSystemDefinitionBuilder.build(definitions.list)
 			.let(GraphTypeSystemBuilder::build)
-			.let { GraphSystemBuilder.build(tags = tags(this@RaptorGraphComponent), typeSystem = it) }
+			.let { GraphSystemBuilder.build(tags = tags(), typeSystem = it) }
 	}
 
 
-	public inner class Definitions : RaptorAssemblyQuery2<Definitions> {
+	public inner class Definitions : RaptorAssemblyQuery<Definitions> {
 
 		private var includesDefault = false
 
@@ -52,26 +54,26 @@ public class RaptorGraphComponent internal constructor() : RaptorComponent2.Base
 	}
 
 
-	internal object Key : RaptorComponentKey2<RaptorGraphComponent> {
+	internal companion object {
 
-		override fun toString() = "graph"
+		val key = RaptorComponentKey<RaptorGraphComponent>("graph")
 	}
 }
 
 
 @RaptorDsl
-public val RaptorAssemblyQuery2<RaptorGraphComponent>.definitions: RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>
+public val RaptorAssemblyQuery<RaptorGraphComponent>.definitions: RaptorAssemblyQuery<RaptorGraphComponent.Definitions>
 	get() = map { it.definitions }
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.add(vararg definitions: RaptorGraphDefinition) {
+public fun RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.add(vararg definitions: RaptorGraphDefinition) {
 	add(definitions.asIterable())
 }
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.add(definitions: Iterable<RaptorGraphDefinition>) {
+public fun RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.add(definitions: Iterable<RaptorGraphDefinition>) {
 	this {
 		add(definitions)
 	}
@@ -79,7 +81,7 @@ public fun RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.add(definition
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.includeDefault() {
+public fun RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.includeDefault() {
 	this {
 		includeDefault()
 	}
@@ -87,7 +89,7 @@ public fun RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.includeDefault
 
 
 @RaptorDsl
-public inline fun <reified Type : Enum<Type>> RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.newEnum(
+public inline fun <reified Type : Enum<Type>> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newEnum(
 	name: String = RaptorGraphDefinition.defaultName,
 	@BuilderInference noinline configure: RaptorEnumGraphDefinitionBuilder<Type>.() -> Unit = {},
 ) {
@@ -101,7 +103,7 @@ public inline fun <reified Type : Enum<Type>> RaptorAssemblyQuery2<RaptorGraphCo
 
 
 @RaptorDsl
-public inline fun <reified Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.newIdAlias(
+public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newIdAlias(
 	@BuilderInference noinline configure: RaptorAliasGraphDefinitionBuilder<Type, String>.() -> Unit,
 ) {
 	add(graphIdAliasDefinition(
@@ -112,7 +114,7 @@ public inline fun <reified Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent
 
 
 @RaptorDsl
-public inline fun <reified Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.newInputObject(
+public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newInputObject(
 	name: String = RaptorGraphDefinition.defaultName,
 	@BuilderInference noinline configure: RaptorInputObjectGraphDefinitionBuilder<Type>.() -> Unit,
 ) {
@@ -125,7 +127,7 @@ public inline fun <reified Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent
 
 
 @RaptorDsl
-public fun <Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.newInterface(
+public fun <Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newInterface(
 	name: String = RaptorGraphDefinition.defaultName,
 	type: KType,
 	configure: RaptorInterfaceGraphDefinitionBuilder<Type>.() -> Unit,
@@ -135,7 +137,7 @@ public fun <Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.n
 
 
 @RaptorDsl
-public inline fun <reified Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.newInterface(
+public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newInterface(
 	name: String = RaptorGraphDefinition.defaultName,
 	noinline configure: RaptorInterfaceGraphDefinitionBuilder<Type>.() -> Unit,
 ) {
@@ -148,7 +150,7 @@ public inline fun <reified Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent
 
 
 @RaptorDsl
-public fun <Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.newObject(
+public fun <Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newObject(
 	name: String = RaptorGraphDefinition.defaultName,
 	type: KType,
 	configure: RaptorObjectGraphDefinitionBuilder<Type>.() -> Unit = {},
@@ -158,7 +160,7 @@ public fun <Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.n
 
 
 @RaptorDsl
-public inline fun <reified Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.newObject(
+public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newObject(
 	name: String = RaptorGraphDefinition.defaultName,
 	@BuilderInference noinline configure: RaptorObjectGraphDefinitionBuilder<Type>.() -> Unit = {},
 ) {
@@ -167,7 +169,7 @@ public inline fun <reified Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent
 
 
 @RaptorDsl
-public inline fun <reified Value : Any> RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.newScalar(
+public inline fun <reified Value : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newScalar(
 	name: String = RaptorGraphDefinition.defaultName,
 	noinline configure: RaptorScalarGraphDefinitionBuilder<Value>.() -> Unit,
 ) {
@@ -180,7 +182,7 @@ public inline fun <reified Value : Any> RaptorAssemblyQuery2<RaptorGraphComponen
 
 
 @RaptorDsl
-public inline fun <reified Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent.Definitions>.newUnion(
+public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newUnion(
 	name: String = RaptorGraphDefinition.defaultName,
 	@BuilderInference noinline configure: RaptorUnionGraphDefinitionBuilder<Type>.() -> Unit = {},
 ) {
@@ -199,12 +201,13 @@ public inline fun <reified Type : Any> RaptorAssemblyQuery2<RaptorGraphComponent
 // or we request an early configuration end on-demand (can lead to cycles which must be detected)
 // Note that it's not yet possible to define graphs below the root component. But it might be at some point.
 // FIXME might need requireFeature?
+// TODO Limit this to certain components?
 @RaptorDsl
-public fun RaptorComponentConfigurationEndScope2.graph(tag: Any? = null): RaptorGraph? {
-	fun RaptorComponentRegistry2.find(): RaptorGraph? {
-		oneOrNull(RaptorGraphsComponent.Key)
-			?.componentRegistry2
-			?.many(RaptorGraphComponent.Key)
+public fun RaptorComponentConfigurationEndScope<*>.graph(tag: Any? = null): RaptorGraph? {
+	fun RaptorComponentRegistry.find(): RaptorGraph? {
+		oneOrNull(RaptorGraphsComponent.key)
+			?.componentRegistry
+			?.many(RaptorGraphComponent.key)
 			?.filter { tag == null || tags(it).contains(tag) }
 			?.also { check(it.size <= 1) { if (tag != null) "Found multiple graphs with tag: $tag" else "Found multiple graphs" } }
 			?.firstOrNull()
@@ -217,5 +220,5 @@ public fun RaptorComponentConfigurationEndScope2.graph(tag: Any? = null): Raptor
 		return parent?.find()
 	}
 
-	return componentRegistry2.find()
+	return componentRegistry.find()
 }

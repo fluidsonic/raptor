@@ -3,13 +3,13 @@ package tests
 import io.fluidsonic.raptor.*
 
 
-class ConfigurationLifecycleCounterComponent : RaptorComponent.Default<ConfigurationLifecycleCounterComponent>() {
+class ConfigurationLifecycleCounterComponent : RaptorComponent.Base<ConfigurationLifecycleCounterComponent>() {
 
 	var onConfigurationEndedCallCount = 0
 	var onConfigurationStartedCallCount = 0
 
 
-	override fun RaptorComponentConfigurationEndScope.onConfigurationEnded() {
+	override fun RaptorComponentConfigurationEndScope<ConfigurationLifecycleCounterComponent>.onConfigurationEnded() {
 		onConfigurationEndedCallCount += 1
 	}
 
@@ -19,8 +19,8 @@ class ConfigurationLifecycleCounterComponent : RaptorComponent.Default<Configura
 	}
 
 
-	object Key : RaptorComponentKey<ConfigurationLifecycleCounterComponent> {
+	companion object {
 
-		override fun toString() = "configuration lifecycle counter"
+		val key = RaptorComponentKey<ConfigurationLifecycleCounterComponent>("configuration lifecycle counter")
 	}
 }

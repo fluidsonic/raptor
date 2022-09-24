@@ -5,38 +5,27 @@ import kotlin.collections.set
 import kotlin.reflect.*
 
 
-public class RaptorJobsComponent internal constructor() : RaptorComponent.Default<RaptorJobsComponent>() {
+public class RaptorJobsComponent internal constructor() : RaptorComponent.Base<RaptorJobsComponent>() {
 
 	private val executorsById: MutableMap<String, RaptorJobExecutor<*>> = hashMapOf()
 
 
-	internal fun createRegistry(): RaptorJobRegistry =
+	internal fun complete(): RaptorJobRegistry =
 		RaptorJobRegistry(executorsById.values)
 
 
 	@RaptorDsl
-	@Suppress("UNCHECKED_CAST")
 	public fun <Data> register(executor: RaptorJobExecutor<Data>) {
 		val id = executor.group.id
 		check(!executorsById.containsKey(id)) { "Cannot register multiple job executors with same ID: $id" }
 
 		executorsById[id] = executor
 	}
-
-
-	public companion object;
-
-
-	internal object Key : RaptorComponentKey<RaptorJobsComponent> {
-
-		override fun toString() = "jobs"
-	}
 }
 
 
-@OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
-public inline fun <Data, reified Dependency> RaptorComponentSet<RaptorJobsComponent>.register(
+public inline fun <Data, reified Dependency> RaptorAssemblyQuery<RaptorJobsComponent>.register(
 	group: RaptorJobGroup<Data>,
 	noinline execute: suspend Dependency.(data: Data) -> Unit,
 ) {
@@ -46,7 +35,7 @@ public inline fun <Data, reified Dependency> RaptorComponentSet<RaptorJobsCompon
 
 @RaptorDsl
 @Suppress("UNCHECKED_CAST")
-public fun <Data, Dependency> RaptorComponentSet<RaptorJobsComponent>.register(
+public fun <Data, Dependency> RaptorAssemblyQuery<RaptorJobsComponent>.register(
 	group: RaptorJobGroup<Data>,
 	dependencyType: KType,
 	execute: suspend Dependency.(data: Data) -> Unit,
@@ -59,6 +48,6 @@ public fun <Data, Dependency> RaptorComponentSet<RaptorJobsComponent>.register(
 
 
 @RaptorDsl
-public fun <Data> RaptorComponentSet<RaptorJobsComponent>.register(executor: RaptorJobExecutor<Data>) {
-	configure { register(executor) }
+public fun <Data> RaptorAssemblyQuery<RaptorJobsComponent>.register(executor: RaptorJobExecutor<Data>) {
+	this { register(executor) }
 }

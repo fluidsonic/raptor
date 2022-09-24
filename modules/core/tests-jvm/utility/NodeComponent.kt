@@ -5,11 +5,35 @@ import io.fluidsonic.raptor.*
 
 class NodeComponent(
 	@RaptorDsl val name: String,
-) : RaptorComponent.Default<NodeComponent>(), TaggableComponent {
+) : RaptorComponent.Base<NodeComponent>(), TaggableComponent<NodeComponent> {
+
+	@RaptorDsl
+	fun node(name: String) =
+		NodeComponent(name = name).also { componentRegistry.register(key, it) }
+
+
+	@RaptorDsl
+	val nodes: RaptorComponentSet<NodeComponent>
+		get() = componentRegistry.all(key)
+
+
+	@RaptorDsl
+	fun nodes(recursive: Boolean): RaptorAssemblyQuery<NodeComponent> =
+		when (recursive) {
+			true -> RaptorAssemblyQuery { action ->
+				nodes.all {
+					action()
+					nodes(recursive = true).each(action)
+				}
+			}
+
+			false -> nodes.all
+		}
+
 
 	fun toNode(): Node = Node(
 		name = name,
-		children = componentRegistry.many(Key).map(NodeComponent::toNode)
+		children = componentRegistry.many(key).map(NodeComponent::toNode)
 	)
 
 
@@ -17,53 +41,36 @@ class NodeComponent(
 		"node ($name)"
 
 
-	object Key : RaptorComponentKey<NodeComponent> {
+	companion object {
 
-		override fun toString() = "node"
+		val key = RaptorComponentKey<NodeComponent>("node")
 	}
 }
 
 
 @RaptorDsl
-fun RaptorComponentSet<NodeComponent>.node(name: String) = withComponentAuthoring {
-	map {
-		NodeComponent(name = name)
-			.also { componentRegistry.register(NodeComponent.Key, it) }
-	}
-}
-
-
-@RaptorDsl
-fun RaptorComponentSet<NodeComponent>.node(name: String, action: NodeComponent.() -> Unit) =
-	node(name).configure(action)
-
-
-@RaptorDsl
-val RaptorComponentSet<NodeComponent>.nodes: RaptorComponentSet<NodeComponent>
-	get() = withComponentAuthoring {
-		map {
-			componentRegistry.configure(NodeComponent.Key)
-		}
+fun RaptorAssemblyQuery<NodeComponent>.node(name: String) =
+	map { node ->
+		node.node(name)
 	}
 
 
 @RaptorDsl
-fun RaptorComponentSet<NodeComponent>.nodes(recursive: Boolean): RaptorComponentSet<NodeComponent> =
-	withComponentAuthoring {
-		when (recursive) {
-			true -> componentSet { action ->
-				authoredSet.nodes {
-					action()
-					nodes(recursive = true).configure(action)
-				}
-			}
-
-			false -> authoredSet.nodes
-		}
-	}
+fun RaptorAssemblyQuery<NodeComponent>.node(name: String, action: NodeComponent.() -> Unit) =
+	node(name).each(action)
 
 
 @RaptorDsl
-fun RaptorComponentSet<NodeComponent>.nodes(recursive: Boolean, action: NodeComponent.() -> Unit) {
-	nodes(recursive = recursive).configure(action)
+val RaptorAssemblyQuery<NodeComponent>.nodes: RaptorAssemblyQuery<NodeComponent>
+	get() = flatMap { it.nodes.all }
+
+
+@RaptorDsl
+fun RaptorAssemblyQuery<NodeComponent>.nodes(recursive: Boolean): RaptorAssemblyQuery<NodeComponent> =
+	flatMap { it.nodes(recursive = recursive) }
+
+
+@RaptorDsl
+fun RaptorAssemblyQuery<NodeComponent>.nodes(recursive: Boolean, action: NodeComponent.() -> Unit) {
+	nodes(recursive = recursive)(action)
 }

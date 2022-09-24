@@ -3,17 +3,20 @@ package io.fluidsonic.raptor.graph
 import io.fluidsonic.raptor.*
 
 
-public class RaptorGraphsComponent internal constructor() : RaptorComponent2.Base<RaptorGraphsComponent>(), RaptorComponentSet2<RaptorGraphComponent> {
+private val graphsPropertyKey = RaptorPropertyKey<Collection<RaptorGraph>>("graphs")
+
+
+public class RaptorGraphsComponent internal constructor() : RaptorComponent.Base<RaptorGraphsComponent>(), RaptorComponentSet<RaptorGraphComponent> {
 
 	@RaptorDsl
-	override val all: RaptorAssemblyQuery2<RaptorGraphComponent>
-		get() = componentRegistry2.all(RaptorGraphComponent.Key).all
+	override val all: RaptorAssemblyQuery<RaptorGraphComponent>
+		get() = componentRegistry.all(RaptorGraphComponent.key).all
 
 
 	@RaptorDsl
 	public fun new(): RaptorGraphComponent =
 		RaptorGraphComponent()
-			.also { componentRegistry2.register(RaptorGraphComponent.Key, it) }
+			.also { componentRegistry.register(RaptorGraphComponent.key, it) }
 
 
 	@RaptorDsl
@@ -22,10 +25,10 @@ public class RaptorGraphsComponent internal constructor() : RaptorComponent2.Bas
 	}
 
 
-	override fun RaptorComponentConfigurationEndScope2.onConfigurationEnded() {
+	override fun RaptorComponentConfigurationEndScope<RaptorGraphsComponent>.onConfigurationEnded() {
 		propertyRegistry.register(
-			key = RaptorGraphsPropertyKey,
-			value = componentRegistry2.many(RaptorGraphComponent.Key).map { component ->
+			key = graphsPropertyKey,
+			value = componentRegistry.many(RaptorGraphComponent.key).map { component ->
 				component.endConfiguration()
 
 				checkNotNull(component.graph)
@@ -34,13 +37,19 @@ public class RaptorGraphsComponent internal constructor() : RaptorComponent2.Bas
 	}
 
 
-	internal object Key : RaptorComponentKey2<RaptorGraphsComponent> {
+	internal companion object {
 
-		override fun toString() = "graphs"
+		val key = RaptorComponentKey<RaptorGraphsComponent>("graphs")
 	}
 }
 
 
+// FIXME It's odd that we have to put it here just to keep the key private. This logically belongs to API.
+//       Keep all keys shared within the module in a single file?
+public val RaptorContext.graphs: Collection<RaptorGraph>
+	get() = properties[graphsPropertyKey] ?: throw RaptorFeatureNotInstalledException(RaptorGraphFeature)
+
+
 @RaptorDsl
 public val RaptorTopLevelConfigurationScope.graphs: RaptorGraphsComponent
-	get() = componentRegistry2.oneOrNull(RaptorGraphsComponent.Key) ?: throw RaptorFeatureNotInstalledException(RaptorGraphFeature)
+	get() = componentRegistry.oneOrNull(RaptorGraphsComponent.key) ?: throw RaptorFeatureNotInstalledException(RaptorGraphFeature)

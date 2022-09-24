@@ -3,6 +3,9 @@ package io.fluidsonic.raptor
 import kotlinx.coroutines.*
 
 
+private val propertyKey = RaptorPropertyKey<RaptorLifecycle>("lifecycle")
+
+
 public interface RaptorLifecycle : CoroutineScope {
 
 	public val state: State
@@ -18,7 +21,17 @@ public interface RaptorLifecycle : CoroutineScope {
 		stopped,
 		stopping
 	}
+}
 
 
-	public companion object
+public val Raptor.lifecycle: RaptorLifecycle
+	get() = context.lifecycle
+
+
+internal val RaptorContext.lifecycle: RaptorLifecycle
+	get() = properties[propertyKey] ?: throw RaptorFeatureNotInstalledException(RaptorLifecycleFeature)
+
+
+internal fun RaptorPropertyRegistry.register(lifecycle: RaptorLifecycle) {
+	register(propertyKey, lifecycle)
 }

@@ -2,19 +2,25 @@ package io.fluidsonic.raptor.ktor
 
 import io.fluidsonic.raptor.*
 
+private val routeComponentKey = RaptorComponentKey<RaptorKtorRouteComponent>("route")
+
 
 public abstract class RaptorKtorRoutesComponent<Component : RaptorKtorRoutesComponent<Component>> internal constructor() :
-	RaptorComponent2.Base<Component>(),
-	RaptorComponentSet2<RaptorKtorRouteComponent> {
+	RaptorComponent.Base<Component>(),
+	RaptorComponentSet<RaptorKtorRouteComponent> {
 
 	@RaptorDsl
-	override val all: RaptorAssemblyQuery2<RaptorKtorRouteComponent>
-		get() = componentRegistry2.all(RaptorKtorRouteComponent.Key).all
+	override val all: RaptorAssemblyQuery<RaptorKtorRouteComponent>
+		get() = componentRegistry.all(routeComponentKey).all
+
+
+	internal fun complete(): Collection<KtorRouteConfiguration> =
+		componentRegistry.many(routeComponentKey).map { it.complete() }
 
 
 	@RaptorDsl
 	public fun new(path: String, host: String? = null): RaptorKtorRouteComponent =
-		componentRegistry2.register(RaptorKtorRouteComponent.Key) { RaptorKtorRouteComponent(host = host, path = path) }
+		componentRegistry.register(routeComponentKey) { RaptorKtorRouteComponent(host = host, path = path) }
 
 
 	@RaptorDsl
@@ -30,36 +36,24 @@ public abstract class RaptorKtorRoutesComponent<Component : RaptorKtorRoutesComp
 
 		@RaptorDsl
 		public fun new(host: String? = null): RaptorKtorRouteComponent =
-			componentRegistry2.register(RaptorKtorRouteComponent.Key) { RaptorKtorRouteComponent(host = host, path = "/") }
+			componentRegistry.register(routeComponentKey) { RaptorKtorRouteComponent(host = host, path = "/") }
 
 
 		@RaptorDsl
 		public fun new(host: String? = null, configure: RaptorKtorRouteComponent.() -> Unit = {}) {
 			new(host = host).configure()
 		}
-
-
-		internal object Key : RaptorComponentKey2<Root> {
-
-			override fun toString() = "routes"
-		}
-	}
-
-
-	internal object Key : RaptorComponentKey2<NonRoot> {
-
-		override fun toString() = "routes"
 	}
 }
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery2<RaptorKtorRoutesComponent<*>>.new(path: String, host: String? = null): RaptorAssemblyQuery2<RaptorKtorRouteComponent> =
+public fun RaptorAssemblyQuery<RaptorKtorRoutesComponent<*>>.new(path: String, host: String? = null): RaptorAssemblyQuery<RaptorKtorRouteComponent> =
 	map { it.new(path = path, host = host) }
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery2<RaptorKtorRoutesComponent<*>>.new(
+public fun RaptorAssemblyQuery<RaptorKtorRoutesComponent<*>>.new(
 	path: String,
 	host: String? = null,
 	configure: RaptorKtorRouteComponent.() -> Unit = {},
@@ -72,13 +66,13 @@ public fun RaptorAssemblyQuery2<RaptorKtorRoutesComponent<*>>.new(
 
 @JvmName("rootNew")
 @RaptorDsl
-public fun RaptorAssemblyQuery2<RaptorKtorRoutesComponent.Root>.new(host: String? = null): RaptorAssemblyQuery2<RaptorKtorRouteComponent> =
+public fun RaptorAssemblyQuery<RaptorKtorRoutesComponent.Root>.new(host: String? = null): RaptorAssemblyQuery<RaptorKtorRouteComponent> =
 	map { it.new(host = host) }
 
 
 @JvmName("rootNew")
 @RaptorDsl
-public fun RaptorAssemblyQuery2<RaptorKtorRoutesComponent.Root>.new(
+public fun RaptorAssemblyQuery<RaptorKtorRoutesComponent.Root>.new(
 	host: String? = null,
 	configure: RaptorKtorRouteComponent.() -> Unit = {},
 ) {

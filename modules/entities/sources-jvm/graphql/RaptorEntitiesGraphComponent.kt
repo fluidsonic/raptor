@@ -6,7 +6,7 @@ import kotlin.reflect.*
 
 internal class RaptorEntitiesGraphComponent internal constructor(
 	private val graphComponent: RaptorGraphComponent,
-) : RaptorComponent2.Base<RaptorEntitiesGraphComponent>() {
+) : RaptorComponent.Base<RaptorEntitiesGraphComponent>() {
 
 	private var idDefinitionsByDiscriminator: MutableMap<String, RaptorEntityId.Definition<*>> = hashMapOf()
 	private var idDefinitionsByInstanceClass: MutableMap<KClass<out RaptorEntityId>, RaptorEntityId.Definition<*>> = hashMapOf()
@@ -40,15 +40,15 @@ internal class RaptorEntitiesGraphComponent internal constructor(
 	}
 
 
-	override fun RaptorComponentConfigurationEndScope2.onConfigurationEnded() {
+	override fun RaptorComponentConfigurationEndScope<RaptorEntitiesGraphComponent>.onConfigurationEnded() {
 		if (idDefinitionsByDiscriminator.isNotEmpty())
 			graphComponent.definitions.add(RaptorEntityId.graphDefinition(idDefinitionsByDiscriminator.values))
 	}
 
 
-	internal object Key : RaptorComponentKey2<RaptorEntitiesGraphComponent> {
+	internal companion object {
 
-		override fun toString() = "entities"
+		val key = RaptorComponentKey<RaptorEntitiesGraphComponent>("entities")
 	}
 }
 
@@ -57,7 +57,7 @@ internal class RaptorEntitiesGraphComponent internal constructor(
 public fun RaptorGraphComponent.definition(definition: RaptorEntityId.Definition<*>) {
 	definitions.add(definition.graphDefinition())
 
-	componentRegistry2.oneOrRegister(RaptorEntitiesGraphComponent.Key) {
+	componentRegistry.oneOrRegister(RaptorEntitiesGraphComponent.key) {
 		RaptorEntitiesGraphComponent(graphComponent = this)
 	}.addIdDefinition(definition)
 }

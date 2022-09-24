@@ -3,17 +3,20 @@ package tests
 import io.fluidsonic.raptor.*
 
 
+private val startableComponentKey = RaptorComponentKey<StartableComponent>("startable")
+
+
 object StartableFeature : RaptorFeature.Configurable<StartableComponent> {
 
 	override fun RaptorFeatureConfigurationScope.beginConfiguration(action: StartableComponent.() -> Unit) {
-		componentRegistry.oneOrRegister(StartableComponent.Key, ::StartableComponent).action()
+		componentRegistry.oneOrRegister(startableComponentKey, ::StartableComponent).action()
 
 		lifecycle.onStart {
-			context[StartableRaptorPropertyKey]!!.start()
+			context[Startable.propertyKey]!!.start()
 		}
 
 		lifecycle.onStop {
-			context[StartableRaptorPropertyKey]!!.stop()
+			context[Startable.propertyKey]!!.stop()
 		}
 	}
 }

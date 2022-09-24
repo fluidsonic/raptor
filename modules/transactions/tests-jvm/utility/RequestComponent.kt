@@ -4,15 +4,16 @@ import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.transactions.*
 
 
-class RequestComponent : RaptorComponent2.Base<RequestComponent>(), RaptorTransactionGeneratingComponent {
+class RequestComponent : RaptorComponent.Base<RequestComponent>(), RaptorTransactionBoundary<RequestComponent> {
 
-	object Key : RaptorComponentKey2<RequestComponent> {
+	private var transactionFactory: RaptorTransactionFactory? = null
 
-		override fun toString() = "request"
+
+	fun complete() =
+		checkNotNull(transactionFactory)
+
+
+	override fun RaptorComponentConfigurationEndScope<RequestComponent>.onConfigurationEnded() {
+		transactionFactory = transactionFactory()
 	}
 }
-
-
-@RaptorDsl
-val RaptorTopLevelConfigurationScope.requests
-	get() = componentRegistry2.all(RequestComponent.Key)

@@ -3,33 +3,41 @@ package tests
 import io.fluidsonic.raptor.*
 
 
-class CounterComponent : RaptorComponent.Default<CounterComponent>() {
+class CounterComponent : RaptorComponent.Base<CounterComponent>() {
 
-	var _count = 0
-
-
-	override fun toString() =
-		"counter ($_count)"
+	private var count = 0
 
 
-	override fun RaptorComponentConfigurationEndScope.onConfigurationEnded() {
-		propertyRegistry.register(CountRaptorPropertyKey, _count)
+	@RaptorDsl
+	fun increment() {
+		count += 1
 	}
 
 
-	object Key : RaptorComponentKey<CounterComponent> {
+	override fun toString() =
+		"counter ($count)"
 
-		override fun toString() = "counter"
+
+	override fun RaptorComponentConfigurationEndScope<CounterComponent>.onConfigurationEnded() {
+		propertyRegistry.register(countPropertyKey, count)
+	}
+
+
+	companion object {
+
+		val key = RaptorComponentKey<CounterComponent>("counter")
 	}
 }
 
 
 @RaptorDsl
-fun RaptorComponentSet<CounterComponent>.increment() = configure {
-	_count += 1
+fun RaptorAssemblyQuery<CounterComponent>.increment() {
+	this {
+		increment()
+	}
 }
 
 
 @RaptorDsl
 val RaptorTopLevelConfigurationScope.counter
-	get() = componentRegistry.configure(CounterComponent.Key)
+	get() = componentRegistry.all(CounterComponent.key)

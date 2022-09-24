@@ -15,7 +15,7 @@ class FeatureTests {
 			}
 		}
 
-		assertEquals(expected = 2, actual = raptor[CountRaptorPropertyKey])
+		assertEquals(expected = 2, actual = raptor[countPropertyKey])
 	}
 
 
@@ -27,14 +27,14 @@ class FeatureTests {
 			install(object : RaptorFeature {
 
 				override fun RaptorFeatureScope.installed() {
-					textCollection {
+					textCollection.all {
 						append("This is working!")
 					}
 				}
 			})
 		}
 
-		assertEquals(expected = "This is working!", actual = raptor[TextRaptorPropertyKey])
+		assertEquals(expected = "This is working!", actual = raptor[textPropertyKey])
 	}
 
 
@@ -71,11 +71,11 @@ class FeatureTests {
 				increment()
 			}
 
-			counter {
+			counter.all {
 				increment()
 			}
 		}
 
-		assertEquals(expected = 4, actual = raptor[CountRaptorPropertyKey])
+		assertEquals(expected = 4, actual = raptor[countPropertyKey])
 	}
 }

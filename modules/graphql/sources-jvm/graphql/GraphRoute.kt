@@ -60,8 +60,8 @@ internal class GraphRoute(
 	}
 
 
-	object PropertyKey : RaptorPropertyKey<GraphRoute> {
+	internal companion object {
 
-		override fun toString() = "graph route"
+		val propertyKey = RaptorPropertyKey<GraphRoute>("graph route")
 	}
 }

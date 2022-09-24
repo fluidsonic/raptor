@@ -1,5 +1,6 @@
 package tests
 
+import io.fluidsonic.raptor.*
 import kotlinx.coroutines.*
 
 
@@ -26,5 +27,11 @@ class Startable(
 		isStarted = false
 
 		delay(delayInMilliseconds)
+	}
+
+
+	companion object {
+
+		val propertyKey = RaptorPropertyKey<Startable>("startable")
 	}
 }

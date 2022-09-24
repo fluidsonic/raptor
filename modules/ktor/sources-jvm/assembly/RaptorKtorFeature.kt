@@ -3,10 +3,19 @@ package io.fluidsonic.raptor.ktor
 import io.fluidsonic.raptor.*
 
 
+private val ktorComponentKey = RaptorComponentKey<RaptorKtorComponent>("ktor")
+private val ktorPropertyKey = RaptorPropertyKey<DefaultRaptorKtor>("ktor")
+
+
 public object RaptorKtorFeature : RaptorFeature {
 
+	override fun RaptorFeatureConfigurationApplicationScope.applyConfiguration() {
+		propertyRegistry.register(ktorPropertyKey, componentRegistry.one(ktorComponentKey).complete(context = lazyContext))
+	}
+
+
 	override fun RaptorFeatureScope.installed() {
-		componentRegistry2.register(RaptorKtorComponent.Key, ::RaptorKtorComponent)
+		componentRegistry.register(ktorComponentKey, ::RaptorKtorComponent)
 
 		lifecycle {
 			onStart {
@@ -23,6 +32,14 @@ public object RaptorKtorFeature : RaptorFeature {
 }
 
 
+public val RaptorContext.ktor: RaptorKtor
+	get() = ktorInternal ?: throw RaptorFeatureNotInstalledException(RaptorKtorFeature)
+
+
+internal val RaptorContext.ktorInternal: DefaultRaptorKtor?
+	get() = properties[ktorPropertyKey]
+
+
 @RaptorDsl
 public val RaptorTopLevelConfigurationScope.ktor: RaptorKtorComponent
-	get() = componentRegistry2.oneOrNull(RaptorKtorComponent.Key) ?: throw RaptorFeatureNotInstalledException(RaptorKtorFeature)
+	get() = componentRegistry.oneOrNull(ktorComponentKey) ?: throw RaptorFeatureNotInstalledException(RaptorKtorFeature)

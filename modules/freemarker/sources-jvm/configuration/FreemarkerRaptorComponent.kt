@@ -5,16 +5,37 @@ import freemarker.template.*
 import kotlin.reflect.*
 
 
-public class FreemarkerRaptorComponent : RaptorComponent.Default<FreemarkerRaptorComponent>() {
+public class FreemarkerRaptorComponent : RaptorComponent.Base<FreemarkerRaptorComponent>() {
 
-	internal val objectWrappers: MutableMap<KClass<*>, RaptorFreemarkerObjectWrapper<*>> = hashMapOf()
-	internal val templateLoaders: MutableList<TemplateLoader> = mutableListOf()
+	private val objectWrappers: MutableMap<KClass<*>, RaptorFreemarkerObjectWrapper<*>> = hashMapOf()
+	private val templateLoaders: MutableList<TemplateLoader> = mutableListOf()
 
 
-	override fun RaptorComponentConfigurationEndScope.onConfigurationEnded() {
+	@RaptorDsl
+	public fun <Value : Any> objectWrapper(
+		valueClass: KClass<out Value>,
+		wrapper: RaptorFreemarkerObjectWrapper<Value>,
+	) {
+		objectWrappers[valueClass] = wrapper // FIXME catch duplicates
+	}
+
+
+	@RaptorDsl
+	public fun resourceLoader(loader: KClass<*>, packagePath: String = "") {
+		templateLoaders += ClassTemplateLoader(loader.java, packagePath)
+	}
+
+
+	@RaptorDsl
+	public fun resourceLoader(loader: ClassLoader, packagePath: String = "") {
+		templateLoaders += ClassTemplateLoader(loader, packagePath)
+	}
+
+
+	override fun RaptorComponentConfigurationEndScope<FreemarkerRaptorComponent>.onConfigurationEnded() {
 		// FIXME make configurable
 		// FIXME per-feature configuration?
-		propertyRegistry.register(FreemarkerRaptorPropertyKey, Configuration(Configuration.VERSION_2_3_30).apply {
+		propertyRegistry.register(Configuration(Configuration.VERSION_2_3_30).apply {
 			defaultEncoding = Charsets.UTF_8.name()
 			logTemplateExceptions = false
 			templateExceptionHandler = TemplateExceptionHandler.RETHROW_HANDLER
@@ -26,22 +47,11 @@ public class FreemarkerRaptorComponent : RaptorComponent.Default<FreemarkerRapto
 				objectWrapper = DelegatingFreemarkerObjectWrapper(objectWrappers)
 		})
 	}
-
-
-	internal object Key : RaptorComponentKey<FreemarkerRaptorComponent> {
-
-		override fun toString() = "freemarker"
-	}
 }
 
 
 @RaptorDsl
-public val RaptorTopLevelConfigurationScope.freemarker: RaptorComponentSet<FreemarkerRaptorComponent>
-	get() = componentRegistry.configure(FreemarkerRaptorComponent.Key)
-
-
-@RaptorDsl
-public inline fun <reified Value : Any> RaptorComponentSet<FreemarkerRaptorComponent>.objectWrapper(
+public inline fun <reified Value : Any> RaptorAssemblyQuery<FreemarkerRaptorComponent>.objectWrapper(
 	wrapper: RaptorFreemarkerObjectWrapper<Value>,
 ) {
 	objectWrapper(valueClass = Value::class, wrapper = wrapper)
@@ -49,33 +59,33 @@ public inline fun <reified Value : Any> RaptorComponentSet<FreemarkerRaptorCompo
 
 
 @RaptorDsl
-public fun <Value : Any> RaptorComponentSet<FreemarkerRaptorComponent>.objectWrapper(
+public fun <Value : Any> RaptorAssemblyQuery<FreemarkerRaptorComponent>.objectWrapper(
 	valueClass: KClass<out Value>,
 	wrapper: RaptorFreemarkerObjectWrapper<Value>,
 ) {
-	configure {
-		objectWrappers[valueClass] = wrapper // FIXME catch duplicates
+	this {
+		objectWrapper(valueClass, wrapper)
 	}
 }
 
 
 @RaptorDsl
-public inline fun <reified ResourceClass : Any> RaptorComponentSet<FreemarkerRaptorComponent>.resourceLoader(packagePath: String = "") {
+public inline fun <reified ResourceClass : Any> RaptorAssemblyQuery<FreemarkerRaptorComponent>.resourceLoader(packagePath: String = "") {
 	resourceLoader(loader = ResourceClass::class, packagePath = packagePath)
 }
 
 
 @RaptorDsl
-public fun RaptorComponentSet<FreemarkerRaptorComponent>.resourceLoader(loader: KClass<*>, packagePath: String = "") {
-	configure {
-		templateLoaders += ClassTemplateLoader(loader.java, packagePath)
+public fun RaptorAssemblyQuery<FreemarkerRaptorComponent>.resourceLoader(loader: KClass<*>, packagePath: String = "") {
+	this {
+		resourceLoader(loader, packagePath)
 	}
 }
 
 
 @RaptorDsl
-public fun RaptorComponentSet<FreemarkerRaptorComponent>.resourceLoader(loader: ClassLoader, packagePath: String = "") {
-	configure {
-		templateLoaders += ClassTemplateLoader(loader, packagePath)
+public fun RaptorAssemblyQuery<FreemarkerRaptorComponent>.resourceLoader(loader: ClassLoader, packagePath: String = "") {
+	this {
+		resourceLoader(loader, packagePath)
 	}
 }

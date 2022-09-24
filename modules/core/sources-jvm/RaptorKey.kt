@@ -1,7 +1,18 @@
 package io.fluidsonic.raptor
 
 
-public interface RaptorKey<Value : Any> {
+public abstract class RaptorKey<Value : Any>(
+	public val label: String,
+) {
 
-	override fun toString(): String
+	final override fun equals(other: Any?): Boolean =
+		this === other
+
+
+	final override fun hashCode(): Int =
+		super.hashCode()
+
+
+	final override fun toString(): String =
+		label
 }

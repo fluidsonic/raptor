@@ -3,8 +3,9 @@ package io.fluidsonic.raptor
 import io.fluidsonic.raptor.graphql.internal.*
 
 
-// FIXME taggable
-public class GraphRaptorComponent internal constructor() : RaptorComponent2.Base<GraphRaptorComponent>(), RaptorTaggableComponent2 {
+public class GraphRaptorComponent internal constructor() :
+	RaptorComponent.Base<GraphRaptorComponent>(),
+	RaptorTaggableComponent<GraphRaptorComponent> {
 
 	private val definitions: MutableList<RaptorGraphDefinition> = mutableListOf()
 	private var includesDefaultDefinitions = false
@@ -41,11 +42,8 @@ public class GraphRaptorComponent internal constructor() : RaptorComponent2.Base
 		)
 
 
-	public companion object;
+	internal companion object {
 
-
-	internal object Key : RaptorComponentKey2<GraphRaptorComponent> {
-
-		override fun toString() = "graphql"
+		val key = RaptorComponentKey<GraphRaptorComponent>("graphql")
 	}
 }

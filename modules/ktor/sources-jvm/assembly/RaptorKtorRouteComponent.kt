@@ -5,16 +5,40 @@ import io.fluidsonic.raptor.transactions.*
 import io.ktor.server.routing.*
 
 
+private val routesComponentKey = RaptorComponentKey<RaptorKtorRoutesComponent.NonRoot>("routes")
+
+
 // FIXME needs custom property set scope & hierarchy
 //FIXME continue here
 public class RaptorKtorRouteComponent internal constructor(
 	private val host: String?,
 	private val path: String,
-) : RaptorComponent2.Base<RaptorKtorRouteComponent>(), RaptorTaggableComponent2, RaptorTransactionGeneratingComponent {
+) : RaptorComponent.Base<RaptorKtorRouteComponent>(),
+	RaptorTaggableComponent<RaptorKtorRouteComponent>,
+	RaptorTransactionBoundary<RaptorKtorRouteComponent> {
 
+	private var configuration: KtorRouteConfiguration? = null
 	private val customConfigurations = mutableListOf<Route.() -> Unit>()
 	private val features = mutableSetOf<RaptorKtorRouteFeature>()
 	private var wrapper: (Route.(next: Route.() -> Unit) -> Unit)? = null
+
+
+	// FIXME Rethink architecture.
+	//       At this point we need a per-route propertyRegistry (hierarchical) and transactionFactory (hierarchical).
+	//       Standardize RaptorTransactionGeneratingComponent -> RaptorTransactionBoundary and add RaptorPropertyBoundary.
+	//       Make sure that RaptorComponentConfigurationStartScope2 and RaptorComponentConfigurationEndScope2 are consistent and component-bound.
+	//       Allow requiring the completed configuration of other features (in end scope) and detect cycles.
+	//       Eventually force scope for referencing other features, e.g. withFeature(RaptorGraphFeature) { graph(tag) }.
+	//       (handy once we have context receivers to extend other types)
+	//       Alternatively make each feature(=plugin) have it's own shortcut for "require and use", e.g. val graphPlugin = use(plugins.graph)
+	//       or make plugins.graph.… automatically finalize its configurations.
+	//       How do we know what component belongs to what plugin?
+	//       Should we allow plugin configuration on installation? Rarely needed & adds complexity.
+	//       Should we allow dynamic plugins? I.e. class instead of object. How does that affect API?
+	//       Should we allow plugins to be installed at defined boundaries?
+	//           e.g. RaptorKtorRoutePlugin : RaptorBoundaryPlugin<RaptorKtorRouteComponent>, class RaptorKtorRouteComponent: RaptorPluginBoundary
+	//       Make all component companions internal and use them for component definition? (label, key, "return type")
+	internal fun complete() = checkNotNull(configuration)
 
 
 	@RaptorDsl
@@ -34,7 +58,7 @@ public class RaptorKtorRouteComponent internal constructor(
 
 	@RaptorDsl
 	public val routes: RaptorKtorRoutesComponent<*>
-		get() = componentRegistry2.oneOrRegister(RaptorKtorRoutesComponent.Key) { RaptorKtorRoutesComponent.NonRoot() }
+		get() = componentRegistry.oneOrRegister(routesComponentKey) { RaptorKtorRoutesComponent.NonRoot() }
 
 
 	@RaptorDsl
@@ -49,56 +73,35 @@ public class RaptorKtorRouteComponent internal constructor(
 	}
 
 
-	// FIXME rn
-	internal fun RaptorComponentConfigurationEndScope2.toRouteConfigurations(): KtorRouteConfiguration {
-		// TODO Check/clean paths.
+	// FIXME use DSL instead of overridden functions? see Ktor 2
+	override fun RaptorComponentConfigurationEndScope<RaptorKtorRouteComponent>.onConfigurationEnded() {
+		if (features.isNotEmpty()) {
+			val scope = ConfigurationEndScope(parent = this)
 
-		val routes = componentRegistry2.oneOrNull(RaptorKtorRoutesComponent.Key)
-			?.componentRegistry2
-			?.many(Key)
-			?.map { routeComponent ->
-				with(routeComponent) {
-					toRouteConfigurations()
+			for (feature in features)
+				with(feature) {
+					scope.onConfigurationEnded()
 				}
-			}
-			.orEmpty()
+		}
 
-		return KtorRouteConfiguration(
-			children = routes,
+		// TODO Check/clean paths.
+		configuration = KtorRouteConfiguration(
+			children = componentRegistry.oneOrNull(routesComponentKey)?.complete().orEmpty(),
 			customConfigurations = customConfigurations.toList(),
 			host = host,
 			path = path,
 			properties = propertyRegistry.toSet(),
-			transactionFactory = transactionFactory(this@RaptorKtorRouteComponent),
+			transactionFactory = transactionFactory(), // FIXME use component-bound scope
 			wrapper = wrapper,
 		)
 	}
 
 
-	override fun RaptorComponentConfigurationEndScope2.onConfigurationEnded() {
-		if (features.isEmpty())
-			return
-
-		val scope = ConfigurationEndScope(parent = this)
-
-		for (feature in features)
-			with(feature) {
-				scope.onConfigurationEnded()
-			}
-	}
-
-
-	internal object Key : RaptorComponentKey2<RaptorKtorRouteComponent> {
-
-		override fun toString() = "route"
-	}
-
-
-	private class ConfigurationEndScope(parent: RaptorComponentConfigurationEndScope2) : RaptorKtorRouteFeatureConfigurationEndScope {
+	private class ConfigurationEndScope(parent: RaptorComponentConfigurationEndScope<RaptorKtorRouteComponent>) : RaptorKtorRouteFeatureConfigurationEndScope {
 
 		private val routeScope = object :
 			RaptorKtorRouteFeatureConfigurationEndScope.RouteScope,
-			RaptorComponentConfigurationEndScope2 by parent {}
+			RaptorComponentConfigurationEndScope<RaptorKtorRouteComponent> by parent {}
 
 
 		override fun route(configuration: RaptorKtorRouteFeatureConfigurationEndScope.RouteScope.() -> Unit) {
@@ -116,7 +119,7 @@ public class RaptorKtorRouteComponent internal constructor(
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery2<RaptorKtorRouteComponent>.custom(configure: RaptorKtorRouteInitializationScope.() -> Unit) {
+public fun RaptorAssemblyQuery<RaptorKtorRouteComponent>.custom(configure: RaptorKtorRouteInitializationScope.() -> Unit) {
 	this{
 		custom(configure)
 	}
@@ -124,7 +127,7 @@ public fun RaptorAssemblyQuery2<RaptorKtorRouteComponent>.custom(configure: Rapt
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery2<RaptorKtorRouteComponent>.install(feature: RaptorKtorRouteFeature) {
+public fun RaptorAssemblyQuery<RaptorKtorRouteComponent>.install(feature: RaptorKtorRouteFeature) {
 	this{
 		install(feature)
 	}
@@ -132,12 +135,12 @@ public fun RaptorAssemblyQuery2<RaptorKtorRouteComponent>.install(feature: Rapto
 
 
 @RaptorDsl
-public val RaptorAssemblyQuery2<RaptorKtorRouteComponent>.routes: RaptorAssemblyQuery2<RaptorKtorRoutesComponent<*>>
+public val RaptorAssemblyQuery<RaptorKtorRouteComponent>.routes: RaptorAssemblyQuery<RaptorKtorRoutesComponent<*>>
 	get() = map { it.routes }
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery2<RaptorKtorRouteComponent>.wrap(wrapper: RaptorKtorRouteInitializationScope.(next: Route.() -> Unit) -> Unit) {
+public fun RaptorAssemblyQuery<RaptorKtorRouteComponent>.wrap(wrapper: RaptorKtorRouteInitializationScope.(next: Route.() -> Unit) -> Unit) {
 	this {
 		wrap(wrapper)
 	}

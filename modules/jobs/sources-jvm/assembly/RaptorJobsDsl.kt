@@ -5,6 +5,6 @@ public object RaptorJobsDsl
 
 
 @RaptorDsl
-@Suppress("unused")
+@Suppress("UnusedReceiverParameter")
 public inline val RaptorGlobalDsl.jobs: RaptorJobsDsl
 	get() = RaptorJobsDsl

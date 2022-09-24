@@ -3,7 +3,4 @@ package tests
 import io.fluidsonic.raptor.*
 
 
-object TagsRaptorComponentExtensionKey : RaptorComponentExtensionKey<MutableSet<Any>> {
-
-	override fun toString() = "tags"
-}
+internal val tagsComponentExtensionKey = RaptorComponentExtensionKey<MutableSet<Any>>("tags")

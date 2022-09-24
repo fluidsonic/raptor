@@ -22,4 +22,4 @@ public val Raptor.properties: RaptorPropertySet
 
 @RaptorDsl
 public fun raptor(configure: RaptorRootComponent.() -> Unit): Raptor =
-	DefaultRaptorRootComponent().apply(configure).endConfiguration()
+	DefaultRootComponent().apply(configure).endConfiguration()

@@ -10,12 +10,9 @@ public interface RaptorTransactionFactory {
 
 	public companion object {
 
-		public val empty: RaptorTransactionFactory = DefaultRaptorTransactionFactory(configurations = emptyList())
+		public val empty: RaptorTransactionFactory = DefaultTransactionFactory(
+			configurations = emptyList(),
+			observers = emptyList(),
+		)
 	}
-}
-
-
-internal object RaptorTransactionFactoryPropertyKey : RaptorPropertyKey<RaptorTransactionFactory> {
-
-	override fun toString() = "transaction factory"
 }

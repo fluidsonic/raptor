@@ -12,7 +12,7 @@
 //
 //	override fun RaptorKtorRouteFeatureConfigurationEndScope.onConfigurationEnded() {
 //		route {
-//			propertyRegistry.register(GraphRoute.PropertyKey, componentRegistry2.one(GraphRaptorComponent.Key).toGraphRoute())
+//			propertyRegistry.register(GraphRoute.PropertyKey, componentRegistry.one(GraphRaptorComponent.Key).toGraphRoute())
 //		}
 //	}
 //

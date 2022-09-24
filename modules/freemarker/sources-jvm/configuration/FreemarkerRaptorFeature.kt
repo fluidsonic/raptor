@@ -4,10 +4,14 @@ import freemarker.template.*
 import io.fluidsonic.raptor.di.*
 
 
-public object FreemarkerRaptorFeature : RaptorFeature { // FIXME rn
+private val freemarkerComponentKey = RaptorComponentKey<FreemarkerRaptorComponent>("freemarker")
+private val freemarkerPropertyKey = RaptorPropertyKey<Configuration>("freemarker configuration")
+
+
+public object FreemarkerRaptorFeature : RaptorFeature { // FIXME rm
 
 	override fun RaptorFeatureScope.installed() {
-		componentRegistry.register(FreemarkerRaptorComponent.Key, FreemarkerRaptorComponent())
+		componentRegistry.register(freemarkerComponentKey, FreemarkerRaptorComponent())
 
 		ifFeature(RaptorDIFeature) {
 			di {
@@ -19,5 +23,14 @@ public object FreemarkerRaptorFeature : RaptorFeature { // FIXME rn
 
 
 public val RaptorContext.freemarker: Configuration
-	get() = properties[FreemarkerRaptorPropertyKey]
-		?: error("You must install ${FreemarkerRaptorFeature::class.simpleName} for enabling Freemarker functionality.")
+	get() = properties[freemarkerPropertyKey] ?: throw RaptorFeatureNotInstalledException(FreemarkerRaptorFeature)
+
+
+internal fun RaptorPropertyRegistry.register(freemarker: Configuration) {
+	register(freemarkerPropertyKey, freemarker)
+}
+
+
+@RaptorDsl
+public val RaptorTopLevelConfigurationScope.freemarker: FreemarkerRaptorComponent
+	get() = componentRegistry.oneOrNull(freemarkerComponentKey) ?: throw RaptorFeatureNotInstalledException(FreemarkerRaptorFeature)

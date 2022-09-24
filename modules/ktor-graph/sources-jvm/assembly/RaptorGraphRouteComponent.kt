@@ -10,46 +10,41 @@ import io.ktor.server.routing.*
 public class RaptorGraphRouteComponent internal constructor(
 	private val route: RaptorKtorRouteComponent,
 	private val tag: Any? = null,
-) : RaptorComponent2.Base<RaptorGraphRouteComponent>() {
+) : RaptorComponent.Base<RaptorGraphRouteComponent>() {
 
-	override fun RaptorComponentConfigurationStartScope2.onConfigurationStarted() {
+	override fun RaptorComponentConfigurationStartScope.onConfigurationStarted() {
 		route.custom {
 			get {
-				val route = checkNotNull(raptorContext[PropertyKey])
+				val route = checkNotNull(raptorContext[propertyKey])
 				route.handle(call)
 			}
 
 			post {
-				val route = checkNotNull(raptorContext[PropertyKey])
+				val route = checkNotNull(raptorContext[propertyKey])
 				route.handle(call)
 			}
 		}
 	}
 
 
-	override fun RaptorComponentConfigurationEndScope2.onConfigurationEnded() {
+	override fun RaptorComponentConfigurationEndScope<RaptorGraphRouteComponent>.onConfigurationEnded() {
 		val graph = checkNotNull(graph(tag)) { if (tag != null) "Cannot find graph with tag: $tag" else "Cannot find any graph" }
 		// FIXME
 //		propertyRegistry.register(PropertyKey, GraphRoute(graph))
 	}
 
 
-	internal object Key : RaptorComponentKey2<RaptorGraphRouteComponent> {
+	internal companion object {
 
-		override fun toString() = "graph"
-	}
-
-
-	private object PropertyKey : RaptorPropertyKey<GraphRoute> {
-
-		override fun toString() = "graph"
+		val key = RaptorComponentKey<RaptorGraphRouteComponent>("graph")
+		val propertyKey = RaptorPropertyKey<GraphRoute>("graph")
 	}
 }
 
 
 @RaptorDsl
 public fun RaptorKtorRouteComponent.graph(tag: Any? = null): RaptorGraphRouteComponent =
-	componentRegistry2.oneOrRegister(RaptorGraphRouteComponent.Key) { RaptorGraphRouteComponent(route = this, tag = tag) }
+	componentRegistry.oneOrRegister(RaptorGraphRouteComponent.key) { RaptorGraphRouteComponent(route = this, tag = tag) }
 
 
 @RaptorDsl
@@ -117,7 +112,7 @@ public fun RaptorKtorRouteComponent.graph(tag: Any? = null, configure: RaptorGra
 //
 //@RaptorDsl
 //public val RaptorKtorRouteComponent.graph
-//	get() = componentRegistry2.oneOrRegister(RaptorGraphRouteComponent.Key) { RaptorGraphRouteComponent(route = this) }
+//	get() = componentRegistry.oneOrRegister(RaptorGraphRouteComponent.Key) { RaptorGraphRouteComponent(route = this) }
 //
 //
 ////if (provideSchema) {

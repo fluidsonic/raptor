@@ -6,7 +6,7 @@ import io.fluidsonic.raptor.*
 object CounterFeature : RaptorFeature.Configurable<CounterComponent> {
 
 	override fun RaptorFeatureConfigurationScope.beginConfiguration(action: CounterComponent.() -> Unit) {
-		componentRegistry.oneOrRegister(CounterComponent.Key, ::CounterComponent).action()
+		componentRegistry.oneOrRegister(CounterComponent.key, ::CounterComponent).action()
 	}
 
 
