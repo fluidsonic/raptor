@@ -34,7 +34,7 @@ public class FreemarkerRaptorComponent : RaptorComponent.Base<FreemarkerRaptorCo
 
 	override fun RaptorComponentConfigurationEndScope<FreemarkerRaptorComponent>.onConfigurationEnded() {
 		// FIXME make configurable
-		// FIXME per-feature configuration?
+		// FIXME per-plugin configuration?
 		propertyRegistry.register(Configuration(Configuration.VERSION_2_3_30).apply {
 			defaultEncoding = Charsets.UTF_8.name()
 			logTemplateExceptions = false

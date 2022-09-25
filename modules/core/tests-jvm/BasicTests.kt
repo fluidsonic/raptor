@@ -56,7 +56,7 @@ class BasicTests {
 					lazyContext = this.lazyContext
 
 					assertEquals(
-						expected = "This context cannot be used until the configuration of all components and features has completed.",
+						expected = "This context cannot be used until the configuration of all components and plugins has completed.",
 						actual = assertFails { lazyContext.properties }.message
 					)
 				}

@@ -200,7 +200,7 @@ public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.
 // or we add some form of dependency system
 // or we request an early configuration end on-demand (can lead to cycles which must be detected)
 // Note that it's not yet possible to define graphs below the root component. But it might be at some point.
-// FIXME might need requireFeature?
+// FIXME might need require()?
 // TODO Limit this to certain components?
 @RaptorDsl
 public fun RaptorComponentConfigurationEndScope<*>.graph(tag: Any? = null): RaptorGraph? {

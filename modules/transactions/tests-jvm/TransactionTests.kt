@@ -176,7 +176,7 @@ class TransactionTests {
 		val raptor = raptor {}
 
 		assertEquals(
-			expected = "Feature io.fluidsonic.raptor.transactions.RaptorTransactionFeature is not installed.",
+			expected = "Plugin io.fluidsonic.raptor.transactions.RaptorTransactionPlugin is not installed.",
 			actual = assertFails {
 				raptor.transaction()
 			}.message

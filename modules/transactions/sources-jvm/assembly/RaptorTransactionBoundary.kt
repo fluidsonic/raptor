@@ -8,7 +8,7 @@ public interface RaptorTransactionBoundary<Component : RaptorTransactionBoundary
 
 
 // TODO Support 'includeNested'.
-// TODO Add proper (lazy) API to check for feature being installed.
+// TODO Add proper (lazy) API to check for plugin being installed.
 @RaptorDsl
 public val RaptorAssemblyQuery<RaptorTransactionBoundary<*>>.transactions: RaptorAssemblyQuery<RaptorTransactionsComponent>
 	get() = map { component ->
@@ -19,7 +19,7 @@ public val RaptorAssemblyQuery<RaptorTransactionBoundary<*>>.transactions: Rapto
 	}
 
 
-// TODO Add proper (lazy) API to check for feature being installed.
+// TODO Add proper (lazy) API to check for plugin being installed.
 @RaptorDsl
 public fun RaptorComponentConfigurationEndScope<out RaptorTransactionBoundary<*>>.transactionFactory(): RaptorTransactionFactory {
 	componentRegistry.root.oneOrNull(Keys.transactionsComponent) ?: throw RaptorPluginNotInstalledException(RaptorTransactionPlugin)

@@ -17,7 +17,6 @@ public object RaptorEntitiesPlugin : RaptorPlugin {
 		}
 
 		complete(RaptorKtorPlugin) {
-			// ifInstalled(raptorGraphFeatureId) { FIXME make compileOnly
 			// FIXME
 //			graphs.definitions(
 //				RaptorEntity.graphDefinition(),

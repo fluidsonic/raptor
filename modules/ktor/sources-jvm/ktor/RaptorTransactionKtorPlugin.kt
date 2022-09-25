@@ -12,7 +12,7 @@ private val ktorCallPropertyKey = RaptorPropertyKey<ApplicationCall>("Ktor call"
 
 
 internal val RaptorTransactionKtorPlugin = createApplicationPlugin(
-	name = "Raptor: transaction feature",
+	name = "Raptor: transaction",
 	createConfiguration = ::RaptorTransactionKtorPluginConfig,
 ) {
 	val serverContext = checkNotNull(pluginConfig.serverContext) { "serverConfig() not set." }

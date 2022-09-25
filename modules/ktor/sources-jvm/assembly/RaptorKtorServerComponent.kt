@@ -25,7 +25,7 @@ public class RaptorKtorServerComponent internal constructor(
 	private val customConfigurations: MutableList<Application.() -> Unit> = mutableListOf()
 	private var engineEnvironmentFactory: ((configure: ApplicationEngineEnvironmentBuilder.() -> Unit) -> ApplicationEngineEnvironment)? = null
 	private var engineFactory: ((environment: ApplicationEngineEnvironment) -> ApplicationEngine)? = null
-	private val features: MutableList<RaptorKtorServerFeature> = mutableListOf()
+	private val plugins: MutableList<RaptorKtorServerPlugin> = mutableListOf()
 	private var startStopDispatcher: CoroutineDispatcher? = null
 
 
@@ -83,9 +83,9 @@ public class RaptorKtorServerComponent internal constructor(
 
 
 	@RaptorDsl
-	public fun install(feature: RaptorKtorServerFeature) {
-		if (features.add(feature))
-			with(feature) {
+	public fun install(plugin: RaptorKtorServerPlugin) {
+		if (plugins.add(plugin))
+			with(plugin) {
 				ConfigurationStartScope().onConfigurationStarted()
 			}
 	}
@@ -104,11 +104,11 @@ public class RaptorKtorServerComponent internal constructor(
 
 
 	override fun RaptorComponentConfigurationEndScope<RaptorKtorServerComponent>.onConfigurationEnded() {
-		if (features.isNotEmpty()) {
+		if (plugins.isNotEmpty()) {
 			val scope = ConfigurationEndScope(parent = this)
 
-			for (feature in features)
-				with(feature) {
+			for (plugin in plugins)
+				with(plugin) {
 					scope.onConfigurationEnded()
 				}
 		}
@@ -158,20 +158,20 @@ public class RaptorKtorServerComponent internal constructor(
 	}
 
 
-	private class ConfigurationEndScope(parent: RaptorComponentConfigurationEndScope<RaptorKtorServerComponent>) : RaptorKtorServerFeatureConfigurationEndScope {
+	private class ConfigurationEndScope(parent: RaptorComponentConfigurationEndScope<RaptorKtorServerComponent>) : RaptorKtorServerPluginConfigurationEndScope {
 
 		private val serverScope = object :
-			RaptorKtorServerFeatureConfigurationEndScope.ServerScope,
+			RaptorKtorServerPluginConfigurationEndScope.ServerScope,
 			RaptorComponentConfigurationEndScope<RaptorKtorServerComponent> by parent {}
 
 
-		override fun server(configuration: RaptorKtorServerFeatureConfigurationEndScope.ServerScope.() -> Unit) {
+		override fun server(configuration: RaptorKtorServerPluginConfigurationEndScope.ServerScope.() -> Unit) {
 			serverScope.configuration()
 		}
 	}
 
 
-	private inner class ConfigurationStartScope : RaptorKtorServerFeatureConfigurationStartScope {
+	private inner class ConfigurationStartScope : RaptorKtorServerPluginConfigurationStartScope {
 
 		override val server: RaptorKtorServerComponent
 			get() = this@RaptorKtorServerComponent
@@ -238,9 +238,9 @@ public fun RaptorAssemblyQuery<RaptorKtorServerComponent>.httpsConnector(
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery<RaptorKtorServerComponent>.install(feature: RaptorKtorServerFeature) {
+public fun RaptorAssemblyQuery<RaptorKtorServerComponent>.install(plugin: RaptorKtorServerPlugin) {
 	this {
-		install(feature)
+		install(plugin)
 	}
 }
 

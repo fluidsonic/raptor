@@ -129,7 +129,7 @@ class LifecycleTests {
 		val raptor = raptor {}
 
 		assertEquals(
-			expected = "Feature io.fluidsonic.raptor.RaptorLifecycleFeature is not installed.",
+			expected = "Plugin io.fluidsonic.raptor.RaptorLifecyclePlugin is not installed.",
 			actual = assertFails {
 				raptor.lifecycle
 			}.message

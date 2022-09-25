@@ -3,13 +3,14 @@ package io.fluidsonic.raptor.ktor
 import io.fluidsonic.raptor.*
 
 
-public interface RaptorKtorRouteFeatureConfigurationEndScope {
+public interface RaptorKtorServerPluginConfigurationEndScope {
 
 	@RaptorDsl
-	public fun route(configuration: RouteScope.() -> Unit)
+	public fun server(configuration: ServerScope.() -> Unit)
 
 
-	public interface RouteScope {
+	@RaptorDsl
+	public interface ServerScope {
 
 		@RaptorDsl
 		public val componentRegistry: RaptorComponentRegistry

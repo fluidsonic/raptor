@@ -6,7 +6,7 @@ import io.ktor.server.plugins.*
 import io.ktor.server.response.*
 
 
-internal val EncryptionEnforcementKtorPlugin = createApplicationPlugin("Raptor: encryption enforcement feature") {
+internal val EncryptionEnforcementKtorPlugin = createApplicationPlugin("Raptor: encryption enforcement") {
 	onCall { call ->
 		val scheme = call.request.origin.scheme
 		if (scheme != "https" && scheme != "wss")

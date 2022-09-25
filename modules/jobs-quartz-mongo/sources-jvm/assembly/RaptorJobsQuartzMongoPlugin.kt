@@ -39,7 +39,7 @@ public object RaptorJobsQuartzMongoPlugin : RaptorPlugin {
 
 @RaptorDsl
 public fun RaptorAssemblyQuery<RaptorJobsComponent>.quartzMongo(configure: RaptorJobsQuartzMongoConfiguration.Builder.() -> Unit) {
-	// TODO Check that feature is installed.
+	// TODO Check that plugin is installed.
 
 	val configuration = RaptorJobsQuartzMongoConfiguration.Builder().apply(configure).build()
 

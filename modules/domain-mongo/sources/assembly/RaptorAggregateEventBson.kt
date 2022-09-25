@@ -19,7 +19,7 @@ internal class RaptorAggregateEventBson(
 		definitions.associateByTo(hashMapOf()) { it.idClass }
 
 
-	override fun RaptorFeatureScope.install() {
+	override fun RaptorPluginInstallationScope.install() {
 		bson.definition<RaptorEvent<*, *>> {
 			decode {
 				var aggregateId: RaptorAggregateId? = null

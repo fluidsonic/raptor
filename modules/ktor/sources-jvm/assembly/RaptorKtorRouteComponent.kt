@@ -19,7 +19,7 @@ public class RaptorKtorRouteComponent internal constructor(
 
 	private var configuration: KtorRouteConfiguration? = null
 	private val customConfigurations = mutableListOf<Route.() -> Unit>()
-	private val features = mutableSetOf<RaptorKtorRouteFeature>()
+	private val plugins = mutableSetOf<RaptorKtorRoutePlugin>()
 	private var wrapper: (Route.(next: Route.() -> Unit) -> Unit)? = null
 
 
@@ -27,10 +27,10 @@ public class RaptorKtorRouteComponent internal constructor(
 	//       At this point we need a per-route propertyRegistry (hierarchical) and transactionFactory (hierarchical).
 	//       Standardize RaptorTransactionGeneratingComponent -> RaptorTransactionBoundary and add RaptorPropertyBoundary.
 	//       Make sure that RaptorComponentConfigurationStartScope2 and RaptorComponentConfigurationEndScope2 are consistent and component-bound.
-	//       Allow requiring the completed configuration of other features (in end scope) and detect cycles.
-	//       Eventually force scope for referencing other features, e.g. withFeature(RaptorGraphFeature) { graph(tag) }.
+	//       Allow requiring the completed configuration of other plugins (in end scope) and detect cycles.
+	//       Eventually force scope for referencing other plugins, e.g. complete(RaptorGraphPlugin) { graph(tag) }.
 	//       (handy once we have context receivers to extend other types)
-	//       Alternatively make each feature(=plugin) have it's own shortcut for "require and use", e.g. val graphPlugin = use(plugins.graph)
+	//       Alternatively make each plugin have it's own shortcut for "require and use", e.g. val graphPlugin = use(plugins.graph)
 	//       or make plugins.graph.… automatically finalize its configurations.
 	//       How do we know what component belongs to what plugin?
 	//       Should we allow plugin configuration on installation? Rarely needed & adds complexity.
@@ -48,9 +48,9 @@ public class RaptorKtorRouteComponent internal constructor(
 
 
 	@RaptorDsl
-	public fun install(feature: RaptorKtorRouteFeature) {
-		if (features.add(feature))
-			with(feature) {
+	public fun install(plugin: RaptorKtorRoutePlugin) {
+		if (plugins.add(plugin))
+			with(plugin) {
 				ConfigurationStartScope().onConfigurationStarted()
 			}
 	}
@@ -75,11 +75,11 @@ public class RaptorKtorRouteComponent internal constructor(
 
 	// FIXME use DSL instead of overridden functions? see Ktor 2
 	override fun RaptorComponentConfigurationEndScope<RaptorKtorRouteComponent>.onConfigurationEnded() {
-		if (features.isNotEmpty()) {
+		if (plugins.isNotEmpty()) {
 			val scope = ConfigurationEndScope(parent = this)
 
-			for (feature in features)
-				with(feature) {
+			for (plugin in plugins)
+				with(plugin) {
 					scope.onConfigurationEnded()
 				}
 		}
@@ -97,20 +97,20 @@ public class RaptorKtorRouteComponent internal constructor(
 	}
 
 
-	private class ConfigurationEndScope(parent: RaptorComponentConfigurationEndScope<RaptorKtorRouteComponent>) : RaptorKtorRouteFeatureConfigurationEndScope {
+	private class ConfigurationEndScope(parent: RaptorComponentConfigurationEndScope<RaptorKtorRouteComponent>) : RaptorKtorRoutePluginConfigurationEndScope {
 
 		private val routeScope = object :
-			RaptorKtorRouteFeatureConfigurationEndScope.RouteScope,
+			RaptorKtorRoutePluginConfigurationEndScope.RouteScope,
 			RaptorComponentConfigurationEndScope<RaptorKtorRouteComponent> by parent {}
 
 
-		override fun route(configuration: RaptorKtorRouteFeatureConfigurationEndScope.RouteScope.() -> Unit) {
+		override fun route(configuration: RaptorKtorRoutePluginConfigurationEndScope.RouteScope.() -> Unit) {
 			routeScope.configuration()
 		}
 	}
 
 
-	private inner class ConfigurationStartScope : RaptorKtorRouteFeatureConfigurationStartScope {
+	private inner class ConfigurationStartScope : RaptorKtorRoutePluginConfigurationStartScope {
 
 		override val route: RaptorKtorRouteComponent
 			get() = this@RaptorKtorRouteComponent
@@ -127,9 +127,9 @@ public fun RaptorAssemblyQuery<RaptorKtorRouteComponent>.custom(configure: Rapto
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery<RaptorKtorRouteComponent>.install(feature: RaptorKtorRouteFeature) {
+public fun RaptorAssemblyQuery<RaptorKtorRouteComponent>.install(plugin: RaptorKtorRoutePlugin) {
 	this{
-		install(feature)
+		install(plugin)
 	}
 }
 

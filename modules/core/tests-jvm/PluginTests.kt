@@ -7,21 +7,7 @@ import kotlin.test.*
 class PluginTests {
 
 	@Test
-	fun testConfigurableFeature() {
-		val raptor = raptor {
-			install(CounterPlugin)
-			counter {
-				increment()
-				increment()
-			}
-		}
-
-		assertEquals(expected = 2, actual = raptor[countPropertyKey])
-	}
-
-
-	@Test
-	fun testFeature() {
+	fun testPlugin() {
 		val raptor = raptor {
 			install(TextCollectionPlugin)
 
@@ -40,20 +26,20 @@ class PluginTests {
 
 
 	@Test
-	fun testFeatureIsInstalledOnlyOnce() {
+	fun testPluginIsInstalledOnlyOnce() {
 		var installCount = 0
 
 		raptor {
-			val feature = object : RaptorPlugin {
+			val plugin = object : RaptorPlugin {
 
 				override fun RaptorPluginInstallationScope.install() {
 					installCount += 1
 				}
 			}
 
-			install(feature)
-			install(feature)
-			install(feature)
+			install(plugin)
+			install(plugin)
+			install(plugin)
 		}
 
 		assertEquals(expected = 1, actual = installCount)
@@ -61,7 +47,7 @@ class PluginTests {
 
 
 	@Test
-	fun testMultipleFeatureConfigurations() {
+	fun testMultiplePluginConfigurations() {
 		val raptor = raptor {
 			install(CounterPlugin)
 			counter {

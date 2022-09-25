@@ -79,7 +79,7 @@ class BsonTests {
 		val raptor = raptor {}
 
 		assertEquals(
-			expected = "Feature io.fluidsonic.raptor.bson.RaptorBsonFeature is not installed.",
+			expected = "Plugin io.fluidsonic.raptor.bson.RaptorBsonPlugin is not installed.",
 			actual = assertFails {
 				raptor.context.bson
 			}.message

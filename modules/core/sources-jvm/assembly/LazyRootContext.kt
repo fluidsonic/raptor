@@ -19,7 +19,7 @@ internal class LazyRootContext : RaptorContext.Lazy {
 
 
 	private fun requireDelegate() =
-		delegate ?: error("This context cannot be used until the configuration of all components and features has completed.")
+		delegate ?: error("This context cannot be used until the configuration of all components and plugins has completed.")
 
 
 	fun resolve(context: RaptorContext) {

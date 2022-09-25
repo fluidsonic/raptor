@@ -7,16 +7,16 @@ import io.ktor.server.response.*
 import io.ktor.server.routing.*
 
 
-public object GraphKtorFeature : RaptorKtorRouteFeature {
+public object GraphKtorPlugin : RaptorKtorRoutePlugin {
 
-	override fun RaptorKtorRouteFeatureConfigurationEndScope.onConfigurationEnded() {
+	override fun RaptorKtorRoutePluginConfigurationEndScope.onConfigurationEnded() {
 		route {
 			propertyRegistry.register(GraphRoute.propertyKey, componentRegistry.one(GraphRaptorComponent.key).toGraphRoute())
 		}
 	}
 
 
-	override fun RaptorKtorRouteFeatureConfigurationStartScope.onConfigurationStarted() {
+	override fun RaptorKtorRoutePluginConfigurationStartScope.onConfigurationStarted() {
 		route {
 			custom {
 				get {

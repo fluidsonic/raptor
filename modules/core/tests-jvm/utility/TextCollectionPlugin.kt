@@ -11,5 +11,5 @@ object TextCollectionPlugin : RaptorPlugin {
 
 
 	override fun toString() =
-		"text collection feature"
+		"text collection"
 }

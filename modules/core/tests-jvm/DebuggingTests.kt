@@ -123,9 +123,6 @@ class DebuggingTests {
 								})
 								componentRegistry.register(DummyComponent.key, DummyComponent("a"))
 							}
-
-
-							override fun toString() = "debugging tests feature"
 						})
 					}
 				}

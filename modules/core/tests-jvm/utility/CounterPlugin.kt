@@ -11,7 +11,7 @@ object CounterPlugin : RaptorPlugin {
 
 
 	override fun toString() =
-		"counter feature"
+		"counter"
 }
 
 

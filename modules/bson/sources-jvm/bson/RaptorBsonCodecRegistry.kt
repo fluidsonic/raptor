@@ -15,7 +15,7 @@ public interface RaptorBsonCodecRegistry {
 		getOrNull(valueClass)
 			?: error(
 				"No BSON definition was provided for type '${valueClass.qualifiedName}'.\n" +
-					"Add a `raptor.bson.definition { … }` for that type and register it in a RaptorFeature with `bson.definitions(…)`."
+					"Add a `raptor.bson.definition { … }` for that type and register it in a RaptorPlugin with `bson.definitions(…)`."
 			)
 
 

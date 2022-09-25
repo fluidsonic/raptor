@@ -8,16 +8,16 @@
 //import io.ktor.routing.*
 //
 //
-//public object RaptorGraphKtorFeature : RaptorKtorRouteFeature {
+//public object RaptorGraphKtorPlugin : RaptorKtorRoutePlugin {
 //
-//	override fun RaptorKtorRouteFeatureConfigurationEndScope.onConfigurationEnded() {
+//	override fun RaptorKtorRoutePluginConfigurationEndScope.onConfigurationEnded() {
 //		route {
 //			propertyRegistry.register(GraphRoute.PropertyKey, componentRegistry.one(GraphRaptorComponent.Key).toGraphRoute())
 //		}
 //	}
 //
 //
-//	override fun RaptorKtorRouteFeatureConfigurationStartScope.onConfigurationStarted() {
+//	override fun RaptorKtorRoutePluginConfigurationStartScope.onConfigurationStarted() {
 //		route {
 //			custom {
 //				get {

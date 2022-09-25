@@ -1,7 +1,7 @@
 package io.fluidsonic.raptor.ktor
 
 
-public interface RaptorKtorServerFeatureConfigurationStartScope {
+public interface RaptorKtorServerPluginConfigurationStartScope {
 
 	public val server: RaptorKtorServerComponent
 }

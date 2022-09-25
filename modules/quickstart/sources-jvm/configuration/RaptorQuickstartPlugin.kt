@@ -10,7 +10,7 @@ import io.ktor.http.*
 
 public object RaptorQuickstartPlugin : RaptorPlugin {
 
-	override fun RaptorFeatureScope.install() {
+	override fun RaptorPluginInstallationScope.install() {
 		install(RaptorBsonPlugin)
 		install(RaptorDIPlugin)
 		install(RaptorEntitiesPlugin)
@@ -22,7 +22,7 @@ public object RaptorQuickstartPlugin : RaptorPlugin {
 
 			definitions(
 				PasswordHash.bsonDefinition(),
-				Url.bsonDefinition() // FIXME move to either BsonFeature or KtorFeature with ifAvailable
+				Url.bsonDefinition() // FIXME move to either BsonPlugin or KtorPlugin with ifAvailable
 			)
 		}
 
