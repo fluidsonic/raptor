@@ -7,20 +7,17 @@ import io.fluidsonic.time.*
 import kotlin.reflect.*
 
 
-internal class RaptorAggregateEventBson(
-	definitions: Set<RaptorAggregateDefinition<*, *, *, *>>,
-) : RaptorPlugin {
+internal object RaptorAggregateEventBson {
 
-	// FIXME Move to new RaptorAggregatesDefinition?
-	private val definitionsByDiscriminator: MutableMap<String, RaptorAggregateDefinition<*, *, *, *>> =
-		definitions.associateByTo(hashMapOf()) { it.discriminator }
+	fun bson(definitions: Set<RaptorAggregateDefinition<*, *, *, *>>): RaptorBsonDefinition {
+		// FIXME Move to new RaptorAggregatesDefinition?
+		val definitionsByDiscriminator: MutableMap<String, RaptorAggregateDefinition<*, *, *, *>> =
+			definitions.associateByTo(hashMapOf()) { it.discriminator }
 
-	private val definitionsByIdClass: MutableMap<KClass<out RaptorAggregateId>, RaptorAggregateDefinition<*, *, *, *>> =
-		definitions.associateByTo(hashMapOf()) { it.idClass }
+		val definitionsByIdClass: MutableMap<KClass<out RaptorAggregateId>, RaptorAggregateDefinition<*, *, *, *>> =
+			definitions.associateByTo(hashMapOf()) { it.idClass }
 
-
-	override fun RaptorPluginInstallationScope.install() {
-		bson.definition<RaptorEvent<*, *>> {
+		return raptor.bson.definition<RaptorEvent<*, *>> {
 			decode {
 				var aggregateId: RaptorAggregateId? = null
 				var change: RaptorAggregateEvent<*>? = null
@@ -103,6 +100,17 @@ internal class RaptorAggregateEventBson(
 					value(Fields.version, value.version)
 				}
 			}
+		}
+	}
+
+
+	fun idBson() = raptor.bson.definition {
+		decode {
+			RaptorEventId(reader.objectId().toString())
+		}
+
+		encode { value ->
+			writer.value(ObjectIdOrNull(value.toString()) ?: error("Invalid aggregate event id: $value"))
 		}
 	}
 

@@ -10,18 +10,18 @@ public object RaptorEntitiesPlugin : RaptorPlugin {
 		val resolverTypes = componentRegistry.oneOrNull(RaptorEntitiesComponent.key)?.resolverTypes.orEmpty()
 
 		// FIXME
-		complete(RaptorDIPlugin) {
+		require(RaptorDIPlugin) {
 			di.provide<RaptorEntityResolver<RaptorEntity, RaptorEntityId>> {
 				RaptorAnyEntityResolver(context = get(), resolverTypes = resolverTypes)
 			}
 		}
 
-		complete(RaptorKtorPlugin) {
+		require(RaptorKtorPlugin) {
 			// FIXME
-//			graphs.definitions(
-//				RaptorEntity.graphDefinition(),
-////				RaptorEntityId.graphDefinition()
-//			)
+			//			graphs.definitions(
+			//				RaptorEntity.graphDefinition(),
+			////				RaptorEntityId.graphDefinition()
+			//			)
 			// }
 		}
 	}

@@ -9,7 +9,7 @@ private val key = RaptorComponentKey<TransactionDIRaptorComponent>("transaction 
 
 
 private class TransactionDIRaptorComponent :
-	RaptorComponent.Base<TransactionDIRaptorComponent>(),
+	RaptorComponent.Base<TransactionDIRaptorComponent>(RaptorDIPlugin),
 	RaptorDIComponent<TransactionDIRaptorComponent> {
 
 	private val builder = DefaultRaptorDIBuilder()

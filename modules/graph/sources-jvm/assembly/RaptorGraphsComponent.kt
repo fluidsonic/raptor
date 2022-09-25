@@ -6,7 +6,9 @@ import io.fluidsonic.raptor.*
 private val graphsPropertyKey = RaptorPropertyKey<Collection<RaptorGraph>>("graphs")
 
 
-public class RaptorGraphsComponent internal constructor() : RaptorComponent.Base<RaptorGraphsComponent>(), RaptorComponentSet<RaptorGraphComponent> {
+public class RaptorGraphsComponent internal constructor() :
+	RaptorComponent.Base<RaptorGraphsComponent>(RaptorGraphPlugin),
+	RaptorComponentSet<RaptorGraphComponent> {
 
 	@RaptorDsl
 	override val all: RaptorAssemblyQuery<RaptorGraphComponent>

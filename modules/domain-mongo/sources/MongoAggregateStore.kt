@@ -14,10 +14,11 @@ public class MongoAggregateStore(
 
 	override suspend fun add(events: List<RaptorEvent<*, *>>) {
 		// TODO Batch in case the number of events is large.
+		// FIXME tx
 		collection.insertMany(events)
 	}
 
 
 	override fun load(): Flow<RaptorEvent<*, *>> =
-		collection.find().sort()
+		collection.find() // FIXME Needs explicit order. Capped collections won't work as they are size-limited & don't support transactions.
 }

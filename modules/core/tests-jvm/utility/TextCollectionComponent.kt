@@ -3,7 +3,7 @@ package tests
 import io.fluidsonic.raptor.*
 
 
-class TextCollectionComponent : RaptorComponent.Base<TextCollectionComponent>() {
+class TextCollectionComponent : RaptorComponent.Base<TextCollectionComponent>(TextCollectionPlugin) {
 
 	private var text = ""
 

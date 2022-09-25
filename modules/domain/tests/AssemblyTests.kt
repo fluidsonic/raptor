@@ -14,6 +14,7 @@ class AssemblyTests {
 
 		val raptor = raptor {
 			install(RaptorDomainPlugin)
+			install(RaptorLifecyclePlugin)
 			install(RaptorTransactionPlugin)
 
 			domain.aggregates {

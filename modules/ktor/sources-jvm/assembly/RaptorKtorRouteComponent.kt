@@ -13,7 +13,7 @@ private val routesComponentKey = RaptorComponentKey<RaptorKtorRoutesComponent.No
 public class RaptorKtorRouteComponent internal constructor(
 	private val host: String?,
 	private val path: String,
-) : RaptorComponent.Base<RaptorKtorRouteComponent>(),
+) : RaptorComponent.Base<RaptorKtorRouteComponent>(RaptorKtorPlugin),
 	RaptorTaggableComponent<RaptorKtorRouteComponent>,
 	RaptorTransactionBoundary<RaptorKtorRouteComponent> {
 

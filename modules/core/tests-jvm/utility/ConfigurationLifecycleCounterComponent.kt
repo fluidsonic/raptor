@@ -3,7 +3,7 @@ package tests
 import io.fluidsonic.raptor.*
 
 
-class ConfigurationLifecycleCounterComponent : RaptorComponent.Base<ConfigurationLifecycleCounterComponent>() {
+class ConfigurationLifecycleCounterComponent : RaptorComponent.Base<ConfigurationLifecycleCounterComponent>(DummyPlugin) {
 
 	var onConfigurationEndedCallCount = 0
 	var onConfigurationStartedCallCount = 0

@@ -10,7 +10,7 @@ import io.ktor.server.routing.*
 public class RaptorGraphRouteComponent internal constructor(
 	private val route: RaptorKtorRouteComponent,
 	private val tag: Any? = null,
-) : RaptorComponent.Base<RaptorGraphRouteComponent>() {
+) : RaptorComponent.Base<RaptorGraphRouteComponent>(RaptorKtorGraphPlugin) {
 
 	override fun RaptorComponentConfigurationStartScope.onConfigurationStarted() {
 		route.custom {

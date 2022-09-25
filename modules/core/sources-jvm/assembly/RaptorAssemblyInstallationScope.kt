@@ -2,14 +2,14 @@ package io.fluidsonic.raptor
 
 
 @RaptorDsl
-public interface RaptorAssemblyInstallationScope : RaptorAssemblyScope {
+public interface RaptorAssemblyInstallationScope : RaptorAssemblyScope, RaptorPluginScope<RaptorPluginWithConfiguration<*>> {
 
 	@RaptorDsl
-	public fun install(plugin: RaptorPlugin)
+	public fun install(plugin: RaptorPluginWithConfiguration<*>)
 
 	@RaptorDsl
-	public fun optional(plugin: RaptorPlugin, action: () -> Unit)
+	public fun optional(plugin: RaptorPluginWithConfiguration<*>, action: () -> Unit)
 
 	@RaptorDsl
-	public fun require(plugin: RaptorPlugin, action: () -> Unit = {})
+	public fun require(plugin: RaptorPluginWithConfiguration<*>, action: () -> Unit = {})
 }

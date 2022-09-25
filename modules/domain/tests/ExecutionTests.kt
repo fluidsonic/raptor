@@ -29,9 +29,7 @@ class ExecutionTests {
 			install(RaptorTransactionPlugin)
 
 			domain.aggregates {
-				clock() // useDI()? done by Store?
-				eventIdFactory() // useDI()? done by Store?
-				store(store) // useDI()?
+				store(store)
 
 				new(::BankAccountAggregate, "bank account") {
 					project(::BankAccountProjector)

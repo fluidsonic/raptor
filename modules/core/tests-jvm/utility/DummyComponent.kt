@@ -3,7 +3,7 @@ package tests
 import io.fluidsonic.raptor.*
 
 
-class DummyComponent(private val name: String = "default") : RaptorComponent.Base<DummyComponent>() {
+class DummyComponent(private val name: String = "default") : RaptorComponent.Base<DummyComponent>(DummyPlugin) {
 
 	override fun toString() =
 		"dummy ($name)"

@@ -1,5 +1,4 @@
 package io.fluidsonic.raptor
 
 
-@RaptorDsl
-public interface RaptorPluginScope<Plugin: RaptorPlugin>: RaptorAssemblyScope
+public interface RaptorPluginScope<Plugin : RaptorPluginWithConfiguration<*>> : RaptorAssemblyScope

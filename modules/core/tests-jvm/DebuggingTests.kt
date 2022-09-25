@@ -38,6 +38,8 @@ class DebuggingTests {
 
 	@Test
 	fun testRegistriesToString() {
+		var completed = false
+
 		raptor {
 			install(TextCollectionPlugin)
 			textCollection.all {
@@ -63,71 +65,77 @@ class DebuggingTests {
 				node("c")
 			}
 
-			require(NodePlugin) {
-				require(CounterPlugin) {
-					require(TextCollectionPlugin) {
-						install(object : RaptorPlugin {
+			install(object : RaptorPlugin {
 
-							override fun RaptorPluginCompletionScope.complete() {
+				override fun RaptorPluginCompletionScope.complete() {
+					require(NodePlugin) {
+						require(CounterPlugin) {
+							require(TextCollectionPlugin) {
+								completed = true
+
 								assertEquals(
 									expected = """
-							[component registry] ->
-								[counter] ->
-									counter (1) -> 
-										[any] -> counter extension
-								[dummy] ->
-									dummy (z)
-									dummy (1) -> 
-										[any] -> dummy extension
-									dummy (a)
-								[node] ->
-									node (root) -> 
 										[component registry] ->
+											[counter] ->
+												counter (1) -> 
+													[any] -> counter extension
+											[dummy] ->
+												dummy (z)
+												dummy (1) -> 
+													[any] -> dummy extension
+												dummy (a)
 											[node] ->
-												node (a) -> 
-													[any] -> node extension
+												node (root) -> 
 													[component registry] ->
 														[node] ->
-															node (a1)
-															node (a2)
-												node (b)
-												node (c)
-								[root] -> root
-								[text collection] -> text collection (foo)
-						""".trimIndent(),
+															node (a) -> 
+																[any] -> node extension
+																[component registry] ->
+																	[node] ->
+																		node (a1)
+																		node (a2)
+															node (b)
+															node (c)
+											[text collection] -> text collection (foo)
+									""".trimIndent(),
 									actual = componentRegistry.toString()
 								)
 
 								assertEquals(
 									expected = """
-							[property registry] ->
-								[count] -> 1
-								[root node] ->
-									node(root) ->
-										node(a) ->
-											node(a1)
-											node(a2)
-										node(b)
-										node(c)
-								[text] -> foo
-						""".trimIndent(),
+										[property registry] ->
+											[count] -> 1
+											[root node] ->
+												node(root) ->
+													node(a) ->
+														node(a1)
+														node(a2)
+													node(b)
+													node(c)
+											[text] -> foo
+									""".trimIndent(),
 									actual = propertyRegistry.toString()
 								)
 							}
-
-
-							override fun RaptorPluginInstallationScope.install() {
-								componentRegistry.register(DummyComponent.key, DummyComponent("z"))
-								componentRegistry.register(DummyComponent.key, DummyComponent("1").apply {
-									extensions[anyComponentExtensionKey] = "dummy extension"
-								})
-								componentRegistry.register(DummyComponent.key, DummyComponent("a"))
-							}
-						})
+						}
 					}
 				}
-			}
+
+
+				override fun RaptorPluginInstallationScope.install() {
+					componentRegistry.register(DummyComponent.key, DummyComponent("z"))
+					componentRegistry.register(DummyComponent.key, DummyComponent("1").apply {
+						extensions[anyComponentExtensionKey] = "dummy extension"
+					})
+					componentRegistry.register(DummyComponent.key, DummyComponent("a"))
+				}
+
+				override fun toString(): String =
+					"tests"
+			})
 		}
+
+		assertTrue(completed)
 	}
 
 

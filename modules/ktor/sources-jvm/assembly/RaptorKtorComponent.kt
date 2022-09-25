@@ -6,7 +6,7 @@ import io.fluidsonic.raptor.*
 private val serversComponentKey = RaptorComponentKey<RaptorKtorServersComponent>("servers")
 
 
-public class RaptorKtorComponent internal constructor() : RaptorComponent.Base<RaptorKtorComponent>() {
+public class RaptorKtorComponent internal constructor() : RaptorComponent.Base<RaptorKtorComponent>(RaptorKtorPlugin) {
 
 	internal fun complete(context: RaptorContext) =
 		DefaultRaptorKtor(

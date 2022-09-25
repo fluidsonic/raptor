@@ -13,8 +13,11 @@ internal class RaptorComponentRegistration<Component : RaptorComponent<Component
 	}
 
 
-	fun endConfiguration(scope: RaptorAssemblyCompletionScope) {
+	fun complete(plugin: RaptorPluginWithConfiguration<*>, scope: RaptorAssemblyCompletionScope) {
 		if (configurationEnded)
+			return
+
+		if (component.plugin != plugin)
 			return
 
 		configurationEnded = true

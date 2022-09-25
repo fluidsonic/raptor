@@ -5,7 +5,7 @@ import kotlin.reflect.*
 
 
 internal class RaptorDIFactoryComponent :
-	RaptorComponent.Base<RaptorDIFactoryComponent>(),
+	RaptorComponent.Base<RaptorDIFactoryComponent>(RaptorDIPlugin),
 	RaptorDIComponent<RaptorDIFactoryComponent> {
 
 	private val builder = DefaultRaptorDIBuilder()

@@ -6,9 +6,9 @@ import io.fluidsonic.raptor.transactions.*
 import kotlinx.datetime.*
 
 
-public object RaptorDomainPlugin : RaptorPlugin {
+public object RaptorDomainPlugin : RaptorPluginWithConfiguration<RaptorDomain> {
 
-	override fun RaptorPluginCompletionScope.complete() {
+	override fun RaptorPluginCompletionScope.complete(): RaptorDomain {
 		val domain = componentRegistry.one(Keys.domainComponent).complete()
 
 		propertyRegistry.register(Keys.aggregateManagerProperty, DefaultAggregateManager(
@@ -19,6 +19,8 @@ public object RaptorDomainPlugin : RaptorPlugin {
 			),
 		))
 		propertyRegistry.register(Keys.domainProperty, domain)
+
+		return domain
 	}
 
 

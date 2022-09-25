@@ -5,7 +5,7 @@ import kotlin.collections.set
 import kotlin.reflect.*
 
 
-public class RaptorJobsComponent internal constructor() : RaptorComponent.Base<RaptorJobsComponent>() {
+public class RaptorJobsComponent internal constructor() : RaptorComponent.Base<RaptorJobsComponent>(RaptorJobsPlugin) {
 
 	private val executorsById: MutableMap<String, RaptorJobExecutor<*>> = hashMapOf()
 

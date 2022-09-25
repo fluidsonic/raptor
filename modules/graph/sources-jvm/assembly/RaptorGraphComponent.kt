@@ -5,7 +5,7 @@ import kotlin.reflect.*
 
 
 public class RaptorGraphComponent internal constructor() :
-	RaptorComponent.Base<RaptorGraphComponent>(),
+	RaptorComponent.Base<RaptorGraphComponent>(RaptorGraphPlugin),
 	RaptorTaggableComponent<RaptorGraphComponent> {
 
 	internal var graph: RaptorGraph? = null

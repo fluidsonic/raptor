@@ -51,6 +51,7 @@ public class RaptorInterfaceGraphDefinitionBuilder<Type : Any> internal construc
 	}
 
 
+	@OptIn(ExperimentalReflectionOnLambdas::class)
 	@RaptorDsl
 	@Suppress("NOTHING_TO_INLINE")
 	public inline fun <FieldType> field(

@@ -16,7 +16,7 @@ private val routesComponentKey = RaptorComponentKey<RaptorKtorRoutesComponent.Ro
 
 public class RaptorKtorServerComponent internal constructor(
 	internal val forceEncryptedConnection: Boolean,
-) : RaptorComponent.Base<RaptorKtorServerComponent>(),
+) : RaptorComponent.Base<RaptorKtorServerComponent>(RaptorKtorPlugin),
 	RaptorTaggableComponent<RaptorKtorServerComponent>,
 	RaptorTransactionBoundary<RaptorKtorServerComponent> {
 

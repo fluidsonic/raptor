@@ -7,6 +7,10 @@ public interface RaptorComponent<Component : RaptorComponent<Component>> : Rapto
 	@RaptorDsl
 	public val extensions: RaptorComponentExtensionSet
 
+	// TODO Can we improve the API to not have this all over the DSL?
+	@RaptorDsl
+	public val plugin: RaptorPluginWithConfiguration<*>
+
 	public fun RaptorComponentConfigurationEndScope<Component>.onConfigurationEnded(): Unit = Unit
 	public fun RaptorComponentConfigurationStartScope.onConfigurationStarted(): Unit = Unit
 
@@ -19,7 +23,9 @@ public interface RaptorComponent<Component : RaptorComponent<Component>> : Rapto
 
 
 	@RaptorDsl
-	public abstract class Base<Component : RaptorComponent<Component>> : RaptorComponent<Component> {
+	public abstract class Base<Component : RaptorComponent<Component>>(
+		override val plugin: RaptorPluginWithConfiguration<*>,
+	) : RaptorComponent<Component> {
 
 		@RaptorDsl
 		final override val extensions: RaptorComponentExtensionSet = DefaultComponentExtensionSet()

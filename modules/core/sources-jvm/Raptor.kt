@@ -18,8 +18,3 @@ public operator fun <Value : Any> Raptor.get(key: RaptorPropertyKey<out Value>):
 
 public val Raptor.properties: RaptorPropertySet
 	get() = context.properties
-
-
-@RaptorDsl
-public fun raptor(configure: RaptorAssemblyInstallationScope.() -> Unit): Raptor =
-	DefaultRootComponent().assemble(configure)

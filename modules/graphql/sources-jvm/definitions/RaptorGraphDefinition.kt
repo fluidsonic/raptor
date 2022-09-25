@@ -30,7 +30,7 @@ public sealed class RaptorGraphDefinition(
 	public companion object {
 
 		@PublishedApi
-		internal const val defaultName = "<default>"
+		internal const val defaultName: String = "<default>"
 
 
 		// FIXME move

@@ -20,17 +20,17 @@ class NestingTests {
 					}
 				}
 
-				nodes {
+				all {
 					if (name == "x")
 						node("x2")
 				}
 
-				nodes(recursive = false) {
+				all(recursive = false) {
 					if (name == "c")
 						node("c2")
 				}
 
-				nodes(recursive = true) {
+				all(recursive = true) {
 					if (name == "c")
 						node("c3")
 				}

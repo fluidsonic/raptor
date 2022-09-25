@@ -6,7 +6,7 @@ private val routeComponentKey = RaptorComponentKey<RaptorKtorRouteComponent>("ro
 
 
 public abstract class RaptorKtorRoutesComponent<Component : RaptorKtorRoutesComponent<Component>> internal constructor() :
-	RaptorComponent.Base<Component>(),
+	RaptorComponent.Base<Component>(RaptorKtorPlugin),
 	RaptorComponentSet<RaptorKtorRouteComponent> {
 
 	@RaptorDsl

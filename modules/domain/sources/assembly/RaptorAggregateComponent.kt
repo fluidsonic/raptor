@@ -20,7 +20,7 @@ public class RaptorAggregateComponent<
 	private val factory: RaptorAggregateFactory<Aggregate, Id>,
 	private val idClass: KClass<Id>,
 	private val topLevelScope: RaptorAssemblyInstallationScope,
-) : RaptorComponent.Base<RaptorAggregateComponent<Aggregate, Id, Command, Event>>() {
+) : RaptorComponent.Base<RaptorAggregateComponent<Aggregate, Id, Command, Event>>(RaptorDomainPlugin) {
 
 	private val commandDefinitions: MutableMap<KClass<out Command>, RaptorAggregateCommandDefinition<Id, out Command>> = hashMapOf()
 	private val eventDefinitions: MutableMap<KClass<out Event>, RaptorAggregateEventDefinition<Id, out Event>> = hashMapOf()

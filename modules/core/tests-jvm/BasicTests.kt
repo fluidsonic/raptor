@@ -16,8 +16,10 @@ class BasicTests {
 				node("b")
 				node("c")
 
-				if (name == "c")
-					node("d")
+				all {
+					if (name == "c")
+						node("d")
+				}
 			}
 		}
 

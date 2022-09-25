@@ -3,7 +3,7 @@ package tests
 import io.fluidsonic.raptor.*
 
 
-class CounterComponent : RaptorComponent.Base<CounterComponent>() {
+class CounterComponent : RaptorComponent.Base<CounterComponent>(CounterPlugin) {
 
 	private var count = 0
 

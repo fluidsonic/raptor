@@ -5,8 +5,14 @@ package io.fluidsonic.raptor
 public typealias RaptorFeature = RaptorPlugin
 
 
-public interface RaptorPlugin {
+public interface RaptorPlugin : RaptorPluginWithConfiguration<Unit> {
 
-	public fun RaptorPluginCompletionScope.complete() {}
+	public override fun RaptorPluginCompletionScope.complete() {}
+}
+
+
+public interface RaptorPluginWithConfiguration<out Configuration : Any> {
+
+	public fun RaptorPluginCompletionScope.complete(): Configuration
 	public fun RaptorPluginInstallationScope.install()
 }

@@ -5,7 +5,7 @@ import freemarker.template.*
 import kotlin.reflect.*
 
 
-public class FreemarkerRaptorComponent : RaptorComponent.Base<FreemarkerRaptorComponent>() {
+public class FreemarkerRaptorComponent : RaptorComponent.Base<FreemarkerRaptorComponent>(FreemarkerRaptorPlugin) {
 
 	private val objectWrappers: MutableMap<KClass<*>, RaptorFreemarkerObjectWrapper<*>> = hashMapOf()
 	private val templateLoaders: MutableList<TemplateLoader> = mutableListOf()

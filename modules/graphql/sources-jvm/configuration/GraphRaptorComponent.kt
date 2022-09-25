@@ -4,7 +4,7 @@ import io.fluidsonic.raptor.graphql.internal.*
 
 
 public class GraphRaptorComponent internal constructor() :
-	RaptorComponent.Base<GraphRaptorComponent>(),
+	RaptorComponent.Base<GraphRaptorComponent>(RaptorGraphqlPlugin),
 	RaptorTaggableComponent<GraphRaptorComponent> {
 
 	private val definitions: MutableList<RaptorGraphDefinition> = mutableListOf()

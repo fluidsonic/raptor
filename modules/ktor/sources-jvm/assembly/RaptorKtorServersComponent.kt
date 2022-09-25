@@ -7,7 +7,7 @@ private val serverComponentKey = RaptorComponentKey<RaptorKtorServerComponent>("
 
 
 public class RaptorKtorServersComponent internal constructor() :
-	RaptorComponent.Base<RaptorKtorServersComponent>(),
+	RaptorComponent.Base<RaptorKtorServersComponent>(RaptorKtorPlugin),
 	RaptorComponentSet<RaptorKtorServerComponent> {
 
 	@RaptorDsl

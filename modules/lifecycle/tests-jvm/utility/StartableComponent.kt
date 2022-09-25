@@ -3,7 +3,7 @@ package tests
 import io.fluidsonic.raptor.*
 
 
-class StartableComponent : RaptorComponent.Base<StartableComponent>() {
+class StartableComponent : RaptorComponent.Base<StartableComponent>(StartablePlugin) {
 
 	var delayInMilliseconds = 0L
 

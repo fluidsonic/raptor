@@ -4,7 +4,7 @@ import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.transactions.*
 
 
-class RequestComponent : RaptorComponent.Base<RequestComponent>(), RaptorTransactionBoundary<RequestComponent> {
+class RequestComponent : RaptorComponent.Base<RequestComponent>(RequestPlugin), RaptorTransactionBoundary<RequestComponent> {
 
 	private var transactionFactory: RaptorTransactionFactory? = null
 

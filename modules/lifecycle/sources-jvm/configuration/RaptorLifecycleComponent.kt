@@ -1,7 +1,7 @@
 package io.fluidsonic.raptor
 
 
-public class RaptorLifecycleComponent internal constructor() : RaptorComponent.Base<RaptorLifecycleComponent>() {
+public class RaptorLifecycleComponent internal constructor() : RaptorComponent.Base<RaptorLifecycleComponent>(RaptorLifecyclePlugin) {
 
 	private val startActions: MutableList<suspend RaptorLifecycleStartScope.() -> Unit> = mutableListOf()
 	private val stopActions: MutableList<suspend RaptorLifecycleStopScope.() -> Unit> = mutableListOf()

@@ -24,5 +24,5 @@ public object RaptorBsonPlugin : RaptorPlugin {
 
 
 @RaptorDsl
-public val RaptorAssemblyScope.bson: RaptorBsonComponent
+public val RaptorPluginScope<in RaptorBsonPlugin>.bson: RaptorBsonComponent
 	get() = componentRegistry.oneOrNull(bsonComponentKey) ?: throw RaptorPluginNotInstalledException(RaptorBsonPlugin)

@@ -10,7 +10,7 @@ import org.bson.codecs.configuration.*
 private val bsonPropertyKey = RaptorPropertyKey<RaptorBson>("bson")
 
 
-public class RaptorBsonComponent internal constructor() : RaptorComponent.Base<RaptorBsonComponent>() {
+public class RaptorBsonComponent internal constructor() : RaptorComponent.Base<RaptorBsonComponent>(RaptorBsonPlugin) {
 
 	private val definitionsByPriority: MutableMap<Priority, MutableList<RaptorBsonDefinition>> = EnumMap(Priority::class.java)
 	private var includesDefaultDefinitions = false
