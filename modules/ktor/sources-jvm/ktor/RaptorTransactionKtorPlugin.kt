@@ -55,7 +55,7 @@ public class RaptorTransactionKtorPluginConfig {
 
 
 internal var ApplicationCall.raptorTransaction: RaptorTransaction
-	get() = attributes.getOrNull(attributeKey) ?: throw RaptorFeatureNotInstalledException(RaptorKtorFeature)
+	get() = attributes.getOrNull(attributeKey) ?: throw RaptorPluginNotInstalledException(RaptorKtorPlugin)
 	set(value) {
 		attributes.put(attributeKey, value)
 	}

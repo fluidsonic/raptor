@@ -39,5 +39,5 @@ fun RaptorAssemblyQuery<TextCollectionComponent>.append(fragment: String) {
 
 
 @RaptorDsl
-val RaptorTopLevelConfigurationScope.textCollection
+val RaptorAssemblyScope.textCollection
 	get() = componentRegistry.all(TextCollectionComponent.key)

@@ -24,9 +24,9 @@ class ExecutionTests {
 		)))
 
 		val raptor = raptor {
-			install(RaptorDomainFeature)
-			install(RaptorLifecycleFeature)
-			install(RaptorTransactionFeature)
+			install(RaptorDomainPlugin)
+			install(RaptorLifecyclePlugin)
+			install(RaptorTransactionPlugin)
 
 			domain.aggregates {
 				clock() // useDI()? done by Store?

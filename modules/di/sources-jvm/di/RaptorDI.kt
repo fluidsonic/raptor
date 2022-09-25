@@ -114,7 +114,7 @@ internal fun RaptorPropertyRegistry.register(di: RaptorDI) {
 
 @RaptorDsl
 public val RaptorScope.di: RaptorDI
-	get() = context.properties[propertyKey] ?: throw RaptorFeatureNotInstalledException(RaptorDIFeature)
+	get() = context.properties[propertyKey] ?: throw RaptorPluginNotInstalledException(RaptorDIPlugin)
 
 
 @LowPriorityInOverloadResolution

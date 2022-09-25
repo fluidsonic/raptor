@@ -8,14 +8,14 @@ private val requestComponentKey = RaptorComponentKey<RequestComponent>("request"
 private val requestTransactionFactoryPropertyKey = RaptorPropertyKey<RaptorTransactionFactory>("request transaction factory")
 
 
-object RequestFeature : RaptorFeature {
+object RequestPlugin : RaptorPlugin {
 
-	override fun RaptorFeatureConfigurationApplicationScope.applyConfiguration() {
+	override fun RaptorPluginCompletionScope.complete() {
 		propertyRegistry.register(requestTransactionFactoryPropertyKey, componentRegistry.one(requestComponentKey).complete())
 	}
 
 
-	override fun RaptorFeatureScope.installed() {
+	override fun RaptorPluginInstallationScope.install() {
 		componentRegistry.register(requestComponentKey, RequestComponent())
 	}
 
@@ -36,5 +36,5 @@ fun RaptorTransaction.createTransaction(request: Request): RaptorTransaction =
 
 
 @RaptorDsl
-val RaptorTopLevelConfigurationScope.requests
+val RaptorAssemblyScope.requests
 	get() = componentRegistry.all(requestComponentKey)

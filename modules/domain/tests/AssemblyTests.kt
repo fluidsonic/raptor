@@ -13,8 +13,8 @@ class AssemblyTests {
 		val store = TestAggregateStore()
 
 		val raptor = raptor {
-			install(RaptorDomainFeature)
-			install(RaptorTransactionFeature)
+			install(RaptorDomainPlugin)
+			install(RaptorTransactionPlugin)
 
 			domain.aggregates {
 				store(store)

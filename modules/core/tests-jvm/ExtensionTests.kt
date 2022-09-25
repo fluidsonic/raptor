@@ -9,11 +9,15 @@ class ExtensionTests {
 	@Test
 	fun testExtension() {
 		raptor {
-			install(CounterFeature) {
+			install(CounterPlugin)
+
+			counter {
 				extensions[anyComponentExtensionKey] = "foo"
 			}
 
-			install(CounterFeature) {
+			install(CounterPlugin)
+
+			counter {
 				assertEquals(expected = "foo", actual = extensions[anyComponentExtensionKey])
 			}
 		}
@@ -23,7 +27,9 @@ class ExtensionTests {
 	@Test
 	fun testTags() {
 		val raptor = raptor {
-			install(NodeFeature) {
+			install(NodePlugin)
+
+			nodes {
 				node("a").tags("tag a")
 				node("b").tags("tag b")
 				node("c") {

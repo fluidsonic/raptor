@@ -5,7 +5,7 @@ import io.fluidsonic.raptor.*
 
 @RaptorDsl
 public class RaptorDomainComponent internal constructor(
-	private val topLevelScope: RaptorTopLevelConfigurationScope, // FIXME remove hack
+	private val topLevelScope: RaptorAssemblyInstallationScope, // FIXME remove hack
 ) : RaptorComponent.Base<RaptorDomainComponent>() {
 
 	@RaptorDsl

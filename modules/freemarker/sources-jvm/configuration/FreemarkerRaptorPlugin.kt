@@ -8,12 +8,12 @@ private val freemarkerComponentKey = RaptorComponentKey<FreemarkerRaptorComponen
 private val freemarkerPropertyKey = RaptorPropertyKey<Configuration>("freemarker configuration")
 
 
-public object FreemarkerRaptorFeature : RaptorFeature { // FIXME rm
+public object FreemarkerRaptorPlugin : RaptorPlugin { // FIXME rm
 
-	override fun RaptorFeatureScope.installed() {
+	override fun RaptorPluginInstallationScope.install() {
 		componentRegistry.register(freemarkerComponentKey, FreemarkerRaptorComponent())
 
-		ifFeature(RaptorDIFeature) {
+		optional(RaptorDIPlugin) {
 			di {
 				provide { get<RaptorContext>().freemarker }
 			}
@@ -23,7 +23,7 @@ public object FreemarkerRaptorFeature : RaptorFeature { // FIXME rm
 
 
 public val RaptorContext.freemarker: Configuration
-	get() = properties[freemarkerPropertyKey] ?: throw RaptorFeatureNotInstalledException(FreemarkerRaptorFeature)
+	get() = properties[freemarkerPropertyKey] ?: throw RaptorPluginNotInstalledException(FreemarkerRaptorPlugin)
 
 
 internal fun RaptorPropertyRegistry.register(freemarker: Configuration) {
@@ -32,5 +32,5 @@ internal fun RaptorPropertyRegistry.register(freemarker: Configuration) {
 
 
 @RaptorDsl
-public val RaptorTopLevelConfigurationScope.freemarker: FreemarkerRaptorComponent
-	get() = componentRegistry.oneOrNull(freemarkerComponentKey) ?: throw RaptorFeatureNotInstalledException(FreemarkerRaptorFeature)
+public val RaptorAssemblyScope.freemarker: FreemarkerRaptorComponent
+	get() = componentRegistry.oneOrNull(freemarkerComponentKey) ?: throw RaptorPluginNotInstalledException(FreemarkerRaptorPlugin)

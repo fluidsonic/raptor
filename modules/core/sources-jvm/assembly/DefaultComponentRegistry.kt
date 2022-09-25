@@ -22,7 +22,7 @@ internal class DefaultComponentRegistry(
 	}
 
 
-	fun endConfiguration(scope: RaptorConfigurationEndScope) {
+	fun endConfiguration(scope: RaptorAssemblyCompletionScope) {
 		checkIsConfigurable { "The configuration phase has already ended." }
 
 		configurationEnded = true

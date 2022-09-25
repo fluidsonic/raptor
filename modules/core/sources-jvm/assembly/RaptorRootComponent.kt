@@ -1,4 +1,5 @@
 package io.fluidsonic.raptor
 
 
-public interface RaptorRootComponent : RaptorComponent<RaptorRootComponent>, RaptorTopLevelConfigurationScope
+// FIXME make private?
+public interface RaptorRootComponent : RaptorComponent<RaptorRootComponent>

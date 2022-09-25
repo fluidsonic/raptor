@@ -6,9 +6,9 @@ import io.fluidsonic.raptor.transactions.*
 import kotlinx.datetime.*
 
 
-public object RaptorDomainFeature : RaptorFeature {
+public object RaptorDomainPlugin : RaptorPlugin {
 
-	override fun RaptorFeatureConfigurationApplicationScope.applyConfiguration() {
+	override fun RaptorPluginCompletionScope.complete() {
 		val domain = componentRegistry.one(Keys.domainComponent).complete()
 
 		propertyRegistry.register(Keys.aggregateManagerProperty, DefaultAggregateManager(
@@ -22,16 +22,16 @@ public object RaptorDomainFeature : RaptorFeature {
 	}
 
 
-	override fun RaptorFeatureScope.installed() {
+	override fun RaptorPluginInstallationScope.install() {
 		componentRegistry.register(Keys.domainComponent) { RaptorDomainComponent(topLevelScope = this) }
 
-		ifFeature(RaptorDIFeature) {
+		optional(RaptorDIPlugin) {
 			// FIXME di should use properties only
 			di.provide<RaptorAggregateEventStream> { DefaultAggregateEventStream() }
 			di.provide<RaptorAggregateProjectionEventStream> { DefaultAggregateProjectionEventStream() }
 		}
 
-		requireFeature(RaptorLifecycleFeature) {
+		require(RaptorLifecyclePlugin) {
 			// FIXME Delay onStop until manager & store have settled.
 
 			lifecycle.onStart {
@@ -39,7 +39,7 @@ public object RaptorDomainFeature : RaptorFeature {
 			}
 		}
 
-		requireFeature(RaptorTransactionFeature) {
+		require(RaptorTransactionPlugin) {
 			// FIXME
 			transactions {
 				observe {
@@ -62,5 +62,5 @@ public object RaptorDomainFeature : RaptorFeature {
 
 // FIXME lazy
 @RaptorDsl
-public val RaptorTopLevelConfigurationScope.domain: RaptorDomainComponent
-	get() = componentRegistry.oneOrNull(Keys.domainComponent) ?: throw RaptorFeatureNotInstalledException(RaptorDomainFeature)
+public val RaptorAssemblyScope.domain: RaptorDomainComponent
+	get() = componentRegistry.oneOrNull(Keys.domainComponent) ?: throw RaptorPluginNotInstalledException(RaptorDomainPlugin)

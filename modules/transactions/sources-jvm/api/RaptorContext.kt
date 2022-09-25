@@ -8,4 +8,4 @@ public fun RaptorContext.transaction(): RaptorTransaction =
 
 
 internal val RaptorContext.transactionFactory: RaptorTransactionFactory
-	get() = properties[Keys.transactionFactoryProperty] ?: throw RaptorFeatureNotInstalledException(RaptorTransactionFeature)
+	get() = properties[Keys.transactionFactoryProperty] ?: throw RaptorPluginNotInstalledException(RaptorTransactionPlugin)

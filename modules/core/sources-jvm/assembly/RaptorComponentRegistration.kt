@@ -13,14 +13,14 @@ internal class RaptorComponentRegistration<Component : RaptorComponent<Component
 	}
 
 
-	fun endConfiguration(scope: RaptorConfigurationEndScope) {
+	fun endConfiguration(scope: RaptorAssemblyCompletionScope) {
 		if (configurationEnded)
 			return
 
 		configurationEnded = true
 
 		// FIXME Rework.
-		val componentScope = object : RaptorComponentConfigurationEndScope<Component>, RaptorConfigurationEndScope by scope {
+		val componentScope = object : RaptorComponentConfigurationEndScope<Component>, RaptorAssemblyCompletionScope by scope {
 
 			override val component: Component
 				get() = this@RaptorComponentRegistration.component

@@ -9,17 +9,15 @@ class BasicTests {
 	@Test
 	fun testComponentPropertyAccess() {
 		val raptor = raptor {
-			install(NodeFeature) {
+			install(NodePlugin)
+
+			nodes {
 				node("a")
 				node("b")
 				node("c")
-			}
 
-			install(NodeFeature) {
-				nodes {
-					if (name == "c")
-						node("d")
-				}
+				if (name == "c")
+					node("d")
 			}
 		}
 
@@ -37,22 +35,6 @@ class BasicTests {
 
 
 	@Test
-	fun testEach() {
-		raptor {
-			val component = this
-
-			each {
-				each {
-					each {
-						assertSame(expected = component, actual = this)
-					}
-				}
-			}
-		}
-	}
-
-
-	@Test
 	fun testEmpty() {
 		val raptor = raptor {}
 
@@ -66,9 +48,9 @@ class BasicTests {
 		lateinit var lazyContext: RaptorContext
 
 		val raptor = raptor {
-			install(object : RaptorFeature {
+			install(object : RaptorPlugin {
 
-				override fun RaptorFeatureConfigurationApplicationScope.applyConfiguration() {
+				override fun RaptorPluginCompletionScope.complete() {
 					propertyRegistry.register(countPropertyKey, 1)
 
 					lazyContext = this.lazyContext
@@ -79,7 +61,7 @@ class BasicTests {
 					)
 				}
 
-				override fun RaptorFeatureScope.installed() {}
+				override fun RaptorPluginInstallationScope.install() {}
 			})
 		}
 
@@ -90,16 +72,16 @@ class BasicTests {
 	@Test
 	fun testTopLevelConfigurationScope() {
 		val raptor = raptor {
-			install(TextCollectionFeature)
+			install(TextCollectionPlugin)
 
 			textCollection.all {
 				append("This ")
 				append("is ")
 			}
 
-			install(object : RaptorFeature {
+			install(object : RaptorPlugin {
 
-				override fun RaptorFeatureScope.installed() {
+				override fun RaptorPluginInstallationScope.install() {
 					textCollection.all {
 						append("working!")
 					}

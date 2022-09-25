@@ -29,7 +29,7 @@ public val Raptor.lifecycle: RaptorLifecycle
 
 
 internal val RaptorContext.lifecycle: RaptorLifecycle
-	get() = properties[propertyKey] ?: throw RaptorFeatureNotInstalledException(RaptorLifecycleFeature)
+	get() = properties[propertyKey] ?: throw RaptorPluginNotInstalledException(RaptorLifecyclePlugin)
 
 
 internal fun RaptorPropertyRegistry.register(lifecycle: RaptorLifecycle) {

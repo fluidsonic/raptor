@@ -16,12 +16,11 @@ class BsonTests {
 		val provider = DummyBsonCodecProvider
 
 		val raptor = raptor {
-			install(RaptorBsonFeature) {
-				codecs(codec)
-				definitions(definition)
-			}
+			install(RaptorBsonPlugin)
 
 			bson {
+				codecs(codec)
+				definitions(definition)
 				providers(provider)
 			}
 		}
@@ -45,7 +44,9 @@ class BsonTests {
 		val currencyDefinition = Currency.bsonDefinition()
 
 		val raptor = raptor {
-			install(RaptorBsonFeature) {
+			install(RaptorBsonPlugin)
+
+			bson {
 				definitions(countryDefinition)
 				includeDefaultDefinitions()
 				definitions(currencyDefinition)
@@ -64,7 +65,7 @@ class BsonTests {
 	@Test
 	fun testEmpty() {
 		val raptor = raptor {
-			install(RaptorBsonFeature)
+			install(RaptorBsonPlugin)
 		}
 
 		val configuration = raptor.context.bson

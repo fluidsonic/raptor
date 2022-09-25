@@ -14,7 +14,7 @@ public val RaptorAssemblyQuery<RaptorTransactionBoundary<*>>.transactions: Rapto
 	get() = map { component ->
 		val registry = component.componentRegistry
 
-		registry.root.oneOrNull(Keys.transactionsComponent) ?: throw RaptorFeatureNotInstalledException(RaptorTransactionFeature)
+		registry.root.oneOrNull(Keys.transactionsComponent) ?: throw RaptorPluginNotInstalledException(RaptorTransactionPlugin)
 		registry.oneOrRegister(Keys.transactionsComponent, ::RaptorTransactionsComponent)
 	}
 
@@ -22,7 +22,7 @@ public val RaptorAssemblyQuery<RaptorTransactionBoundary<*>>.transactions: Rapto
 // TODO Add proper (lazy) API to check for feature being installed.
 @RaptorDsl
 public fun RaptorComponentConfigurationEndScope<out RaptorTransactionBoundary<*>>.transactionFactory(): RaptorTransactionFactory {
-	componentRegistry.root.oneOrNull(Keys.transactionsComponent) ?: throw RaptorFeatureNotInstalledException(RaptorTransactionFeature)
+	componentRegistry.root.oneOrNull(Keys.transactionsComponent) ?: throw RaptorPluginNotInstalledException(RaptorTransactionPlugin)
 
 	return componentRegistry.oneOrNull(Keys.transactionsComponent)?.toFactory() ?: RaptorTransactionFactory.empty
 }

@@ -6,7 +6,7 @@ import kotlin.reflect.*
 
 @RaptorDsl
 public class RaptorAggregatesComponent internal constructor(
-	private val topLevelScope: RaptorTopLevelConfigurationScope, // FIXME hack
+	private val topLevelScope: RaptorAssemblyInstallationScope, // FIXME hack
 ) : RaptorComponent.Base<RaptorAggregatesComponent>(),
 	RaptorComponentSet<RaptorAggregateComponent<*, *, *, *>> { // FIXME ok? conflicting Set/Query esp. as we remove Set
 

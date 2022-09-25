@@ -5,4 +5,4 @@ import io.fluidsonic.raptor.transactions.*
 
 
 internal val RaptorTransactionContext.aggregateManager: RaptorAggregateManager
-	get() = properties[Keys.aggregateManagerProperty] ?: throw RaptorFeatureNotInstalledException(RaptorDomainFeature)
+	get() = properties[Keys.aggregateManagerProperty] ?: throw RaptorPluginNotInstalledException(RaptorDomainPlugin)

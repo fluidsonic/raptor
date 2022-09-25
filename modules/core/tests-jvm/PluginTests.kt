@@ -4,12 +4,13 @@ import io.fluidsonic.raptor.*
 import kotlin.test.*
 
 
-class FeatureTests {
+class PluginTests {
 
 	@Test
 	fun testConfigurableFeature() {
 		val raptor = raptor {
-			install(CounterFeature) {
+			install(CounterPlugin)
+			counter {
 				increment()
 				increment()
 			}
@@ -22,11 +23,11 @@ class FeatureTests {
 	@Test
 	fun testFeature() {
 		val raptor = raptor {
-			install(TextCollectionFeature)
+			install(TextCollectionPlugin)
 
-			install(object : RaptorFeature {
+			install(object : RaptorPlugin {
 
-				override fun RaptorFeatureScope.installed() {
+				override fun RaptorPluginInstallationScope.install() {
 					textCollection.all {
 						append("This is working!")
 					}
@@ -43,9 +44,9 @@ class FeatureTests {
 		var installCount = 0
 
 		raptor {
-			val feature = object : RaptorFeature {
+			val feature = object : RaptorPlugin {
 
-				override fun RaptorFeatureScope.installed() {
+				override fun RaptorPluginInstallationScope.install() {
 					installCount += 1
 				}
 			}
@@ -62,16 +63,18 @@ class FeatureTests {
 	@Test
 	fun testMultipleFeatureConfigurations() {
 		val raptor = raptor {
-			install(CounterFeature) {
+			install(CounterPlugin)
+			counter {
 				increment()
 				increment()
 			}
 
-			install(CounterFeature) {
+			install(CounterPlugin)
+			counter {
 				increment()
 			}
 
-			counter.all {
+			counter {
 				increment()
 			}
 		}

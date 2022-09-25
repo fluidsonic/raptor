@@ -7,14 +7,14 @@ private val ktorComponentKey = RaptorComponentKey<RaptorKtorComponent>("ktor")
 private val ktorPropertyKey = RaptorPropertyKey<DefaultRaptorKtor>("ktor")
 
 
-public object RaptorKtorFeature : RaptorFeature {
+public object RaptorKtorPlugin : RaptorPlugin {
 
-	override fun RaptorFeatureConfigurationApplicationScope.applyConfiguration() {
+	override fun RaptorPluginCompletionScope.complete() {
 		propertyRegistry.register(ktorPropertyKey, componentRegistry.one(ktorComponentKey).complete(context = lazyContext))
 	}
 
 
-	override fun RaptorFeatureScope.installed() {
+	override fun RaptorPluginInstallationScope.install() {
 		componentRegistry.register(ktorComponentKey, ::RaptorKtorComponent)
 
 		lifecycle {
@@ -33,7 +33,7 @@ public object RaptorKtorFeature : RaptorFeature {
 
 
 public val RaptorContext.ktor: RaptorKtor
-	get() = ktorInternal ?: throw RaptorFeatureNotInstalledException(RaptorKtorFeature)
+	get() = ktorInternal ?: throw RaptorPluginNotInstalledException(RaptorKtorPlugin)
 
 
 internal val RaptorContext.ktorInternal: DefaultRaptorKtor?
@@ -41,5 +41,5 @@ internal val RaptorContext.ktorInternal: DefaultRaptorKtor?
 
 
 @RaptorDsl
-public val RaptorTopLevelConfigurationScope.ktor: RaptorKtorComponent
-	get() = componentRegistry.oneOrNull(ktorComponentKey) ?: throw RaptorFeatureNotInstalledException(RaptorKtorFeature)
+public val RaptorAssemblyScope.ktor: RaptorKtorComponent
+	get() = componentRegistry.oneOrNull(ktorComponentKey) ?: throw RaptorPluginNotInstalledException(RaptorKtorPlugin)

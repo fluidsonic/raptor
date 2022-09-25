@@ -19,7 +19,7 @@ public class RaptorAggregateComponent<
 	private val eventClass: KClass<Event>,
 	private val factory: RaptorAggregateFactory<Aggregate, Id>,
 	private val idClass: KClass<Id>,
-	private val topLevelScope: RaptorTopLevelConfigurationScope,
+	private val topLevelScope: RaptorAssemblyInstallationScope,
 ) : RaptorComponent.Base<RaptorAggregateComponent<Aggregate, Id, Command, Event>>() {
 
 	private val commandDefinitions: MutableMap<KClass<out Command>, RaptorAggregateCommandDefinition<Id, out Command>> = hashMapOf()
@@ -70,7 +70,7 @@ public class RaptorAggregateComponent<
 		this.projectorFactory = projectorFactory
 
 		with(topLevelScope) { // FIXME remove hack
-			ifFeature(RaptorDIFeature) {
+			optional(RaptorDIPlugin) {
 				di.provide(RaptorProjectionLoader::class.createType(listOf(
 					KTypeProjection.invariant(type),
 					KTypeProjection.invariant(this@RaptorAggregateComponent.idClass.starProjectedType),

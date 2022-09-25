@@ -22,13 +22,13 @@ class ConfigurationLifecycleTests {
 	@Test
 	fun testConfigurationAfterEndFails() {
 		raptor {
-			install(TextCollectionFeature)
+			install(TextCollectionPlugin)
 
 			val textCollection = componentRegistry.all(TextCollectionComponent.key)
 
-			install(object : RaptorFeature {
+			install(object : RaptorPlugin {
 
-				override fun RaptorFeatureConfigurationApplicationScope.applyConfiguration() {
+				override fun RaptorPluginCompletionScope.complete() {
 					assertFails {
 						componentRegistry.all(TextCollectionComponent.key)
 					}
@@ -43,7 +43,7 @@ class ConfigurationLifecycleTests {
 				}
 
 
-				override fun RaptorFeatureScope.installed() {}
+				override fun RaptorPluginInstallationScope.install() {}
 			})
 		}
 	}

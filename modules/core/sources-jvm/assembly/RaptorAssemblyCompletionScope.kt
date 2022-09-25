@@ -1,14 +1,11 @@
 package io.fluidsonic.raptor
 
 
-public interface RaptorConfigurationEndScope {
+public interface RaptorAssemblyCompletionScope : RaptorAssemblyScope {
 
 	@RaptorDsl
 	public val lazyContext: RaptorContext
 
 	@RaptorDsl
 	public val propertyRegistry: RaptorPropertyRegistry
-
-	@RaptorDsl
-	public fun RaptorComponent<*>.endConfiguration()
 }

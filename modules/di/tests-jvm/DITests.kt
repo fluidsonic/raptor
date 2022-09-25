@@ -9,7 +9,7 @@ class DITests {
 	@Test
 	fun testExplicit() {
 		val di = raptor {
-			install(RaptorDIFeature)
+			install(RaptorDIPlugin)
 			di {
 				provide<Foo> { FooImpl1 }
 				provide<Bar>(BarImpl1)
@@ -32,7 +32,7 @@ class DITests {
 	fun testLazyResolutionExplicit() {
 		var resolutionCount = 0
 		val di = raptor {
-			install(RaptorDIFeature)
+			install(RaptorDIPlugin)
 			di {
 				provide<Foo> { resolutionCount += 1; FooImpl1 }
 				provide(BarImpl1)
@@ -57,7 +57,7 @@ class DITests {
 	fun testLazyResolutionImplicit() {
 		var resolutionCount = 0
 		val di = raptor {
-			install(RaptorDIFeature)
+			install(RaptorDIPlugin)
 			di {
 				provide { resolutionCount += 1; FooImpl1 }
 				provide<Foo> { get<FooImpl1>() }
@@ -89,7 +89,7 @@ class DITests {
 		var overriddenResolutionCount = 0
 		var resolutionCount = 0
 		val di = raptor {
-			install(RaptorDIFeature)
+			install(RaptorDIPlugin)
 			di {
 				provide<Foo> { overriddenResolutionCount += 1; FooImpl2 }
 				provide { implResolutionCount += 1; FooImpl1 }
@@ -123,7 +123,7 @@ class DITests {
 	@Test
 	fun testOverrideExplicit() {
 		val di = raptor {
-			install(RaptorDIFeature)
+			install(RaptorDIPlugin)
 			di {
 				provide<Foo> { FooImpl1 }
 				provide<Foo> { FooImpl2 }
@@ -143,7 +143,7 @@ class DITests {
 	@Test
 	fun testOverrideImplicit() {
 		val di = raptor {
-			install(RaptorDIFeature)
+			install(RaptorDIPlugin)
 			di {
 				provide { FooImpl1 }
 				provide<Foo> { get<FooImpl1>() }
@@ -176,7 +176,7 @@ class DITests {
 	@Test
 	fun testOverrideImplicitWithReverseResolution() {
 		val di = raptor {
-			install(RaptorDIFeature)
+			install(RaptorDIPlugin)
 			di {
 				provide { FooImpl1 }
 				provide<Foo> { get<FooImpl1>() }

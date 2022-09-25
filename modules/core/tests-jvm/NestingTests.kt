@@ -9,7 +9,8 @@ class NestingTests {
 	@Test
 	fun testNesting() {
 		val raptor = raptor {
-			install(NodeFeature) {
+			install(NodePlugin)
+			nodes {
 				val cNode = node("a").node("b").node("c")
 				cNode.node("d")
 

@@ -6,12 +6,12 @@ import io.fluidsonic.raptor.di.*
 private val lifecycleComponentKey = RaptorComponentKey<RaptorLifecycleComponent>("lifecycle")
 
 
-public object RaptorLifecycleFeature : RaptorFeature {
+public object RaptorLifecyclePlugin : RaptorPlugin {
 
-	override fun RaptorFeatureScope.installed() {
+	override fun RaptorPluginInstallationScope.install() {
 		componentRegistry.register(lifecycleComponentKey, RaptorLifecycleComponent())
 
-		ifFeature(RaptorDIFeature) {
+		optional(RaptorDIPlugin) {
 			di {
 				provide { get<RaptorLifecycle>().coroutineContext }
 				provide { context.lifecycle }
@@ -22,5 +22,5 @@ public object RaptorLifecycleFeature : RaptorFeature {
 
 
 @RaptorDsl
-public val RaptorTopLevelConfigurationScope.lifecycle: RaptorLifecycleComponent
-	get() = componentRegistry.oneOrNull(lifecycleComponentKey) ?: throw RaptorFeatureNotInstalledException(RaptorLifecycleFeature)
+public val RaptorAssemblyScope.lifecycle: RaptorLifecycleComponent
+	get() = componentRegistry.oneOrNull(lifecycleComponentKey) ?: throw RaptorPluginNotInstalledException(RaptorLifecyclePlugin)

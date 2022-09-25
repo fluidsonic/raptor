@@ -9,7 +9,7 @@ import kotlin.reflect.*
 
 internal class RaptorAggregateEventBson(
 	definitions: Set<RaptorAggregateDefinition<*, *, *, *>>,
-) : RaptorFeature {
+) : RaptorPlugin {
 
 	// FIXME Move to new RaptorAggregatesDefinition?
 	private val definitionsByDiscriminator: MutableMap<String, RaptorAggregateDefinition<*, *, *, *>> =
@@ -19,7 +19,7 @@ internal class RaptorAggregateEventBson(
 		definitions.associateByTo(hashMapOf()) { it.idClass }
 
 
-	override fun RaptorFeatureScope.installed() {
+	override fun RaptorFeatureScope.install() {
 		bson.definition<RaptorEvent<*, *>> {
 			decode {
 				var aggregateId: RaptorAggregateId? = null

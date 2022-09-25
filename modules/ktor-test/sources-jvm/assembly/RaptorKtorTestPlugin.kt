@@ -5,11 +5,11 @@ import io.ktor.server.testing.*
 import kotlinx.coroutines.*
 
 
-public object RaptorKtorTestFeature : RaptorFeature {
+public object RaptorKtorTestPlugin : RaptorPlugin {
 
 	@Suppress("INVISIBLE_MEMBER")
-	override fun RaptorFeatureScope.installed() {
-		install(RaptorKtorFeature)
+	override fun RaptorPluginInstallationScope.install() {
+		install(RaptorKtorPlugin)
 
 		ktor.servers.all {
 			engineEnvironmentFactory(::createTestEnvironment)

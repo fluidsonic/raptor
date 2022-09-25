@@ -146,7 +146,7 @@ public fun <Value : Any, TransformedValue : Any> RaptorSettings.ValueProvider<Va
 
 
 @RaptorDsl
-public fun RaptorRootComponent.install(settings: RaptorSettings) {
+public fun RaptorAssemblyInstallationScope.install(settings: RaptorSettings) {
 	componentRegistry.oneOrNull(componentKey)?.let {
 		error("Cannot set settings multiple times. Use RaptorSettings.lookup(…) to combine multiple settings.")
 	}
@@ -162,6 +162,6 @@ public fun RaptorGlobalDsl.settings(configure: RaptorSettings.Builder.() -> Unit
 
 
 @RaptorDsl
-public val RaptorTopLevelConfigurationScope.settings: RaptorSettings
+public val RaptorAssemblyScope.settings: RaptorSettings
 	get() = componentRegistry.root.oneOrNull(componentKey)?.settings
 		?: error("No settings have been registered. Use install(settings) inside raptor { … } before any other configuration.")

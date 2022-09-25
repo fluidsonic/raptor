@@ -1,19 +1,15 @@
 package io.fluidsonic.raptor
 
 
-internal class DefaultRootComponent : RaptorComponent.Base<RaptorRootComponent>(),
-	RaptorComponent<RaptorRootComponent>,
-	RaptorConfigurationEndScope,
-	RaptorFeatureConfigurationApplicationScope,
-	RaptorFeatureConfigurationScope,
-	RaptorRootComponent {
+// FIXME Note dependencies between plugins and finalize accordingly.
+internal class DefaultRootComponent : RaptorComponent.Base<RaptorRootComponent>(), RaptorComponent<RaptorRootComponent>, RaptorRootComponent {
 
+	private val componentRegistry = DefaultComponentRegistry()
 	private var configurationEnded = false
-	private val featureConfigurators: MutableMap<RaptorFeature, FeatureConfigurator> = hashMapOf()
-
-	override val componentRegistry = DefaultComponentRegistry()
-	override val lazyContext = LazyRootContext()
-	override val propertyRegistry = DefaultPropertyRegistry()
+	private val pluginConfigurators: MutableMap<RaptorPlugin, RaptorPluginConfigurator> = hashMapOf()
+	private val lazyContext = LazyRootContext()
+	private val propertyRegistry = DefaultPropertyRegistry()
+	private val scopes = Scopes()
 
 
 	init {
@@ -21,18 +17,39 @@ internal class DefaultRootComponent : RaptorComponent.Base<RaptorRootComponent>(
 	}
 
 
+	fun assemble(configure: RaptorAssemblyInstallationScope.() -> Unit): Raptor {
+		scopes.configure()
+
+		return endConfiguration()
+	}
+
+
+	private fun checkConfigurable() {
+		check(!configurationEnded) { "The configuration phase has already ended." }
+	}
+
+
+	private fun configurator(plugin: RaptorPlugin) =
+		pluginConfigurators.getOrPut(plugin) {
+			RaptorPluginConfigurator(
+				completionScope = scopes,
+				componentRegistry = componentRegistry,
+				installationScope = scopes,
+				plugin = plugin,
+			)
+		}
+
+
 	internal fun endConfiguration(): Raptor {
-		requireConfigurable()
+		checkConfigurable()
 
 		configurationEnded = true
 
-		for (configurator in featureConfigurators.values)
-			configurator.completeConfiguration()
+		// FIXME Finalize components by plugin.
+		for (configurator in pluginConfigurators.values)
+			configurator.complete()
 
-		componentRegistry.endConfiguration(scope = this)
-
-		for (configurator in featureConfigurators.values)
-			configurator.endConfiguration()
+		componentRegistry.endConfiguration(scope = scopes)
 
 		val context = DefaultRaptorContext(properties = propertyRegistry.toSet())
 		val raptor = DefaultRaptor(context = context)
@@ -43,126 +60,45 @@ internal class DefaultRootComponent : RaptorComponent.Base<RaptorRootComponent>(
 	}
 
 
-	private fun featureConfigurator(feature: RaptorFeature) =
-		featureConfigurators.getOrPut(feature) { FeatureConfigurator(feature) }
-
-
-	override fun ifFeature(feature: RaptorFeature, action: () -> Unit) {
-		requireConfigurable()
-		featureConfigurator(feature).configure(required = false, action = action)
-	}
-
-
-	override fun install(feature: RaptorFeature) {
-		requireConfigurable()
-		featureConfigurator(feature).install()
-	}
-
-
-	override fun <Feature : RaptorFeature.Configurable<ConfigurationScope>, ConfigurationScope : Any> install(
-		feature: Feature,
-		configuration: ConfigurationScope.() -> Unit,
-	) {
-		install(feature)
-
-		with(feature) {
-			beginConfiguration(configuration)
-		}
-	}
-
-
-	private fun requireConfigurable() {
-		check(!configurationEnded) { "The configuration phase has already ended." }
-	}
-
-
-	override fun requireFeature(feature: RaptorFeature, action: () -> Unit) {
-		requireConfigurable()
-		featureConfigurator(feature).configure(required = true, action = action)
-	}
-
-
-	override fun RaptorComponent<*>.endConfiguration() {
-		// TODO Refactor.
-		registration.endConfiguration(this@DefaultRootComponent)
-	}
-
-
 	override fun toString() =
 		"root"
 
 
-	private inner class FeatureConfigurator(private val feature: RaptorFeature) {
+	private inner class Scopes : RaptorPluginCompletionScope, RaptorPluginInstallationScope {
 
-		private var configurations: MutableList<() -> Unit>? = null
-		private var isInstalled = false
-		private var notInstalledException: RaptorFeatureNotInstalledException? = null
-
-
-		fun configure(required: Boolean, action: () -> Unit) {
-			when (isInstalled) {
-				true -> action()
-				false -> {
-					if (required && notInstalledException == null)
-						notInstalledException = RaptorFeatureNotInstalledException(feature)
-
-					ensureConfigurations().add(action)
-				}
-			}
+		override fun <Plugin : RaptorPlugin> complete(plugin: Plugin, action: RaptorPluginScope<Plugin>.() -> Unit) {
+			// FIXME
+			TODO("Not yet implemented")
 		}
 
 
-		private fun applyConfigurations() {
-			val configurations = configurations ?: return
-			this.configurations = null
+		override val componentRegistry: RaptorComponentRegistry
+			get() = this@DefaultRootComponent.componentRegistry
 
-			for (configure in configurations)
-				configure()
+
+		override fun install(plugin: RaptorPlugin) {
+			this@DefaultRootComponent.checkConfigurable()
+			this@DefaultRootComponent.configurator(plugin).install()
 		}
 
 
-		private fun beginConfiguration() {
-			with(feature) {
-				this@DefaultRootComponent.installed()
-			}
+		override val lazyContext: RaptorContext
+			get() = this@DefaultRootComponent.lazyContext
+
+
+		override fun optional(plugin: RaptorPlugin, action: () -> Unit) {
+			this@DefaultRootComponent.checkConfigurable()
+			this@DefaultRootComponent.configurator(plugin).configure(required = false, action = action)
 		}
 
 
-		fun completeConfiguration() {
-			if (!isInstalled) {
-				notInstalledException?.let { throw it }
-				return
-			}
-
-			with(feature) {
-				this@DefaultRootComponent.completeConfiguration()
-			}
-		}
+		override val propertyRegistry: RaptorPropertyRegistry
+			get() = this@DefaultRootComponent.propertyRegistry
 
 
-		fun endConfiguration() {
-			if (!isInstalled)
-				return
-
-			with(feature) {
-				this@DefaultRootComponent.applyConfiguration()
-			}
-		}
-
-
-		private fun ensureConfigurations() =
-			configurations ?: mutableListOf<() -> Unit>().also { configurations = it }
-
-
-		fun install() {
-			if (isInstalled)
-				return
-
-			isInstalled = true
-			notInstalledException = null
-
-			beginConfiguration()
-			applyConfigurations()
+		override fun require(plugin: RaptorPlugin, action: () -> Unit) {
+			this@DefaultRootComponent.checkConfigurable()
+			this@DefaultRootComponent.configurator(plugin).configure(required = true, action = action)
 		}
 	}
 }

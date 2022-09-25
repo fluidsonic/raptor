@@ -212,8 +212,6 @@ public fun RaptorComponentConfigurationEndScope<*>.graph(tag: Any? = null): Rapt
 			?.also { check(it.size <= 1) { if (tag != null) "Found multiple graphs with tag: $tag" else "Found multiple graphs" } }
 			?.firstOrNull()
 			?.let { component ->
-				component.endConfiguration()
-
 				return checkNotNull(component.graph)
 			}
 

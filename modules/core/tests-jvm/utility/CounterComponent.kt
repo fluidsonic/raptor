@@ -39,5 +39,5 @@ fun RaptorAssemblyQuery<CounterComponent>.increment() {
 
 
 @RaptorDsl
-val RaptorTopLevelConfigurationScope.counter
+val RaptorAssemblyScope.counter
 	get() = componentRegistry.all(CounterComponent.key)

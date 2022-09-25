@@ -21,5 +21,5 @@ public val Raptor.properties: RaptorPropertySet
 
 
 @RaptorDsl
-public fun raptor(configure: RaptorRootComponent.() -> Unit): Raptor =
-	DefaultRootComponent().apply(configure).endConfiguration()
+public fun raptor(configure: RaptorAssemblyInstallationScope.() -> Unit): Raptor =
+	DefaultRootComponent().assemble(configure)

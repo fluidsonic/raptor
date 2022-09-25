@@ -86,5 +86,5 @@ public fun RaptorAssemblyQuery<RaptorTransactionsComponent>.observe(action: Rapt
 
 // FIXME (includeNested = false)
 @RaptorDsl
-public val RaptorTopLevelConfigurationScope.transactions: RaptorTransactionsComponent
-	get() = componentRegistry.oneOrNull(Keys.transactionsComponent) ?: throw RaptorFeatureNotInstalledException(RaptorTransactionFeature)
+public val RaptorAssemblyScope.transactions: RaptorTransactionsComponent
+	get() = componentRegistry.oneOrNull(Keys.transactionsComponent) ?: throw RaptorPluginNotInstalledException(RaptorTransactionPlugin)

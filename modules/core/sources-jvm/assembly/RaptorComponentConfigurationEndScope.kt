@@ -1,11 +1,8 @@
 package io.fluidsonic.raptor
 
 
-public interface RaptorComponentConfigurationEndScope<Component : RaptorComponent<Component>> : RaptorConfigurationEndScope {
+public interface RaptorComponentConfigurationEndScope<Component : RaptorComponent<Component>> : RaptorAssemblyCompletionScope {
 
 	@RaptorDsl
 	public val component: Component
-
-	@RaptorDsl
-	public val componentRegistry: RaptorComponentRegistry
 }

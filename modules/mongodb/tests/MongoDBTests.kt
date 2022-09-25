@@ -12,9 +12,9 @@ class MongoDBTests {
 	@Test
 	fun testDefaultCodecs() {
 		val raptor = raptor {
-			install(RaptorBsonFeature) {
-				includeMongoClientDefaultCodecs()
-			}
+			install(RaptorBsonPlugin)
+
+			bson.includeMongoClientDefaultCodecs()
 		}
 
 		val bson = raptor.context.bson

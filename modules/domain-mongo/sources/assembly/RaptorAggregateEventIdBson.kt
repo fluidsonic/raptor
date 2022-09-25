@@ -5,9 +5,9 @@ import io.fluidsonic.raptor.bson.*
 import io.fluidsonic.raptor.cqrs.*
 
 
-internal object RaptorAggregateEventIdBson : RaptorFeature {
+internal object RaptorAggregateEventIdBson : RaptorPlugin {
 
-	override fun RaptorFeatureScope.installed() {
+	override fun RaptorFeatureScope.install() {
 		bson.definition {
 			decode {
 				RaptorEventId(reader.objectId().toString())

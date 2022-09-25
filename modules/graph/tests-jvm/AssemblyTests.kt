@@ -11,7 +11,7 @@ class AssemblyTests {
 	@Test
 	fun testDefinitions() {
 		val raptor = raptor {
-			install(RaptorGraphFeature)
+			install(RaptorGraphPlugin)
 
 			graphs.new {
 				tag("A")
@@ -43,8 +43,8 @@ class AssemblyTests {
 	@Test
 	fun testDI() {
 		val raptor = raptor {
-			install(RaptorDIFeature)
-			install(RaptorGraphFeature)
+			install(RaptorDIPlugin)
+			install(RaptorGraphPlugin)
 
 			graphs.new().tag("A")
 
@@ -58,7 +58,7 @@ class AssemblyTests {
 	@Test
 	fun testIncludeDefaultDefinitions() {
 		val raptor = raptor {
-			install(RaptorGraphFeature)
+			install(RaptorGraphPlugin)
 
 			graphs.new {
 				tag("A")
@@ -99,7 +99,7 @@ class AssemblyTests {
 		var count = 0
 
 		val raptor = raptor {
-			install(RaptorGraphFeature)
+			install(RaptorGraphPlugin)
 
 			graphs.new()
 			graphs.new {}
@@ -126,7 +126,7 @@ class AssemblyTests {
 		var dTagged = 0
 
 		val raptor = raptor {
-			install(RaptorGraphFeature)
+			install(RaptorGraphPlugin)
 
 			graphs.new().tag("A")
 			graphs.new {

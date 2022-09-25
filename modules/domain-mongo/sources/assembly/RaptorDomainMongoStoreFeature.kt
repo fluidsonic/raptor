@@ -5,13 +5,13 @@ import io.fluidsonic.raptor.bson.*
 import io.fluidsonic.raptor.cqrs.*
 
 
-public object RaptorDomainMongoFeature : RaptorFeature {
+public object RaptorDomainMongoPlugin : RaptorPlugin {
 
-	override fun RaptorFeatureScope.installed() {
-		requireFeature(RaptorDomainFeature)
-		// requireFeature(RaptorMongoFeature) // FIXME
+	override fun RaptorPluginInstallationScope.install() {
+		require(RaptorDomainPlugin)
+		// require(RaptorMongoPlugin) // FIXME
 
-		requireFeature(RaptorBsonFeature) {
+		require(RaptorBsonPlugin) {
 			install(RaptorAggregateEventIdBson)
 		}
 	}

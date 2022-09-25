@@ -5,8 +5,8 @@ import io.fluidsonic.raptor.*
 
 // FIXME tx sub managers
 internal val RaptorContext.aggregateManager: RaptorAggregateManager
-	get() = properties[Keys.aggregateManagerProperty] ?: throw RaptorFeatureNotInstalledException(RaptorDomainFeature)
+	get() = properties[Keys.aggregateManagerProperty] ?: throw RaptorPluginNotInstalledException(RaptorDomainPlugin)
 
 
 public val RaptorContext.domain: RaptorDomain
-	get() = properties[Keys.domainProperty] ?: throw RaptorFeatureNotInstalledException(RaptorDomainFeature)
+	get() = properties[Keys.domainProperty] ?: throw RaptorPluginNotInstalledException(RaptorDomainPlugin)

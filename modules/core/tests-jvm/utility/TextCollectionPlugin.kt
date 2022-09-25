@@ -3,9 +3,9 @@ package tests
 import io.fluidsonic.raptor.*
 
 
-object TextCollectionFeature : RaptorFeature {
+object TextCollectionPlugin : RaptorPlugin {
 
-	override fun RaptorFeatureScope.installed() {
+	override fun RaptorPluginInstallationScope.install() {
 		componentRegistry.register(TextCollectionComponent.key, TextCollectionComponent())
 	}
 

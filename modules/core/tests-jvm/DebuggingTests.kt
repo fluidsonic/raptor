@@ -39,18 +39,20 @@ class DebuggingTests {
 	@Test
 	fun testRegistriesToString() {
 		raptor {
-			install(TextCollectionFeature)
+			install(TextCollectionPlugin)
 			textCollection.all {
 				append("foo")
 			}
 
-			install(CounterFeature) {
+			install(CounterPlugin)
+			counter {
 				increment()
 
 				extensions[anyComponentExtensionKey] = "counter extension"
 			}
 
-			install(NodeFeature) {
+			install(NodePlugin)
+			nodes {
 				node("a") {
 					node("a1")
 					node("a2")
@@ -61,12 +63,12 @@ class DebuggingTests {
 				node("c")
 			}
 
-			requireFeature(NodeFeature) {
-				requireFeature(CounterFeature) {
-					requireFeature(TextCollectionFeature) {
-						install(object : RaptorFeature {
+			require(NodePlugin) {
+				require(CounterPlugin) {
+					require(TextCollectionPlugin) {
+						install(object : RaptorPlugin {
 
-							override fun RaptorFeatureConfigurationApplicationScope.applyConfiguration() {
+							override fun RaptorPluginCompletionScope.complete() {
 								assertEquals(
 									expected = """
 							[component registry] ->
@@ -114,7 +116,7 @@ class DebuggingTests {
 							}
 
 
-							override fun RaptorFeatureScope.installed() {
+							override fun RaptorPluginInstallationScope.install() {
 								componentRegistry.register(DummyComponent.key, DummyComponent("z"))
 								componentRegistry.register(DummyComponent.key, DummyComponent("1").apply {
 									extensions[anyComponentExtensionKey] = "dummy extension"
@@ -135,12 +137,13 @@ class DebuggingTests {
 	@Test
 	fun testRaptorToString() {
 		val raptor = raptor {
-			install(TextCollectionFeature)
+			install(TextCollectionPlugin)
 			textCollection.all {
 				append("foo")
 			}
 
-			install(CounterFeature) {
+			install(CounterPlugin)
+			counter {
 				increment()
 			}
 		}

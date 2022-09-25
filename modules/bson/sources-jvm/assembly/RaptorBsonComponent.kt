@@ -156,4 +156,4 @@ public fun RaptorAssemblyQuery<RaptorBsonComponent>.providers(
 
 
 public val RaptorContext.bson: RaptorBson
-	get() = properties[bsonPropertyKey] ?: throw RaptorFeatureNotInstalledException(RaptorBsonFeature)
+	get() = properties[bsonPropertyKey] ?: throw RaptorPluginNotInstalledException(RaptorBsonPlugin)

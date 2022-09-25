@@ -6,9 +6,9 @@ import io.fluidsonic.raptor.di.*
 private val jobComponentKey = RaptorComponentKey<RaptorJobsComponent>("jobs")
 
 
-public object RaptorJobsFeature : RaptorFeature {
+public object RaptorJobsPlugin : RaptorPlugin {
 
-	override fun RaptorFeatureConfigurationScope.completeConfiguration() {
+	override fun RaptorPluginCompletionScope.complete() {
 		val component = componentRegistry.one(jobComponentKey)
 		val registry = component.complete()
 
@@ -16,12 +16,12 @@ public object RaptorJobsFeature : RaptorFeature {
 	}
 
 
-	override fun RaptorFeatureScope.installed() {
+	override fun RaptorPluginInstallationScope.install() {
 		componentRegistry.register(jobComponentKey, RaptorJobsComponent())
 	}
 }
 
 
 @RaptorDsl
-public val RaptorTopLevelConfigurationScope.jobs: RaptorJobsComponent
-	get() = componentRegistry.oneOrNull(jobComponentKey) ?: throw RaptorFeatureNotInstalledException(RaptorJobsFeature)
+public val RaptorAssemblyScope.jobs: RaptorJobsComponent
+	get() = componentRegistry.oneOrNull(jobComponentKey) ?: throw RaptorPluginNotInstalledException(RaptorJobsPlugin)

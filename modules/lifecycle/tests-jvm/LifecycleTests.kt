@@ -17,10 +17,10 @@ class LifecycleTests {
 	@Test
 	fun testLifecycle() = runTest {
 		val raptor = raptor {
-			install(RaptorLifecycleFeature)
-			install(StartableFeature) {
-				delayInMilliseconds = 100
-			}
+			install(RaptorLifecyclePlugin)
+			install(StartablePlugin)
+
+			startable.delayInMilliseconds = 100
 		}
 
 		val lifecycle = raptor.lifecycle
@@ -92,10 +92,10 @@ class LifecycleTests {
 	@Test
 	fun testLifecycleWaitsForActions() = runTest {
 		val raptor = raptor {
-			install(RaptorLifecycleFeature)
-			install(StartableFeature) {
-				delayInMilliseconds = 1_000L
-			}
+			install(RaptorLifecyclePlugin)
+			install(StartablePlugin)
+
+			startable.delayInMilliseconds = 1_000L
 		}
 
 		val lifecycle = raptor.lifecycle

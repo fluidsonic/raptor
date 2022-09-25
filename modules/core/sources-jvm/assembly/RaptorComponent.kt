@@ -23,5 +23,12 @@ public interface RaptorComponent<Component : RaptorComponent<Component>> : Rapto
 
 		@RaptorDsl
 		final override val extensions: RaptorComponentExtensionSet = DefaultComponentExtensionSet()
+
+
+		@RaptorDsl
+		@Suppress("UNCHECKED_CAST")
+		final override fun each(configure: Component.() -> Unit) {
+			(this as Component).configure()
+		}
 	}
 }

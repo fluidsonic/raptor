@@ -246,4 +246,4 @@ internal class RaptorKtorServerImpl(
 
 internal val Application.raptorServerImpl
 	get() = attributes.getOrNull(RaptorKtorServerImpl.attributeKey)
-		?: error("You must install ${RaptorKtorFeature::class.simpleName} for enabling Raptor functionality.")
+		?: error("You must install ${RaptorKtorPlugin::class.simpleName} for enabling Raptor functionality.")

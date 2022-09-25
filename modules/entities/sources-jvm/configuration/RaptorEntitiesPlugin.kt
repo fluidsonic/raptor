@@ -4,19 +4,19 @@ import io.fluidsonic.raptor.di.*
 import io.fluidsonic.raptor.ktor.*
 
 
-public object RaptorEntitiesFeature : RaptorFeature {
+public object RaptorEntitiesPlugin : RaptorPlugin {
 
-	override fun RaptorFeatureConfigurationScope.completeConfiguration() {
+	override fun RaptorPluginCompletionScope.complete() {
 		val resolverTypes = componentRegistry.oneOrNull(RaptorEntitiesComponent.key)?.resolverTypes.orEmpty()
 
 		// FIXME
-		ifFeature(RaptorDIFeature) {
+		complete(RaptorDIPlugin) {
 			di.provide<RaptorEntityResolver<RaptorEntity, RaptorEntityId>> {
 				RaptorAnyEntityResolver(context = get(), resolverTypes = resolverTypes)
 			}
 		}
 
-		ifFeature(RaptorKtorFeature) {
+		complete(RaptorKtorPlugin) {
 			// ifInstalled(raptorGraphFeatureId) { FIXME make compileOnly
 			// FIXME
 //			graphs.definitions(
@@ -26,9 +26,12 @@ public object RaptorEntitiesFeature : RaptorFeature {
 			// }
 		}
 	}
+
+
+	override fun RaptorPluginInstallationScope.install() {}
 }
 
 
 @RaptorDsl
-public val RaptorTopLevelConfigurationScope.entities: RaptorEntitiesComponent
+public val RaptorAssemblyScope.entities: RaptorEntitiesComponent
 	get() = componentRegistry.oneOrRegister(RaptorEntitiesComponent.key, ::RaptorEntitiesComponent)

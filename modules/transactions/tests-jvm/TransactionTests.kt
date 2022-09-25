@@ -16,7 +16,7 @@ class TransactionTests {
 	@Test
 	fun testConfigurationWithoutInstallation() {
 		raptor {
-			install(RaptorTransactionFeature)
+			install(RaptorTransactionPlugin)
 
 			transactions {
 				onCreate {
@@ -30,8 +30,8 @@ class TransactionTests {
 	@Test
 	fun testCustomTransactionGeneration() {
 		val raptor = raptor {
-			install(RaptorTransactionFeature)
-			install(RequestFeature)
+			install(RaptorTransactionPlugin)
+			install(RequestPlugin)
 
 			transactions {
 				onCreate {
@@ -67,7 +67,7 @@ class TransactionTests {
 	@Test
 	fun testInstallationWithoutConfiguration() {
 		raptor {
-			install(RaptorTransactionFeature)
+			install(RaptorTransactionPlugin)
 		}
 	}
 
@@ -75,7 +75,7 @@ class TransactionTests {
 	@Test
 	fun testNestedTransactionCreation() {
 		val raptor = raptor {
-			install(RaptorTransactionFeature)
+			install(RaptorTransactionPlugin)
 
 			transactions {
 				onCreate {
@@ -108,7 +108,7 @@ class TransactionTests {
 	@Test
 	fun testRaptorExtensions() = runTest {
 		val raptor = raptor {
-			install(RaptorTransactionFeature)
+			install(RaptorTransactionPlugin)
 		}
 
 		@Suppress("USELESS_IS_CHECK")
@@ -124,7 +124,7 @@ class TransactionTests {
 	@Test
 	fun testRaptorContextExtensions() = runTest {
 		val raptor = raptor {
-			install(RaptorTransactionFeature)
+			install(RaptorTransactionPlugin)
 		}
 
 		@Suppress("USELESS_IS_CHECK")
@@ -139,7 +139,7 @@ class TransactionTests {
 	@Test
 	fun testRaptorScopeExtensions() = runTest {
 		val raptor = raptor {
-			install(RaptorTransactionFeature)
+			install(RaptorTransactionPlugin)
 		}
 
 		raptor.context.transaction {
@@ -152,7 +152,7 @@ class TransactionTests {
 	@Test
 	fun testTransactionCreation() {
 		val raptor = raptor {
-			install(RaptorTransactionFeature)
+			install(RaptorTransactionPlugin)
 
 			transactions {
 				var lastId = 0

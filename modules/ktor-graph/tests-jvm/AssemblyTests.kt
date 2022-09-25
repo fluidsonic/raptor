@@ -12,8 +12,8 @@ class AssemblyTests {
 	@Test
 	fun testSchemaRoute() {
 		val raptor = raptor {
-			install(RaptorGraphFeature)
-			install(RaptorKtorFeature)
+			install(RaptorGraphPlugin)
+			install(RaptorKtorPlugin)
 
 			graphs.new()
 

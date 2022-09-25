@@ -8,13 +8,13 @@ import io.fluidsonic.raptor.mongo.*
 import io.ktor.http.*
 
 
-public object RaptorQuickstartFeature : RaptorFeature {
+public object RaptorQuickstartPlugin : RaptorPlugin {
 
-	override fun RaptorFeatureScope.installed() {
-		install(RaptorBsonFeature)
-		install(RaptorDIFeature)
-		install(RaptorEntitiesFeature)
-		install(RaptorKtorFeature)
+	override fun RaptorFeatureScope.install() {
+		install(RaptorBsonPlugin)
+		install(RaptorDIPlugin)
+		install(RaptorEntitiesPlugin)
+		install(RaptorKtorPlugin)
 
 		bson {
 			includeDefaultDefinitions()
