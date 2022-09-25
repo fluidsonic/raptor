@@ -29,6 +29,7 @@ public object RaptorDomainPlugin : RaptorPluginWithConfiguration<RaptorDomain> {
 
 		optional(RaptorDIPlugin) {
 			// FIXME di should use properties only
+			di.provide<RaptorAggregateCommandExecutor> { context.aggregateManager }
 			di.provide<RaptorAggregateEventStream> { DefaultAggregateEventStream() }
 			di.provide<RaptorAggregateProjectionEventStream> { DefaultAggregateProjectionEventStream() }
 		}
