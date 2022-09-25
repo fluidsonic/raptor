@@ -17,7 +17,6 @@ public object RaptorDomainFeature : RaptorFeature {
 				clock = Clock.System, // FIXME
 				idFactory = { RaptorEventId("x") }, // FIXME
 			),
-			store = MemoryAggregateStore(),
 		))
 		propertyRegistry.register(Keys.domainProperty, domain)
 	}
@@ -30,6 +29,14 @@ public object RaptorDomainFeature : RaptorFeature {
 			// FIXME di should use properties only
 			di.provide<RaptorAggregateEventStream> { DefaultAggregateEventStream() }
 			di.provide<RaptorAggregateProjectionEventStream> { DefaultAggregateProjectionEventStream() }
+		}
+
+		requireFeature(RaptorLifecycleFeature) {
+			// FIXME Delay onStop until manager & store have settled.
+
+			lifecycle.onStart {
+				context.aggregateManager.load()
+			}
 		}
 
 		requireFeature(RaptorTransactionFeature) {

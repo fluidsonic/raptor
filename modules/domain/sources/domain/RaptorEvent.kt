@@ -3,8 +3,8 @@ package io.fluidsonic.raptor.cqrs
 import io.fluidsonic.time.*
 
 
+// FIXME rn to RaptorAggregateEvent?
 public data class RaptorEvent<
-	// FIXME RaptorDomainEvent
 	out AggregateId : RaptorAggregateId,
 	out AggregateEvent : RaptorAggregateEvent<AggregateId>,
 	>(

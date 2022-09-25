@@ -1,6 +1,7 @@
 package io.fluidsonic.raptor.cqrs
 
 import kotlin.reflect.*
+import kotlin.reflect.full.*
 
 
 public data class RaptorAggregateDefinition<
@@ -19,17 +20,21 @@ public data class RaptorAggregateDefinition<
 	val idClass: KClass<Id>,
 ) {
 
-	private val commandDefinitionsByCommandClass: Map<KClass<out Command>, RaptorAggregateCommandDefinition<Id, out Command>> =
+	private val commandDefinitionsByClass: Map<KClass<out Command>, RaptorAggregateCommandDefinition<Id, out Command>> =
 		commandDefinitions.associateByTo(hashMapOf()) { it.commandClass }
 
-
-	private val eventDefinitionsByEventClass: Map<KClass<out Event>, RaptorAggregateEventDefinition<Id, out Event>> =
+	private val eventDefinitionsByClass: Map<KClass<out Event>, RaptorAggregateEventDefinition<Id, out Event>> =
 		eventDefinitions.associateByTo(hashMapOf()) { it.eventClass }
+
+	private val eventDefinitionsByDiscriminator: Map<String, RaptorAggregateEventDefinition<Id, out Event>> =
+		eventDefinitions.associateByTo(hashMapOf()) { it.discriminator }
+
+	val idType: KType = idClass.starProjectedType
 
 
 	@Suppress("UNCHECKED_CAST")
 	public fun castOrNull(command: RaptorAggregateCommand<Id>): Command? {
-		if (!commandDefinitionsByCommandClass.contains(command::class as KClass<out Command>))
+		if (commandDefinition(command::class) == null)
 			return null
 
 		return command as Command
@@ -38,7 +43,7 @@ public data class RaptorAggregateDefinition<
 
 	@Suppress("UNCHECKED_CAST")
 	public fun castOrNull(event: RaptorAggregateEvent<Id>): Event? {
-		if (!eventDefinitionsByEventClass.contains(event::class as KClass<out Event>))
+		if (changeDefinition(event::class) == null)
 			return null
 
 		return event as Event
@@ -52,4 +57,22 @@ public data class RaptorAggregateDefinition<
 
 		return event as RaptorEvent<Id, Event>
 	}
+
+
+	@Suppress("UNCHECKED_CAST")
+	public fun <TEvent : RaptorAggregateEvent<Id>> changeDefinition(
+		changeClass: KClass<out TEvent>,
+	): RaptorAggregateEventDefinition<Id, out Event>? =
+		eventDefinitionsByClass[changeClass as KClass<out Event>]
+
+
+	public fun changeDefinition(discriminator: String): RaptorAggregateEventDefinition<Id, out Event>? =
+		eventDefinitionsByDiscriminator[discriminator]
+
+
+	@Suppress("UNCHECKED_CAST")
+	public fun <TCommand : RaptorAggregateCommand<Id>> commandDefinition(
+		commandClass: KClass<out TCommand>,
+	): RaptorAggregateCommandDefinition<Id, out Command>? =
+		commandDefinitionsByClass[commandClass as KClass<out Command>]
 }

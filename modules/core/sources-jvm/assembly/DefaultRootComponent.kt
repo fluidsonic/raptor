@@ -118,9 +118,6 @@ internal class DefaultRootComponent : RaptorComponent.Base<RaptorRootComponent>(
 
 			for (configure in configurations)
 				configure()
-
-			// Configurations may have added new configurations.
-			applyConfigurations()
 		}
 
 
@@ -165,6 +162,7 @@ internal class DefaultRootComponent : RaptorComponent.Base<RaptorRootComponent>(
 			notInstalledException = null
 
 			beginConfiguration()
+			applyConfigurations()
 		}
 	}
 }

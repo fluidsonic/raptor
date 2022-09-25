@@ -10,10 +10,20 @@ public class RaptorDomainComponent internal constructor(
 
 	@RaptorDsl
 	public val aggregates: RaptorAggregatesComponent
-		get() = componentRegistry.oneOrRegister(Keys.aggregatesComponent) { RaptorAggregatesComponent(topLevelScope = topLevelScope) }
+		get() = componentRegistry.one(Keys.aggregatesComponent)
 
 
 	// FIXME rework & standardize
 	internal fun complete(): RaptorDomain =
-		RaptorDomain(aggregateDefinitions = componentRegistry.oneOrNull(Keys.aggregatesComponent)?.complete().orEmpty())
+		RaptorDomain(aggregates = aggregates.complete())
+
+
+	override fun RaptorComponentConfigurationStartScope.onConfigurationStarted() {
+		componentRegistry.register(Keys.aggregatesComponent, RaptorAggregatesComponent(topLevelScope = topLevelScope))
+	}
 }
+
+
+@RaptorDsl
+public val RaptorAssemblyQuery<RaptorDomainComponent>.aggregates: RaptorAssemblyQuery<RaptorAggregatesComponent>
+	get() = map { it.aggregates }

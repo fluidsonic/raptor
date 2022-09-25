@@ -5,19 +5,20 @@ package io.fluidsonic.raptor.cqrs
 internal class DefaultAggregateManager(
 	private val domain: RaptorDomain,
 	private val eventFactory: RaptorEventFactory,
-	private val store: RaptorAggregateStore,
 ) : RaptorAggregateManager {
 
 	private val controllers: MutableMap<RaptorAggregateId, RaptorAggregateController<*>> = hashMapOf()
-	private val pendingEvents: MutableList<RaptorEvent<*, *>> = mutableListOf()
+	private var pendingEvents: MutableList<RaptorEvent<*, *>> = mutableListOf()
 
 
 	override suspend fun commit() {
 		if (pendingEvents.isEmpty())
 			return
 
-		store.add(pendingEvents) // FIXME copy?
+		val pendingEvents = pendingEvents
+		this.pendingEvents = mutableListOf()
 
+		domain.aggregates.store.add(pendingEvents) // FIXME copy?
 		// FIXME event bus
 	}
 
@@ -31,7 +32,7 @@ internal class DefaultAggregateManager(
 	private fun <Id : RaptorAggregateId> createController(id: Id): RaptorAggregateController<Id> =
 		DefaultAggregateController(
 			// Seriously? Isn't there a better way?
-			definition = domain.aggregateDefinition(id) as RaptorAggregateDefinition<
+			definition = domain.aggregates.definition(id) as RaptorAggregateDefinition<
 				RaptorAggregate<RaptorAggregateId, RaptorAggregateCommand<RaptorAggregateId>, RaptorAggregateEvent<RaptorAggregateId>>,
 				RaptorAggregateId,
 				RaptorAggregateCommand<RaptorAggregateId>,
@@ -48,7 +49,7 @@ internal class DefaultAggregateManager(
 
 
 	override suspend fun load() {
-		store.load().collect { event ->
+		domain.aggregates.store.load().collect { event ->
 			controller(event.aggregateId).handle(event)
 		}
 	}

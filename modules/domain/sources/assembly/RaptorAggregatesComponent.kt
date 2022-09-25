@@ -10,14 +10,19 @@ public class RaptorAggregatesComponent internal constructor(
 ) : RaptorComponent.Base<RaptorAggregatesComponent>(),
 	RaptorComponentSet<RaptorAggregateComponent<*, *, *, *>> { // FIXME ok? conflicting Set/Query esp. as we remove Set
 
+	private var store: RaptorAggregateStore? = null
+
+
 	@RaptorDsl
 	override val all: RaptorAssemblyQuery<RaptorAggregateComponent<*, *, *, *>>
 		get() = componentRegistry.all(Keys.aggregateComponent).all
 
 
 	// FIXME rework
-	internal fun complete(): Set<RaptorAggregateDefinition<*, *, *, *>> =
-		componentRegistry.many(Keys.aggregateComponent).mapTo(hashSetOf()) { it.complete() }
+	internal fun complete() = RaptorDomain.Aggregates(
+		definitions = componentRegistry.many(Keys.aggregateComponent).mapTo(hashSetOf()) { it.complete() },
+		store = store ?: MemoryAggregateStore(), // FIXME no default?
+	)
 
 
 	@RaptorDsl
@@ -44,6 +49,14 @@ public class RaptorAggregatesComponent internal constructor(
 			idClass = idClass,
 			topLevelScope = topLevelScope,
 		).also { componentRegistry.register(Keys.aggregateComponent, it) }
+
+
+	@RaptorDsl
+	public fun store(store: RaptorAggregateStore) {
+		check(this.store == null) { "Cannot set multiple aggregate stores." }
+
+		this.store = store
+	}
 }
 
 
@@ -238,4 +251,12 @@ public inline fun <
 		factory = factory,
 		idClass = Id::class,
 	)
+}
+
+
+@RaptorDsl
+public fun RaptorAssemblyQuery<RaptorAggregatesComponent>.store(store: RaptorAggregateStore) {
+	each {
+		store(store)
+	}
 }

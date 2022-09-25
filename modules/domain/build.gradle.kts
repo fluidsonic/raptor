@@ -4,6 +4,7 @@ fluidLibraryModule(description = "FIXME") {
 	targets {
 		common {
 			dependencies {
+				api(project(":raptor-lifecycle"))
 				api(project(":raptor-transactions"))
 				api(fluid("time", Versions.fluid_time))
 				implementation(project(":raptor-di"))

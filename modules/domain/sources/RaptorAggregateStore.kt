@@ -3,8 +3,8 @@ package io.fluidsonic.raptor.cqrs
 import kotlinx.coroutines.flow.*
 
 
-internal interface RaptorAggregateStore {
+public interface RaptorAggregateStore {
 
-	suspend fun add(events: List<RaptorEvent<*, *>>)
-	fun load(): Flow<RaptorEvent<*, *>>
+	public suspend fun add(events: List<RaptorEvent<*, *>>)
+	public fun load(): Flow<RaptorEvent<*, *>>
 }

@@ -10,20 +10,5 @@ public suspend inline fun <Result> RaptorScope.transaction(block: RaptorTransact
 		callsInPlace(block, InvocationKind.EXACTLY_ONCE)
 	}
 
-	val transaction = context.transaction()
-	transaction.start()
-
-	val result = try {
-		with(transaction.context) {
-			block()
-		}
-	}
-	catch (error: Throwable) {
-		transaction.fail(error)
-		throw error
-	}
-
-	transaction.stop()
-
-	return result
+	return context.transaction().execute(block)
 }

@@ -18,7 +18,7 @@ internal class FunctionTransactionObserver(
 
 
 	override suspend fun onStop(context: RaptorTransactionContext) {
-		onStart?.invoke(context)
+		onStop?.invoke(context)
 	}
 }
 

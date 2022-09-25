@@ -14,6 +14,7 @@
             <option value="$PROJECT_DIR$/modules/core" />
             <option value="$PROJECT_DIR$/modules/di" />
             <option value="$PROJECT_DIR$/modules/domain" />
+            <option value="$PROJECT_DIR$/modules/domain-mongo" />
             <option value="$PROJECT_DIR$/modules/dsl" />
             <option value="$PROJECT_DIR$/modules/entities" />
             <option value="$PROJECT_DIR$/modules/entities-core" />
