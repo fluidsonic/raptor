@@ -255,22 +255,31 @@ internal class RaptorAssembly(
 
 			override fun install(plugin: RaptorPluginWithConfiguration<*>) {
 				check(plugin != this.plugin) { "A plugin cannot install itself." }
+				check(!this@Installation.isCompleting) { "Cannot install plugin $plugin once the assembly is completing." }
 
-				this@Installation.install(plugin)
+				val configurator = this@Installation.configurator(plugin)
+				configurator.install()
+				configurator.addDependent(this.plugin)
 			}
 
 
 			override fun optional(plugin: RaptorPluginWithConfiguration<*>, action: () -> Unit) {
 				check(plugin != this.plugin) { "A plugin cannot depend on itself." }
+				check(!this@Installation.isCompleting) { "Cannot configure plugin $plugin once the assembly is completing." }
 
-				this@Installation.optional(plugin, action)
+				val configurator = this@Installation.configurator(plugin)
+				configurator.configure(required = false, action = action)
+				configurator.addDependent(this.plugin)
 			}
 
 
 			override fun require(plugin: RaptorPluginWithConfiguration<*>, action: () -> Unit) {
 				check(plugin != this.plugin) { "A plugin cannot depend on itself." }
+				check(!this@Installation.isCompleting) { "Cannot configure plugin $plugin once the assembly is completing." }
 
-				this@Installation.require(plugin, action)
+				val configurator = this@Installation.configurator(plugin)
+				configurator.configure(required = true, action = action)
+				configurator.addDependent(this.plugin)
 			}
 		}
 	}
