@@ -22,5 +22,5 @@ public object RaptorLifecyclePlugin : RaptorPlugin {
 
 
 @RaptorDsl
-public val RaptorAssemblyScope.lifecycle: RaptorLifecycleComponent
+public val RaptorPluginScope<in RaptorLifecyclePlugin>.lifecycle: RaptorLifecycleComponent
 	get() = componentRegistry.oneOrNull(lifecycleComponentKey) ?: throw RaptorPluginNotInstalledException(RaptorLifecyclePlugin)

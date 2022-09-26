@@ -12,11 +12,15 @@ public object RaptorJobsPlugin : RaptorPlugin {
 		val component = componentRegistry.one(jobComponentKey)
 		val registry = component.complete()
 
-		di { provide(registry) }
+		configure(RaptorDIPlugin) {
+			di { provide(registry) }
+		}
 	}
 
 
 	override fun RaptorPluginInstallationScope.install() {
+		require(RaptorDIPlugin)
+
 		componentRegistry.register(jobComponentKey, RaptorJobsComponent())
 	}
 }

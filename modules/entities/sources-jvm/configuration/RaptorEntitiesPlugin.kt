@@ -10,7 +10,7 @@ public object RaptorEntitiesPlugin : RaptorPlugin {
 		val resolverTypes = componentRegistry.oneOrNull(RaptorEntitiesComponent.key)?.resolverTypes.orEmpty()
 
 		// FIXME
-		require(RaptorDIPlugin) {
+		configure(RaptorDIPlugin) {
 			di.provide<RaptorEntityResolver<RaptorEntity, RaptorEntityId>> {
 				RaptorAnyEntityResolver(context = get(), resolverTypes = resolverTypes)
 			}
@@ -27,7 +27,9 @@ public object RaptorEntitiesPlugin : RaptorPlugin {
 	}
 
 
-	override fun RaptorPluginInstallationScope.install() {}
+	override fun RaptorPluginInstallationScope.install() {
+		require(RaptorDIPlugin)
+	}
 }
 
 

@@ -12,18 +12,22 @@ public object RaptorJobsQuartzMongoPlugin : RaptorPlugin {
 	override fun RaptorPluginCompletionScope.complete() {
 		val configuration = jobs.extensions[configurationExtensionKey] ?: return
 
-		di.provide<RaptorJobScheduler> {
-			QuartzJobScheduler(
-				context = get(),
-				dispatcher = configuration.dispatcher,
-				database = configuration.database(this),
-				registry = get(),
-			)
+		configure(RaptorDIPlugin) {
+			di.provide<RaptorJobScheduler> {
+				QuartzJobScheduler(
+					context = get(),
+					dispatcher = configuration.dispatcher,
+					database = configuration.database(this),
+					registry = get(),
+				)
+			}
 		}
 
-		lifecycle {
-			onStart { di.get<RaptorJobScheduler>().castOrNull<QuartzJobScheduler>()?.start() }
-			onStop { di.get<RaptorJobScheduler>().castOrNull<QuartzJobScheduler>()?.stop() }
+		configure(RaptorLifecyclePlugin) {
+			lifecycle {
+				onStart { di.get<RaptorJobScheduler>().castOrNull<QuartzJobScheduler>()?.start() }
+				onStop { di.get<RaptorJobScheduler>().castOrNull<QuartzJobScheduler>()?.stop() }
+			}
 		}
 	}
 

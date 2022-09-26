@@ -18,5 +18,5 @@ public object RaptorDIPlugin : RaptorPlugin {
 
 
 @RaptorDsl
-public val RaptorAssemblyScope.di: RaptorDIComponent<*>
+public val RaptorPluginScope<in RaptorDIPlugin>.di: RaptorDIComponent<*>
 	get() = componentRegistry.oneOrNull(rootComponentKey) ?: throw RaptorPluginNotInstalledException(RaptorDIPlugin)
