@@ -15,7 +15,7 @@ internal class RaptorAssembly(
 			.let { installation ->
 				Completion(
 					componentRegistry = installation.componentRegistry,
-					plugins = installation.plugins,
+					pluginsAndDependents = installation.pluginsAndDependents,
 				)
 			}
 			.raptor
@@ -24,14 +24,16 @@ internal class RaptorAssembly(
 
 	private inner class Completion(
 		private val componentRegistry: DefaultComponentRegistry,
-		plugins: Set<RaptorPluginWithConfiguration<*>>,
+		pluginsAndDependents: Collection<Pair<RaptorPluginWithConfiguration<*>, Set<RaptorPluginWithConfiguration<*>>>>, // FIXME improve
 	) {
 
 		private val lazyContext = LazyRootContext()
 		private val propertyRegistry = DefaultPropertyRegistry()
 
 		private val pluginConfigurators: Map<RaptorPluginWithConfiguration<*>, PluginConfigurator<*, *>> =
-			plugins.associateWithTo(hashMapOf(), ::PluginConfigurator)
+			pluginsAndDependents.associateTo(hashMapOf()) { (plugin, dependents) ->
+				plugin to PluginConfigurator(plugin = plugin, dependents = dependents)
+			}
 
 		val raptor: Raptor
 
@@ -58,6 +60,7 @@ internal class RaptorAssembly(
 
 		private inner class PluginConfigurator<out Configuration : Any, Plugin : RaptorPluginWithConfiguration<Configuration>>(
 			val plugin: RaptorPluginWithConfiguration<Configuration>,
+			private val dependents: Set<RaptorPluginWithConfiguration<*>>,
 		) : RaptorPluginCompletionScope, RaptorPluginScope<RaptorPluginWithConfiguration<*>> {
 
 			private var configuration: Configuration? = null
@@ -96,6 +99,9 @@ internal class RaptorAssembly(
 				// TODO This is just a very basic protection. Improve.
 				check(!isCompleting) { "Plugin completion cycle detected." }
 				isCompleting = true
+
+				for (dependent in dependents)
+					requireConfigurator(dependent).complete()
 
 				// TODO In the future we could complete the components after the plugin and allow the plugin to force-complete using scope.completeComponents().
 				// FIXME Won't work properly. A component of the plugin might depend on plugin dependencies to be completed first.
@@ -169,10 +175,10 @@ internal class RaptorAssembly(
 		}
 
 
-		val plugins: Set<RaptorPluginWithConfiguration<*>>
+		val pluginsAndDependents: Collection<Pair<RaptorPluginWithConfiguration<*>, Set<RaptorPluginWithConfiguration<*>>>>
 			get() = pluginConfigurators.values
 				.filter { it.isInstalled }
-				.mapTo(hashSetOf()) { it.plugin }
+				.mapTo(hashSetOf()) { it.plugin to it.dependents.toHashSet() }
 
 
 		override fun require(plugin: RaptorPluginWithConfiguration<*>, action: () -> Unit) {
@@ -186,6 +192,7 @@ internal class RaptorAssembly(
 			val plugin: RaptorPluginWithConfiguration<*>,
 		) : RaptorPluginInstallationScope {
 
+			var dependents: MutableSet<RaptorPluginWithConfiguration<*>> = hashSetOf() // FIXME visiblity
 			private var notInstalledException: RaptorPluginNotInstalledException? = null
 			private var pendingActions: MutableList<() -> Unit>? = null
 
@@ -193,6 +200,13 @@ internal class RaptorAssembly(
 				private set
 
 			override val componentRegistry: RaptorComponentRegistry get() = this@Installation.componentRegistry
+
+
+			private fun addDependent(plugin: RaptorPluginWithConfiguration<*>) {
+				check(plugin != this.plugin) { "A plugin cannot depend on itself." }
+
+				dependents += plugin
+			}
 
 
 			private fun applyPendingActions() {
@@ -240,16 +254,22 @@ internal class RaptorAssembly(
 
 
 			override fun install(plugin: RaptorPluginWithConfiguration<*>) {
+				check(plugin != this.plugin) { "A plugin cannot install itself." }
+
 				this@Installation.install(plugin)
 			}
 
 
 			override fun optional(plugin: RaptorPluginWithConfiguration<*>, action: () -> Unit) {
+				check(plugin != this.plugin) { "A plugin cannot depend on itself." }
+
 				this@Installation.optional(plugin, action)
 			}
 
 
 			override fun require(plugin: RaptorPluginWithConfiguration<*>, action: () -> Unit) {
+				check(plugin != this.plugin) { "A plugin cannot depend on itself." }
+
 				this@Installation.require(plugin, action)
 			}
 		}
