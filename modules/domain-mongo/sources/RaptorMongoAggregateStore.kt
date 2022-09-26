@@ -7,7 +7,7 @@ import kotlinx.datetime.*
 
 
 // TODO Support horizontal scaling.
-public class MongoAggregateStore(
+public class RaptorMongoAggregateStore(
 	private val clock: Clock,
 	private val collection: MongoCollection<RaptorEvent<*, *>>,
 ) : RaptorAggregateStore {

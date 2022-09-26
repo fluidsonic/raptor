@@ -2,6 +2,7 @@ package io.fluidsonic.raptor.cqrs
 
 import io.fluidsonic.raptor.*
 import kotlin.reflect.*
+import kotlinx.coroutines.flow.*
 
 
 @RaptorDsl
@@ -19,9 +20,13 @@ public class RaptorAggregatesComponent internal constructor(
 
 
 	// FIXME rework
-	internal fun complete() = RaptorDomain.Aggregates(
+	internal fun complete(context: RaptorContext) = RaptorDomain.Aggregates(
 		definitions = componentRegistry.many(Keys.aggregateComponent).mapTo(hashSetOf()) { it.complete() },
-		store = store ?: MemoryAggregateStore(), // FIXME no default?
+		store = when (val store = store) {
+			null -> error("An aggregate store must be defined: domain.aggregates.store(…)")
+			DIStorePlaceholder -> DIAggregateStore(context = context)
+			else -> store
+		},
 	)
 
 
@@ -56,6 +61,27 @@ public class RaptorAggregatesComponent internal constructor(
 		check(this.store == null) { "Cannot set multiple aggregate stores." }
 
 		this.store = store
+	}
+
+
+	// FIXME hack
+	internal object DIStorePlaceholder : RaptorAggregateStore {
+
+		override suspend fun add(events: List<RaptorEvent<*, *>>) {
+			error("Placeholder.")
+		}
+
+		override fun load(): Flow<RaptorEvent<*, *>> {
+			error("Placeholder.")
+		}
+	}
+}
+
+
+@RaptorDsl
+public fun RaptorAssemblyQuery<RaptorAggregatesComponent>.diStore() {
+	each {
+		store(RaptorAggregatesComponent.DIStorePlaceholder)
 	}
 }
 

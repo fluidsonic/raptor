@@ -38,6 +38,9 @@ public object RaptorJobsQuartzMongoPlugin : RaptorPlugin {
 		require(RaptorDIPlugin)
 		require(RaptorLifecyclePlugin)
 	}
+
+
+	override fun toString(): String = "jobs-quartz-mongo"
 }
 
 

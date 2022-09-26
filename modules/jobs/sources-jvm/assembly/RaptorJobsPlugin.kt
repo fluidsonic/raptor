@@ -23,6 +23,9 @@ public object RaptorJobsPlugin : RaptorPlugin {
 
 		componentRegistry.register(jobComponentKey, RaptorJobsComponent())
 	}
+
+
+	override fun toString(): String = "jobs"
 }
 
 

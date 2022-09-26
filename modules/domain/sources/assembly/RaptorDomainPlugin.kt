@@ -9,7 +9,7 @@ import kotlinx.datetime.*
 public object RaptorDomainPlugin : RaptorPluginWithConfiguration<RaptorDomain> {
 
 	override fun RaptorPluginCompletionScope.complete(): RaptorDomain {
-		val domain = componentRegistry.one(Keys.domainComponent).complete()
+		val domain = componentRegistry.one(Keys.domainComponent).complete(context = lazyContext)
 
 		propertyRegistry.register(Keys.aggregateManagerProperty, DefaultAggregateManager(
 			domain = domain,

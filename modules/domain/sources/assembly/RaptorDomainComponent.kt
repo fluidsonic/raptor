@@ -14,8 +14,8 @@ public class RaptorDomainComponent internal constructor(
 
 
 	// FIXME rework & standardize
-	internal fun complete(): RaptorDomain =
-		RaptorDomain(aggregates = aggregates.complete())
+	internal fun complete(context: RaptorContext): RaptorDomain =
+		RaptorDomain(aggregates = aggregates.complete(context = context))
 
 
 	override fun RaptorComponentConfigurationStartScope.onConfigurationStarted() {

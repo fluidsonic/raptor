@@ -20,6 +20,9 @@ public object RaptorBsonPlugin : RaptorPlugin {
 			}
 		}
 	}
+
+
+	override fun toString(): String = "bson"
 }
 
 

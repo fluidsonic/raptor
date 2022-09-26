@@ -18,6 +18,9 @@ public object RaptorLifecyclePlugin : RaptorPlugin {
 			}
 		}
 	}
+
+
+	override fun toString(): String = "lifecycle"
 }
 
 

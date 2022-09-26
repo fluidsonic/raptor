@@ -5,8 +5,6 @@ internal class RaptorAssembly(
 	configure: RaptorAssemblyInstallationScope.() -> Unit,
 ) {
 
-	private var state = State.installation
-
 	val raptor: Raptor
 
 
@@ -94,14 +92,18 @@ internal class RaptorAssembly(
 
 
 			fun complete(): Configuration {
+				// TODO Cannot detect cycles here yet. Re-entry is expected for now.
+				for (dependent in dependents)
+					requireConfigurator(dependent).let { configurator ->
+						if (!configurator.isCompleting)
+							configurator.complete()
+					}
+
 				configuration?.let { return it }
 
 				// TODO This is just a very basic protection. Improve.
-				check(!isCompleting) { "Plugin completion cycle detected." }
+				check(!isCompleting) { "Plugin completion cycle detected: $plugin" }
 				isCompleting = true
-
-				for (dependent in dependents)
-					requireConfigurator(dependent).complete()
 
 				// TODO In the future we could complete the components after the plugin and allow the plugin to force-complete using scope.completeComponents().
 				// FIXME Won't work properly. A component of the plugin might depend on plugin dependencies to be completed first.
@@ -282,14 +284,6 @@ internal class RaptorAssembly(
 				configurator.addDependent(this.plugin)
 			}
 		}
-	}
-
-
-	private enum class State {
-
-		completed,
-		completion,
-		installation,
 	}
 }
 
