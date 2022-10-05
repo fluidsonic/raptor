@@ -8,3 +8,10 @@ import io.fluidsonic.raptor.transactions.*
 public fun <Id : RaptorAggregateId> RaptorTransactionScope.execute(id: Id, command: RaptorAggregateCommand<Id>) {
 	context.aggregateManager.execute(id, command)
 }
+
+
+// FIXME rm
+@RaptorDsl
+public suspend fun RaptorTransactionScope.commit() {
+	context.aggregateManager.commit()
+}

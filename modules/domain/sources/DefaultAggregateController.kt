@@ -8,7 +8,7 @@ internal class DefaultAggregateController<
 	Event : RaptorAggregateEvent<Id>,
 	>(
 	private val definition: RaptorAggregateDefinition<Aggregate, Id, Command, Event>,
-	private val eventFactory: RaptorEventFactory,
+	private val eventFactory: RaptorAggregateEventFactory,
 	private val id: Id,
 ) : RaptorAggregateController<Id> {
 

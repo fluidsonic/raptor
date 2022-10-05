@@ -2,6 +2,7 @@ package io.fluidsonic.raptor.cqrs
 
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.di.*
+import io.fluidsonic.raptor.transactions.*
 import kotlin.collections.set
 import kotlin.reflect.*
 import kotlin.reflect.full.*
@@ -24,7 +25,7 @@ public class RaptorAggregateComponent<
 
 	private val commandDefinitions: MutableMap<KClass<out Command>, RaptorAggregateCommandDefinition<Id, out Command>> = hashMapOf()
 	private val eventDefinitions: MutableMap<KClass<out Event>, RaptorAggregateEventDefinition<Id, out Event>> = hashMapOf()
-	private var projectorFactory: (() -> RaptorProjector.Incremental<*, Id, Event>)? = null
+	private var projectionDefinition: RaptorAggregateProjectionDefinition<*, *, Event>? = null
 
 
 	@RaptorDsl
@@ -45,6 +46,7 @@ public class RaptorAggregateComponent<
 			eventDefinitions = eventDefinitions.values.toHashSet(),
 			factory = factory,
 			idClass = idClass,
+			projectionDefinition = projectionDefinition,
 		)
 
 
@@ -64,17 +66,30 @@ public class RaptorAggregateComponent<
 
 	@RaptorInternalApi // FIXME
 	@RaptorDsl
-	public fun project(type: KType, projectorFactory: () -> RaptorProjector.Incremental<*, Id, Event>) {
-		check(this.projectorFactory == null) { "Cannot set multiple projector factories for aggregate $aggregateClass." }
+	public fun <Projection : RaptorAggregateProjection<Id>> _project(
+		projectionClass: KClass<Projection>, projectorFactory: () -> RaptorAggregateProjector.Incremental<Projection, *, Event>,
+	) {
+		check(this.projectionDefinition == null) { "Cannot set multiple projector factories for aggregate $aggregateClass." }
 
-		this.projectorFactory = projectorFactory
+		this.projectionDefinition =
+			RaptorAggregateProjectionDefinition(
+				factory = projectorFactory as () -> RaptorAggregateProjector.Incremental<RaptorAggregateProjection<RaptorAggregateProjectionId>, RaptorAggregateProjectionId, RaptorAggregateEvent<RaptorAggregateProjectionId>>,
+				idClass = idClass as KClass<RaptorAggregateProjectionId>,
+				projectionClass = projectionClass as KClass<RaptorAggregateProjection<RaptorAggregateProjectionId>>,
+			) as RaptorAggregateProjectionDefinition<*, *, Event>
 
 		with(topLevelScope) { // FIXME remove hack
 			optional(RaptorDIPlugin) {
-				di.provide(RaptorProjectionLoader::class.createType(listOf(
-					KTypeProjection.invariant(type),
+//				transactions { // FIXME
+				di.provide(RaptorAggregateProjectionLoader::class.createType(listOf(
+					KTypeProjection.invariant(projectionClass.starProjectedType),
 					KTypeProjection.invariant(this@RaptorAggregateComponent.idClass.starProjectedType),
-				))) { DefaultProjectionLoader<RaptorProjection<*>, RaptorProjectionId>() }
+				))) {
+					// FIXME Improve.
+					// FIXME (context as RaptorTransactionContext)
+					context.projectionLoader(this@RaptorAggregateComponent.idClass)
+				}
+//				}
 			}
 		}
 	}
@@ -112,21 +127,21 @@ public inline fun <reified Event : RaptorAggregateEvent<*>>
 
 @OptIn(RaptorInternalApi::class) // FIXME remove
 @RaptorDsl
-public fun <Projection : RaptorProjection<Id>, Id, Event : RaptorAggregateEvent<Id>>
+public fun <Projection : RaptorAggregateProjection<Id>, Id : RaptorAggregateProjectionId, Event : RaptorAggregateEvent<Id>>
 	RaptorAssemblyQuery<RaptorAggregateComponent<out RaptorAggregate<Id, *, Event>, Id, *, Event>>.project(
-	type: KType,
-	projectorFactory: () -> RaptorProjector.Incremental<Projection, Id, Event>,
-) where Id : RaptorAggregateId, Id : RaptorProjectionId {
+	projectionClass: KClass<Projection>,
+	projectorFactory: () -> RaptorAggregateProjector.Incremental<Projection, Id, Event>,
+) {
 	each {
-		project(type, projectorFactory)
+		_project(projectionClass, projectorFactory)
 	}
 }
 
 
 @RaptorDsl
-public inline fun <reified Projection : RaptorProjection<Id>, Id, Event : RaptorAggregateEvent<Id>>
+public inline fun <reified Projection : RaptorAggregateProjection<Id>, Id : RaptorAggregateProjectionId, Event : RaptorAggregateEvent<Id>>
 	RaptorAssemblyQuery<RaptorAggregateComponent<out RaptorAggregate<Id, *, Event>, Id, *, Event>>.project(
-	noinline projectorFactory: () -> RaptorProjector.Incremental<Projection, Id, Event>,
-) where Id : RaptorAggregateId, Id : RaptorProjectionId {
-	project<Projection, Id, Event>(typeOf<Projection>(), projectorFactory)
+	noinline projectorFactory: () -> RaptorAggregateProjector.Incremental<Projection, Id, Event>,
+) {
+	project(Projection::class, projectorFactory)
 }

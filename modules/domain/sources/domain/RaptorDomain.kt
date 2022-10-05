@@ -9,6 +9,7 @@ public data class RaptorDomain(
 
 	public data class Aggregates(
 		public val definitions: Set<RaptorAggregateDefinition<*, *, *, *>>,
+		public val eventFactory: RaptorAggregateEventFactory, // FIXME ok to have here?
 		public val store: RaptorAggregateStore, // FIXME ok to have here?
 	) {
 

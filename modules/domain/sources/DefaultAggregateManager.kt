@@ -4,7 +4,8 @@ package io.fluidsonic.raptor.cqrs
 // FIXME races, txs
 internal class DefaultAggregateManager(
 	private val domain: RaptorDomain,
-	private val eventFactory: RaptorEventFactory,
+	private val eventFactory: RaptorAggregateEventFactory,
+	private val fixme: DefaultAggregateProjectionLoaderManager, // FIXME
 ) : RaptorAggregateManager {
 
 	private val controllers: MutableMap<RaptorAggregateId, RaptorAggregateController<*>> = hashMapOf()
@@ -19,6 +20,10 @@ internal class DefaultAggregateManager(
 		this.pendingEvents = mutableListOf()
 
 		domain.aggregates.store.add(pendingEvents) // FIXME copy?
+
+		for (event in pendingEvents)
+			fixme.addEvent(event)
+
 		// FIXME event bus
 	}
 
@@ -51,6 +56,7 @@ internal class DefaultAggregateManager(
 	override suspend fun load() {
 		domain.aggregates.store.load().collect { event ->
 			controller(event.aggregateId).handle(event)
+			fixme.addEvent(event)
 		}
 	}
 }

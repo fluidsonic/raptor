@@ -18,6 +18,7 @@ public data class RaptorAggregateDefinition<
 	val eventDefinitions: Set<RaptorAggregateEventDefinition<Id, out Event>>,
 	val factory: RaptorAggregateFactory<Aggregate, Id>,
 	val idClass: KClass<Id>,
+	val projectionDefinition: RaptorAggregateProjectionDefinition<*, *, Event>? = null,
 ) {
 
 	private val commandDefinitionsByClass: Map<KClass<out Command>, RaptorAggregateCommandDefinition<Id, out Command>> =

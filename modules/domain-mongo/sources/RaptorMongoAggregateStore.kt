@@ -3,12 +3,10 @@ package io.fluidsonic.raptor.domain.mongo
 import io.fluidsonic.mongo.*
 import io.fluidsonic.raptor.cqrs.*
 import kotlinx.coroutines.flow.*
-import kotlinx.datetime.*
 
 
 // TODO Support horizontal scaling.
 public class RaptorMongoAggregateStore(
-	private val clock: Clock,
 	private val collection: MongoCollection<RaptorEvent<*, *>>,
 ) : RaptorAggregateStore {
 

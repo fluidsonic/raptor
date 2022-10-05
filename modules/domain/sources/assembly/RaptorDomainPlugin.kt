@@ -3,7 +3,6 @@ package io.fluidsonic.raptor.cqrs
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.di.*
 import io.fluidsonic.raptor.transactions.*
-import kotlinx.datetime.*
 
 
 public object RaptorDomainPlugin : RaptorPluginWithConfiguration<RaptorDomain> {
@@ -11,13 +10,17 @@ public object RaptorDomainPlugin : RaptorPluginWithConfiguration<RaptorDomain> {
 	override fun RaptorPluginCompletionScope.complete(): RaptorDomain {
 		val domain = componentRegistry.one(Keys.domainComponent).complete(context = lazyContext)
 
-		propertyRegistry.register(Keys.aggregateManagerProperty, DefaultAggregateManager(
+		val loaderManager = DefaultAggregateProjectionLoaderManager(
+			definitions = domain.aggregates.definitions.mapNotNull { it.projectionDefinition },
+		)
+		val aggregateManager = DefaultAggregateManager(
 			domain = domain,
-			eventFactory = DefaultEventFactory(
-				clock = Clock.System, // FIXME
-				idFactory = { RaptorEventId("x") }, // FIXME
-			),
-		))
+			eventFactory = domain.aggregates.eventFactory,
+			fixme = loaderManager,
+		)
+
+		propertyRegistry.register(Keys.aggregateManagerProperty, aggregateManager)
+		propertyRegistry.register(Keys.aggregateProjectionLoaderManagerProperty, loaderManager)
 		propertyRegistry.register(Keys.domainProperty, domain)
 
 		return domain

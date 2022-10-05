@@ -7,11 +7,16 @@ import kotlinx.datetime.*
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery<RaptorAggregatesComponent>.mongoStore(
-	clock: Clock,
-	collection: MongoCollection<RaptorEvent<*, *>>,
-) {
+public fun RaptorAssemblyQuery<RaptorAggregatesComponent>.mongoEventFactory(clock: Clock) {
 	each {
-		store(RaptorMongoAggregateStore(clock = clock, collection = collection))
+		eventFactory(RaptorMongoAggregateEventFactory(clock = clock))
+	}
+}
+
+
+@RaptorDsl
+public fun RaptorAssemblyQuery<RaptorAggregatesComponent>.mongoStore(collection: MongoCollection<RaptorEvent<*, *>>) {
+	each {
+		store(RaptorMongoAggregateStore(collection = collection))
 	}
 }

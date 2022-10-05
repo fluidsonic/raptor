@@ -1,14 +1,14 @@
-package io.fluidsonic.raptor.cqrs
+package io.fluidsonic.raptor.domain.mongo
 
+import io.fluidsonic.raptor.cqrs.*
 import kotlinx.datetime.*
+import org.bson.types.*
 
 
-internal class DefaultEventFactory(
+public class RaptorMongoAggregateEventFactory(
 	private val clock: Clock,
-	private val idFactory: RaptorEntityIdFactory<RaptorEventId>, // FIXME move this to Store?
-) : RaptorEventFactory {
+) : RaptorAggregateEventFactory {
 
-	// FIXME move this to Store?
 	override fun <Id : RaptorAggregateId, Event : RaptorAggregateEvent<Id>> create(
 		aggregateId: Id,
 		data: Event,
@@ -17,7 +17,7 @@ internal class DefaultEventFactory(
 		RaptorEvent(
 			aggregateId = aggregateId,
 			data = data,
-			id = idFactory.create(),
+			id = RaptorEventId(ObjectId.get().toString()),
 			timestamp = clock.now(),
 			version = version,
 		)

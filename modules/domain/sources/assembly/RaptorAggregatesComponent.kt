@@ -11,6 +11,7 @@ public class RaptorAggregatesComponent internal constructor(
 ) : RaptorComponent.Base<RaptorAggregatesComponent>(RaptorDomainPlugin),
 	RaptorComponentSet<RaptorAggregateComponent<*, *, *, *>> { // FIXME ok? conflicting Set/Query esp. as we remove Set
 
+	private var eventFactory: RaptorAggregateEventFactory? = null
 	private var store: RaptorAggregateStore? = null
 
 
@@ -22,12 +23,25 @@ public class RaptorAggregatesComponent internal constructor(
 	// FIXME rework
 	internal fun complete(context: RaptorContext) = RaptorDomain.Aggregates(
 		definitions = componentRegistry.many(Keys.aggregateComponent).mapTo(hashSetOf()) { it.complete() },
+		eventFactory = when (val eventFactory = eventFactory) {
+			null -> error("An aggregate event factory must be defined: domain.aggregates.eventFactory(…)")
+			DIPlaceholder -> DIAggregateEventFactory(context = context)
+			else -> eventFactory
+		},
 		store = when (val store = store) {
 			null -> error("An aggregate store must be defined: domain.aggregates.store(…)")
-			DIStorePlaceholder -> DIAggregateStore(context = context)
+			DIPlaceholder -> DIAggregateStore(context = context)
 			else -> store
 		},
 	)
+
+
+	@RaptorDsl
+	public fun eventFactory(factory: RaptorAggregateEventFactory) {
+		check(this.eventFactory == null) { "Cannot set multiple aggregate event factories." }
+
+		this.eventFactory = factory
+	}
 
 
 	@RaptorDsl
@@ -65,7 +79,7 @@ public class RaptorAggregatesComponent internal constructor(
 
 
 	// FIXME hack
-	internal object DIStorePlaceholder : RaptorAggregateStore {
+	internal object DIPlaceholder : RaptorAggregateEventFactory, RaptorAggregateStore {
 
 		override suspend fun add(events: List<RaptorEvent<*, *>>) {
 			error("Placeholder.")
@@ -74,14 +88,30 @@ public class RaptorAggregatesComponent internal constructor(
 		override fun load(): Flow<RaptorEvent<*, *>> {
 			error("Placeholder.")
 		}
+
+		override fun <Id : RaptorAggregateId, Event : RaptorAggregateEvent<Id>> create(aggregateId: Id, data: Event, version: Int): RaptorEvent<Id, Event> {
+			error("Placeholder.")
+		}
 	}
 }
 
 
 @RaptorDsl
+public fun RaptorAssemblyQuery<RaptorAggregatesComponent>.diEventFactory() {
+	eventFactory(RaptorAggregatesComponent.DIPlaceholder)
+}
+
+
+@RaptorDsl
 public fun RaptorAssemblyQuery<RaptorAggregatesComponent>.diStore() {
+	store(RaptorAggregatesComponent.DIPlaceholder)
+}
+
+
+@RaptorDsl
+public fun RaptorAssemblyQuery<RaptorAggregatesComponent>.eventFactory(factory: RaptorAggregateEventFactory) {
 	each {
-		store(RaptorAggregatesComponent.DIStorePlaceholder)
+		eventFactory(factory)
 	}
 }
 

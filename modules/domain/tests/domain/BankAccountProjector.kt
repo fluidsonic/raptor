@@ -2,7 +2,7 @@ import BankAccountEvent.*
 import io.fluidsonic.raptor.cqrs.*
 
 
-internal class BankAccountProjector : RaptorProjector.Incremental<BankAccount, BankAccountNumber, BankAccountEvent> {
+internal class BankAccountProjector : RaptorAggregateProjector.Incremental<BankAccount, BankAccountNumber, BankAccountEvent> {
 
 	override var projection: BankAccount? = null
 		private set
