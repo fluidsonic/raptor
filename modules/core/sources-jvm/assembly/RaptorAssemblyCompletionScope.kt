@@ -8,4 +8,7 @@ public interface RaptorAssemblyCompletionScope : RaptorAssemblyScope {
 
 	@RaptorDsl
 	public val propertyRegistry: RaptorPropertyRegistry
+
+	@RaptorDsl
+	public fun <Configuration : Any, Plugin : RaptorPluginWithConfiguration<Configuration>> require(plugin: Plugin): Configuration
 }

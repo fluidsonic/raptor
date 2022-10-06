@@ -1,6 +1,7 @@
-package io.fluidsonic.raptor.ktor
+package io.fluidsonic.raptor.ktor.graph
 
 import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.ktor.*
 
 
 // FIXME raptor-model module?

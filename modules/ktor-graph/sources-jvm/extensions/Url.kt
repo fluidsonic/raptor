@@ -1,4 +1,4 @@
-package io.fluidsonic.raptor.ktor
+package io.fluidsonic.raptor.ktor.graph
 
 import io.fluidsonic.raptor.graph.*
 import io.ktor.http.*

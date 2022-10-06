@@ -6,4 +6,4 @@ data class BankAccount(
 	override val id: BankAccountNumber,
 	val label: String? = null,
 	val owner: String,
-) : RaptorProjection<BankAccountNumber>
+) : RaptorAggregateProjection<BankAccountNumber>

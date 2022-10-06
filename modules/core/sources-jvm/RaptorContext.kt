@@ -29,5 +29,9 @@ public operator fun <Value : Any> RaptorContext.get(key: RaptorPropertyKey<out V
 	properties[key]
 
 
+public val RaptorContext.plugins: RaptorPluginConfigurationsSet
+	get() = checkNotNull(properties[Keys.pluginConfigurationSet])
+
+
 public val RaptorContext.root: RaptorContext
 	get() = parent?.root ?: this

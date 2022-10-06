@@ -4,12 +4,14 @@ import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.cqrs.*
 import io.fluidsonic.raptor.transactions.*
 import kotlin.test.*
+import kotlinx.datetime.*
 
 
 class AssemblyTests {
 
 	@Test
 	fun testNewAggregate() {
+		val eventFactory = TestAggregateEventFactory(clock = Clock.System)
 		val store = TestAggregateStore()
 
 		val raptor = raptor {
@@ -18,6 +20,7 @@ class AssemblyTests {
 			install(RaptorTransactionPlugin)
 
 			domain.aggregates {
+				eventFactory(eventFactory)
 				store(store)
 
 				new(::BankAccountAggregate, "bank account") {
@@ -63,8 +66,14 @@ class AssemblyTests {
 						),
 						factory = RaptorAggregateFactory(::BankAccountAggregate),
 						idClass = BankAccountNumber::class,
+						projectionDefinition = RaptorAggregateProjectionDefinition(
+							factory = ::BankAccountProjector,
+							idClass = BankAccountNumber::class,
+							projectionClass = BankAccount::class
+						),
 					),
 				),
+				eventFactory = eventFactory,
 				store = store,
 			)),
 		)

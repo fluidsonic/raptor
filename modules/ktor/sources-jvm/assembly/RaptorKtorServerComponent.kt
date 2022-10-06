@@ -11,9 +11,6 @@ import java.io.*
 import kotlinx.coroutines.*
 
 
-private val routesComponentKey = RaptorComponentKey<RaptorKtorRoutesComponent.Root>("routes")
-
-
 public class RaptorKtorServerComponent internal constructor(
 	internal val forceEncryptedConnection: Boolean,
 ) : RaptorComponent.Base<RaptorKtorServerComponent>(RaptorKtorPlugin),
@@ -100,7 +97,7 @@ public class RaptorKtorServerComponent internal constructor(
 
 	@RaptorDsl
 	public val routes: RaptorKtorRoutesComponent.Root
-		get() = componentRegistry.oneOrRegister(routesComponentKey) { RaptorKtorRoutesComponent.Root() }
+		get() = componentRegistry.oneOrRegister(Keys.rootRoutesComponent) { RaptorKtorRoutesComponent.Root() }
 
 
 	override fun RaptorComponentConfigurationEndScope<RaptorKtorServerComponent>.onConfigurationEnded() {
@@ -113,7 +110,7 @@ public class RaptorKtorServerComponent internal constructor(
 				}
 		}
 
-		val rootRouteConfiguration = componentRegistry.oneOrNull(routesComponentKey)?.complete()?.let {
+		val rootRouteConfiguration = componentRegistry.oneOrNull(Keys.rootRoutesComponent)?.complete()?.let {
 			KtorRouteConfiguration(
 				children = it,
 				customConfigurations = emptyList(),

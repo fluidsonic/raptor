@@ -13,7 +13,9 @@ class DebuggingTests {
 		assertEquals(
 			expected = """
 				[raptor] ->
-					[context] -> (empty)
+					[context] ->
+						[property set] ->
+							[plugin configuration set] -> <empty>
 			""".trimIndent(),
 			actual = raptor.toString()
 		)
@@ -68,57 +70,55 @@ class DebuggingTests {
 			install(object : RaptorPlugin {
 
 				override fun RaptorPluginCompletionScope.complete() {
-					require(NodePlugin) {
-						require(CounterPlugin) {
-							require(TextCollectionPlugin) {
-								completed = true
+					require(NodePlugin)
+					require(CounterPlugin)
+					require(TextCollectionPlugin)
 
-								assertEquals(
-									expected = """
+					completed = true
+
+					assertEquals(
+						expected = """
+							[component registry] ->
+								[counter] ->
+									counter (1) -> 
+										[any] -> counter extension
+								[dummy] ->
+									dummy (z)
+									dummy (1) -> 
+										[any] -> dummy extension
+									dummy (a)
+								[node] ->
+									node (root) -> 
 										[component registry] ->
-											[counter] ->
-												counter (1) -> 
-													[any] -> counter extension
-											[dummy] ->
-												dummy (z)
-												dummy (1) -> 
-													[any] -> dummy extension
-												dummy (a)
 											[node] ->
-												node (root) -> 
+												node (a) -> 
+													[any] -> node extension
 													[component registry] ->
 														[node] ->
-															node (a) -> 
-																[any] -> node extension
-																[component registry] ->
-																	[node] ->
-																		node (a1)
-																		node (a2)
-															node (b)
-															node (c)
-											[text collection] -> text collection (foo)
-									""".trimIndent(),
-									actual = componentRegistry.toString()
-								)
+															node (a1)
+															node (a2)
+												node (b)
+												node (c)
+								[text collection] -> text collection (foo)
+						""".trimIndent(),
+						actual = componentRegistry.toString()
+					)
 
-								assertEquals(
-									expected = """
-										[property registry] ->
-											[count] -> 1
-											[root node] ->
-												node(root) ->
-													node(a) ->
-														node(a1)
-														node(a2)
-													node(b)
-													node(c)
-											[text] -> foo
-									""".trimIndent(),
-									actual = propertyRegistry.toString()
-								)
-							}
-						}
-					}
+					assertEquals(
+						expected = """
+							[property registry] ->
+								[count] -> 1
+								[root node] ->
+									node(root) ->
+										node(a) ->
+											node(a1)
+											node(a2)
+										node(b)
+										node(c)
+								[text] -> foo
+						""".trimIndent(),
+						actual = propertyRegistry.toString()
+					)
 				}
 
 
@@ -159,6 +159,9 @@ class DebuggingTests {
 					[context] ->
 						[property set] ->
 							[count] -> 1
+							[plugin configuration set] ->
+								counter -> <none>
+								text collection -> <none>
 							[text] -> foo
 			""".trimIndent(),
 			actual = raptor.toString()

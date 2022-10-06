@@ -8,19 +8,14 @@ public class RaptorGraphComponent internal constructor() :
 	RaptorComponent.Base<RaptorGraphComponent>(RaptorGraphPlugin),
 	RaptorTaggableComponent<RaptorGraphComponent> {
 
-	internal var graph: RaptorGraph? = null
-		private set
-
-
 	@RaptorDsl
 	public val definitions: Definitions = Definitions()
 
 
-	override fun RaptorComponentConfigurationEndScope<RaptorGraphComponent>.onConfigurationEnded() {
-		graph = GraphSystemDefinitionBuilder.build(definitions.list)
+	internal fun complete(): RaptorGraph =
+		GraphSystemDefinitionBuilder.build(definitions.list)
 			.let(GraphTypeSystemBuilder::build)
 			.let { GraphSystemBuilder.build(tags = tags(), typeSystem = it) }
-	}
 
 
 	public inner class Definitions : RaptorAssemblyQuery<Definitions> {
@@ -51,12 +46,6 @@ public class RaptorGraphComponent internal constructor() :
 
 			add(RaptorGraphDefaults.definitions)
 		}
-	}
-
-
-	internal companion object {
-
-		val key = RaptorComponentKey<RaptorGraphComponent>("graph")
 	}
 }
 
@@ -191,32 +180,4 @@ public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.
 		type = typeOf<Type>(),
 		configure = configure,
 	))
-}
-
-
-// We can either use two phases:
-//  1. complete conf (create RaptorGraph)
-//  2. end conf (reference RaptorGraph from other component)
-// or we add some form of dependency system
-// or we request an early configuration end on-demand (can lead to cycles which must be detected)
-// Note that it's not yet possible to define graphs below the root component. But it might be at some point.
-// FIXME might need require()?
-// TODO Limit this to certain components?
-@RaptorDsl
-public fun RaptorComponentConfigurationEndScope<*>.graph(tag: Any? = null): RaptorGraph? {
-	fun RaptorComponentRegistry.find(): RaptorGraph? {
-		oneOrNull(RaptorGraphsComponent.key)
-			?.componentRegistry
-			?.many(RaptorGraphComponent.key)
-			?.filter { tag == null || tags(it).contains(tag) }
-			?.also { check(it.size <= 1) { if (tag != null) "Found multiple graphs with tag: $tag" else "Found multiple graphs" } }
-			?.firstOrNull()
-			?.let { component ->
-				return checkNotNull(component.graph)
-			}
-
-		return parent?.find()
-	}
-
-	return componentRegistry.find()
 }

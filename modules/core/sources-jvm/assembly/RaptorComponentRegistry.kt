@@ -12,7 +12,7 @@ public interface RaptorComponentRegistry {
 
 	@Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE") // FIXME
 	@kotlin.internal.LowPriorityInOverloadResolution
-	public fun <Component : RaptorComponent<in Component>> register(key: RaptorComponentKey<in Component>, component: Component)
+	public fun <Component : RaptorComponent<in Component>> register(key: RaptorComponentKey<in Component>, component: Component): Component
 	override fun toString(): String
 
 
@@ -43,6 +43,7 @@ public inline fun <Component : RaptorComponent<Component>> RaptorComponentRegist
 	oneOrNull(key) ?: register(key, create)
 
 
+@Deprecated(message = "Create component directly.", replaceWith = ReplaceWith("this.register(key, create())"))
 public inline fun <Component : RaptorComponent<Component>> RaptorComponentRegistry.register(
 	key: RaptorComponentKey<Component>,
 	create: () -> Component,

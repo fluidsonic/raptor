@@ -41,7 +41,6 @@ class BasicTests {
 		val raptor = raptor {}
 
 		assertNull(raptor[textPropertyKey])
-		assertTrue(raptor.properties.isEmpty())
 	}
 
 

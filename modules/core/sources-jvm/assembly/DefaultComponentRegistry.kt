@@ -68,7 +68,7 @@ internal class DefaultComponentRegistry(
 
 
 	// FIXME Throw when registering a component of a plugin that isn't installed.
-	override fun <Component : RaptorComponent<in Component>> register(key: RaptorComponentKey<in Component>, component: Component) {
+	override fun <Component : RaptorComponent<in Component>> register(key: RaptorComponentKey<in Component>, component: Component): Component {
 		checkIsConfigurable { "Cannot register a component after the configuration phase has ended." }
 
 		getOrCreateSet(key).add(
@@ -79,6 +79,8 @@ internal class DefaultComponentRegistry(
 				StartScope.onConfigurationStarted()
 			}
 		}
+
+		return component
 	}
 
 

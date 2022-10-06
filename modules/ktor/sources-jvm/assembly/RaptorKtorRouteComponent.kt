@@ -5,9 +5,6 @@ import io.fluidsonic.raptor.transactions.*
 import io.ktor.server.routing.*
 
 
-private val routesComponentKey = RaptorComponentKey<RaptorKtorRoutesComponent.NonRoot>("routes")
-
-
 // FIXME needs custom property set scope & hierarchy
 //FIXME continue here
 public class RaptorKtorRouteComponent internal constructor(
@@ -20,6 +17,7 @@ public class RaptorKtorRouteComponent internal constructor(
 	private var configuration: KtorRouteConfiguration? = null
 	private val customConfigurations = mutableListOf<Route.() -> Unit>()
 	private val plugins = mutableSetOf<RaptorKtorRoutePlugin>()
+	private val propertyRegistry = RaptorPropertyRegistry.default()
 	private var wrapper: (Route.(next: Route.() -> Unit) -> Unit)? = null
 
 
@@ -58,7 +56,7 @@ public class RaptorKtorRouteComponent internal constructor(
 
 	@RaptorDsl
 	public val routes: RaptorKtorRoutesComponent<*>
-		get() = componentRegistry.oneOrRegister(routesComponentKey) { RaptorKtorRoutesComponent.NonRoot() }
+		get() = componentRegistry.oneOrRegister(Keys.routesComponent) { RaptorKtorRoutesComponent.NonRoot() }
 
 
 	@RaptorDsl
@@ -86,22 +84,28 @@ public class RaptorKtorRouteComponent internal constructor(
 
 		// TODO Check/clean paths.
 		configuration = KtorRouteConfiguration(
-			children = componentRegistry.oneOrNull(routesComponentKey)?.complete().orEmpty(),
+			children = componentRegistry.oneOrNull(Keys.routesComponent)?.complete().orEmpty(),
 			customConfigurations = customConfigurations.toList(),
 			host = host,
 			path = path,
-			properties = propertyRegistry.toSet(),
+			properties = this@RaptorKtorRouteComponent.propertyRegistry.toSet(),
 			transactionFactory = transactionFactory(), // FIXME use component-bound scope
 			wrapper = wrapper,
 		)
 	}
 
 
-	private class ConfigurationEndScope(parent: RaptorComponentConfigurationEndScope<RaptorKtorRouteComponent>) : RaptorKtorRoutePluginConfigurationEndScope {
+	private inner class ConfigurationEndScope(
+		parent: RaptorComponentConfigurationEndScope<RaptorKtorRouteComponent>,
+	) : RaptorKtorRoutePluginConfigurationEndScope, RaptorAssemblyCompletionScope by parent {
 
 		private val routeScope = object :
 			RaptorKtorRoutePluginConfigurationEndScope.RouteScope,
-			RaptorComponentConfigurationEndScope<RaptorKtorRouteComponent> by parent {}
+			RaptorComponentConfigurationEndScope<RaptorKtorRouteComponent> by parent {
+
+			override val propertyRegistry: RaptorPropertyRegistry
+				get() = this@RaptorKtorRouteComponent.propertyRegistry
+		}
 
 
 		override fun route(configuration: RaptorKtorRoutePluginConfigurationEndScope.RouteScope.() -> Unit) {
@@ -120,7 +124,7 @@ public class RaptorKtorRouteComponent internal constructor(
 
 @RaptorDsl
 public fun RaptorAssemblyQuery<RaptorKtorRouteComponent>.custom(configure: RaptorKtorRouteInitializationScope.() -> Unit) {
-	this{
+	each {
 		custom(configure)
 	}
 }
@@ -128,7 +132,7 @@ public fun RaptorAssemblyQuery<RaptorKtorRouteComponent>.custom(configure: Rapto
 
 @RaptorDsl
 public fun RaptorAssemblyQuery<RaptorKtorRouteComponent>.install(plugin: RaptorKtorRoutePlugin) {
-	this{
+	each {
 		install(plugin)
 	}
 }
@@ -141,7 +145,7 @@ public val RaptorAssemblyQuery<RaptorKtorRouteComponent>.routes: RaptorAssemblyQ
 
 @RaptorDsl
 public fun RaptorAssemblyQuery<RaptorKtorRouteComponent>.wrap(wrapper: RaptorKtorRouteInitializationScope.(next: Route.() -> Unit) -> Unit) {
-	this {
+	each {
 		wrap(wrapper)
 	}
 }

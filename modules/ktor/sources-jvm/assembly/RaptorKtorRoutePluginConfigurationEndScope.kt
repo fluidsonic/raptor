@@ -3,7 +3,7 @@ package io.fluidsonic.raptor.ktor
 import io.fluidsonic.raptor.*
 
 
-public interface RaptorKtorRoutePluginConfigurationEndScope {
+public interface RaptorKtorRoutePluginConfigurationEndScope : RaptorAssemblyCompletionScope {
 
 	@RaptorDsl
 	public fun route(configuration: RouteScope.() -> Unit)

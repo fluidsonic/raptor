@@ -7,6 +7,8 @@ import io.fluidsonic.raptor.ktor.*
 public object RaptorEntitiesPlugin : RaptorPlugin {
 
 	override fun RaptorPluginCompletionScope.complete() {
+		require(RaptorKtorPlugin)
+
 		val resolverTypes = componentRegistry.oneOrNull(RaptorEntitiesComponent.key)?.resolverTypes.orEmpty()
 
 		// FIXME
@@ -16,14 +18,12 @@ public object RaptorEntitiesPlugin : RaptorPlugin {
 			}
 		}
 
-		require(RaptorKtorPlugin) {
-			// FIXME
-			//			graphs.definitions(
-			//				RaptorEntity.graphDefinition(),
-			////				RaptorEntityId.graphDefinition()
-			//			)
-			// }
-		}
+		// FIXME
+		//			graphs.definitions(
+		//				RaptorEntity.graphDefinition(),
+		////				RaptorEntityId.graphDefinition()
+		//			)
+		// }
 	}
 
 

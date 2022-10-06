@@ -4,7 +4,7 @@ import io.fluidsonic.raptor.*
 import kotlinx.atomicfu.*
 
 
-internal class DefaultRaptorKtor(
+internal class RaptorKtorInternal(
 	configuration: KtorConfiguration,
 	context: RaptorContext,
 ) : RaptorKtor {
@@ -12,7 +12,7 @@ internal class DefaultRaptorKtor(
 	private val stateRef = atomic(State.initial)
 
 	override val servers = configuration.servers.map { configuration ->
-		RaptorKtorServerImpl(
+		RaptorKtorServerInternal(
 			configuration = configuration,
 			parentContext = context
 		)

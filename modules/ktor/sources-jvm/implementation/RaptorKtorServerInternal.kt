@@ -20,7 +20,7 @@ import org.slf4j.*
 import org.slf4j.event.*
 
 
-internal class RaptorKtorServerImpl(
+internal class RaptorKtorServerInternal(
 	private val configuration: KtorServerConfiguration,
 	parentContext: RaptorContext,
 ) : RaptorKtorServer {
@@ -141,7 +141,7 @@ internal class RaptorKtorServerImpl(
 
 	// FIXME rework
 	private fun Application.configure() {
-		attributes.put(attributeKey, this@RaptorKtorServerImpl)
+		attributes.put(Keys.serverKtorAttribute, this@RaptorKtorServerInternal)
 
 		install(CallLogging) {
 			level = Level.INFO
@@ -170,7 +170,7 @@ internal class RaptorKtorServerImpl(
 			install(EncryptionEnforcementKtorPlugin)
 
 		install(RaptorTransactionKtorPlugin) {
-			serverContext(this@RaptorKtorServerImpl.context)
+			serverContext(this@RaptorKtorServerInternal.context)
 			transactionFactory(configuration.transactionFactory)
 		}
 
@@ -203,7 +203,7 @@ internal class RaptorKtorServerImpl(
 						val parentContext = parentTransaction.context
 
 						val transaction = transactionFactory.createTransaction(
-							context = RaptorKtorRouteContextImpl(
+							context = RaptorKtorRouteContext(
 								parent = parentTransaction.context,
 								properties = configuration.properties.withFallback(parentContext.properties),
 							)
@@ -227,12 +227,6 @@ internal class RaptorKtorServerImpl(
 	}
 
 
-	companion object {
-
-		val attributeKey = AttributeKey<RaptorKtorServerImpl>("Raptor: server")
-	}
-
-
 	private enum class State {
 
 		initial,
@@ -242,8 +236,3 @@ internal class RaptorKtorServerImpl(
 		stopping
 	}
 }
-
-
-internal val Application.raptorServerImpl
-	get() = attributes.getOrNull(RaptorKtorServerImpl.attributeKey)
-		?: error("You must install ${RaptorKtorPlugin::class.simpleName} for enabling Raptor functionality.")

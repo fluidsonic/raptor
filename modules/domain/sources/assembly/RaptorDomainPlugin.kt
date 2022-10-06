@@ -68,5 +68,5 @@ public object RaptorDomainPlugin : RaptorPluginWithConfiguration<RaptorDomain> {
 
 // FIXME lazy
 @RaptorDsl
-public val RaptorAssemblyScope.domain: RaptorDomainComponent
+public val RaptorPluginScope<in RaptorDomainPlugin>.domain: RaptorDomainComponent
 	get() = componentRegistry.oneOrNull(Keys.domainComponent) ?: throw RaptorPluginNotInstalledException(RaptorDomainPlugin)

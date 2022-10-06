@@ -9,13 +9,13 @@ import io.fluidsonic.raptor.mongo.*
 public object RaptorDomainMongoPlugin : RaptorPlugin {
 
 	override fun RaptorPluginCompletionScope.complete() {
+		val domainConfiguration = require(RaptorDomainPlugin)
+
 		configure(RaptorBsonPlugin) {
-			require(RaptorDomainPlugin) { domain ->
-				bson.definitions(
-					RaptorAggregateEventBson.bson(definitions = domain.aggregates.definitions),
-					RaptorAggregateEventBson.idBson(),
-				)
-			}
+			bson.definitions(
+				RaptorAggregateEventBson.bson(definitions = domainConfiguration.aggregates.definitions),
+				RaptorAggregateEventBson.idBson(),
+			)
 		}
 	}
 

@@ -2,8 +2,6 @@ package io.fluidsonic.raptor.ktor
 
 import io.fluidsonic.raptor.*
 
-private val routeComponentKey = RaptorComponentKey<RaptorKtorRouteComponent>("route")
-
 
 public abstract class RaptorKtorRoutesComponent<Component : RaptorKtorRoutesComponent<Component>> internal constructor() :
 	RaptorComponent.Base<Component>(RaptorKtorPlugin),
@@ -11,16 +9,16 @@ public abstract class RaptorKtorRoutesComponent<Component : RaptorKtorRoutesComp
 
 	@RaptorDsl
 	override val all: RaptorAssemblyQuery<RaptorKtorRouteComponent>
-		get() = componentRegistry.all(routeComponentKey).all
+		get() = componentRegistry.all(Keys.routeComponent).all
 
 
 	internal fun complete(): Collection<KtorRouteConfiguration> =
-		componentRegistry.many(routeComponentKey).map { it.complete() }
+		componentRegistry.many(Keys.routeComponent).map { it.complete() }
 
 
 	@RaptorDsl
 	public fun new(path: String, host: String? = null): RaptorKtorRouteComponent =
-		componentRegistry.register(routeComponentKey) { RaptorKtorRouteComponent(host = host, path = path) }
+		componentRegistry.register(Keys.routeComponent) { RaptorKtorRouteComponent(host = host, path = path) }
 
 
 	@RaptorDsl
@@ -36,7 +34,7 @@ public abstract class RaptorKtorRoutesComponent<Component : RaptorKtorRoutesComp
 
 		@RaptorDsl
 		public fun new(host: String? = null): RaptorKtorRouteComponent =
-			componentRegistry.register(routeComponentKey) { RaptorKtorRouteComponent(host = host, path = "/") }
+			componentRegistry.register(Keys.routeComponent) { RaptorKtorRouteComponent(host = host, path = "/") }
 
 
 		@RaptorDsl

@@ -1,21 +1,23 @@
 package io.fluidsonic.raptor.ktor
 
 import io.fluidsonic.raptor.*
-
-
-private val ktorComponentKey = RaptorComponentKey<RaptorKtorComponent>("ktor")
-private val ktorPropertyKey = RaptorPropertyKey<DefaultRaptorKtor>("ktor")
+import io.fluidsonic.raptor.transactions.*
 
 
 public object RaptorKtorPlugin : RaptorPlugin {
 
 	override fun RaptorPluginCompletionScope.complete() {
-		propertyRegistry.register(ktorPropertyKey, componentRegistry.one(ktorComponentKey).complete(context = lazyContext))
+		completeComponents()
+
+		propertyRegistry.register(Keys.ktorProperty, componentRegistry.one(Keys.ktorComponent).complete(context = lazyContext))
 	}
 
 
 	override fun RaptorPluginInstallationScope.install() {
-		componentRegistry.register(ktorComponentKey, ::RaptorKtorComponent)
+		require(RaptorLifecyclePlugin)
+		require(RaptorTransactionPlugin)
+
+		componentRegistry.register(Keys.ktorComponent, RaptorKtorComponent())
 
 		lifecycle {
 			onStart {
@@ -32,14 +34,6 @@ public object RaptorKtorPlugin : RaptorPlugin {
 }
 
 
-public val RaptorContext.ktor: RaptorKtor
-	get() = ktorInternal ?: throw RaptorPluginNotInstalledException(RaptorKtorPlugin)
-
-
-internal val RaptorContext.ktorInternal: DefaultRaptorKtor?
-	get() = properties[ktorPropertyKey]
-
-
 @RaptorDsl
 public val RaptorAssemblyScope.ktor: RaptorKtorComponent
-	get() = componentRegistry.oneOrNull(ktorComponentKey) ?: throw RaptorPluginNotInstalledException(RaptorKtorPlugin)
+	get() = componentRegistry.oneOrNull(Keys.ktorComponent) ?: throw RaptorPluginNotInstalledException(RaptorKtorPlugin)

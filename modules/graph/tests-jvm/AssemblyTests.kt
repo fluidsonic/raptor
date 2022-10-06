@@ -30,11 +30,11 @@ class AssemblyTests {
 			}
 		}
 
-		val graphA = raptor.context.graphs.single { it.tags.contains("A") }
+		val graphA = raptor.context.plugins.graph.taggedGraph("A")
 		assertNotNull(graphA.schema.resolveType("Dummy1"))
 		assertNotNull(graphA.schema.resolveType("Dummy2"))
 
-		val graphB = raptor.context.graphs.single { it.tags.contains("B") }
+		val graphB = raptor.context.plugins.graph.taggedGraph("B")
 		assertNotNull(graphB.schema.resolveType("Dummy3"))
 		assertNotNull(graphB.schema.resolveType("Dummy4"))
 	}
@@ -48,7 +48,7 @@ class AssemblyTests {
 
 			graphs.new().tag("A")
 
-			di.provide { context.graph("A") }
+			di.provide { context.plugins.graph.taggedGraph("A") }
 		}
 
 		assertEquals(actual = raptor.context.di.get<RaptorGraph>().tags, expected = setOf("A"))
@@ -84,11 +84,11 @@ class AssemblyTests {
 			"Unit",
 		)
 
-		val graphA = raptor.context.graphs.single { it.tags.contains("A") }
+		val graphA = raptor.context.plugins.graph.taggedGraph("A")
 		for (name in defaultTypeNames)
 			assertNotNull(graphA.schema.resolveType(name))
 
-		val graphB = raptor.context.graphs.single { it.tags.contains("B") }
+		val graphB = raptor.context.plugins.graph.taggedGraph("B")
 		for (name in defaultTypeNames)
 			assertNull(graphB.schema.resolveType(name))
 	}
@@ -114,7 +114,7 @@ class AssemblyTests {
 		}
 
 		assertEquals(actual = count, expected = 4)
-		assertEquals(actual = raptor.context.graphs.size, expected = 4)
+		assertEquals(actual = raptor.context.plugins.graph.graphs.size, expected = 4)
 	}
 
 
@@ -153,7 +153,10 @@ class AssemblyTests {
 		assertEquals(actual = bTagged, expected = 1)
 		assertEquals(actual = cTagged, expected = 1)
 		assertEquals(actual = dTagged, expected = 1)
-		assertEquals(actual = raptor.context.graphs.mapTo(hashSetOf()) { it.tags }, expected = setOf<Set<Any>>(setOf("A"), setOf("B", "C"), setOf("D")))
+		assertEquals(
+			actual = raptor.context.plugins.graph.graphs.mapTo(hashSetOf()) { it.tags },
+			expected = setOf<Set<Any>>(setOf("A"), setOf("B", "C"), setOf("D")),
+		)
 	}
 
 

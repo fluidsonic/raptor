@@ -11,6 +11,8 @@ private val requestTransactionFactoryPropertyKey = RaptorPropertyKey<RaptorTrans
 object RequestPlugin : RaptorPlugin {
 
 	override fun RaptorPluginCompletionScope.complete() {
+		completeComponents()
+
 		propertyRegistry.register(requestTransactionFactoryPropertyKey, componentRegistry.one(requestComponentKey).complete())
 	}
 

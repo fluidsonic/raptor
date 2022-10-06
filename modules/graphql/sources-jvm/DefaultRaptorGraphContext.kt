@@ -13,5 +13,5 @@ internal class DefaultRaptorGraphContext(
 
 
 	override fun toString() =
-		TODO() // FIXME
+		parent.toString() // TODO Support hierarchical toString(). `this.properties` are missing.
 }

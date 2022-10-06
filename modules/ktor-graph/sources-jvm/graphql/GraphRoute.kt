@@ -1,9 +1,10 @@
-package io.fluidsonic.raptor.ktor
+package io.fluidsonic.raptor.ktor.graph
 
 import io.fluidsonic.graphql.*
 import io.fluidsonic.json.*
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.graph.*
+import io.fluidsonic.raptor.ktor.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.request.*

@@ -3,25 +3,22 @@ package io.fluidsonic.raptor.ktor
 import io.fluidsonic.raptor.*
 
 
-private val serverComponentKey = RaptorComponentKey<RaptorKtorServerComponent>("server")
-
-
 public class RaptorKtorServersComponent internal constructor() :
 	RaptorComponent.Base<RaptorKtorServersComponent>(RaptorKtorPlugin),
 	RaptorComponentSet<RaptorKtorServerComponent> {
 
 	@RaptorDsl
 	override val all: RaptorAssemblyQuery<RaptorKtorServerComponent>
-		get() = componentRegistry.all(serverComponentKey).all
+		get() = componentRegistry.all(Keys.serverComponent).all
 
 
 	internal fun complete(): Collection<KtorServerConfiguration> =
-		componentRegistry.many(serverComponentKey).map { it.complete() }
+		componentRegistry.many(Keys.serverComponent).map { it.complete() }
 
 
 	@RaptorDsl
 	public fun new(forceEncryptedConnection: Boolean = true): RaptorKtorServerComponent =
-		componentRegistry.register(serverComponentKey) { RaptorKtorServerComponent(forceEncryptedConnection = forceEncryptedConnection) }
+		componentRegistry.register(Keys.serverComponent) { RaptorKtorServerComponent(forceEncryptedConnection = forceEncryptedConnection) }
 
 
 	@RaptorDsl

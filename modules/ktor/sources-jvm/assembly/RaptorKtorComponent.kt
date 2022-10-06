@@ -3,15 +3,12 @@ package io.fluidsonic.raptor.ktor
 import io.fluidsonic.raptor.*
 
 
-private val serversComponentKey = RaptorComponentKey<RaptorKtorServersComponent>("servers")
-
-
 public class RaptorKtorComponent internal constructor() : RaptorComponent.Base<RaptorKtorComponent>(RaptorKtorPlugin) {
 
 	internal fun complete(context: RaptorContext) =
-		DefaultRaptorKtor(
+		RaptorKtorInternal(
 			configuration = KtorConfiguration(
-				servers = componentRegistry.oneOrNull(serversComponentKey)?.complete().orEmpty(),
+				servers = componentRegistry.oneOrNull(Keys.serversComponent)?.complete().orEmpty(),
 			),
 			context = context,
 		)
@@ -19,7 +16,7 @@ public class RaptorKtorComponent internal constructor() : RaptorComponent.Base<R
 
 	@RaptorDsl
 	public val servers: RaptorKtorServersComponent
-		get() = componentRegistry.oneOrRegister(serversComponentKey, ::RaptorKtorServersComponent)
+		get() = componentRegistry.oneOrRegister(Keys.serversComponent, ::RaptorKtorServersComponent)
 }
 
 

@@ -80,5 +80,11 @@ public fun RaptorComponentConfigurationEndScope<out RaptorTaggableComponent<*>>.
 // TODO Sucks until we have context receivers.
 @RaptorDsl
 @Suppress("UnusedReceiverParameter")
-public fun RaptorComponentConfigurationEndScope<*>.tags(component: RaptorTaggableComponent<*>): Set<Any> =
+public fun RaptorAssemblyCompletionScope.tags(component: RaptorTaggableComponent<*>): Set<Any> =
 	component.tagRegistry()?.tags.orEmpty()
+
+
+// TODO Sucks until we have context receivers to limit this to the completion scope.
+@RaptorDsl
+public fun RaptorTaggableComponent<*>.tags(): Set<Any> =
+	tagRegistry()?.tags.orEmpty()

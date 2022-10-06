@@ -1,7 +1,7 @@
-package io.fluidsonic.raptor.ktor
+package io.fluidsonic.raptor.ktor.graph
 
 import io.fluidsonic.graphql.*
-import kotlin.collections.hashMapOf
+import io.fluidsonic.raptor.ktor.*
 import kotlin.collections.set
 import org.slf4j.*
 

@@ -37,8 +37,11 @@ internal class RaptorAssembly(
 
 
 		init {
-			for (configurator in pluginConfigurators.values)
+			val pluginConfigurations = pluginConfigurators.mapValues { (_, configurator) ->
 				configurator.complete()
+			}
+
+			propertyRegistry.register(Keys.pluginConfigurationSet, DefaultRaptorPluginConfigurationSet(pluginConfigurations))
 
 			val context = DefaultRaptorContext(properties = propertyRegistry.toSet())
 			raptor = DefaultRaptor(context = context)
@@ -61,12 +64,24 @@ internal class RaptorAssembly(
 			private val dependents: Set<RaptorPluginWithConfiguration<*>>,
 		) : RaptorPluginCompletionScope, RaptorPluginScope<RaptorPluginWithConfiguration<*>> {
 
+			private var componentsCompleted = false
 			private var configuration: Configuration? = null
 			private var isCompleting = false
 
 			override val componentRegistry: DefaultComponentRegistry get() = this@Completion.componentRegistry
 			override val lazyContext: RaptorContext get() = this@Completion.lazyContext
 			override val propertyRegistry: RaptorPropertyRegistry get() = this@Completion.propertyRegistry
+
+
+			override fun completeComponents() {
+				if (componentsCompleted)
+					return
+
+				check(isCompleting) { "Cannot complete components until completion of the plugin began." }
+
+				componentsCompleted = true
+				componentRegistry.complete(plugin = plugin, scope = this)
+			}
 
 
 			private fun configureBy(
@@ -105,6 +120,10 @@ internal class RaptorAssembly(
 				check(!isCompleting) { "Plugin completion cycle detected: $plugin" }
 				isCompleting = true
 
+				val configuration = with(plugin) {
+					(this@PluginConfigurator as RaptorPluginCompletionScope).complete()
+				}.also { configuration = it }
+
 				// TODO In the future we could complete the components after the plugin and allow the plugin to force-complete using scope.completeComponents().
 				// FIXME Won't work properly. A component of the plugin might depend on plugin dependencies to be completed first.
 				//       But we'll only know about that below.
@@ -116,22 +135,17 @@ internal class RaptorAssembly(
 				//         component-specific access using e.g. scope.graph(component). Downside is that we cannot automatically detect references
 				//         to components that have not been completed yet.
 				//       - Never allow components to depend on each other. Only support communication through properties or plugins configurations.
-				componentRegistry.complete(plugin = plugin, scope = this)
+				completeComponents()
 
-				return with(plugin) {
-					(this@PluginConfigurator as RaptorPluginCompletionScope).complete()
-				}.also { configuration = it }
+				return configuration
 			}
 
 
 			// FIXME Detect and report cycles.
-			override fun <Configuration : Any, Plugin : RaptorPluginWithConfiguration<Configuration>> require(
-				plugin: Plugin,
-				action: (configuration: Configuration) -> Unit,
-			) {
+			override fun <Configuration : Any, Plugin : RaptorPluginWithConfiguration<Configuration>> require(plugin: Plugin): Configuration {
 				check(configuration == null) { "Plugin $plugin cannot configure any plugins as its assembly was already completed." }
 
-				action(requireConfigurator(plugin).complete())
+				return requireConfigurator(plugin).complete()
 			}
 		}
 	}

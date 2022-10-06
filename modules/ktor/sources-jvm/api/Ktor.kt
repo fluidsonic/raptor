@@ -6,17 +6,20 @@ import io.ktor.server.application.*
 import io.ktor.server.routing.*
 import io.ktor.server.websocket.*
 import io.ktor.util.pipeline.*
-import io.ktor.websocket.*
 
 
 @RaptorDsl
 public val Application.raptorContext: RaptorContext
-	get() = raptorServerImpl.context
+	get() = raptorServerInternal.context
 
 
 @RaptorDsl
 public val Application.raptorServer: RaptorKtorServer
-	get() = raptorServerImpl
+	get() = raptorServerInternal
+
+
+internal val Application.raptorServerInternal: RaptorKtorServerInternal
+	get() = attributes.getOrNull(Keys.serverKtorAttribute) ?: throw RaptorPluginNotInstalledException(RaptorKtorPlugin)
 
 
 @RaptorDsl
