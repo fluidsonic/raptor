@@ -1,32 +1,16 @@
-package io.fluidsonic.raptor.cqrs
+package io.fluidsonic.raptor.domain
 
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.di.*
 import io.fluidsonic.raptor.transactions.*
 
 
-public object RaptorDomainPlugin : RaptorPluginWithConfiguration<RaptorDomain> {
+public object RaptorDomainPlugin : RaptorPluginWithConfiguration<RaptorDomainPluginConfiguration> {
 
-	override fun RaptorPluginCompletionScope.complete(): RaptorDomain {
-		val domain = componentRegistry.one(Keys.domainComponent).complete(context = lazyContext)
-		val projectionEventStream = DefaultAggregateProjectionEventStream()
+	override fun RaptorPluginCompletionScope.complete(): RaptorDomainPluginConfiguration {
+		completeComponents()
 
-		val loaderManager = DefaultAggregateProjectionLoaderManager(
-			definitions = domain.aggregates.definitions.mapNotNull { it.projectionDefinition },
-			projectionEventStream = projectionEventStream,
-		)
-		val aggregateManager = DefaultAggregateManager(
-			domain = domain,
-			eventFactory = domain.aggregates.eventFactory,
-			fixme = loaderManager,
-		)
-
-		propertyRegistry.register(Keys.aggregateManagerProperty, aggregateManager)
-		propertyRegistry.register(Keys.aggregateProjectionEventStreamProperty, projectionEventStream)
-		propertyRegistry.register(Keys.aggregateProjectorLoaderManagerProperty, loaderManager)
-		propertyRegistry.register(Keys.domainProperty, domain)
-
-		return domain
+		return componentRegistry.one(Keys.domainComponent).complete(context = lazyContext)
 	}
 
 
@@ -34,17 +18,24 @@ public object RaptorDomainPlugin : RaptorPluginWithConfiguration<RaptorDomain> {
 		componentRegistry.register(Keys.domainComponent, RaptorDomainComponent(topLevelScope = this))
 
 		optional(RaptorDIPlugin) {
-			// FIXME di should use properties only
-			di.provide<RaptorAggregateCommandExecutor> { context.aggregateManager }
-			di.provide<RaptorAggregateEventStream> { DefaultAggregateEventStream() }
-			di.provide<RaptorAggregateProjectionEventStream> { context[Keys.aggregateProjectionEventStreamProperty]!! } // TODO
+			di.provide<RaptorAggregateCommandExecutor> { context.plugins.domain.aggregates.manager }
+			di.provide<RaptorAggregateEventFactory> { context.plugins.domain.aggregates.eventFactory }
+			di.provide<RaptorAggregateEventStream> { context.plugins.domain.aggregates.eventStream }
+			di.provide<RaptorAggregateProjectionEventStream> { context.plugins.domain.aggregates.projectionEventStream }
+			di.provide<RaptorAggregateStore> { context.plugins.domain.aggregates.store }
 		}
 
 		require(RaptorLifecyclePlugin) {
 			// FIXME Delay onStop until manager & store have settled.
 
-			lifecycle.onStart {
-				context.aggregateManager.load()
+			lifecycle {
+				onStart {
+					context.plugins.domain.aggregates.manager.load()
+				}
+				onStop {
+					context.plugins.domain.aggregates.eventStreamInternal.stop()
+					context.plugins.domain.aggregates.projectionEventStreamInternal.stop()
+				}
 			}
 		}
 
@@ -53,7 +44,7 @@ public object RaptorDomainPlugin : RaptorPluginWithConfiguration<RaptorDomain> {
 			transactions {
 				observe {
 					onStop {
-						context.aggregateManager.commit() // FIXME per-tx
+						context.plugins.domain.aggregates.manager.commit() // FIXME per-tx
 					}
 				}
 

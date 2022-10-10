@@ -1,4 +1,4 @@
-package io.fluidsonic.raptor.cqrs
+package io.fluidsonic.raptor.domain
 
 
 internal interface RaptorAggregateManager : RaptorAggregateCommandExecutor { // FIXME tx

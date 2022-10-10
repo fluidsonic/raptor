@@ -1,4 +1,4 @@
-package io.fluidsonic.raptor.cqrs
+package io.fluidsonic.raptor.domain
 
 import kotlin.reflect.*
 import kotlinx.coroutines.*
@@ -20,15 +20,16 @@ public interface RaptorAggregateProjectionEventStream {
 }
 
 
-public fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>, Projection : RaptorProjection<Id>>
+public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>, Projection : RaptorProjection<Id>>
 	RaptorAggregateProjectionEventStream.subscribeIn(
 	scope: CoroutineScope,
 	collector: suspend (event: RaptorAggregateProjectionEvent<Id, Projection, Change>) -> Unit,
-	errorStrategy: RaptorAggregateProjectionEventStream.ErrorStrategy, // FIXME use
+	errorStrategy: RaptorAggregateProjectionEventStream.ErrorStrategy = RaptorAggregateProjectionEventStream.ErrorStrategy.skip, // FIXME use
 	changeClass: KClass<Change>,
 	idClass: KClass<Id>,
 	projectionClass: KClass<Projection>,
 ): Job {
+	val completion = CompletableDeferred<Unit>()
 	var failedProjectionIds: MutableSet<RaptorAggregateProjectionId>? = null
 
 	return asFlow()
@@ -50,15 +51,17 @@ public fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>
 					.add(projectionId)
 			}
 		}
+		.onStart { completion.complete(Unit) }
 		.launchIn(scope)
+		.also { completion.await() }
 }
 
 
-public inline fun <reified Id : RaptorAggregateProjectionId, reified Change : RaptorAggregateChange<Id>, reified Projection : RaptorProjection<Id>>
+public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Change : RaptorAggregateChange<Id>, reified Projection : RaptorProjection<Id>>
 	RaptorAggregateProjectionEventStream.subscribeIn(
 	scope: CoroutineScope,
 	noinline collector: suspend (event: RaptorAggregateProjectionEvent<Id, Projection, Change>) -> Unit,
-	errorStrategy: RaptorAggregateProjectionEventStream.ErrorStrategy,
+	errorStrategy: RaptorAggregateProjectionEventStream.ErrorStrategy = RaptorAggregateProjectionEventStream.ErrorStrategy.skip,
 ): Job =
 	subscribeIn(
 		scope = scope,

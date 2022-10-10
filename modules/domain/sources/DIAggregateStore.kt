@@ -1,4 +1,4 @@
-package io.fluidsonic.raptor.cqrs
+package io.fluidsonic.raptor.domain
 
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.di.*

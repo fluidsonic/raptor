@@ -1,7 +1,7 @@
 import BankAccountChange.*
 import BankAccountCommand.*
 import io.fluidsonic.raptor.*
-import io.fluidsonic.raptor.cqrs.*
+import io.fluidsonic.raptor.domain.*
 import io.fluidsonic.raptor.transactions.*
 import io.fluidsonic.time.*
 import kotlin.test.*
@@ -14,12 +14,13 @@ class ExecutionTests {
 
 	@Test
 	fun testExecution() = runTest {
-		val clock = ManualClock()
 		val id = BankAccountNumber("1")
+
+		val clock = ManualClock()
 		val eventFactory = TestAggregateEventFactory(clock = clock)
 		val store = TestAggregateStore(events = listOf(RaptorAggregateEvent(
 			aggregateId = id,
-			data = Created(owner = "owner"),
+			change = Created(owner = "owner"),
 			id = RaptorAggregateEventId("1"),
 			timestamp = Timestamp.fromEpochSeconds(0),
 			version = 1,
@@ -63,14 +64,14 @@ class ExecutionTests {
 		assertEquals(actual = store.takeBatches(), expected = listOf(listOf(
 			RaptorAggregateEvent(
 				aggregateId = id,
-				data = Deposited(amount = 100),
+				change = Deposited(amount = 100),
 				id = RaptorAggregateEventId("1"),
 				timestamp = Timestamp.fromEpochSeconds(10),
 				version = 2,
 			),
 			RaptorAggregateEvent(
 				aggregateId = id,
-				data = Labeled("test"),
+				change = Labeled("test"),
 				id = RaptorAggregateEventId("2"),
 				timestamp = Timestamp.fromEpochSeconds(20),
 				version = 3,
@@ -87,14 +88,14 @@ class ExecutionTests {
 		assertEquals(actual = store.takeBatches(), expected = listOf(listOf(
 			RaptorAggregateEvent(
 				aggregateId = id,
-				data = Withdrawn(amount = 100),
+				change = Withdrawn(amount = 100),
 				id = RaptorAggregateEventId("3"),
 				timestamp = Timestamp.fromEpochSeconds(30),
 				version = 4,
 			),
 			RaptorAggregateEvent(
 				aggregateId = id,
-				data = Deleted,
+				change = Deleted,
 				id = RaptorAggregateEventId("4"),
 				timestamp = Timestamp.fromEpochSeconds(40),
 				version = 5,

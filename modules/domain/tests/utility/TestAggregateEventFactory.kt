@@ -1,4 +1,4 @@
-import io.fluidsonic.raptor.cqrs.*
+import io.fluidsonic.raptor.domain.*
 import kotlinx.datetime.*
 
 
@@ -9,14 +9,14 @@ class TestAggregateEventFactory(
 	private var nextId = 1
 
 
-	override fun <Id : RaptorAggregateId, Event : RaptorAggregateChange<Id>> create(
+	override fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>> create(
 		aggregateId: Id,
-		data: Event,
+		change: Change,
 		version: Int,
-	): RaptorAggregateEvent<Id, Event> =
+	): RaptorAggregateEvent<Id, Change> =
 		RaptorAggregateEvent(
 			aggregateId = aggregateId,
-			data = data,
+			change = change,
 			id = RaptorAggregateEventId((nextId++).toString()),
 			timestamp = clock.now(),
 			version = version,

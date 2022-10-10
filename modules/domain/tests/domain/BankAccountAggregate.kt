@@ -1,6 +1,6 @@
 import BankAccountChange.*
 import BankAccountCommand.*
-import io.fluidsonic.raptor.cqrs.*
+import io.fluidsonic.raptor.domain.*
 
 
 class BankAccountAggregate(

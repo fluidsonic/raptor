@@ -1,7 +1,7 @@
 import BankAccountChange.*
 import BankAccountCommand.*
 import io.fluidsonic.raptor.*
-import io.fluidsonic.raptor.cqrs.*
+import io.fluidsonic.raptor.domain.*
 import io.fluidsonic.raptor.transactions.*
 import kotlin.test.*
 import kotlinx.datetime.*
@@ -41,41 +41,37 @@ class AssemblyTests {
 			}
 		}
 
-		assertEquals(
-			actual = raptor.context.domain,
-			expected = RaptorDomain(aggregates = RaptorDomain.Aggregates(
-				definitions = setOf(
-					RaptorAggregateDefinition(
-						aggregateClass = BankAccountAggregate::class,
-						commandClass = BankAccountCommand::class,
-						commandDefinitions = setOf(
-							RaptorAggregateCommandDefinition(commandClass = Create::class),
-							RaptorAggregateCommandDefinition(commandClass = Delete::class),
-							RaptorAggregateCommandDefinition(commandClass = Deposit::class),
-							RaptorAggregateCommandDefinition(commandClass = Label::class),
-							RaptorAggregateCommandDefinition(commandClass = Withdraw::class),
-						),
-						discriminator = "bank account",
-						eventClass = BankAccountChange::class,
-						eventDefinitions = setOf(
-							RaptorAggregateChangeDefinition(discriminator = "created", eventClass = Created::class),
-							RaptorAggregateChangeDefinition(discriminator = "deleted", eventClass = Deleted::class),
-							RaptorAggregateChangeDefinition(discriminator = "deposited", eventClass = Deposited::class),
-							RaptorAggregateChangeDefinition(discriminator = "labeled", eventClass = Labeled::class),
-							RaptorAggregateChangeDefinition(discriminator = "withdrawn", eventClass = Withdrawn::class),
-						),
-						factory = RaptorAggregateFactory(::BankAccountAggregate),
-						idClass = BankAccountNumber::class,
-						projectionDefinition = RaptorAggregateProjectionDefinition(
-							factory = ::BankAccountProjector,
-							idClass = BankAccountNumber::class,
-							projectionClass = BankAccount::class
-						),
-					),
+		val configuration = raptor.context.plugins.domain
+		assertEquals(actual = configuration.aggregates.definitions, expected = RaptorAggregateDefinitions(setOf(
+			RaptorAggregateDefinition(
+				aggregateClass = BankAccountAggregate::class,
+				changeClass = BankAccountChange::class,
+				changeDefinitions = setOf(
+					RaptorAggregateChangeDefinition(discriminator = "created", changeClass = Created::class),
+					RaptorAggregateChangeDefinition(discriminator = "deleted", changeClass = Deleted::class),
+					RaptorAggregateChangeDefinition(discriminator = "deposited", changeClass = Deposited::class),
+					RaptorAggregateChangeDefinition(discriminator = "labeled", changeClass = Labeled::class),
+					RaptorAggregateChangeDefinition(discriminator = "withdrawn", changeClass = Withdrawn::class),
 				),
-				eventFactory = eventFactory,
-				store = store,
-			)),
-		)
+				commandClass = BankAccountCommand::class,
+				commandDefinitions = setOf(
+					RaptorAggregateCommandDefinition(commandClass = Create::class),
+					RaptorAggregateCommandDefinition(commandClass = Delete::class),
+					RaptorAggregateCommandDefinition(commandClass = Deposit::class),
+					RaptorAggregateCommandDefinition(commandClass = Label::class),
+					RaptorAggregateCommandDefinition(commandClass = Withdraw::class),
+				),
+				discriminator = "bank account",
+				factory = RaptorAggregateFactory(::BankAccountAggregate),
+				idClass = BankAccountNumber::class,
+				projectionDefinition = RaptorAggregateProjectionDefinition(
+					factory = ::BankAccountProjector,
+					idClass = BankAccountNumber::class,
+					projectionClass = BankAccount::class
+				),
+			),
+		)))
+		assertEquals(actual = configuration.aggregates.eventFactory, expected = eventFactory)
+		assertEquals(actual = configuration.aggregates.store, expected = store)
 	}
 }

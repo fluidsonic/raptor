@@ -1,4 +1,4 @@
-package io.fluidsonic.raptor.cqrs
+package io.fluidsonic.raptor.domain
 
 import java.util.concurrent.*
 import kotlinx.coroutines.*

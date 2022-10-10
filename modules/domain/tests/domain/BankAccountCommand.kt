@@ -1,4 +1,4 @@
-import io.fluidsonic.raptor.cqrs.*
+import io.fluidsonic.raptor.domain.*
 
 
 sealed interface BankAccountCommand : RaptorAggregateCommand<BankAccountNumber> {

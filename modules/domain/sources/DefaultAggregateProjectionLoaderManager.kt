@@ -1,11 +1,10 @@
-package io.fluidsonic.raptor.cqrs
+package io.fluidsonic.raptor.domain
 
 import kotlin.reflect.*
 
 
 internal class DefaultAggregateProjectionLoaderManager(
 	definitions: Collection<RaptorAggregateProjectionDefinition<*, *, *>>,
-	private val projectionEventStream: DefaultAggregateProjectionEventStream,
 ) : RaptorAggregateProjectorLoaderManager {
 
 	private val factoriesByClass: Map<KClass<out RaptorAggregateProjectionId>, (() -> RaptorAggregateProjector.Incremental<RaptorAggregateProjection<*>, out RaptorAggregateProjectionId, *>)?> =
@@ -15,16 +14,13 @@ internal class DefaultAggregateProjectionLoaderManager(
 	private val loaders: MutableMap<KClass<out RaptorAggregateProjectionId>, RaptorAggregateProjectionLoader<*, *>> = hashMapOf()
 
 
-	internal suspend fun addEvent(event: RaptorAggregateEvent<*, *>) {
-		val id = event.aggregateId as? RaptorAggregateProjectionId ?: return
+	internal fun addEvent(event: RaptorAggregateEvent<*, *>): RaptorAggregateProjectionEvent<*, *, *>? {
+		val id = event.aggregateId as? RaptorAggregateProjectionId ?: return null
 
 		// FIXME
-		val projectionEvent =
-			(getOrCreate(id::class)
-				as DefaultAggregateProjectionLoader<RaptorAggregateProjection<RaptorAggregateProjectionId>, RaptorAggregateProjectionId, RaptorAggregateChange<RaptorAggregateProjectionId>>)
-				.addEvent(event as RaptorAggregateEvent<RaptorAggregateProjectionId, *>)
-
-		projectionEventStream.add(projectionEvent)
+		return (getOrCreate(id::class)
+			as DefaultAggregateProjectionLoader<RaptorAggregateProjection<RaptorAggregateProjectionId>, RaptorAggregateProjectionId, RaptorAggregateChange<RaptorAggregateProjectionId>>)
+			.addEvent(event as RaptorAggregateEvent<RaptorAggregateProjectionId, *>)
 	}
 
 

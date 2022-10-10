@@ -1,11 +1,14 @@
-package io.fluidsonic.raptor.cqrs
+package io.fluidsonic.raptor.domain
 
 
 // FIXME races, txs
 internal class DefaultAggregateManager(
-	private val domain: RaptorDomain,
+	private val definitions: RaptorAggregateDefinitions,
 	private val eventFactory: RaptorAggregateEventFactory,
+	private val eventStream: DefaultAggregateEventStream,
 	private val fixme: DefaultAggregateProjectionLoaderManager, // FIXME
+	private val projectionEventStream: DefaultAggregateProjectionEventStream,
+	private val store: RaptorAggregateStore,
 ) : RaptorAggregateManager {
 
 	private val controllers: MutableMap<RaptorAggregateId, RaptorAggregateController<*>> = hashMapOf()
@@ -19,10 +22,16 @@ internal class DefaultAggregateManager(
 		val pendingEvents = pendingEvents
 		this.pendingEvents = mutableListOf()
 
-		domain.aggregates.store.add(pendingEvents) // FIXME copy?
+		store.add(pendingEvents) // FIXME copy?
 
-		for (event in pendingEvents)
-			fixme.addEvent(event)
+		for (event in pendingEvents) {
+			val projectionEvent = fixme.addEvent(event)
+
+			eventStream.add(event)
+
+			if (projectionEvent != null)
+				projectionEventStream.add(projectionEvent)
+		}
 	}
 
 
@@ -35,12 +44,12 @@ internal class DefaultAggregateManager(
 	private fun <Id : RaptorAggregateId> createController(id: Id): RaptorAggregateController<Id> =
 		DefaultAggregateController(
 			// Seriously? Isn't there a better way?
-			definition = domain.aggregates.definition(id) as RaptorAggregateDefinition<
+			definition = definitions[id] as RaptorAggregateDefinition<
 				RaptorAggregate<RaptorAggregateId, RaptorAggregateCommand<RaptorAggregateId>, RaptorAggregateChange<RaptorAggregateId>>,
 				RaptorAggregateId,
 				RaptorAggregateCommand<RaptorAggregateId>,
 				RaptorAggregateChange<RaptorAggregateId>
-				>,
+				>, // FIXME null check
 			eventFactory = eventFactory,
 			id = id,
 		) as RaptorAggregateController<Id>
@@ -52,7 +61,7 @@ internal class DefaultAggregateManager(
 
 
 	override suspend fun load() {
-		domain.aggregates.store.load().collect { event ->
+		store.load().collect { event ->
 			controller(event.aggregateId).handle(event)
 			fixme.addEvent(event)
 		}

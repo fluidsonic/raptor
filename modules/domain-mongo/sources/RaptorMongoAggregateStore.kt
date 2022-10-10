@@ -1,7 +1,7 @@
 package io.fluidsonic.raptor.domain.mongo
 
 import io.fluidsonic.mongo.*
-import io.fluidsonic.raptor.cqrs.*
+import io.fluidsonic.raptor.domain.*
 import kotlinx.coroutines.flow.*
 
 

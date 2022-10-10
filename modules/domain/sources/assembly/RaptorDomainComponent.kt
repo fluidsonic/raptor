@@ -1,4 +1,4 @@
-package io.fluidsonic.raptor.cqrs
+package io.fluidsonic.raptor.domain
 
 import io.fluidsonic.raptor.*
 
@@ -13,9 +13,9 @@ public class RaptorDomainComponent internal constructor(
 		get() = componentRegistry.one(Keys.aggregatesComponent)
 
 
-	// FIXME rework & standardize
-	internal fun complete(context: RaptorContext): RaptorDomain =
-		RaptorDomain(aggregates = aggregates.complete(context = context))
+	// TODO rework & standardize
+	internal fun complete(context: RaptorContext): RaptorDomainPluginConfiguration =
+		RaptorDomainPluginConfiguration(aggregates = aggregates.complete(context = context))
 
 
 	override fun RaptorComponentConfigurationStartScope.onConfigurationStarted() {

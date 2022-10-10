@@ -2,7 +2,7 @@ package io.fluidsonic.raptor.domain.mongo
 
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.bson.*
-import io.fluidsonic.raptor.cqrs.*
+import io.fluidsonic.raptor.domain.*
 import io.fluidsonic.time.*
 import kotlin.reflect.*
 

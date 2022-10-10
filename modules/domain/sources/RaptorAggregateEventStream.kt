@@ -1,4 +1,4 @@
-package io.fluidsonic.raptor.cqrs
+package io.fluidsonic.raptor.domain
 
 import kotlin.reflect.*
 import kotlinx.coroutines.*
@@ -19,14 +19,15 @@ public interface RaptorAggregateEventStream {
 }
 
 
-public fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
+public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 	RaptorAggregateEventStream.subscribeIn(
 	scope: CoroutineScope,
 	collector: suspend (event: RaptorAggregateEvent<Id, Change>) -> Unit,
-	errorStrategy: RaptorAggregateEventStream.ErrorStrategy, // FIXME use
+	errorStrategy: RaptorAggregateEventStream.ErrorStrategy = RaptorAggregateEventStream.ErrorStrategy.skip, // FIXME use
 	changeClass: KClass<Change>,
 	idClass: KClass<Id>,
 ): Job {
+	val completion = CompletableDeferred<Unit>()
 	var failedAggregateIds: MutableSet<RaptorAggregateId>? = null
 
 	return asFlow()
@@ -48,15 +49,17 @@ public fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 					.add(aggregateId)
 			}
 		}
+		.onStart { completion.complete(Unit) }
 		.launchIn(scope)
+		.also { completion.await() }
 }
 
 
-public inline fun <reified Id : RaptorAggregateId, reified Change : RaptorAggregateChange<Id>>
+public suspend inline fun <reified Id : RaptorAggregateId, reified Change : RaptorAggregateChange<Id>>
 	RaptorAggregateEventStream.subscribeIn(
 	scope: CoroutineScope,
 	noinline collector: suspend (event: RaptorAggregateEvent<Id, Change>) -> Unit,
-	errorStrategy: RaptorAggregateEventStream.ErrorStrategy,
+	errorStrategy: RaptorAggregateEventStream.ErrorStrategy = RaptorAggregateEventStream.ErrorStrategy.skip,
 ): Job =
 	subscribeIn(
 		scope = scope,

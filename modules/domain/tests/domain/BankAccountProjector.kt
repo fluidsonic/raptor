@@ -1,5 +1,5 @@
 import BankAccountChange.*
-import io.fluidsonic.raptor.cqrs.*
+import io.fluidsonic.raptor.domain.*
 
 
 internal class BankAccountProjector : RaptorAggregateProjector.Incremental<BankAccount, BankAccountNumber, BankAccountChange> {
@@ -16,12 +16,12 @@ internal class BankAccountProjector : RaptorAggregateProjector.Incremental<BankA
 		if (this != null)
 			check(id == event.aggregateId) { "Cannot apply event for aggregate ${event.aggregateId} to $id." }
 
-		return when (val data = event.data) {
+		return when (val change = event.change) {
 			is Created -> when (this) {
 				null -> BankAccount(
 					amount = 0,
 					id = event.aggregateId,
-					owner = data.owner,
+					owner = change.owner,
 				)
 
 				else -> error("Cannot create aggregate $id multiple times.")
@@ -29,12 +29,12 @@ internal class BankAccountProjector : RaptorAggregateProjector.Incremental<BankA
 
 			else -> when (this) {
 				null -> error("Missing first event.")
-				else -> when (data) {
+				else -> when (change) {
 					is Created -> error("Compiler error.s")
 					is Deleted -> null
-					is Deposited -> apply(data)
-					is Labeled -> apply(data)
-					is Withdrawn -> apply(data)
+					is Deposited -> apply(change)
+					is Labeled -> apply(change)
+					is Withdrawn -> apply(change)
 				}
 			}
 		}

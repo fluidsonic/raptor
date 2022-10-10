@@ -1,4 +1,4 @@
-package io.fluidsonic.raptor.cqrs
+package io.fluidsonic.raptor.domain
 
 import io.fluidsonic.raptor.*
 import kotlin.reflect.*
@@ -20,20 +20,44 @@ public class RaptorAggregatesComponent internal constructor(
 		get() = componentRegistry.all(Keys.aggregateComponent).all
 
 
-	// FIXME rework
-	internal fun complete(context: RaptorContext) = RaptorDomain.Aggregates(
-		definitions = componentRegistry.many(Keys.aggregateComponent).mapTo(hashSetOf()) { it.complete() },
-		eventFactory = when (val eventFactory = eventFactory) {
+	// TODO rework
+	internal fun complete(context: RaptorContext): RaptorAggregatesConfiguration {
+		val definitions = RaptorAggregateDefinitions(componentRegistry.many(Keys.aggregateComponent).mapTo(hashSetOf()) { it.complete() })
+		val eventFactory = when (val eventFactory = eventFactory) {
 			null -> error("An aggregate event factory must be defined: domain.aggregates.eventFactory(…)")
 			DIPlaceholder -> DIAggregateEventFactory(context = context)
 			else -> eventFactory
-		},
-		store = when (val store = store) {
+		}
+		val eventStream = DefaultAggregateEventStream()
+		val projectionEventStream = DefaultAggregateProjectionEventStream()
+		val projectionLoaderManager = DefaultAggregateProjectionLoaderManager(
+			definitions = definitions.mapNotNull { it.projectionDefinition },
+		)
+		val store = when (val store = store) {
 			null -> error("An aggregate store must be defined: domain.aggregates.store(…)")
 			DIPlaceholder -> DIAggregateStore(context = context)
 			else -> store
-		},
-	)
+		}
+
+		val manager = DefaultAggregateManager(
+			definitions = definitions,
+			eventFactory = eventFactory,
+			eventStream = eventStream,
+			fixme = projectionLoaderManager,
+			projectionEventStream = projectionEventStream,
+			store = store,
+		)
+
+		return RaptorAggregatesConfiguration(
+			definitions = definitions,
+			eventFactory = eventFactory,
+			eventStreamInternal = eventStream,
+			manager = manager,
+			projectionEventStreamInternal = projectionEventStream,
+			projectionLoaderManager = projectionLoaderManager,
+			store = store,
+		)
+	}
 
 
 	@RaptorDsl

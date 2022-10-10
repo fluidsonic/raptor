@@ -1,4 +1,4 @@
-package io.fluidsonic.raptor.cqrs
+package io.fluidsonic.raptor.domain
 
 
 public fun interface RaptorAggregateFactory<out Aggregate : RaptorAggregate<Id, *, *>, Id : RaptorAggregateId> {
