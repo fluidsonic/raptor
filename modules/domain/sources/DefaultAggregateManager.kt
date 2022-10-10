@@ -9,7 +9,7 @@ internal class DefaultAggregateManager(
 ) : RaptorAggregateManager {
 
 	private val controllers: MutableMap<RaptorAggregateId, RaptorAggregateController<*>> = hashMapOf()
-	private var pendingEvents: MutableList<RaptorEvent<*, *>> = mutableListOf()
+	private var pendingEvents: MutableList<RaptorAggregateEvent<*, *>> = mutableListOf() // FIXME reset on transaction failure
 
 
 	override suspend fun commit() {
@@ -23,8 +23,6 @@ internal class DefaultAggregateManager(
 
 		for (event in pendingEvents)
 			fixme.addEvent(event)
-
-		// FIXME event bus
 	}
 
 
@@ -38,10 +36,10 @@ internal class DefaultAggregateManager(
 		DefaultAggregateController(
 			// Seriously? Isn't there a better way?
 			definition = domain.aggregates.definition(id) as RaptorAggregateDefinition<
-				RaptorAggregate<RaptorAggregateId, RaptorAggregateCommand<RaptorAggregateId>, RaptorAggregateEvent<RaptorAggregateId>>,
+				RaptorAggregate<RaptorAggregateId, RaptorAggregateCommand<RaptorAggregateId>, RaptorAggregateChange<RaptorAggregateId>>,
 				RaptorAggregateId,
 				RaptorAggregateCommand<RaptorAggregateId>,
-				RaptorAggregateEvent<RaptorAggregateId>
+				RaptorAggregateChange<RaptorAggregateId>
 				>,
 			eventFactory = eventFactory,
 			id = id,

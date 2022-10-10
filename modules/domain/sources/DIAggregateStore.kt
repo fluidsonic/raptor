@@ -12,7 +12,7 @@ internal class DIAggregateStore(
 	private val delegate: RaptorAggregateStore by lazy { context.di.get() }
 
 
-	override suspend fun add(events: List<RaptorEvent<*, *>>) {
+	override suspend fun add(events: List<RaptorAggregateEvent<*, *>>) {
 		delegate.add(events)
 	}
 

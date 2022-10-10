@@ -9,23 +9,37 @@ import kotlin.reflect.full.*
 
 
 public class RaptorAggregateComponent<
-	Aggregate : RaptorAggregate<Id, Command, Event>,
+	Aggregate : RaptorAggregate<Id, Command, Change>,
 	Id : RaptorAggregateId,
 	Command : RaptorAggregateCommand<Id>,
-	Event : RaptorAggregateEvent<Id>,
+	Change : RaptorAggregateChange<Id>,
 	> internal constructor(
 	private val aggregateClass: KClass<Aggregate>, // FIXME use KTypes
+	private val changeClass: KClass<Change>,
 	private val commandClass: KClass<Command>,
 	private val discriminator: String,
-	private val eventClass: KClass<Event>,
 	private val factory: RaptorAggregateFactory<Aggregate, Id>,
 	private val idClass: KClass<Id>,
 	private val topLevelScope: RaptorAssemblyInstallationScope,
-) : RaptorComponent.Base<RaptorAggregateComponent<Aggregate, Id, Command, Event>>(RaptorDomainPlugin) {
+) : RaptorComponent.Base<RaptorAggregateComponent<Aggregate, Id, Command, Change>>(RaptorDomainPlugin) {
 
+	private val changeDefinitions: MutableMap<KClass<out Change>, RaptorAggregateChangeDefinition<Id, out Change>> = hashMapOf()
 	private val commandDefinitions: MutableMap<KClass<out Command>, RaptorAggregateCommandDefinition<Id, out Command>> = hashMapOf()
-	private val eventDefinitions: MutableMap<KClass<out Event>, RaptorAggregateEventDefinition<Id, out Event>> = hashMapOf()
-	private var projectionDefinition: RaptorAggregateProjectionDefinition<*, *, Event>? = null
+	private var projectionDefinition: RaptorAggregateProjectionDefinition<*, *, Change>? = null
+
+
+	@RaptorDsl
+	public fun change(discriminator: String, changeClass: KClass<out Change>) {
+		check(!changeDefinitions.containsKey(changeClass)) { "Cannot define change $changeClass multiple times." }
+		check(changeDefinitions.values.none { it.discriminator == discriminator }) {
+			"Cannot define multiple changes with the same discriminator: $discriminator."
+		}
+
+		changeDefinitions[changeClass] = RaptorAggregateChangeDefinition(
+			changeClass = changeClass,
+			discriminator = discriminator,
+		)
+	}
 
 
 	@RaptorDsl
@@ -39,44 +53,30 @@ public class RaptorAggregateComponent<
 	internal fun complete() =
 		RaptorAggregateDefinition(
 			aggregateClass = aggregateClass,
+			changeClass = changeClass,
+			changeDefinitions = changeDefinitions.values.toHashSet(),
 			commandClass = commandClass,
 			commandDefinitions = commandDefinitions.values.toHashSet(),
 			discriminator = discriminator,
-			eventClass = eventClass,
-			eventDefinitions = eventDefinitions.values.toHashSet(),
 			factory = factory,
 			idClass = idClass,
 			projectionDefinition = projectionDefinition,
 		)
 
 
-	@RaptorDsl
-	public fun event(discriminator: String, eventClass: KClass<out Event>) {
-		check(!eventDefinitions.containsKey(eventClass)) { "Cannot define event $eventClass multiple times." }
-		check(eventDefinitions.values.none { it.discriminator == discriminator }) {
-			"Cannot define multiple events with the same discriminator: $discriminator."
-		}
-
-		eventDefinitions[eventClass] = RaptorAggregateEventDefinition(
-			discriminator = discriminator,
-			eventClass = eventClass,
-		)
-	}
-
-
 	@RaptorInternalApi // FIXME
 	@RaptorDsl
 	public fun <Projection : RaptorAggregateProjection<Id>> _project(
-		projectionClass: KClass<Projection>, projectorFactory: () -> RaptorAggregateProjector.Incremental<Projection, *, Event>,
+		projectionClass: KClass<Projection>, projectorFactory: () -> RaptorAggregateProjector.Incremental<Projection, *, Change>,
 	) {
 		check(this.projectionDefinition == null) { "Cannot set multiple projector factories for aggregate $aggregateClass." }
 
 		this.projectionDefinition =
 			RaptorAggregateProjectionDefinition(
-				factory = projectorFactory as () -> RaptorAggregateProjector.Incremental<RaptorAggregateProjection<RaptorAggregateProjectionId>, RaptorAggregateProjectionId, RaptorAggregateEvent<RaptorAggregateProjectionId>>,
+				factory = projectorFactory as () -> RaptorAggregateProjector.Incremental<RaptorAggregateProjection<RaptorAggregateProjectionId>, RaptorAggregateProjectionId, RaptorAggregateChange<RaptorAggregateProjectionId>>,
 				idClass = idClass as KClass<RaptorAggregateProjectionId>,
 				projectionClass = projectionClass as KClass<RaptorAggregateProjection<RaptorAggregateProjectionId>>,
-			) as RaptorAggregateProjectionDefinition<*, *, Event>
+			) as RaptorAggregateProjectionDefinition<*, *, Change>
 
 		with(topLevelScope) { // FIXME remove hack
 			optional(RaptorDIPlugin) {
@@ -105,29 +105,29 @@ public inline fun <reified Command : RaptorAggregateCommand<*>> RaptorAssemblyQu
 
 
 @RaptorDsl
-public fun <Event : RaptorAggregateEvent<*>>
-	RaptorAssemblyQuery<RaptorAggregateComponent<*, *, *, in Event>>.event(
+public fun <Event : RaptorAggregateChange<*>>
+	RaptorAssemblyQuery<RaptorAggregateComponent<*, *, *, in Event>>.change(
 	discriminator: String,
 	eventClass: KClass<Event>,
 ) {
 	each {
-		event(discriminator, eventClass)
+		change(discriminator, eventClass)
 	}
 }
 
 
 @RaptorDsl
-public inline fun <reified Event : RaptorAggregateEvent<*>>
-	RaptorAssemblyQuery<RaptorAggregateComponent<*, *, *, in Event>>.event(
+public inline fun <reified Event : RaptorAggregateChange<*>>
+	RaptorAssemblyQuery<RaptorAggregateComponent<*, *, *, in Event>>.change(
 	discriminator: String,
 ) {
-	event(discriminator, Event::class)
+	change(discriminator, Event::class)
 }
 
 
 @OptIn(RaptorInternalApi::class) // FIXME remove
 @RaptorDsl
-public fun <Projection : RaptorAggregateProjection<Id>, Id : RaptorAggregateProjectionId, Event : RaptorAggregateEvent<Id>>
+public fun <Projection : RaptorAggregateProjection<Id>, Id : RaptorAggregateProjectionId, Event : RaptorAggregateChange<Id>>
 	RaptorAssemblyQuery<RaptorAggregateComponent<out RaptorAggregate<Id, *, Event>, Id, *, Event>>.project(
 	projectionClass: KClass<Projection>,
 	projectorFactory: () -> RaptorAggregateProjector.Incremental<Projection, Id, Event>,
@@ -139,7 +139,7 @@ public fun <Projection : RaptorAggregateProjection<Id>, Id : RaptorAggregateProj
 
 
 @RaptorDsl
-public inline fun <reified Projection : RaptorAggregateProjection<Id>, Id : RaptorAggregateProjectionId, Event : RaptorAggregateEvent<Id>>
+public inline fun <reified Projection : RaptorAggregateProjection<Id>, Id : RaptorAggregateProjectionId, Event : RaptorAggregateChange<Id>>
 	RaptorAssemblyQuery<RaptorAggregateComponent<out RaptorAggregate<Id, *, Event>, Id, *, Event>>.project(
 	noinline projectorFactory: () -> RaptorAggregateProjector.Incremental<Projection, Id, Event>,
 ) {

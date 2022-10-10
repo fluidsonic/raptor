@@ -1,18 +1,18 @@
-import BankAccountEvent.*
+import BankAccountChange.*
 import io.fluidsonic.raptor.cqrs.*
 
 
-internal class BankAccountProjector : RaptorAggregateProjector.Incremental<BankAccount, BankAccountNumber, BankAccountEvent> {
+internal class BankAccountProjector : RaptorAggregateProjector.Incremental<BankAccount, BankAccountNumber, BankAccountChange> {
 
 	override var projection: BankAccount? = null
 		private set
 
 
-	override fun add(event: RaptorEvent<BankAccountNumber, BankAccountEvent>) =
+	override fun add(event: RaptorAggregateEvent<BankAccountNumber, BankAccountChange>) =
 		projection.apply(event).also { projection = it }
 
 
-	private fun BankAccount?.apply(event: RaptorEvent<BankAccountNumber, BankAccountEvent>): BankAccount? {
+	private fun BankAccount?.apply(event: RaptorAggregateEvent<BankAccountNumber, BankAccountChange>): BankAccount? {
 		if (this != null)
 			check(id == event.aggregateId) { "Cannot apply event for aggregate ${event.aggregateId} to $id." }
 

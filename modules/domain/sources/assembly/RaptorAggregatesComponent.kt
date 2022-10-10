@@ -46,24 +46,24 @@ public class RaptorAggregatesComponent internal constructor(
 
 	@RaptorDsl
 	public fun <
-		Aggregate : RaptorAggregate<Id, Command, Event>,
+		Aggregate : RaptorAggregate<Id, Command, Change>,
 		Id : RaptorAggregateId,
 		Command : RaptorAggregateCommand<Id>,
-		Event : RaptorAggregateEvent<Id>,
+		Change : RaptorAggregateChange<Id>,
 		>
 		new(
 		aggregateClass: KClass<Aggregate>,
+		changeClass: KClass<Change>,
 		commandClass: KClass<Command>,
 		discriminator: String,
-		eventClass: KClass<Event>,
 		factory: RaptorAggregateFactory<Aggregate, Id>,
 		idClass: KClass<Id>,
-	): RaptorAssemblyQuery<RaptorAggregateComponent<Aggregate, Id, Command, Event>> =
+	): RaptorAssemblyQuery<RaptorAggregateComponent<Aggregate, Id, Command, Change>> =
 		RaptorAggregateComponent(
 			aggregateClass = aggregateClass,
+			changeClass = changeClass,
 			commandClass = commandClass,
 			discriminator = discriminator,
-			eventClass = eventClass,
 			factory = factory,
 			idClass = idClass,
 			topLevelScope = topLevelScope,
@@ -81,15 +81,15 @@ public class RaptorAggregatesComponent internal constructor(
 	// FIXME hack
 	internal object DIPlaceholder : RaptorAggregateEventFactory, RaptorAggregateStore {
 
-		override suspend fun add(events: List<RaptorEvent<*, *>>) {
+		override suspend fun add(events: List<RaptorAggregateEvent<*, *>>) {
 			error("Placeholder.")
 		}
 
-		override fun load(): Flow<RaptorEvent<*, *>> {
+		override fun load(): Flow<RaptorAggregateEvent<*, *>> {
 			error("Placeholder.")
 		}
 
-		override fun <Id : RaptorAggregateId, Event : RaptorAggregateEvent<Id>> create(aggregateId: Id, data: Event, version: Int): RaptorEvent<Id, Event> {
+		override fun <Id : RaptorAggregateId, Event : RaptorAggregateChange<Id>> create(aggregateId: Id, data: Event, version: Int): RaptorAggregateEvent<Id, Event> {
 			error("Placeholder.")
 		}
 	}
@@ -118,25 +118,25 @@ public fun RaptorAssemblyQuery<RaptorAggregatesComponent>.eventFactory(factory: 
 
 @RaptorDsl
 public fun <
-	Aggregate : RaptorAggregate<Id, Command, Event>,
+	Aggregate : RaptorAggregate<Id, Command, Change>,
 	Id : RaptorAggregateId,
 	Command : RaptorAggregateCommand<Id>,
-	Event : RaptorAggregateEvent<Id>,
+	Change : RaptorAggregateChange<Id>,
 	>
 	RaptorAssemblyQuery<RaptorAggregatesComponent>.new(
 	aggregateClass: KClass<Aggregate>,
+	changeClass: KClass<Change>,
 	commandClass: KClass<Command>,
 	discriminator: String,
-	eventClass: KClass<Event>,
 	factory: RaptorAggregateFactory<Aggregate, Id>,
 	idClass: KClass<Id>,
-): RaptorAssemblyQuery<RaptorAggregateComponent<Aggregate, Id, Command, Event>> =
+): RaptorAssemblyQuery<RaptorAggregateComponent<Aggregate, Id, Command, Change>> =
 	flatMap { aggregates ->
 		aggregates.new(
 			aggregateClass = aggregateClass,
+			changeClass = changeClass,
 			commandClass = commandClass,
 			discriminator = discriminator,
-			eventClass = eventClass,
 			factory = factory,
 			idClass = idClass,
 		)
@@ -145,25 +145,25 @@ public fun <
 
 @RaptorDsl
 public fun <
-	Aggregate : RaptorAggregate<Id, Command, Event>,
+	Aggregate : RaptorAggregate<Id, Command, Change>,
 	Id : RaptorAggregateId,
 	Command : RaptorAggregateCommand<Id>,
-	Event : RaptorAggregateEvent<Id>,
+	Change : RaptorAggregateChange<Id>,
 	>
 	RaptorAssemblyQuery<RaptorAggregatesComponent>.new(
 	aggregateClass: KClass<Aggregate>,
+	changeClass: KClass<Change>,
 	commandClass: KClass<Command>,
 	discriminator: String,
-	eventClass: KClass<Event>,
 	factory: RaptorAggregateFactory<Aggregate, Id>,
 	idClass: KClass<Id>,
-	configure: RaptorAggregateComponent<Aggregate, Id, Command, Event>.() -> Unit = {},
+	configure: RaptorAggregateComponent<Aggregate, Id, Command, Change>.() -> Unit = {},
 ) {
 	new(
 		aggregateClass = aggregateClass,
+		changeClass = changeClass,
 		commandClass = commandClass,
 		discriminator = discriminator,
-		eventClass = eventClass,
 		factory = factory,
 		idClass = idClass,
 	).each(configure)
@@ -172,20 +172,20 @@ public fun <
 
 @RaptorDsl
 public inline fun <
-	reified Aggregate : RaptorAggregate<Id, Command, Event>,
+	reified Aggregate : RaptorAggregate<Id, Command, Change>,
 	reified Id : RaptorAggregateId,
 	reified Command : RaptorAggregateCommand<Id>,
-	reified Event : RaptorAggregateEvent<Id>,
+	reified Change : RaptorAggregateChange<Id>,
 	>
 	RaptorAssemblyQuery<RaptorAggregatesComponent>.new(
 	factory: RaptorAggregateFactory<Aggregate, Id>,
 	discriminator: String,
-): RaptorAssemblyQuery<RaptorAggregateComponent<Aggregate, Id, Command, Event>> =
+): RaptorAssemblyQuery<RaptorAggregateComponent<Aggregate, Id, Command, Change>> =
 	new(
 		aggregateClass = Aggregate::class,
+		changeClass = Change::class,
 		commandClass = Command::class,
 		discriminator = discriminator,
-		eventClass = Event::class,
 		factory = factory,
 		idClass = Id::class,
 	)
@@ -193,21 +193,21 @@ public inline fun <
 
 @RaptorDsl
 public inline fun <
-	reified Aggregate : RaptorAggregate<Id, Command, Event>,
+	reified Aggregate : RaptorAggregate<Id, Command, Change>,
 	reified Id : RaptorAggregateId,
 	reified Command : RaptorAggregateCommand<Id>,
-	reified Event : RaptorAggregateEvent<Id>,
+	reified Change : RaptorAggregateChange<Id>,
 	> RaptorAssemblyQuery<RaptorAggregatesComponent>.new(
 	factory: RaptorAggregateFactory<Aggregate, Id>,
 	discriminator: String,
-	noinline configure: RaptorAggregateComponent<Aggregate, Id, Command, Event>.() -> Unit = {},
+	noinline configure: RaptorAggregateComponent<Aggregate, Id, Command, Change>.() -> Unit = {},
 ) {
 	new(
 		aggregateClass = Aggregate::class,
+		changeClass = Change::class,
 		commandClass = Command::class,
 		configure = configure,
 		discriminator = discriminator,
-		eventClass = Event::class,
 		factory = factory,
 		idClass = Id::class,
 	)
@@ -216,24 +216,24 @@ public inline fun <
 
 @RaptorDsl
 public fun <
-	Aggregate : RaptorAggregate<Id, Command, Event>,
+	Aggregate : RaptorAggregate<Id, Command, Change>,
 	Id : RaptorAggregateId,
 	Command : RaptorAggregateCommand<Id>,
-	Event : RaptorAggregateEvent<Id>,
+	Change : RaptorAggregateChange<Id>,
 	>
 	RaptorAssemblyQuery<RaptorAggregatesComponent>.new(
 	aggregateClass: KClass<Aggregate>,
+	changeClass: KClass<Change>,
 	commandClass: KClass<Command>,
 	discriminator: String,
-	eventClass: KClass<Event>,
 	factory: (id: Id) -> Aggregate,
 	idClass: KClass<Id>,
-): RaptorAssemblyQuery<RaptorAggregateComponent<Aggregate, Id, Command, Event>> =
+): RaptorAssemblyQuery<RaptorAggregateComponent<Aggregate, Id, Command, Change>> =
 	new(
 		aggregateClass = aggregateClass,
+		changeClass = changeClass,
 		commandClass = commandClass,
 		discriminator = discriminator,
-		eventClass = eventClass,
 		factory = RaptorAggregateFactory(factory),
 		idClass = idClass,
 	)
@@ -241,25 +241,25 @@ public fun <
 
 @RaptorDsl
 public fun <
-	Aggregate : RaptorAggregate<Id, Command, Event>,
+	Aggregate : RaptorAggregate<Id, Command, Change>,
 	Id : RaptorAggregateId,
 	Command : RaptorAggregateCommand<Id>,
-	Event : RaptorAggregateEvent<Id>,
+	Change : RaptorAggregateChange<Id>,
 	>
 	RaptorAssemblyQuery<RaptorAggregatesComponent>.new(
 	aggregateClass: KClass<Aggregate>,
+	changeClass: KClass<Change>,
 	commandClass: KClass<Command>,
 	discriminator: String,
-	eventClass: KClass<Event>,
 	factory: (id: Id) -> Aggregate,
 	idClass: KClass<Id>,
-	configure: RaptorAggregateComponent<Aggregate, Id, Command, Event>.() -> Unit = {},
+	configure: RaptorAggregateComponent<Aggregate, Id, Command, Change>.() -> Unit = {},
 ) {
 	new(
 		aggregateClass = aggregateClass,
+		changeClass = changeClass,
 		commandClass = commandClass,
 		discriminator = discriminator,
-		eventClass = eventClass,
 		factory = RaptorAggregateFactory(factory),
 		idClass = idClass,
 	).each(configure)
@@ -268,20 +268,20 @@ public fun <
 
 @RaptorDsl
 public inline fun <
-	reified Aggregate : RaptorAggregate<Id, Command, Event>,
+	reified Aggregate : RaptorAggregate<Id, Command, Change>,
 	reified Id : RaptorAggregateId,
 	reified Command : RaptorAggregateCommand<Id>,
-	reified Event : RaptorAggregateEvent<Id>,
+	reified Change : RaptorAggregateChange<Id>,
 	>
 	RaptorAssemblyQuery<RaptorAggregatesComponent>.new(
 	noinline factory: (id: Id) -> Aggregate,
 	discriminator: String,
-): RaptorAssemblyQuery<RaptorAggregateComponent<Aggregate, Id, Command, Event>> =
+): RaptorAssemblyQuery<RaptorAggregateComponent<Aggregate, Id, Command, Change>> =
 	new(
 		aggregateClass = Aggregate::class,
+		changeClass = Change::class,
 		commandClass = Command::class,
 		discriminator = discriminator,
-		eventClass = Event::class,
 		factory = factory,
 		idClass = Id::class,
 	)
@@ -289,21 +289,21 @@ public inline fun <
 
 @RaptorDsl
 public inline fun <
-	reified Aggregate : RaptorAggregate<Id, Command, Event>,
+	reified Aggregate : RaptorAggregate<Id, Command, Change>,
 	reified Id : RaptorAggregateId,
 	reified Command : RaptorAggregateCommand<Id>,
-	reified Event : RaptorAggregateEvent<Id>,
+	reified Change : RaptorAggregateChange<Id>,
 	> RaptorAssemblyQuery<RaptorAggregatesComponent>.new(
 	noinline factory: (id: Id) -> Aggregate,
 	discriminator: String,
-	noinline configure: RaptorAggregateComponent<Aggregate, Id, Command, Event>.() -> Unit = {},
+	noinline configure: RaptorAggregateComponent<Aggregate, Id, Command, Change>.() -> Unit = {},
 ) {
 	new(
 		aggregateClass = Aggregate::class,
+		changeClass = Change::class,
 		commandClass = Command::class,
 		configure = configure,
 		discriminator = discriminator,
-		eventClass = Event::class,
 		factory = factory,
 		idClass = Id::class,
 	)

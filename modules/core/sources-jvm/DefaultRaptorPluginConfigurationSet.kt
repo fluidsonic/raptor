@@ -6,8 +6,8 @@ internal class DefaultRaptorPluginConfigurationSet(
 ) : RaptorPluginConfigurationsSet {
 
 	@Suppress("UNCHECKED_CAST")
-	override operator fun <Configuration : Any, Plugin : RaptorPluginWithConfiguration<Configuration>> get(plugin: Plugin): Configuration =
-		values[plugin] as Configuration? ?: throw RaptorPluginNotInstalledException(plugin)
+	override fun <Configuration : Any, Plugin : RaptorPluginWithConfiguration<Configuration>> getOrNull(plugin: Plugin): Configuration? =
+		values[plugin] as Configuration?
 
 
 	override fun toString() =

@@ -17,30 +17,30 @@ internal object RaptorAggregateEventBson {
 		val definitionsByIdClass: MutableMap<KClass<out RaptorAggregateId>, RaptorAggregateDefinition<*, *, *, *>> =
 			definitions.associateByTo(hashMapOf()) { it.idClass }
 
-		return raptor.bson.definition<RaptorEvent<*, *>> {
+		return raptor.bson.definition<RaptorAggregateEvent<*, *>> {
 			decode {
 				var aggregateId: RaptorAggregateId? = null
-				var change: RaptorAggregateEvent<*>? = null
-				var id: RaptorEventId? = null
+				var change: RaptorAggregateChange<*>? = null
+				var id: RaptorAggregateEventId? = null
 				var timestamp: Timestamp? = null
 				var version: Int? = null
 
-				var definition: RaptorAggregateDefinition<*, RaptorAggregateId, *, RaptorAggregateEvent<RaptorAggregateId>>? = null
-				var changeDefinition: RaptorAggregateEventDefinition<RaptorAggregateId, out RaptorAggregateEvent<RaptorAggregateId>>? = null
+				var definition: RaptorAggregateDefinition<*, RaptorAggregateId, *, RaptorAggregateChange<RaptorAggregateId>>? = null
+				var changeDefinition: RaptorAggregateChangeDefinition<RaptorAggregateId, out RaptorAggregateChange<RaptorAggregateId>>? = null
 
 				reader.documentByField { field ->
 					when (field) {
 						Fields.aggregateType -> string().let { discriminator ->
 							@Suppress("UNCHECKED_CAST")
 							definition = definitionsByDiscriminator[discriminator]
-								as RaptorAggregateDefinition<*, RaptorAggregateId, *, RaptorAggregateEvent<RaptorAggregateId>>?
+								as RaptorAggregateDefinition<*, RaptorAggregateId, *, RaptorAggregateChange<RaptorAggregateId>>?
 								?: error("Cannot decode event for undefined aggregate discriminator '$discriminator'.")
 						}
 
 						Fields.aggregateId -> {
 							@Suppress("NAME_SHADOWING")
 							val definition = checkNotNull(definition) {
-								"Invalid field order when decoding ${RaptorEvent::class}. '${Fields.aggregateType}' must precede '${Fields.aggregateId}'."
+								"Invalid field order when decoding ${RaptorAggregateEvent::class}. '${Fields.aggregateType}' must precede '${Fields.aggregateId}'."
 							}
 
 							aggregateId = value(definition.idType)
@@ -49,7 +49,7 @@ internal object RaptorAggregateEventBson {
 						Fields.changeType -> string().let { discriminator ->
 							@Suppress("NAME_SHADOWING")
 							val definition = checkNotNull(definition) {
-								"Invalid field order when decoding ${RaptorEvent::class}. '${Fields.aggregateType}' must precede '${Fields.changeType}'."
+								"Invalid field order when decoding ${RaptorAggregateEvent::class}. '${Fields.aggregateType}' must precede '${Fields.changeType}'."
 							}
 
 							changeDefinition = definition.changeDefinition(discriminator)
@@ -59,7 +59,7 @@ internal object RaptorAggregateEventBson {
 						Fields.change -> {
 							@Suppress("NAME_SHADOWING")
 							val changeDefinition = checkNotNull(changeDefinition) {
-								"Invalid field order when decoding ${RaptorEvent::class}. '${Fields.changeType}' must precede '${Fields.change}'."
+								"Invalid field order when decoding ${RaptorAggregateEvent::class}. '${Fields.changeType}' must precede '${Fields.change}'."
 							}
 
 							change = value(changeDefinition.type)
@@ -72,9 +72,9 @@ internal object RaptorAggregateEventBson {
 					}
 				}
 
-				RaptorEvent(
+				RaptorAggregateEvent(
 					aggregateId = aggregateId ?: missingFieldValue(Fields.aggregateId),
-					data = change ?: missingFieldValue(Fields.change),
+					change = change ?: missingFieldValue(Fields.change),
 					id = id ?: missingFieldValue(Fields.id),
 					timestamp = timestamp ?: missingFieldValue(Fields.timestamp),
 					version = version ?: missingFieldValue(Fields.version),
@@ -84,17 +84,17 @@ internal object RaptorAggregateEventBson {
 			encode { value ->
 				@Suppress("UNCHECKED_CAST")
 				val definition = definitionsByIdClass[value.aggregateId::class]
-					as RaptorAggregateDefinition<*, RaptorAggregateId, *, RaptorAggregateEvent<RaptorAggregateId>>?
+					as RaptorAggregateDefinition<*, RaptorAggregateId, *, RaptorAggregateChange<RaptorAggregateId>>?
 					?: error("Cannot encode event for undefined aggregate '${value.aggregateId.debug}':\n$value")
 
-				val changeDefinition = definition.changeDefinition(value.data::class)
+				val changeDefinition = definition.changeDefinition(value.change::class)
 					?: error("Cannot encode undefined change for aggregate '${value.aggregateId.debug}':\n$value")
 
 				writer.document {
 					value(Fields.aggregateType, definition.discriminator)
 					value(Fields.aggregateId, value.aggregateId)
 					value(Fields.changeType, changeDefinition.discriminator)
-					value(Fields.change, value.data)
+					value(Fields.change, value.change)
 					value(Fields.id, value.id)
 					value(Fields.timestamp, value.timestamp)
 					value(Fields.version, value.version)
@@ -106,7 +106,7 @@ internal object RaptorAggregateEventBson {
 
 	fun idBson() = raptor.bson.definition {
 		decode {
-			RaptorEventId(reader.objectId().toString())
+			RaptorAggregateEventId(reader.objectId().toString())
 		}
 
 		encode { value ->

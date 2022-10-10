@@ -3,5 +3,11 @@ package io.fluidsonic.raptor
 
 public interface RaptorPluginConfigurationsSet {
 
-	public operator fun <Configuration : Any, Plugin : RaptorPluginWithConfiguration<Configuration>> get(plugin: Plugin): Configuration
+	public fun <Configuration : Any, Plugin : RaptorPluginWithConfiguration<Configuration>> getOrNull(plugin: Plugin): Configuration?
 }
+
+
+public operator fun <Configuration : Any, Plugin : RaptorPluginWithConfiguration<Configuration>> RaptorPluginConfigurationsSet.get(
+	plugin: Plugin,
+): Configuration =
+	getOrNull(plugin) ?: throw RaptorPluginNotInstalledException(plugin)

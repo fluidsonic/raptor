@@ -9,9 +9,11 @@ public object RaptorDomainPlugin : RaptorPluginWithConfiguration<RaptorDomain> {
 
 	override fun RaptorPluginCompletionScope.complete(): RaptorDomain {
 		val domain = componentRegistry.one(Keys.domainComponent).complete(context = lazyContext)
+		val projectionEventStream = DefaultAggregateProjectionEventStream()
 
 		val loaderManager = DefaultAggregateProjectionLoaderManager(
 			definitions = domain.aggregates.definitions.mapNotNull { it.projectionDefinition },
+			projectionEventStream = projectionEventStream,
 		)
 		val aggregateManager = DefaultAggregateManager(
 			domain = domain,
@@ -20,7 +22,8 @@ public object RaptorDomainPlugin : RaptorPluginWithConfiguration<RaptorDomain> {
 		)
 
 		propertyRegistry.register(Keys.aggregateManagerProperty, aggregateManager)
-		propertyRegistry.register(Keys.aggregateProjectionLoaderManagerProperty, loaderManager)
+		propertyRegistry.register(Keys.aggregateProjectionEventStreamProperty, projectionEventStream)
+		propertyRegistry.register(Keys.aggregateProjectorLoaderManagerProperty, loaderManager)
 		propertyRegistry.register(Keys.domainProperty, domain)
 
 		return domain
@@ -28,13 +31,13 @@ public object RaptorDomainPlugin : RaptorPluginWithConfiguration<RaptorDomain> {
 
 
 	override fun RaptorPluginInstallationScope.install() {
-		componentRegistry.register(Keys.domainComponent) { RaptorDomainComponent(topLevelScope = this) }
+		componentRegistry.register(Keys.domainComponent, RaptorDomainComponent(topLevelScope = this))
 
 		optional(RaptorDIPlugin) {
 			// FIXME di should use properties only
 			di.provide<RaptorAggregateCommandExecutor> { context.aggregateManager }
 			di.provide<RaptorAggregateEventStream> { DefaultAggregateEventStream() }
-			di.provide<RaptorAggregateProjectionEventStream> { DefaultAggregateProjectionEventStream() }
+			di.provide<RaptorAggregateProjectionEventStream> { context[Keys.aggregateProjectionEventStreamProperty]!! } // TODO
 		}
 
 		require(RaptorLifecyclePlugin) {

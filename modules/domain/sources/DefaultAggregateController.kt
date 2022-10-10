@@ -5,7 +5,7 @@ internal class DefaultAggregateController<
 	Aggregate : RaptorAggregate<Id, Command, Event>,
 	Id : RaptorAggregateId,
 	Command : RaptorAggregateCommand<Id>,
-	Event : RaptorAggregateEvent<Id>,
+	Event : RaptorAggregateChange<Id>,
 	>(
 	private val definition: RaptorAggregateDefinition<Aggregate, Id, Command, Event>,
 	private val eventFactory: RaptorAggregateEventFactory,
@@ -16,15 +16,15 @@ internal class DefaultAggregateController<
 	private var version = 0
 
 
-	override fun execute(command: RaptorAggregateCommand<Id>): List<RaptorEvent<Id, RaptorAggregateEvent<Id>>> {
+	override fun execute(command: RaptorAggregateCommand<Id>): List<RaptorAggregateEvent<Id, RaptorAggregateChange<Id>>> {
 		@Suppress("NAME_SHADOWING")
 		val command = definition.castOrNull(command)
 			?: error("Unsupported command.") // FIXME
 
-		return aggregate.execute(command).map { data ->
+		return aggregate.execute(command).map { change ->
 			eventFactory.create(
 				aggregateId = aggregate.id,
-				data = data,
+				change = change,
 				version = version + 1,
 			).also { event ->
 				handleUnchecked(event)
@@ -33,7 +33,7 @@ internal class DefaultAggregateController<
 	}
 
 
-	override fun handle(event: RaptorEvent<Id, RaptorAggregateEvent<Id>>) {
+	override fun handle(event: RaptorAggregateEvent<Id, RaptorAggregateChange<Id>>) {
 		@Suppress("NAME_SHADOWING")
 		val event = definition.castOrNull(event)
 			?: error("Unsupported event.") // FIXME
@@ -51,8 +51,8 @@ internal class DefaultAggregateController<
 	}
 
 
-	private fun handleUnchecked(event: RaptorEvent<Id, Event>) {
-		aggregate.handle(event.data)
+	private fun handleUnchecked(event: RaptorAggregateEvent<Id, Event>) {
+		aggregate.handle(event.change)
 		version = event.version
 	}
 }

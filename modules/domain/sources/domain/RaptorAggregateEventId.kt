@@ -2,10 +2,10 @@ package io.fluidsonic.raptor.cqrs
 
 
 @JvmInline
-public value class RaptorEventId(private val value: String) : RaptorEntityId {
+public value class RaptorAggregateEventId(private val value: String) : RaptorEntityId {
 
 	override val discriminator: String
-		get() = "event"
+		get() = "aggregate event"
 
 
 	override fun toString(): String =

@@ -9,15 +9,15 @@ class TestAggregateEventFactory(
 	private var nextId = 1
 
 
-	override fun <Id : RaptorAggregateId, Event : RaptorAggregateEvent<Id>> create(
+	override fun <Id : RaptorAggregateId, Event : RaptorAggregateChange<Id>> create(
 		aggregateId: Id,
 		data: Event,
 		version: Int,
-	): RaptorEvent<Id, Event> =
-		RaptorEvent(
+	): RaptorAggregateEvent<Id, Event> =
+		RaptorAggregateEvent(
 			aggregateId = aggregateId,
 			data = data,
-			id = RaptorEventId((nextId++).toString()),
+			id = RaptorAggregateEventId((nextId++).toString()),
 			timestamp = clock.now(),
 			version = version,
 		)

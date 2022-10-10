@@ -3,9 +3,9 @@ package io.fluidsonic.raptor.cqrs
 
 public interface RaptorAggregateEventFactory { // FIXME RN
 
-	public fun <Id : RaptorAggregateId, Event : RaptorAggregateEvent<Id>> create(
+	public fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>> create(
 		aggregateId: Id,
-		data: Event,
+		change: Change,
 		version: Int,
-	): RaptorEvent<Id, Event>
+	): RaptorAggregateEvent<Id, Change>
 }

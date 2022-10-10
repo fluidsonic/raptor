@@ -1,18 +1,18 @@
+import BankAccountChange.*
 import BankAccountCommand.*
-import BankAccountEvent.*
 import io.fluidsonic.raptor.cqrs.*
 
 
 class BankAccountAggregate(
 	override val id: BankAccountNumber,
-) : RaptorAggregate<BankAccountNumber, BankAccountCommand, BankAccountEvent> {
+) : RaptorAggregate<BankAccountNumber, BankAccountCommand, BankAccountChange> {
 
 	private var amount = 0
 	private var isCreated = false
 	private var label: String? = null
 
 
-	override fun execute(command: BankAccountCommand): List<BankAccountEvent> =
+	override fun execute(command: BankAccountCommand): List<BankAccountChange> =
 		listOfNotNull(when (command) {
 			is Create -> execute(command)
 			is Delete -> execute(command)
@@ -70,7 +70,7 @@ class BankAccountAggregate(
 	}
 
 
-	override fun handle(event: BankAccountEvent) {
+	override fun handle(event: BankAccountChange) {
 		when (event) {
 			is Created -> handle(event)
 			is Deleted -> handle(event)

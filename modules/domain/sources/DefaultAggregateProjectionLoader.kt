@@ -9,18 +9,32 @@ import kotlinx.coroutines.flow.Flow
 // FIXME How to receive events?
 // FIXME rename class
 internal class DefaultAggregateProjectionLoader<
-	out Projection : RaptorAggregateProjection<Id>,
+	Projection : RaptorAggregateProjection<Id>,
 	Id : RaptorAggregateProjectionId,
-	in Event : RaptorAggregateEvent<Id>,
+	Change : RaptorAggregateChange<Id>,
 	>(
-	private val factory: () -> RaptorAggregateProjector.Incremental<Projection, Id, Event>,
+	private val factory: () -> RaptorAggregateProjector.Incremental<Projection, Id, Change>,
 ) : RaptorAggregateProjectionLoader<Projection, Id> {
 
-	private val projectors = ConcurrentHashMap<Id, RaptorAggregateProjector.Incremental<Projection, Id, Event>>()
+	private val projectors = ConcurrentHashMap<Id, RaptorAggregateProjector.Incremental<Projection, Id, Change>>()
 
 
-	internal fun addEvent(event: RaptorEvent<Id, Event>) {
-		projectors.getOrPut(event.aggregateId, factory).add(event)
+	internal fun addEvent(event: RaptorAggregateEvent<Id, Change>): RaptorAggregateProjectionEvent<Id, Projection, Change> {
+		val projector = projectors.getOrPut(event.aggregateId, factory)
+		val previousProjection = projector.projection
+		val projection = projector.add(event)
+
+		return RaptorAggregateProjectionEvent(
+			change = event.change,
+			id = event.id,
+			previousProjection = previousProjection,
+			projection = projection
+				?: previousProjection
+				?: error("Change of aggregate ${event.aggregateId} cannot transition from one non-existent projection " +
+					"to another non-existent projection: $event"),
+			timestamp = event.timestamp,
+			version = event.version,
+		)
 	}
 
 

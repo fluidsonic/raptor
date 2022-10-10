@@ -4,7 +4,7 @@ package io.fluidsonic.raptor.cqrs
 public interface RaptorAggregate<
 	Id : RaptorAggregateId,
 	in Command : RaptorAggregateCommand<Id>,
-	Event : RaptorAggregateEvent<Id>,
+	Event : RaptorAggregateChange<Id>,
 	> : RaptorEntity<Id> {
 
 	public override val id: Id

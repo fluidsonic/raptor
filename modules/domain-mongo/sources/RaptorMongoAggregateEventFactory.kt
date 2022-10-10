@@ -9,15 +9,15 @@ public class RaptorMongoAggregateEventFactory(
 	private val clock: Clock,
 ) : RaptorAggregateEventFactory {
 
-	override fun <Id : RaptorAggregateId, Event : RaptorAggregateEvent<Id>> create(
+	override fun <Id : RaptorAggregateId, Event : RaptorAggregateChange<Id>> create(
 		aggregateId: Id,
-		data: Event,
+		change: Event,
 		version: Int,
-	): RaptorEvent<Id, Event> =
-		RaptorEvent(
+	): RaptorAggregateEvent<Id, Event> =
+		RaptorAggregateEvent(
 			aggregateId = aggregateId,
-			data = data,
-			id = RaptorEventId(ObjectId.get().toString()),
+			change = change,
+			id = RaptorAggregateEventId(ObjectId.get().toString()),
 			timestamp = clock.now(),
 			version = version,
 		)

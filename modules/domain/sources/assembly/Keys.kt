@@ -5,9 +5,10 @@ import io.fluidsonic.raptor.*
 
 internal object Keys {
 
-	val aggregateManagerProperty = RaptorPropertyKey<RaptorAggregateManager>("aggregate manager")
+	val aggregateManagerProperty = RaptorPropertyKey<DefaultAggregateManager>("aggregate manager")
 	val aggregateComponent = RaptorComponentKey<RaptorAggregateComponent<*, *, *, *>>("aggregate")
-	val aggregateProjectionLoaderManagerProperty = RaptorPropertyKey<RaptorAggregateProjectorLoaderManager>("aggregate projection loader manager")
+	val aggregateProjectionEventStreamProperty = RaptorPropertyKey<RaptorAggregateProjectionEventStream>("aggregate projection event stream")
+	val aggregateProjectorLoaderManagerProperty = RaptorPropertyKey<RaptorAggregateProjectorLoaderManager>("aggregate projector loader manager")
 	val aggregatesComponent = RaptorComponentKey<RaptorAggregatesComponent>("aggregates")
 	val domainComponent = RaptorComponentKey<RaptorDomainComponent>("domain")
 	val domainProperty = RaptorPropertyKey<RaptorDomain>("domain")

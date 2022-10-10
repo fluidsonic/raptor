@@ -5,32 +5,41 @@ import kotlin.reflect.full.*
 
 
 public data class RaptorAggregateDefinition<
-	Aggregate : RaptorAggregate<Id, Command, Event>,
+	Aggregate : RaptorAggregate<Id, Command, Change>,
 	Id : RaptorAggregateId,
 	Command : RaptorAggregateCommand<Id>,
-	Event : RaptorAggregateEvent<Id>,
+	Change : RaptorAggregateChange<Id>,
 	>(
 	val aggregateClass: KClass<Aggregate>,
+	val changeClass: KClass<Change>,
+	val changeDefinitions: Set<RaptorAggregateChangeDefinition<Id, out Change>>,
 	val commandClass: KClass<Command>,
 	val commandDefinitions: Set<RaptorAggregateCommandDefinition<Id, out Command>>,
 	val discriminator: String,
-	val eventClass: KClass<Event>,
-	val eventDefinitions: Set<RaptorAggregateEventDefinition<Id, out Event>>,
 	val factory: RaptorAggregateFactory<Aggregate, Id>,
 	val idClass: KClass<Id>,
-	val projectionDefinition: RaptorAggregateProjectionDefinition<*, *, Event>? = null,
+	val projectionDefinition: RaptorAggregateProjectionDefinition<*, *, Change>? = null,
 ) {
+
+	private val changeDefinitionsByClass: Map<KClass<out Change>, RaptorAggregateChangeDefinition<Id, out Change>> =
+		changeDefinitions.associateByTo(hashMapOf()) { it.changeClass }
+
+	private val changeDefinitionsByDiscriminator: Map<String, RaptorAggregateChangeDefinition<Id, out Change>> =
+		changeDefinitions.associateByTo(hashMapOf()) { it.discriminator }
 
 	private val commandDefinitionsByClass: Map<KClass<out Command>, RaptorAggregateCommandDefinition<Id, out Command>> =
 		commandDefinitions.associateByTo(hashMapOf()) { it.commandClass }
 
-	private val eventDefinitionsByClass: Map<KClass<out Event>, RaptorAggregateEventDefinition<Id, out Event>> =
-		eventDefinitions.associateByTo(hashMapOf()) { it.eventClass }
-
-	private val eventDefinitionsByDiscriminator: Map<String, RaptorAggregateEventDefinition<Id, out Event>> =
-		eventDefinitions.associateByTo(hashMapOf()) { it.discriminator }
-
 	val idType: KType = idClass.starProjectedType
+
+
+	@Suppress("UNCHECKED_CAST")
+	public fun castOrNull(change: RaptorAggregateChange<Id>): Change? {
+		if (changeDefinition(change::class) == null)
+			return null
+
+		return change as Change
+	}
 
 
 	@Suppress("UNCHECKED_CAST")
@@ -43,32 +52,23 @@ public data class RaptorAggregateDefinition<
 
 
 	@Suppress("UNCHECKED_CAST")
-	public fun castOrNull(event: RaptorAggregateEvent<Id>): Event? {
-		if (changeDefinition(event::class) == null)
+	public fun castOrNull(event: RaptorAggregateEvent<Id, RaptorAggregateChange<Id>>): RaptorAggregateEvent<Id, Change>? {
+		if (castOrNull(event.change) == null)
 			return null
 
-		return event as Event
+		return event as RaptorAggregateEvent<Id, Change>
 	}
 
 
 	@Suppress("UNCHECKED_CAST")
-	public fun castOrNull(event: RaptorEvent<Id, RaptorAggregateEvent<Id>>): RaptorEvent<Id, Event>? {
-		if (castOrNull(event.data) == null)
-			return null
-
-		return event as RaptorEvent<Id, Event>
-	}
-
-
-	@Suppress("UNCHECKED_CAST")
-	public fun <TEvent : RaptorAggregateEvent<Id>> changeDefinition(
+	public fun <TEvent : RaptorAggregateChange<Id>> changeDefinition(
 		changeClass: KClass<out TEvent>,
-	): RaptorAggregateEventDefinition<Id, out Event>? =
-		eventDefinitionsByClass[changeClass as KClass<out Event>]
+	): RaptorAggregateChangeDefinition<Id, out Change>? =
+		changeDefinitionsByClass[changeClass as KClass<out Change>]
 
 
-	public fun changeDefinition(discriminator: String): RaptorAggregateEventDefinition<Id, out Event>? =
-		eventDefinitionsByDiscriminator[discriminator]
+	public fun changeDefinition(discriminator: String): RaptorAggregateChangeDefinition<Id, out Change>? =
+		changeDefinitionsByDiscriminator[discriminator]
 
 
 	@Suppress("UNCHECKED_CAST")

@@ -12,6 +12,10 @@ internal class DIAggregateEventFactory(
 	private val delegate: RaptorAggregateEventFactory by lazy { context.di.get() }
 
 
-	override fun <Id : RaptorAggregateId, Event : RaptorAggregateEvent<Id>> create(aggregateId: Id, data: Event, version: Int) =
-		delegate.create(aggregateId = aggregateId, data = data, version = version)
+	override fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>> create(
+		aggregateId: Id,
+		change: Change,
+		version: Int,
+	) =
+		delegate.create(aggregateId = aggregateId, change = change, version = version)
 }

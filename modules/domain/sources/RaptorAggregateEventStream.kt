@@ -5,18 +5,9 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 
-// FIXME
 public interface RaptorAggregateEventStream {
 
-	public fun asFlow(): Flow<RaptorAggregateProjectionEvent<*, *, *>>
-
-	public fun <Id : RaptorAggregateId, Event : RaptorAggregateEvent<Id>> subscribeIn(
-		scope: CoroutineScope,
-		collector: suspend (event: RaptorEvent<Id, Event>) -> Unit,
-		errorStrategy: ErrorStrategy,
-		eventClass: KClass<Event>,
-		idClass: KClass<Id>,
-	): Job
+	public fun asFlow(): Flow<RaptorAggregateEvent<*, *>>
 
 
 	public enum class ErrorStrategy {
@@ -28,32 +19,65 @@ public interface RaptorAggregateEventStream {
 }
 
 
-@Suppress("UNCHECKED_CAST")
-public fun <Id : RaptorAggregateId, Event : RaptorAggregateEvent<Id>>
-	Flow<RaptorEvent<*, *>>.filterIsInstance(
-	idClass: KClass<Id>,
-	eventClass: KClass<Event>,
-): Flow<RaptorEvent<Id, Event>> =
-	filter { event ->
-		idClass.isInstance(event.aggregateId) && eventClass.isInstance(event.data)
-	} as Flow<RaptorEvent<Id, Event>>
-
-
-public inline fun <reified Id : RaptorAggregateId, reified Event : RaptorAggregateEvent<Id>>
-	Flow<RaptorEvent<*, *>>.filterIsInstance(): Flow<RaptorEvent<Id, Event>> =
-	filterIsInstance(idClass = Id::class, eventClass = Event::class)
-
-
-public inline fun <reified Id : RaptorAggregateId, reified Event : RaptorAggregateEvent<Id>>
+public fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 	RaptorAggregateEventStream.subscribeIn(
 	scope: CoroutineScope,
-	noinline collector: suspend (event: RaptorEvent<Id, Event>) -> Unit,
+	collector: suspend (event: RaptorAggregateEvent<Id, Change>) -> Unit,
+	errorStrategy: RaptorAggregateEventStream.ErrorStrategy, // FIXME use
+	changeClass: KClass<Change>,
+	idClass: KClass<Id>,
+): Job {
+	var failedAggregateIds: MutableSet<RaptorAggregateId>? = null
+
+	return asFlow()
+		.filterIsInstance(changeClass = changeClass, idClass = idClass)
+		.onEach { event ->
+			val aggregateId = event.aggregateId
+
+			if (failedAggregateIds?.contains(aggregateId) == true)
+				return@onEach
+
+			try {
+				collector(event)
+			}
+			catch (e: CancellationException) {
+				throw e
+			}
+			catch (e: Throwable) {
+				(failedAggregateIds ?: hashSetOf<RaptorAggregateId>().also { failedAggregateIds = it })
+					.add(aggregateId)
+			}
+		}
+		.launchIn(scope)
+}
+
+
+public inline fun <reified Id : RaptorAggregateId, reified Change : RaptorAggregateChange<Id>>
+	RaptorAggregateEventStream.subscribeIn(
+	scope: CoroutineScope,
+	noinline collector: suspend (event: RaptorAggregateEvent<Id, Change>) -> Unit,
 	errorStrategy: RaptorAggregateEventStream.ErrorStrategy,
 ): Job =
 	subscribeIn(
 		scope = scope,
 		collector = collector,
 		errorStrategy = errorStrategy,
-		eventClass = Event::class,
+		changeClass = Change::class,
 		idClass = Id::class,
 	)
+
+
+@Suppress("UNCHECKED_CAST")
+public fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
+	Flow<RaptorAggregateEvent<*, *>>.filterIsInstance(
+	changeClass: KClass<Change>,
+	idClass: KClass<Id>,
+): Flow<RaptorAggregateEvent<Id, Change>> =
+	filter { event ->
+		idClass.isInstance(event.aggregateId) && changeClass.isInstance(event.change)
+	} as Flow<RaptorAggregateEvent<Id, Change>>
+
+
+public inline fun <reified Id : RaptorAggregateId, reified Change : RaptorAggregateChange<Id>>
+	Flow<RaptorAggregateEvent<*, *>>.filterIsInstance(): Flow<RaptorAggregateEvent<Id, Change>> =
+	filterIsInstance(changeClass = Change::class, idClass = Id::class)

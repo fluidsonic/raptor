@@ -1,17 +1,20 @@
 package io.fluidsonic.raptor.cqrs
 
-import kotlin.reflect.*
-import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 
+// FIXME Make sure all subscribers subscribe before the first events are emitted.
+// FIXME Error handling? Make sure Flow never stops.
 internal class DefaultAggregateProjectionEventStream : RaptorAggregateProjectionEventStream {
 
-	override fun asFlow(): Flow<RaptorAggregateProjectionEvent<*, *, *>> {
-		return flow { } // FIXME
+	private val flow = MutableSharedFlow<RaptorAggregateProjectionEvent<*, *, *>>()
+
+
+	suspend fun add(event: RaptorAggregateProjectionEvent<*, *, *>) {
+		flow.emit(event)
 	}
 
-	override fun <Id, Event : RaptorAggregateEvent<Id>, Projection : RaptorProjection<Id>> subscribeIn(scope: CoroutineScope, collector: suspend (event: RaptorAggregateProjectionEvent<Id, Event, Projection>) -> Unit, errorStrategy: RaptorAggregateProjectionEventStream.ErrorStrategy, eventClass: KClass<Event>, idClass: KClass<Id>, projectionClass: KClass<Projection>): Job where Id : RaptorAggregateId, Id : RaptorProjectionId {
-		return Job() // FIXME
-	}
+
+	override fun asFlow(): Flow<RaptorAggregateProjectionEvent<*, *, *>> =
+		flow
 }

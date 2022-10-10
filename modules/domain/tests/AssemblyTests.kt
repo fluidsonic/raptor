@@ -1,5 +1,5 @@
+import BankAccountChange.*
 import BankAccountCommand.*
-import BankAccountEvent.*
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.cqrs.*
 import io.fluidsonic.raptor.transactions.*
@@ -32,11 +32,11 @@ class AssemblyTests {
 					command<Label>()
 					command<Withdraw>()
 
-					event<Created>("created")
-					event<Deleted>("deleted")
-					event<Deposited>("deposited")
-					event<Labeled>("labeled")
-					event<Withdrawn>("withdrawn")
+					change<Created>("created")
+					change<Deleted>("deleted")
+					change<Deposited>("deposited")
+					change<Labeled>("labeled")
+					change<Withdrawn>("withdrawn")
 				}
 			}
 		}
@@ -56,13 +56,13 @@ class AssemblyTests {
 							RaptorAggregateCommandDefinition(commandClass = Withdraw::class),
 						),
 						discriminator = "bank account",
-						eventClass = BankAccountEvent::class,
+						eventClass = BankAccountChange::class,
 						eventDefinitions = setOf(
-							RaptorAggregateEventDefinition(discriminator = "created", eventClass = Created::class),
-							RaptorAggregateEventDefinition(discriminator = "deleted", eventClass = Deleted::class),
-							RaptorAggregateEventDefinition(discriminator = "deposited", eventClass = Deposited::class),
-							RaptorAggregateEventDefinition(discriminator = "labeled", eventClass = Labeled::class),
-							RaptorAggregateEventDefinition(discriminator = "withdrawn", eventClass = Withdrawn::class),
+							RaptorAggregateChangeDefinition(discriminator = "created", eventClass = Created::class),
+							RaptorAggregateChangeDefinition(discriminator = "deleted", eventClass = Deleted::class),
+							RaptorAggregateChangeDefinition(discriminator = "deposited", eventClass = Deposited::class),
+							RaptorAggregateChangeDefinition(discriminator = "labeled", eventClass = Labeled::class),
+							RaptorAggregateChangeDefinition(discriminator = "withdrawn", eventClass = Withdrawn::class),
 						),
 						factory = RaptorAggregateFactory(::BankAccountAggregate),
 						idClass = BankAccountNumber::class,

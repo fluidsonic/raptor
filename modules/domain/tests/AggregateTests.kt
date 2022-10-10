@@ -1,5 +1,5 @@
+import BankAccountChange.*
 import BankAccountCommand.*
-import BankAccountEvent.*
 import kotlin.test.*
 
 

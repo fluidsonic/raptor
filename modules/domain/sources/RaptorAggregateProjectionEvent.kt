@@ -4,11 +4,15 @@ import io.fluidsonic.time.*
 
 
 // FIXME
-public data class RaptorAggregateProjectionEvent<Id, Event : RaptorAggregateEvent<Id>, Projection : RaptorProjection<Id>>(
-	val data: Event,
-	override val id: RaptorEventId,
+public data class RaptorAggregateProjectionEvent<
+	ProjectionId : RaptorAggregateProjectionId,
+	Projection : RaptorProjection<ProjectionId>,
+	Change : RaptorAggregateChange<ProjectionId>,
+	>(
+	val change: Change,
+	override val id: RaptorAggregateEventId,
 	val previousProjection: Projection? = null,
 	val projection: Projection,
 	val timestamp: Timestamp,
 	val version: Int,
-) : RaptorEntity<RaptorEventId> where Id : RaptorAggregateId, Id : RaptorProjectionId
+) : RaptorEntity<RaptorAggregateEventId>

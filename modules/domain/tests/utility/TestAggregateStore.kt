@@ -3,14 +3,14 @@ import kotlinx.coroutines.flow.*
 
 
 class TestAggregateStore(
-	events: List<RaptorEvent<*, *>> = emptyList(),
+	events: List<RaptorAggregateEvent<*, *>> = emptyList(),
 ) : RaptorAggregateStore {
 
-	private var batches: MutableList<List<RaptorEvent<*, *>>> = mutableListOf()
-	private val events: MutableList<RaptorEvent<*, *>> = events.toMutableList()
+	private var batches: MutableList<List<RaptorAggregateEvent<*, *>>> = mutableListOf()
+	private val events: MutableList<RaptorAggregateEvent<*, *>> = events.toMutableList()
 
 
-	override suspend fun add(events: List<RaptorEvent<*, *>>) {
+	override suspend fun add(events: List<RaptorAggregateEvent<*, *>>) {
 		this.events += events
 
 		batches += events
@@ -21,7 +21,7 @@ class TestAggregateStore(
 		events.toList().asFlow()
 
 
-	fun takeBatches(): List<List<RaptorEvent<*, *>>> {
+	fun takeBatches(): List<List<RaptorAggregateEvent<*, *>>> {
 		val batches = this.batches.toList()
 		this.batches.clear()
 

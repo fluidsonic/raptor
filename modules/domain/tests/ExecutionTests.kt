@@ -1,5 +1,5 @@
+import BankAccountChange.*
 import BankAccountCommand.*
-import BankAccountEvent.*
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.cqrs.*
 import io.fluidsonic.raptor.transactions.*
@@ -17,10 +17,10 @@ class ExecutionTests {
 		val clock = ManualClock()
 		val id = BankAccountNumber("1")
 		val eventFactory = TestAggregateEventFactory(clock = clock)
-		val store = TestAggregateStore(events = listOf(RaptorEvent(
+		val store = TestAggregateStore(events = listOf(RaptorAggregateEvent(
 			aggregateId = id,
 			data = Created(owner = "owner"),
-			id = RaptorEventId("1"),
+			id = RaptorAggregateEventId("1"),
 			timestamp = Timestamp.fromEpochSeconds(0),
 			version = 1,
 		)))
@@ -43,11 +43,11 @@ class ExecutionTests {
 					command<Label>()
 					command<Withdraw>()
 
-					event<Created>("created")
-					event<Deleted>("deleted")
-					event<Deposited>("deposited")
-					event<Labeled>("labeled")
-					event<Withdrawn>("withdrawn")
+					change<Created>("created")
+					change<Deleted>("deleted")
+					change<Deposited>("deposited")
+					change<Labeled>("labeled")
+					change<Withdrawn>("withdrawn")
 				}
 			}
 		}
@@ -61,17 +61,17 @@ class ExecutionTests {
 			execute(id, Label("test"))
 		}
 		assertEquals(actual = store.takeBatches(), expected = listOf(listOf(
-			RaptorEvent(
+			RaptorAggregateEvent(
 				aggregateId = id,
 				data = Deposited(amount = 100),
-				id = RaptorEventId("1"),
+				id = RaptorAggregateEventId("1"),
 				timestamp = Timestamp.fromEpochSeconds(10),
 				version = 2,
 			),
-			RaptorEvent(
+			RaptorAggregateEvent(
 				aggregateId = id,
 				data = Labeled("test"),
-				id = RaptorEventId("2"),
+				id = RaptorAggregateEventId("2"),
 				timestamp = Timestamp.fromEpochSeconds(20),
 				version = 3,
 			),
@@ -85,17 +85,17 @@ class ExecutionTests {
 			execute(id, Delete)
 		}
 		assertEquals(actual = store.takeBatches(), expected = listOf(listOf(
-			RaptorEvent(
+			RaptorAggregateEvent(
 				aggregateId = id,
 				data = Withdrawn(amount = 100),
-				id = RaptorEventId("3"),
+				id = RaptorAggregateEventId("3"),
 				timestamp = Timestamp.fromEpochSeconds(30),
 				version = 4,
 			),
-			RaptorEvent(
+			RaptorAggregateEvent(
 				aggregateId = id,
 				data = Deleted,
-				id = RaptorEventId("4"),
+				id = RaptorAggregateEventId("4"),
 				timestamp = Timestamp.fromEpochSeconds(40),
 				version = 5,
 			),

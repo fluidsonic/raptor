@@ -6,13 +6,13 @@ import kotlin.reflect.*
 
 
 // FIXME tx sub managers
-internal val RaptorContext.aggregateManager: RaptorAggregateManager
+internal val RaptorContext.aggregateManager: DefaultAggregateManager
 	get() = properties[Keys.aggregateManagerProperty] ?: throw RaptorPluginNotInstalledException(RaptorDomainPlugin)
 
 
 // FIXME tx sub managers
 internal val RaptorContext.aggregateProjectionLoaderManager: RaptorAggregateProjectorLoaderManager
-	get() = properties[Keys.aggregateProjectionLoaderManagerProperty] ?: throw RaptorPluginNotInstalledException(RaptorDomainPlugin)
+	get() = properties[Keys.aggregateProjectorLoaderManagerProperty] ?: throw RaptorPluginNotInstalledException(RaptorDomainPlugin)
 
 
 public val RaptorContext.domain: RaptorDomain
