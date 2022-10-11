@@ -24,14 +24,8 @@ internal class DefaultAggregateManager(
 
 		store.add(pendingEvents) // FIXME copy?
 
-		for (event in pendingEvents) {
-			val projectionEvent = fixme.addEvent(event)
-
-			eventStream.add(event)
-
-			if (projectionEvent != null)
-				projectionEventStream.add(projectionEvent)
-		}
+		for (event in pendingEvents)
+			process(event)
 	}
 
 
@@ -63,7 +57,17 @@ internal class DefaultAggregateManager(
 	override suspend fun load() {
 		store.load().collect { event ->
 			controller(event.aggregateId).handle(event)
-			fixme.addEvent(event)
+			process(event)
 		}
+	}
+
+
+	private suspend fun process(event: RaptorAggregateEvent<*, *>) {
+		val projectionEvent = fixme.addEvent(event)
+
+		eventStream.add(event)
+
+		if (projectionEvent != null)
+			projectionEventStream.add(projectionEvent)
 	}
 }

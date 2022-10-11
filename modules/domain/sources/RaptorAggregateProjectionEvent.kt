@@ -3,7 +3,6 @@ package io.fluidsonic.raptor.domain
 import io.fluidsonic.time.*
 
 
-// FIXME
 public data class RaptorAggregateProjectionEvent<
 	ProjectionId : RaptorAggregateProjectionId,
 	Projection : RaptorProjection<ProjectionId>,
@@ -11,6 +10,7 @@ public data class RaptorAggregateProjectionEvent<
 	>(
 	val change: Change,
 	override val id: RaptorAggregateEventId,
+	val isReplay: Boolean,
 	val previousProjection: Projection? = null,
 	val projection: Projection,
 	val timestamp: Timestamp,

@@ -26,11 +26,18 @@ public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 	errorStrategy: RaptorAggregateEventStream.ErrorStrategy = RaptorAggregateEventStream.ErrorStrategy.skip, // FIXME use
 	changeClass: KClass<Change>,
 	idClass: KClass<Id>,
+	includeReplays: Boolean = false,
 ): Job {
 	val completion = CompletableDeferred<Unit>()
 	var failedAggregateIds: MutableSet<RaptorAggregateId>? = null
 
 	return asFlow()
+		.let { flow ->
+			when (includeReplays) {
+				true -> flow
+				false -> flow.filter { !it.isReplay }
+			}
+		}
 		.filterIsInstance(changeClass = changeClass, idClass = idClass)
 		.onEach { event ->
 			val aggregateId = event.aggregateId
@@ -60,6 +67,7 @@ public suspend inline fun <reified Id : RaptorAggregateId, reified Change : Rapt
 	scope: CoroutineScope,
 	noinline collector: suspend (event: RaptorAggregateEvent<Id, Change>) -> Unit,
 	errorStrategy: RaptorAggregateEventStream.ErrorStrategy = RaptorAggregateEventStream.ErrorStrategy.skip,
+	includeReplays: Boolean = false,
 ): Job =
 	subscribeIn(
 		scope = scope,
@@ -67,6 +75,7 @@ public suspend inline fun <reified Id : RaptorAggregateId, reified Change : Rapt
 		errorStrategy = errorStrategy,
 		changeClass = Change::class,
 		idClass = Id::class,
+		includeReplays = includeReplays,
 	)
 
 

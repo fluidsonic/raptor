@@ -10,6 +10,7 @@ public data class RaptorAggregateEvent<
 	val aggregateId: AggregateId,
 	val change: AggregateChange,
 	override val id: RaptorAggregateEventId,
+	val isReplay: Boolean,
 	val timestamp: Timestamp,
 	val version: Int,
 ) : RaptorEntity<RaptorAggregateEventId> {

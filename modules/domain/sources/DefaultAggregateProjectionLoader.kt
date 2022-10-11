@@ -27,6 +27,7 @@ internal class DefaultAggregateProjectionLoader<
 		return RaptorAggregateProjectionEvent(
 			change = event.change,
 			id = event.id,
+			isReplay = event.isReplay,
 			previousProjection = previousProjection,
 			projection = projection
 				?: previousProjection

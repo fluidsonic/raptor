@@ -18,6 +18,7 @@ class TestAggregateEventFactory(
 			aggregateId = aggregateId,
 			change = change,
 			id = RaptorAggregateEventId((nextId++).toString()),
+			isReplay = false,
 			timestamp = clock.now(),
 			version = version,
 		)

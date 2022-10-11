@@ -81,6 +81,7 @@ class EventTests {
 				aggregateId = id,
 				change = Created(owner = "owner"),
 				id = RaptorAggregateEventId("1"),
+				isReplay = false,
 				timestamp = Timestamp.fromEpochSeconds(1),
 				version = 1,
 			)),
@@ -90,6 +91,7 @@ class EventTests {
 			expected = listOf(RaptorAggregateProjectionEvent(
 				change = Created(owner = "owner"),
 				id = RaptorAggregateEventId("1"),
+				isReplay = false,
 				previousProjection = null,
 				projection = BankAccount(amount = 0, id = id, label = null, owner = "owner"),
 				timestamp = Timestamp.fromEpochSeconds(1),
@@ -107,6 +109,7 @@ class EventTests {
 					aggregateId = BankAccountNumber("1"),
 					change = Created(owner = "owner"),
 					id = RaptorAggregateEventId("event 1"),
+					isReplay = false,
 					timestamp = Timestamp.fromEpochSeconds(0),
 					version = 0,
 				)

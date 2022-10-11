@@ -18,6 +18,7 @@ public class RaptorMongoAggregateEventFactory(
 			aggregateId = aggregateId,
 			change = change,
 			id = RaptorAggregateEventId(ObjectId.get().toString()),
+			isReplay = false,
 			timestamp = clock.now(),
 			version = version,
 		)

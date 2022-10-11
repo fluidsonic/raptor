@@ -76,6 +76,7 @@ internal object RaptorAggregateEventBson {
 					aggregateId = aggregateId ?: missingFieldValue(Fields.aggregateId),
 					change = change ?: missingFieldValue(Fields.change),
 					id = id ?: missingFieldValue(Fields.id),
+					isReplay = true,
 					timestamp = timestamp ?: missingFieldValue(Fields.timestamp),
 					version = version ?: missingFieldValue(Fields.version),
 				)
