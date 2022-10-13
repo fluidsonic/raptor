@@ -148,10 +148,11 @@ internal class GraphSystemDefinitionBuilder private constructor(
 		if (!definition.kotlinType.isSpecialized)
 			return
 
+		// FIXME Check if typename is used for operations. If not then allow names.
 		when (definition.name) {
 			GLanguage.defaultMutationTypeName,
 			GLanguage.defaultQueryTypeName,
-			GLanguage.defaultSubscriptionTypeName,
+//			GLanguage.defaultSubscriptionTypeName,
 			->
 				error("A GraphQL type definition must not use the default operation type name '${definition.name}':\n$definition\n---")
 		}

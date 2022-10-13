@@ -194,10 +194,15 @@ internal class GraphSystemBuilder private constructor(
 	private fun interfaceTypeNamesForObjectValueClass(kotlinType: KotlinType, target: MutableSet<String>) {
 		for (superType in kotlinType.classifier.supertypes) {
 			val superClass = superType.classifier as? KClass<*> ?: continue
-			if (superClass.typeParameters.isNotEmpty())
-				continue // TODO Won't work for generic interfaces
-
-			val superKotlinType = KotlinType(classifier = superClass, isNullable = false)
+			val superKotlinType = KotlinType(
+				classifier = superClass,
+				isNullable = false,
+				typeArguments = superClass.typeParameters.map { parameter ->
+					(parameter.upperBounds.singleOrNull()?.classifier as? KClass<*>)?.let { classifier ->
+						KotlinType(classifier, isNullable = false, typeArguments = classifier.typeParameters.map { null })
+					}
+				},
+			)
 
 			val gqlSuperClassName = interfaceTypesByKotlinType[superKotlinType]?.name
 			if (gqlSuperClassName !== null)

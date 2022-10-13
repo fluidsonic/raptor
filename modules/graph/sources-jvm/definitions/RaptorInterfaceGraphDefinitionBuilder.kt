@@ -3,7 +3,6 @@ package io.fluidsonic.raptor.graph
 import io.fluidsonic.raptor.*
 import io.fluidsonic.stdlib.*
 import kotlin.reflect.*
-import kotlin.reflect.jvm.*
 
 
 @RaptorDsl
@@ -41,22 +40,20 @@ public class RaptorInterfaceGraphDefinitionBuilder<Type : Any> internal construc
 
 
 	@RaptorDsl
-	@Suppress("NOTHING_TO_INLINE")
-	public inline fun <FieldType> field(
+	public inline fun <reified FieldType> field(
 		property: KProperty1<Type, FieldType>,
 		noinline configure: RaptorGraphFieldBuilder.() -> Unit = {},
 	) {
-		field(name = property.name, type = property.returnType, configure = configure)
+		field(name = property.name, type = typeOf<FieldType>(), configure = configure)
 	}
 
 
 	@RaptorDsl
-	@Suppress("NOTHING_TO_INLINE")
-	public inline fun <FieldType> field(
+	public inline fun <reified FieldType> field(
 		function: KSuspendFunction2<Type, RaptorGraphContext, FieldType>,
 		noinline configure: RaptorGraphFieldBuilder.() -> Unit = {},
 	) {
-		field(name = function.name, type = function.reflect()!!.returnType, configure = configure) // FIXME
+		field(name = function.name, type = typeOf<FieldType>(), configure = configure) // FIXME
 	}
 
 
