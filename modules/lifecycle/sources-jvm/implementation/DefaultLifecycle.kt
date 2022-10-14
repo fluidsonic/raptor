@@ -1,20 +1,30 @@
-package io.fluidsonic.raptor
+package io.fluidsonic.raptor.lifecycle
 
-import io.fluidsonic.raptor.RaptorLifecycle.*
+import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.lifecycle.RaptorLifecycle.*
 import kotlin.coroutines.*
 import kotlinx.atomicfu.*
 import kotlinx.coroutines.*
 
 
-// FIXME prevent reuse b/c coroutineContext cannot be reused
-internal class DefaultRaptorLifecycle(
+// TODO Prevent re-use b/c coroutineContext cannot be reused.
+internal class DefaultLifecycle(
 	override val context: RaptorContext,
-	private val startActions: List<suspend RaptorLifecycleStartScope.() -> Unit>,
-	private val stopActions: List<suspend RaptorLifecycleStopScope.() -> Unit>,
+	startActions: List<LifecycleAction<RaptorLifecycleStartScope>>,
+	stopActions: List<LifecycleAction<RaptorLifecycleStopScope>>,
 ) : RaptorLifecycle, RaptorLifecycleStartScope, RaptorLifecycleStopScope {
 
 	private var _coroutineContext: CoroutineContext? = null
 	private val stateRef = atomic(State.stopped)
+
+	private val startActions = startActions
+		.sortedByDescending { it.priority }
+		.map { it.block }
+
+	private val stopActions = stopActions
+		.sortedByDescending { it.priority }
+		.map { it.block }
+
 
 	override val coroutineContext: CoroutineContext
 		get() = checkNotNull(_coroutineContext)
@@ -25,7 +35,7 @@ internal class DefaultRaptorLifecycle(
 			"Lifecycle can only be started when stopped but it's ${stateRef.value}."
 		}
 
-		_coroutineContext = scope.coroutineContext + Job(parent = scope.coroutineContext[Job]) + CoroutineName("Raptor: lifecycle") // FIXME ok?
+		_coroutineContext = scope.coroutineContext + Job(parent = scope.coroutineContext[Job]) + CoroutineName("Raptor: lifecycle") // TODO ok?
 
 		for (action in startActions)
 			action()

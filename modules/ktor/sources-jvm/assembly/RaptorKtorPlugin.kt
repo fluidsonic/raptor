@@ -1,6 +1,7 @@
 package io.fluidsonic.raptor.ktor
 
 import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.lifecycle.*
 import io.fluidsonic.raptor.transactions.*
 
 
@@ -20,10 +21,10 @@ public object RaptorKtorPlugin : RaptorPlugin {
 		componentRegistry.register(Keys.ktorComponent, RaptorKtorComponent())
 
 		lifecycle {
-			onStart {
+			onStart(priority = Int.MIN_VALUE) {
 				checkNotNull(context.ktorInternal).start()
 			}
-			onStop {
+			onStop(priority = Int.MAX_VALUE) {
 				checkNotNull(context.ktorInternal).stop()
 			}
 		}

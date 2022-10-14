@@ -4,6 +4,7 @@ import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.graph.*
 import io.fluidsonic.raptor.ktor.*
 import io.fluidsonic.raptor.ktor.graph.*
+import io.fluidsonic.raptor.lifecycle.*
 import io.fluidsonic.raptor.transactions.*
 import kotlin.test.*
 

@@ -1,6 +1,7 @@
 package io.fluidsonic.raptor
 
 import io.fluidsonic.raptor.di.*
+import io.fluidsonic.raptor.lifecycle.*
 import io.fluidsonic.stdlib.*
 
 
@@ -25,8 +26,8 @@ public object RaptorJobsQuartzMongoPlugin : RaptorPlugin {
 
 		configure(RaptorLifecyclePlugin) {
 			lifecycle {
-				onStart { di.get<RaptorJobScheduler>().castOrNull<QuartzJobScheduler>()?.start() }
-				onStop { di.get<RaptorJobScheduler>().castOrNull<QuartzJobScheduler>()?.stop() }
+				onStart(Int.MIN_VALUE) { di.get<RaptorJobScheduler>().castOrNull<QuartzJobScheduler>()?.start() }
+				onStop(Int.MAX_VALUE) { di.get<RaptorJobScheduler>().castOrNull<QuartzJobScheduler>()?.stop() }
 			}
 		}
 	}

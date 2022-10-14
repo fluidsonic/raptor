@@ -1,7 +1,8 @@
 package tests
 
 import io.fluidsonic.raptor.*
-import io.fluidsonic.raptor.RaptorLifecycle.*
+import io.fluidsonic.raptor.lifecycle.*
+import io.fluidsonic.raptor.lifecycle.RaptorLifecycle.*
 import kotlin.test.*
 import kotlin.test.Test
 import kotlinx.coroutines.*
@@ -129,7 +130,7 @@ class LifecycleTests {
 		val raptor = raptor {}
 
 		assertEquals(
-			expected = "Plugin io.fluidsonic.raptor.RaptorLifecyclePlugin is not installed.",
+			expected = "Plugin io.fluidsonic.raptor.lifecycle.RaptorLifecyclePlugin is not installed.",
 			actual = assertFails {
 				raptor.lifecycle
 			}.message

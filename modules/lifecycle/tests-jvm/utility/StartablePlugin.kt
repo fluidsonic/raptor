@@ -1,6 +1,7 @@
 package tests
 
 import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.lifecycle.*
 
 
 private val startableComponentKey = RaptorComponentKey<StartableComponent>("startable")

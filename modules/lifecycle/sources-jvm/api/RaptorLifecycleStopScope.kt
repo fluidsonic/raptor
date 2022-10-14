@@ -1,4 +1,6 @@
-package io.fluidsonic.raptor
+package io.fluidsonic.raptor.lifecycle
+
+import io.fluidsonic.raptor.*
 
 
 @RaptorDsl

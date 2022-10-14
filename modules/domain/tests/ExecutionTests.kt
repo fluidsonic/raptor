@@ -2,6 +2,7 @@ import BankAccountChange.*
 import BankAccountCommand.*
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.domain.*
+import io.fluidsonic.raptor.lifecycle.*
 import io.fluidsonic.raptor.transactions.*
 import io.fluidsonic.time.*
 import kotlin.test.*

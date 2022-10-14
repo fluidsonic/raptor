@@ -2,6 +2,7 @@ package io.fluidsonic.raptor.domain
 
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.di.*
+import io.fluidsonic.raptor.lifecycle.*
 import io.fluidsonic.raptor.transactions.*
 
 
@@ -26,13 +27,13 @@ public object RaptorDomainPlugin : RaptorPluginWithConfiguration<RaptorDomainPlu
 		}
 
 		require(RaptorLifecyclePlugin) {
-			// FIXME Delay onStop until manager & store have settled.
+			// FIXME Delay onStop until manager & store have completed their work.
 
 			lifecycle {
-				onStart {
+				onStart(priority = Int.MIN_VALUE) {
 					context.plugins.domain.aggregates.manager.load()
 				}
-				onStop {
+				onStop(priority = Int.MAX_VALUE) {
 					context.plugins.domain.aggregates.eventStreamInternal.stop()
 					context.plugins.domain.aggregates.projectionEventStreamInternal.stop()
 				}
