@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.*
 public interface RaptorAggregateProjectionEventStream {
 
 	public fun asFlow(): Flow<RaptorAggregateProjectionEvent<*, *, *>>
+	public suspend fun wait()
 }
 
 

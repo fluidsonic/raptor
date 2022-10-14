@@ -1,5 +1,6 @@
 package io.fluidsonic.raptor.domain
 
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 
@@ -7,7 +8,8 @@ import kotlinx.coroutines.flow.*
 // FIXME Error handling? Make sure Flow never stops.
 internal class DefaultAggregateEventStream : RaptorAggregateEventStream {
 
-	private val flow = MutableSharedFlow<RaptorAggregateEvent<*, *>?>()
+	private val flow = MutableSharedFlow<RaptorAggregateEvent<*, *>>()
+	private val stopEvent = dummyAggregateEvent()
 
 
 	suspend fun add(event: RaptorAggregateEvent<*, *>) {
@@ -15,13 +17,28 @@ internal class DefaultAggregateEventStream : RaptorAggregateEventStream {
 	}
 
 
-	@Suppress("UNCHECKED_CAST")
+	// TODO Collects forever if called after stop().
 	override fun asFlow(): Flow<RaptorAggregateEvent<*, *>> =
-		flow.takeWhile { it != null } as Flow<RaptorAggregateEvent<*, *>>
+		flow
+			.takeWhile { it !== stopEvent }
+			.filterNot { it.isDummy() }
 
 
 	suspend fun stop() {
-		// TODO Wait for processing.
-		flow.emit(null)
+		// TODO This doesn't actually wait for events to be processed.
+		wait()
+
+		flow.emit(stopEvent)
+	}
+
+
+	override suspend fun wait() {
+		val waitEvent = dummyAggregateEvent()
+
+		coroutineScope {
+			flow
+				.onStart { launch { flow.emit(waitEvent) } }
+				.firstOrNull { it === waitEvent }
+		}
 	}
 }

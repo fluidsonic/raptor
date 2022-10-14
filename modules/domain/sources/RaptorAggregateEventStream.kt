@@ -8,6 +8,7 @@ import kotlinx.coroutines.flow.*
 public interface RaptorAggregateEventStream {
 
 	public fun asFlow(): Flow<RaptorAggregateEvent<*, *>>
+	public suspend fun wait()
 
 
 	public enum class ErrorStrategy {
@@ -31,6 +32,7 @@ public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 	val completion = CompletableDeferred<Unit>()
 	var failedAggregateIds: MutableSet<RaptorAggregateId>? = null
 
+	// FIXME Using a Flow means that the events are no longer processed synchronously. OK? Workarounds?
 	return asFlow()
 		.let { flow ->
 			when (includeReplays) {
