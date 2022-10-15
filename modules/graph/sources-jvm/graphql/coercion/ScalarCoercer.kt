@@ -1,6 +1,7 @@
 package io.fluidsonic.raptor.graph
 
 import io.fluidsonic.graphql.*
+import io.fluidsonic.raptor.transactions.*
 
 
 // FIXME allow some kind of invalidValueError() in all Raptor parsers & serializers
@@ -10,7 +11,7 @@ internal object ScalarCoercer : GNodeInputCoercer<GValue>, GOutputCoercer<Any>, 
 		val context = checkNotNull(execution.raptorContext)
 		val raptorType = (type as GCustomScalarType).raptorType as ScalarGraphType
 
-		val inputScope = object : RaptorGraphInputScope, RaptorGraphScope by context {
+		val inputScope = object : RaptorGraphInputScope, RaptorTransactionScope by context {
 
 			override fun invalid(details: String?): Nothing =
 				this@coerceInput.invalid(details = details)
@@ -28,7 +29,7 @@ internal object ScalarCoercer : GNodeInputCoercer<GValue>, GOutputCoercer<Any>, 
 		val context = checkNotNull(execution.raptorContext)
 		val raptorType = (type as GCustomScalarType).raptorType as ScalarGraphType
 
-		val outputScope = object : RaptorGraphOutputScope, RaptorGraphScope by context {}  // FIXME improve
+		val outputScope = object : RaptorGraphOutputScope, RaptorTransactionScope by context {}  // FIXME improve
 
 		return raptorType.serialize(outputScope, output)
 	}

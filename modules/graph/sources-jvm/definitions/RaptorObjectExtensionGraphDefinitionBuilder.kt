@@ -1,6 +1,7 @@
 package io.fluidsonic.raptor.graph
 
 import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.transactions.*
 import io.fluidsonic.stdlib.*
 import kotlin.reflect.*
 
@@ -50,7 +51,7 @@ public class RaptorObjectExtensionGraphDefinitionBuilder<Type : Any> internal co
 
 	@RaptorDsl
 	public fun <FieldType> field(
-		function: KSuspendFunction2<Type, RaptorGraphContext, FieldType>,
+		function: KSuspendFunction2<Type, RaptorTransactionContext, FieldType>,
 		configure: RaptorGraphFieldBuilder.WithResolver<FieldType, Type>.() -> Unit = {},
 	) {
 		field(

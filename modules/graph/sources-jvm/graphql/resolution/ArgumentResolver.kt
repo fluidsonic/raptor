@@ -1,6 +1,7 @@
 package io.fluidsonic.raptor.graph
 
 import io.fluidsonic.graphql.*
+import io.fluidsonic.raptor.transactions.*
 import io.fluidsonic.stdlib.*
 
 
@@ -23,7 +24,7 @@ internal class ArgumentResolver(
 		if (expectsMaybe && !argumentValues.containsKey(name))
 			return Maybe.nothing
 
-		val inputScope = object : RaptorGraphInputScope, RaptorGraphScope by context { // FIXME improve
+		val inputScope = object : RaptorGraphInputScope, RaptorTransactionScope by context { // FIXME improve
 
 			override fun invalid(details: String?): Nothing =
 				error("invalid argument ($details)") // FIXME

@@ -1,7 +1,7 @@
 package io.fluidsonic.raptor.graph
 
 import io.fluidsonic.graphql.*
-import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.transactions.*
 
 
 internal object InputObjectCoercer : GNodeInputCoercer<Map<String, Any?>>, GVariableInputCoercer<Map<String, Any?>> {
@@ -11,7 +11,7 @@ internal object InputObjectCoercer : GNodeInputCoercer<Map<String, Any?>>, GVari
 		val type = type as GInputObjectType
 		val definition = type.raptorType as InputObjectGraphType
 
-		val inputScope = object : RaptorGraphInputScope, RaptorGraphScope by context { // FIXME improve
+		val inputScope = object : RaptorGraphInputScope, RaptorTransactionScope by context { // FIXME improve
 
 			override fun invalid(details: String?): Nothing =
 				this@coerceInput.invalid(details = details)

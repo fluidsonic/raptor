@@ -28,10 +28,7 @@ internal class DefaultRaptorGraph(
 			operationName = operationName,
 			variableValues = variableValues,
 			extensions = GExecutorContextExtensionSet {
-				raptorContext = DefaultRaptorGraphContext(
-					parent = context,
-					system = this@DefaultRaptorGraph,
-				)
+				raptorContext = context
 			}
 		)
 

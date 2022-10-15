@@ -23,7 +23,7 @@ internal object VariableInputCoercer : GVariableInputCoercer<Any?> {
 //					system = this@GraphSystem
 //				).useBlocking {
 //					with(typeDefinition) {
-//						with(context.environment as RaptorGraphScope) { factory() }
+//						with(context.environment as RaptorTransactionScope) { factory() }
 //					}
 //				}
 //				is GraphInterfaceDefinition -> error("Interface type '$typeRef' cannot appear in an input position.")

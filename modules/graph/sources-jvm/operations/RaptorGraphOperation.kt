@@ -1,6 +1,7 @@
 package io.fluidsonic.raptor.graph
 
 import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.transactions.*
 import io.fluidsonic.stdlib.*
 import kotlin.reflect.*
 
@@ -12,7 +13,7 @@ public sealed class RaptorGraphOperation<Input : Any, Output> {
 
 	public abstract val definition: RaptorGraphDefinition // FIXME fun graphDefinition() like the others?
 
-	public abstract suspend fun RaptorGraphScope.execute(input: Input): Output
+	public abstract suspend fun RaptorTransactionScope.execute(input: Input): Output
 
 	internal fun defaultName() =
 		this::class.simpleName
@@ -24,11 +25,11 @@ public sealed class RaptorGraphOperation<Input : Any, Output> {
 }
 
 
-public suspend fun <Output> RaptorGraphOperation<Unit, Output>.execute(context: RaptorGraphContext): Output =
+public suspend fun <Output> RaptorGraphOperation<Unit, Output>.execute(context: RaptorTransactionContext): Output =
 	execute(context = context, input = Unit)
 
 
-public suspend fun <Input : Any, Output> RaptorGraphOperation<Input, Output>.execute(context: RaptorGraphContext, input: Input): Output =
+public suspend fun <Input : Any, Output> RaptorGraphOperation<Input, Output>.execute(context: RaptorTransactionContext, input: Input): Output =
 	context.asScope().execute(input)
 
 

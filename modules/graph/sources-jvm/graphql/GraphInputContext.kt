@@ -6,7 +6,7 @@ package io.fluidsonic.raptor.graph
 //	private val arguments: Map<String, Any?>,
 //	private val definitions: Collection<GArgumentDefinition>,
 //	private val system: GraphSystem,
-//	private val environment: RaptorGraphScope
+//	private val environment: RaptorTransactionScope
 //) {
 //
 //

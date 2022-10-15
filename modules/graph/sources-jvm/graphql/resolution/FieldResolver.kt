@@ -1,6 +1,7 @@
 package io.fluidsonic.raptor.graph
 
 import io.fluidsonic.graphql.*
+import io.fluidsonic.raptor.transactions.*
 
 
 internal object FieldResolver : GFieldResolver<Any> {
@@ -11,7 +12,7 @@ internal object FieldResolver : GFieldResolver<Any> {
 		val resolve = checkNotNull(field.resolve)
 		val argumentResolver = checkNotNull(field.argumentResolver)
 
-		val outputScope = object : RaptorGraphOutputScope, RaptorGraphScope by context {}  // FIXME improve
+		val outputScope = object : RaptorGraphOutputScope, RaptorTransactionScope by context {}  // FIXME improve
 
 		val value = argumentResolver.withArguments(
 			argumentValues = arguments,
