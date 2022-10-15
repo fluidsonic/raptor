@@ -30,9 +30,10 @@ public class RaptorBsonComponent internal constructor() : RaptorComponent.Base<R
 
 	@RaptorDsl
 	public inline fun <reified Value : Any> definition(
+		priority: Priority = Priority.normal,
 		@BuilderInference noinline configure: RaptorBsonDefinitionBuilder<Value>.() -> Unit,
 	) {
-		definitions(raptor.bson.definition(configure))
+		definitions(raptor.bson.definition(configure), priority = priority)
 	}
 
 
