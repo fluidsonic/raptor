@@ -35,7 +35,7 @@ class DITests {
 			install(RaptorDIPlugin)
 			di {
 				provide<Foo> { resolutionCount += 1; FooImpl1 }
-				provide(BarImpl1)
+				provide<BarImpl1>(BarImpl1)
 				provide<Bar> { get<BarImpl1>() }
 			}
 		}.context.di
@@ -59,9 +59,9 @@ class DITests {
 		val di = raptor {
 			install(RaptorDIPlugin)
 			di {
-				provide { resolutionCount += 1; FooImpl1 }
+				provide<FooImpl1> { resolutionCount += 1; FooImpl1 }
 				provide<Foo> { get<FooImpl1>() }
-				provide(BarImpl1)
+				provide<BarImpl1>(BarImpl1)
 				provide<Bar> { get<BarImpl1>() }
 			}
 		}.context.di
@@ -92,9 +92,9 @@ class DITests {
 			install(RaptorDIPlugin)
 			di {
 				provide<Foo> { overriddenResolutionCount += 1; FooImpl2 }
-				provide { implResolutionCount += 1; FooImpl1 }
+				provide<FooImpl1> { implResolutionCount += 1; FooImpl1 }
 				provide<Foo> { resolutionCount += 1; get<FooImpl1>() }
-				provide(BarImpl1)
+				provide<BarImpl1>(BarImpl1)
 				provide<Bar> { get<BarImpl1>() }
 			}
 		}.context.di
@@ -145,14 +145,14 @@ class DITests {
 		val di = raptor {
 			install(RaptorDIPlugin)
 			di {
-				provide { FooImpl1 }
+				provide<FooImpl1> { FooImpl1 }
 				provide<Foo> { get<FooImpl1>() }
-				provide { FooImpl2 }
+				provide<FooImpl2> { FooImpl2 }
 				provide<Foo> { get<FooImpl2>() }
 
-				provide(BarImpl1)
+				provide<BarImpl1>(BarImpl1)
 				provide<Bar> { get<BarImpl1>() }
-				provide(BarImpl2)
+				provide<BarImpl2>(BarImpl2)
 				provide<Bar> { get<BarImpl2>() }
 			}
 		}.context.di
@@ -178,13 +178,13 @@ class DITests {
 		val di = raptor {
 			install(RaptorDIPlugin)
 			di {
-				provide { FooImpl1 }
+				provide<FooImpl1> { FooImpl1 }
 				provide<Foo> { get<FooImpl1>() }
-				provide { FooImpl2 }
+				provide<FooImpl2> { FooImpl2 }
 				provide<Foo> { get<FooImpl2>() }
-				provide(BarImpl1)
+				provide<BarImpl1>(BarImpl1)
 				provide<Bar> { get<BarImpl1>() }
-				provide(BarImpl2)
+				provide<BarImpl2>(BarImpl2)
 				provide<Bar> { get<BarImpl2>() }
 			}
 		}.context.di

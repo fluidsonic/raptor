@@ -15,7 +15,7 @@ public object FreemarkerRaptorPlugin : RaptorPlugin { // FIXME rm
 
 		optional(RaptorDIPlugin) {
 			di {
-				provide { get<RaptorContext>().freemarker }
+				provide<Configuration> { get<RaptorContext>().freemarker }
 			}
 		}
 	}

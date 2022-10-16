@@ -9,7 +9,7 @@ private val rootComponentKey = RaptorComponentKey<RootDIRaptorComponent>("DI")
 public object RaptorDIPlugin : RaptorPlugin {
 
 	override fun RaptorPluginInstallationScope.install() {
-		componentRegistry.register(rootComponentKey, ::RootDIRaptorComponent)
+		componentRegistry.register(rootComponentKey, RootDIRaptorComponent())
 	}
 
 

@@ -36,7 +36,7 @@ public object RaptorQuickstartPlugin : RaptorPlugin {
 		}
 
 		di {
-			provide { PasswordHasher() }
+			provide<PasswordHasher> { PasswordHasher() }
 		}
 	}
 }

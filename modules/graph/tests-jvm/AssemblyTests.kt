@@ -48,7 +48,7 @@ class AssemblyTests {
 
 			graphs.new().tag("A")
 
-			di.provide { context.plugins.graph.taggedGraph("A") }
+			di.provide<RaptorGraph> { context.plugins.graph.taggedGraph("A") }
 		}
 
 		assertEquals(actual = raptor.context.di.get<RaptorGraph>().tags, expected = setOf("A"))
