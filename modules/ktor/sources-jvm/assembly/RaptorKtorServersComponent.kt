@@ -18,7 +18,7 @@ public class RaptorKtorServersComponent internal constructor() :
 
 	@RaptorDsl
 	public fun new(forceEncryptedConnection: Boolean = true): RaptorKtorServerComponent =
-		componentRegistry.register(Keys.serverComponent) { RaptorKtorServerComponent(forceEncryptedConnection = forceEncryptedConnection) }
+		componentRegistry.register(Keys.serverComponent, RaptorKtorServerComponent(forceEncryptedConnection = forceEncryptedConnection))
 
 
 	@RaptorDsl

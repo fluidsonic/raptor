@@ -24,15 +24,17 @@ internal class DefaultAggregateProjectionLoader<
 		val previousProjection = projector.projection
 		val projection = projector.add(event)
 
+		check(projection != null || previousProjection != null) {
+			"Change of aggregate ${event.aggregateId} cannot transition from one non-existent projection " +
+				"to another non-existent projection: $event"
+		}
+
 		return RaptorAggregateProjectionEvent(
 			change = event.change,
 			id = event.id,
 			isReplay = event.isReplay,
 			previousProjection = previousProjection,
-			projection = projection
-				?: previousProjection
-				?: error("Change of aggregate ${event.aggregateId} cannot transition from one non-existent projection " +
-					"to another non-existent projection: $event"),
+			projection = projection,
 			timestamp = event.timestamp,
 			version = event.version,
 		)

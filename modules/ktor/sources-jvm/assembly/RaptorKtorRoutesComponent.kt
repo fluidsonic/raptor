@@ -18,7 +18,7 @@ public abstract class RaptorKtorRoutesComponent<Component : RaptorKtorRoutesComp
 
 	@RaptorDsl
 	public fun new(path: String, host: String? = null): RaptorKtorRouteComponent =
-		componentRegistry.register(Keys.routeComponent) { RaptorKtorRouteComponent(host = host, path = path) }
+		componentRegistry.register(Keys.routeComponent, RaptorKtorRouteComponent(host = host, path = path))
 
 
 	@RaptorDsl
@@ -34,7 +34,7 @@ public abstract class RaptorKtorRoutesComponent<Component : RaptorKtorRoutesComp
 
 		@RaptorDsl
 		public fun new(host: String? = null): RaptorKtorRouteComponent =
-			componentRegistry.register(Keys.routeComponent) { RaptorKtorRouteComponent(host = host, path = "/") }
+			componentRegistry.register(Keys.routeComponent, RaptorKtorRouteComponent(host = host, path = "/"))
 
 
 		@RaptorDsl

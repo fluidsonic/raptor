@@ -40,7 +40,7 @@ public inline fun <Component : RaptorComponent<Component>> RaptorComponentRegist
 	key: RaptorComponentKey<Component>,
 	create: () -> Component,
 ): Component =
-	oneOrNull(key) ?: register(key, create)
+	oneOrNull(key) ?: register(key, create())
 
 
 @Deprecated(message = "Create component directly.", replaceWith = ReplaceWith("this.register(key, create())"))

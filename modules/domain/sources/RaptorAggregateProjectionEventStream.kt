@@ -34,7 +34,7 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 		}
 		.filterIsInstance(changeClass = changeClass, idClass = idClass, projectionClass = projectionClass)
 		.onEach { event ->
-			val projectionId = event.projection.id
+			val projectionId = event.projectionId
 
 			if (failedProjectionIds?.contains(projectionId) == true)
 				return@onEach
@@ -82,9 +82,14 @@ public fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>
 	projectionClass: KClass<Projection>,
 ): Flow<RaptorAggregateProjectionEvent<Id, Projection, Change>> =
 	filter { event ->
-		val projection: RaptorProjection<*> = event.projection
+		val previousProjection: RaptorProjection<*>? = event.previousProjection
+		val projection: RaptorProjection<*>? = event.projection
 
-		changeClass.isInstance(event.change) && idClass.isInstance(projection.id) && projectionClass.isInstance(projection)
+		changeClass.isInstance(event.change)
+			&& (previousProjection == null || idClass.isInstance(previousProjection.id))
+			&& (projection == null || idClass.isInstance(projection.id))
+			&& (previousProjection == null || projectionClass.isInstance(previousProjection))
+			&& (projection == null || projectionClass.isInstance(projection))
 	} as Flow<RaptorAggregateProjectionEvent<Id, Projection, Change>>
 
 
