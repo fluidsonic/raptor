@@ -1,7 +1,5 @@
-import org.jetbrains.kotlin.gradle.plugin.*
-
 plugins {
-	kotlin("jvm") version "1.6.10"
+	kotlin("jvm") version "1.7.20"
 }
 
 repositories {
@@ -9,12 +7,8 @@ repositories {
 	gradlePluginPortal()
 }
 
-sourceSets {
+kotlin.sourceSets {
 	getByName("main") {
 		kotlin.srcDirs("sources")
 	}
 }
-
-
-val SourceSet.kotlin
-	get() = withConvention(KotlinSourceSet::class) { kotlin }
