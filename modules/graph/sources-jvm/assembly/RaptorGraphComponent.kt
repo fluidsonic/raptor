@@ -1,6 +1,9 @@
+@file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
+
 package io.fluidsonic.raptor.graph
 
 import io.fluidsonic.raptor.*
+import kotlin.internal.*
 import kotlin.reflect.*
 
 
@@ -80,7 +83,7 @@ public fun RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.includeDefault(
 @RaptorDsl
 public inline fun <reified Type : Enum<Type>> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newEnum(
 	name: String = RaptorGraphDefinition.defaultName,
-	@BuilderInference noinline configure: RaptorEnumGraphDefinitionBuilder<Type>.() -> Unit = {},
+	noinline configure: RaptorEnumGraphDefinitionBuilder<@NoInfer Type>.() -> Unit = {},
 ) {
 	add(graphEnumDefinition(
 		name = name,
@@ -93,9 +96,9 @@ public inline fun <reified Type : Enum<Type>> RaptorAssemblyQuery<RaptorGraphCom
 
 @RaptorDsl
 public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newIdAlias(
-	@BuilderInference noinline configure: RaptorAliasGraphDefinitionBuilder<Type, String>.() -> Unit,
+	noinline configure: RaptorAliasGraphDefinitionBuilder<@NoInfer Type, String>.() -> Unit,
 ) {
-	add(graphIdAliasDefinition(
+	add(graphIdAliasDefinition<Type>(
 		type = typeOf<Type>(),
 		configure = configure,
 	))
@@ -105,9 +108,9 @@ public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.
 @RaptorDsl
 public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newInputObject(
 	name: String = RaptorGraphDefinition.defaultName,
-	@BuilderInference noinline configure: RaptorInputObjectGraphDefinitionBuilder<Type>.() -> Unit,
+	noinline configure: RaptorInputObjectGraphDefinitionBuilder<@NoInfer Type>.() -> Unit,
 ) {
-	add(graphInputObjectDefinition(
+	add(graphInputObjectDefinition<Type>(
 		name = name,
 		type = typeOf<Type>(),
 		configure = configure,
@@ -119,18 +122,18 @@ public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.
 public fun <Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newInterface(
 	name: String = RaptorGraphDefinition.defaultName,
 	type: KType,
-	configure: RaptorInterfaceGraphDefinitionBuilder<Type>.() -> Unit,
+	configure: RaptorInterfaceGraphDefinitionBuilder<@NoInfer Type>.() -> Unit,
 ) {
-	add(graphInterfaceDefinition(name = name, type = type, configure = configure))
+	add(graphInterfaceDefinition<Type>(name = name, type = type, configure = configure))
 }
 
 
 @RaptorDsl
 public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newInterface(
 	name: String = RaptorGraphDefinition.defaultName,
-	noinline configure: RaptorInterfaceGraphDefinitionBuilder<Type>.() -> Unit,
+	noinline configure: RaptorInterfaceGraphDefinitionBuilder<@NoInfer Type>.() -> Unit,
 ) {
-	newInterface(
+	newInterface<Type>(
 		name = name,
 		type = typeOf<Type>(),
 		configure = configure
@@ -142,29 +145,29 @@ public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.
 public fun <Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newObject(
 	name: String = RaptorGraphDefinition.defaultName,
 	type: KType,
-	configure: RaptorObjectGraphDefinitionBuilder<Type>.() -> Unit = {},
+	configure: RaptorObjectGraphDefinitionBuilder<@NoInfer Type>.() -> Unit = {},
 ) {
-	add(graphObjectDefinition(name = name, type = type, configure = configure))
+	add(graphObjectDefinition<Type>(name = name, type = type, configure = configure))
 }
 
 
 @RaptorDsl
 public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newObject(
 	name: String = RaptorGraphDefinition.defaultName,
-	@BuilderInference noinline configure: RaptorObjectGraphDefinitionBuilder<Type>.() -> Unit = {},
+	noinline configure: RaptorObjectGraphDefinitionBuilder<@NoInfer Type>.() -> Unit = {},
 ) {
-	newObject(name = name, type = typeOf<Type>(), configure = configure)
+	newObject<Type>(name = name, type = typeOf<Type>(), configure = configure)
 }
 
 
 @RaptorDsl
-public inline fun <reified Value : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newScalar(
+public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newScalar(
 	name: String = RaptorGraphDefinition.defaultName,
-	noinline configure: RaptorScalarGraphDefinitionBuilder<Value>.() -> Unit,
+	noinline configure: RaptorScalarGraphDefinitionBuilder<@NoInfer Type>.() -> Unit,
 ) {
-	add(graphScalarDefinition(
+	add(graphScalarDefinition<Type>(
 		name = name,
-		type = typeOf<Value>(),
+		type = typeOf<Type>(),
 		configure = configure,
 	))
 }
@@ -173,9 +176,9 @@ public inline fun <reified Value : Any> RaptorAssemblyQuery<RaptorGraphComponent
 @RaptorDsl
 public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newUnion(
 	name: String = RaptorGraphDefinition.defaultName,
-	@BuilderInference noinline configure: RaptorUnionGraphDefinitionBuilder<Type>.() -> Unit = {},
+	noinline configure: RaptorUnionGraphDefinitionBuilder<@NoInfer Type>.() -> Unit = {},
 ) {
-	add(graphUnionDefinition(
+	add(graphUnionDefinition<Type>(
 		name = name,
 		type = typeOf<Type>(),
 		configure = configure,

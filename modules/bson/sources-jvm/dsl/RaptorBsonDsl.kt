@@ -1,6 +1,9 @@
+@file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
+
 package io.fluidsonic.raptor.bson
 
 import io.fluidsonic.raptor.*
+import kotlin.internal.*
 import kotlin.reflect.*
 
 
@@ -13,13 +16,11 @@ public val RaptorGlobalDsl.bson: RaptorBsonDsl
 	get() = RaptorBsonDsl
 
 
-// FIXME Enable BuilderInference once fixed: https://youtrack.jetbrains.com/issue/KT-41595
+// https://youtrack.jetbrains.com/issue/KT-54477/NoInfer-doesnt-work-for-builders
 @RaptorDsl
-@Suppress("unused")
 public inline fun <reified Value : Any> RaptorBsonDsl.definition(
-	/* @BuilderInference */
-	noinline configure: RaptorBsonDefinitionBuilder<Value>.() -> Unit,
-): RaptorBsonDefinition.ForValue<Value> =
+	noinline configure: RaptorBsonDefinitionBuilder<@NoInfer Value>.() -> Unit,
+): RaptorBsonDefinition.ForValue<@NoInfer Value> =
 	definition(valueClass = Value::class, configure = configure)
 
 

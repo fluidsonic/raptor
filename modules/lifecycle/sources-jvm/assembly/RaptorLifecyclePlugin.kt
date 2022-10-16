@@ -2,6 +2,7 @@ package io.fluidsonic.raptor.lifecycle
 
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.di.*
+import kotlin.coroutines.*
 
 
 public object RaptorLifecyclePlugin : RaptorPlugin {
@@ -11,8 +12,8 @@ public object RaptorLifecyclePlugin : RaptorPlugin {
 
 		optional(RaptorDIPlugin) {
 			di {
-				provide { get<RaptorLifecycle>().coroutineContext }
-				provide { context.lifecycle }
+				provide<CoroutineContext> { get<RaptorLifecycle>().coroutineContext }
+				provide<RaptorLifecycle> { context.lifecycle }
 			}
 		}
 	}

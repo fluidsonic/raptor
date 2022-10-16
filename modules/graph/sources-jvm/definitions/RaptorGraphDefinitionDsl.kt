@@ -1,7 +1,10 @@
+@file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
+
 package io.fluidsonic.raptor.graph
 
 import io.fluidsonic.raptor.*
 import io.fluidsonic.stdlib.*
+import kotlin.internal.*
 import kotlin.reflect.*
 
 // FIXME Allow nested definitions in structured definitions & reuse in RaptorGraphOperationBuilder.
@@ -10,9 +13,9 @@ import kotlin.reflect.*
 
 @RaptorDsl
 public inline fun <reified Type : Any, reified ReferencedType : Any> graphAliasDefinition(
-	@BuilderInference noinline configure: RaptorAliasGraphDefinitionBuilder<Type, ReferencedType>.() -> Unit,
+	noinline configure: RaptorAliasGraphDefinitionBuilder<@NoInfer Type, @NoInfer ReferencedType>.() -> Unit,
 ): RaptorGraphDefinition =
-	graphAliasDefinition(
+	graphAliasDefinition<Type, ReferencedType>(
 		type = typeOf<Type>(),
 		referencedType = typeOf<ReferencedType>(),
 		configure = configure
@@ -23,7 +26,7 @@ public inline fun <reified Type : Any, reified ReferencedType : Any> graphAliasD
 public fun <Type : Any, ReferencedType : Any> graphAliasDefinition(
 	type: KType,
 	referencedType: KType,
-	configure: RaptorAliasGraphDefinitionBuilder<Type, ReferencedType>.() -> Unit,
+	configure: RaptorAliasGraphDefinitionBuilder<@NoInfer Type, @NoInfer ReferencedType>.() -> Unit,
 ): RaptorGraphDefinition =
 	RaptorAliasGraphDefinitionBuilder<Type, ReferencedType>(
 		isId = false,
@@ -52,7 +55,7 @@ public fun <Type : Any, ReferencedType : Any> graphAliasDefinition(
 @RaptorDsl
 public inline fun <reified Type : Enum<Type>> graphEnumDefinition(
 	name: String = RaptorGraphDefinition.defaultName,
-	@BuilderInference noinline configure: RaptorEnumGraphDefinitionBuilder<Type>.() -> Unit = {},
+	noinline configure: RaptorEnumGraphDefinitionBuilder<@NoInfer Type>.() -> Unit = {},
 ): RaptorGraphDefinition =
 	graphEnumDefinition(
 		name = name,
@@ -66,8 +69,8 @@ public inline fun <reified Type : Enum<Type>> graphEnumDefinition(
 public fun <Type : Enum<Type>> graphEnumDefinition(
 	name: String = RaptorGraphDefinition.defaultName,
 	type: KType,
-	values: List<Type>, // FIXME validate
-	configure: RaptorEnumGraphDefinitionBuilder<Type>.() -> Unit = {},
+	values: List<@NoInfer Type>, // FIXME validate
+	configure: RaptorEnumGraphDefinitionBuilder<@NoInfer Type>.() -> Unit = {},
 ): RaptorGraphDefinition =
 	RaptorEnumGraphDefinitionBuilder(
 		kotlinType = KotlinType.of(
@@ -88,9 +91,9 @@ public fun <Type : Enum<Type>> graphEnumDefinition(
 
 @RaptorDsl
 public inline fun <reified Type : Any> graphIdAliasDefinition(
-	@BuilderInference noinline configure: RaptorAliasGraphDefinitionBuilder<Type, String>.() -> Unit,
+	noinline configure: RaptorAliasGraphDefinitionBuilder<@NoInfer Type, String>.() -> Unit,
 ): RaptorGraphDefinition =
-	graphIdAliasDefinition(
+	graphIdAliasDefinition<Type>(
 		type = typeOf<Type>(),
 		configure = configure
 	)
@@ -99,7 +102,7 @@ public inline fun <reified Type : Any> graphIdAliasDefinition(
 @RaptorDsl
 public fun <Type : Any> graphIdAliasDefinition(
 	type: KType,
-	configure: RaptorAliasGraphDefinitionBuilder<Type, String>.() -> Unit,
+	configure: RaptorAliasGraphDefinitionBuilder<@NoInfer Type, String>.() -> Unit,
 ): RaptorGraphDefinition =
 	RaptorAliasGraphDefinitionBuilder<Type, String>(
 		isId = true,
@@ -128,9 +131,9 @@ public fun <Type : Any> graphIdAliasDefinition(
 @RaptorDsl
 public inline fun <reified Type : Any> graphInputObjectDefinition(
 	name: String = RaptorGraphDefinition.defaultName,
-	@BuilderInference noinline configure: RaptorInputObjectGraphDefinitionBuilder<Type>.() -> Unit,
+	noinline configure: RaptorInputObjectGraphDefinitionBuilder<@NoInfer Type>.() -> Unit,
 ): RaptorGraphDefinition =
-	graphInputObjectDefinition(
+	graphInputObjectDefinition<Type>(
 		name = name,
 		type = typeOf<Type>(),
 		configure = configure
@@ -141,7 +144,7 @@ public inline fun <reified Type : Any> graphInputObjectDefinition(
 public fun <Type : Any> graphInputObjectDefinition(
 	name: String = RaptorGraphDefinition.defaultName,
 	type: KType,
-	configure: RaptorInputObjectGraphDefinitionBuilder<Type>.() -> Unit,
+	configure: RaptorInputObjectGraphDefinitionBuilder<@NoInfer Type>.() -> Unit,
 ): RaptorGraphDefinition =
 	RaptorInputObjectGraphDefinitionBuilder<Type>(
 		kotlinType = KotlinType.of(
@@ -162,9 +165,9 @@ public fun <Type : Any> graphInputObjectDefinition(
 @RaptorDsl
 public inline fun <reified Type : Any> graphInterfaceDefinition(
 	name: String = RaptorGraphDefinition.defaultName,
-	noinline configure: RaptorInterfaceGraphDefinitionBuilder<Type>.() -> Unit,
+	noinline configure: RaptorInterfaceGraphDefinitionBuilder<@NoInfer Type>.() -> Unit,
 ): RaptorGraphDefinition =
-	graphInterfaceDefinition(
+	graphInterfaceDefinition<Type>(
 		name = name,
 		type = typeOf<Type>(),
 		configure = configure
@@ -175,7 +178,7 @@ public inline fun <reified Type : Any> graphInterfaceDefinition(
 public fun <Type : Any> graphInterfaceDefinition(
 	name: String = RaptorGraphDefinition.defaultName,
 	type: KType,
-	configure: RaptorInterfaceGraphDefinitionBuilder<Type>.() -> Unit,
+	configure: RaptorInterfaceGraphDefinitionBuilder<@NoInfer Type>.() -> Unit,
 ): RaptorGraphDefinition =
 	RaptorInterfaceGraphDefinitionBuilder<Type>(
 		kotlinType = KotlinType.of(
@@ -195,9 +198,9 @@ public fun <Type : Any> graphInterfaceDefinition(
 
 @RaptorDsl
 public inline fun <reified Type : Any> graphInterfaceExtensionDefinition(
-	@BuilderInference noinline configure: RaptorInterfaceExtensionGraphDefinitionBuilder<Type>.() -> Unit,
+	noinline configure: RaptorInterfaceExtensionGraphDefinitionBuilder<@NoInfer Type>.() -> Unit,
 ): RaptorGraphDefinition =
-	graphInterfaceExtensionDefinition(
+	graphInterfaceExtensionDefinition<Type>(
 		type = typeOf<Type>(),
 		configure = configure
 	)
@@ -206,7 +209,7 @@ public inline fun <reified Type : Any> graphInterfaceExtensionDefinition(
 @RaptorDsl
 public fun <Type : Any> graphInterfaceExtensionDefinition(
 	type: KType,
-	configure: RaptorInterfaceExtensionGraphDefinitionBuilder<Type>.() -> Unit,
+	configure: RaptorInterfaceExtensionGraphDefinitionBuilder<@NoInfer Type>.() -> Unit,
 ): RaptorGraphDefinition =
 	RaptorInterfaceExtensionGraphDefinitionBuilder<Type>(
 		kotlinType = KotlinType.of(
@@ -227,9 +230,9 @@ public fun <Type : Any> graphInterfaceExtensionDefinition(
 @RaptorDsl
 public inline fun <reified Type : Any> graphObjectDefinition(
 	name: String = RaptorGraphDefinition.defaultName,
-	@BuilderInference noinline configure: RaptorObjectGraphDefinitionBuilder<Type>.() -> Unit = {},
+	noinline configure: RaptorObjectGraphDefinitionBuilder<@NoInfer Type>.() -> Unit = {},
 ): RaptorGraphDefinition =
-	graphObjectDefinition(
+	graphObjectDefinition<Type>(
 		name = name,
 		type = typeOf<Type>(),
 		configure = configure
@@ -240,7 +243,7 @@ public inline fun <reified Type : Any> graphObjectDefinition(
 public fun <Type : Any> graphObjectDefinition(
 	name: String = RaptorGraphDefinition.defaultName,
 	type: KType,
-	configure: RaptorObjectGraphDefinitionBuilder<Type>.() -> Unit = {},
+	configure: RaptorObjectGraphDefinitionBuilder<@NoInfer Type>.() -> Unit = {},
 ): RaptorGraphDefinition =
 	RaptorObjectGraphDefinitionBuilder<Type>(
 		kotlinType = KotlinType.of(
@@ -260,9 +263,9 @@ public fun <Type : Any> graphObjectDefinition(
 
 @RaptorDsl
 public inline fun <reified Type : Any> graphObjectExtensionDefinition(
-	@BuilderInference noinline configure: RaptorObjectExtensionGraphDefinitionBuilder<Type>.() -> Unit,
+	noinline configure: RaptorObjectExtensionGraphDefinitionBuilder<@NoInfer Type>.() -> Unit,
 ): RaptorGraphDefinition =
-	graphObjectExtensionDefinition(
+	graphObjectExtensionDefinition<Type>(
 		type = typeOf<Type>(),
 		configure = configure
 	)
@@ -271,7 +274,7 @@ public inline fun <reified Type : Any> graphObjectExtensionDefinition(
 @RaptorDsl
 public fun <Type : Any> graphObjectExtensionDefinition(
 	type: KType,
-	configure: RaptorObjectExtensionGraphDefinitionBuilder<Type>.() -> Unit,
+	configure: RaptorObjectExtensionGraphDefinitionBuilder<@NoInfer Type>.() -> Unit,
 ): RaptorGraphDefinition =
 	RaptorObjectExtensionGraphDefinitionBuilder<Type>(
 		kotlinType = KotlinType.of(
@@ -292,9 +295,9 @@ public fun <Type : Any> graphObjectExtensionDefinition(
 public inline fun <reified Value> graphOperationDefinition(
 	name: String,
 	operationType: RaptorGraphOperationType,
-	@BuilderInference noinline configure: RaptorGraphOperationDefinitionBuilder<Value>.() -> Unit,
+	noinline configure: RaptorGraphOperationDefinitionBuilder<@NoInfer Value>.() -> Unit,
 ): RaptorGraphDefinition =
-	graphOperationDefinition(
+	graphOperationDefinition<Value>(
 		name = name,
 		operationType = operationType,
 		type = typeOf<Value>(),
@@ -307,7 +310,7 @@ public fun <Value> graphOperationDefinition(
 	name: String,
 	type: KType,
 	operationType: RaptorGraphOperationType,
-	configure: RaptorGraphOperationDefinitionBuilder<Value>.() -> Unit,
+	configure: RaptorGraphOperationDefinitionBuilder<@NoInfer Value>.() -> Unit,
 ): RaptorGraphDefinition =
 	RaptorGraphOperationDefinitionBuilder<Value>(
 		additionalDefinitions = emptyList(),
@@ -328,13 +331,13 @@ public fun <Value> graphOperationDefinition(
 
 
 @RaptorDsl
-public inline fun <reified Value : Any> graphScalarDefinition(
+public inline fun <reified Type : Any> graphScalarDefinition(
 	name: String = RaptorGraphDefinition.defaultName,
-	@BuilderInference noinline configure: RaptorScalarGraphDefinitionBuilder<Value>.() -> Unit,
+	noinline configure: RaptorScalarGraphDefinitionBuilder<@NoInfer Type>.() -> Unit,
 ): RaptorGraphDefinition =
-	graphScalarDefinition(
+	graphScalarDefinition<Type>(
 		name = name,
-		type = typeOf<Value>(),
+		type = typeOf<Type>(),
 		configure = configure
 	)
 
@@ -343,7 +346,7 @@ public inline fun <reified Value : Any> graphScalarDefinition(
 public fun <Type : Any> graphScalarDefinition(
 	name: String = RaptorGraphDefinition.defaultName,
 	type: KType,
-	configure: RaptorScalarGraphDefinitionBuilder<Type>.() -> Unit,
+	configure: RaptorScalarGraphDefinitionBuilder<@NoInfer Type>.() -> Unit,
 ): RaptorGraphDefinition =
 	RaptorScalarGraphDefinitionBuilder<Type>(
 		kotlinType = KotlinType.of(
@@ -364,9 +367,9 @@ public fun <Type : Any> graphScalarDefinition(
 @RaptorDsl
 public inline fun <reified Type : Any> graphUnionDefinition(
 	name: String = RaptorGraphDefinition.defaultName,
-	@BuilderInference noinline configure: RaptorUnionGraphDefinitionBuilder<Type>.() -> Unit = {},
+	noinline configure: RaptorUnionGraphDefinitionBuilder<@NoInfer Type>.() -> Unit = {},
 ): RaptorGraphDefinition =
-	graphUnionDefinition(
+	graphUnionDefinition<Type>(
 		name = name,
 		type = typeOf<Type>(),
 		configure = configure
@@ -377,7 +380,7 @@ public inline fun <reified Type : Any> graphUnionDefinition(
 public fun <Type : Any> graphUnionDefinition(
 	name: String = RaptorGraphDefinition.defaultName,
 	type: KType,
-	configure: RaptorUnionGraphDefinitionBuilder<Type>.() -> Unit = {},
+	configure: RaptorUnionGraphDefinitionBuilder<@NoInfer Type>.() -> Unit = {},
 ): RaptorGraphDefinition =
 	RaptorUnionGraphDefinitionBuilder<Type>(
 		kotlinType = KotlinType.of(

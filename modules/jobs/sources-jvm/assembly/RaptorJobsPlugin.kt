@@ -13,7 +13,7 @@ public object RaptorJobsPlugin : RaptorPlugin {
 		val registry = component.complete()
 
 		configure(RaptorDIPlugin) {
-			di { provide(registry) }
+			di.provide<RaptorJobRegistry>(registry)
 		}
 	}
 

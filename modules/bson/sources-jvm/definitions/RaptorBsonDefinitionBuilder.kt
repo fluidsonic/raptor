@@ -43,11 +43,9 @@ public class RaptorBsonDefinitionBuilder<Value : Any> internal constructor(
 	}
 
 
-	// FIXME Enable BuilderInference once fixed: https://youtrack.jetbrains.com/issue/KT-41595
 	@RaptorDsl
 	public inline fun <reified Value : Any> additionalDefinition(
-		/* @BuilderInference */
-		noinline configure: RaptorBsonDefinitionBuilder<Value>.() -> Unit,
+		noinline configure: RaptorBsonDefinitionBuilder<@NoInfer Value>.() -> Unit,
 	) {
 		additionalDefinition(valueClass = Value::class, configure = configure)
 	}
@@ -60,7 +58,7 @@ public class RaptorBsonDefinitionBuilder<Value : Any> internal constructor(
 
 
 	@RaptorDsl
-	public fun decode(decode: RaptorBsonReaderScope.(arguments: List<KTypeProjection>?) -> Value) {
+	public fun decode(decode: RaptorBsonReaderScope.(arguments: List<KTypeProjection>?) -> @NoInfer Value) {
 		check(this.decode == null) { "Cannot provide multiple `decode { … }` blocks." }
 
 		this.decode = decode

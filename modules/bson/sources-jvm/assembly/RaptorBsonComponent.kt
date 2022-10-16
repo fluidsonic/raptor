@@ -1,8 +1,11 @@
+@file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
+
 package io.fluidsonic.raptor.bson
 
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.bson.RaptorBsonDefinition.*
 import java.util.*
+import kotlin.internal.*
 import org.bson.codecs.*
 import org.bson.codecs.configuration.*
 
@@ -31,9 +34,9 @@ public class RaptorBsonComponent internal constructor() : RaptorComponent.Base<R
 	@RaptorDsl
 	public inline fun <reified Value : Any> definition(
 		priority: Priority = Priority.normal,
-		@BuilderInference noinline configure: RaptorBsonDefinitionBuilder<Value>.() -> Unit,
+		noinline configure: RaptorBsonDefinitionBuilder<@NoInfer Value>.() -> Unit,
 	) {
-		definitions(raptor.bson.definition(configure), priority = priority)
+		definitions(raptor.bson.definition<Value>(configure), priority = priority)
 	}
 
 
@@ -106,7 +109,7 @@ public fun RaptorAssemblyQuery<RaptorBsonComponent>.codecs(
 public inline fun <reified Value : Any> RaptorAssemblyQuery<RaptorBsonComponent>.definition(
 	@BuilderInference noinline configure: RaptorBsonDefinitionBuilder<Value>.() -> Unit,
 ) {
-	definitions(raptor.bson.definition(configure))
+	definitions(raptor.bson.definition<Value>(configure))
 }
 
 
