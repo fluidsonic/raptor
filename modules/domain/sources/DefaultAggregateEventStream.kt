@@ -8,20 +8,27 @@ import kotlinx.coroutines.flow.*
 // FIXME Error handling? Make sure Flow never stops.
 internal class DefaultAggregateEventStream : RaptorAggregateEventStream {
 
-	private val flow = MutableSharedFlow<RaptorAggregateEvent<*, *>>()
-	private val stopEvent = dummyAggregateEvent()
+	private val flow = MutableSharedFlow<RaptorAggregateEventBatch<*, *>>()
+	private val stopEvent = dummyAggregateEventBatch()
 
 
-	suspend fun add(event: RaptorAggregateEvent<*, *>) {
-		flow.emit(event)
+	suspend fun add(batch: RaptorAggregateEventBatch<*, *>) {
+		flow.emit(batch)
 	}
 
 
-	// TODO Collects forever if called after stop().
-	override fun asFlow(): Flow<RaptorAggregateEvent<*, *>> =
+	override fun asBatchFlow(): Flow<RaptorAggregateEventBatch<*, *>> =
 		flow
 			.takeWhile { it !== stopEvent }
 			.filterNot { it.isDummy() }
+
+
+	// TODO Collects forever if called after stop().
+	@OptIn(FlowPreview::class)
+	override fun asFlow(): Flow<RaptorAggregateEvent<*, *>> =
+		flow.flatMapConcat { batch ->
+			batch.events.asFlow()
+		}
 
 
 	suspend fun stop() {
@@ -33,7 +40,7 @@ internal class DefaultAggregateEventStream : RaptorAggregateEventStream {
 
 
 	override suspend fun wait() {
-		val waitEvent = dummyAggregateEvent()
+		val waitEvent = dummyAggregateEventBatch()
 
 		coroutineScope {
 			flow

@@ -14,7 +14,20 @@ internal fun dummyAggregateEvent(): RaptorAggregateEvent<*, *> =
 	)
 
 
+internal fun dummyAggregateEventBatch(): RaptorAggregateEventBatch<*, *> =
+	RaptorAggregateEventBatch(
+		aggregateId = DummyAggregateId,
+		events = listOf(dummyAggregateEvent()),
+		isReplay = false,
+		version = 1,
+	)
+
+
 internal fun RaptorAggregateEvent<*, *>.isDummy() =
+	aggregateId === DummyAggregateId
+
+
+internal fun RaptorAggregateEventBatch<*, *>.isDummy() =
 	aggregateId === DummyAggregateId
 
 

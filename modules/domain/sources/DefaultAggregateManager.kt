@@ -24,8 +24,23 @@ internal class DefaultAggregateManager(
 
 		store.add(pendingEvents) // FIXME copy?
 
-		for (event in pendingEvents)
-			process(event)
+		pendingEvents
+			.groupBy { it.aggregateId }
+			.values
+			.map { events ->
+				val lastEvent = events.last()
+
+				RaptorAggregateEventBatch(
+					aggregateId = lastEvent.aggregateId,
+					events = when (events.size) {
+						1 -> events
+						else -> events.map { it.copy(lastVersionInBatch = lastEvent.version) }
+					},
+					isReplay = lastEvent.isReplay,
+					version = lastEvent.version,
+				)
+			}
+			.forEach { process(it) }
 	}
 
 
@@ -55,19 +70,47 @@ internal class DefaultAggregateManager(
 
 
 	override suspend fun load() {
+		// FIXME use controller?
+		val eventsInBatchByAggregateId: MutableMap<RaptorAggregateId, MutableList<RaptorAggregateEvent<*, *>>> = hashMapOf()
+
 		store.load().collect { event ->
+			val eventsInBatch = eventsInBatchByAggregateId.getOrPut(event.aggregateId, ::mutableListOf)
+			eventsInBatch += event
+
 			controller(event.aggregateId).handle(event)
-			process(event)
+
+			if (event.version == event.lastVersionInBatch) {
+				process(RaptorAggregateEventBatch(
+					aggregateId = event.aggregateId,
+					events = eventsInBatch,
+					isReplay = event.isReplay,
+					version = event.version,
+				))
+
+				eventsInBatchByAggregateId[event.aggregateId] = mutableListOf()
+			}
 		}
 	}
 
 
-	private suspend fun process(event: RaptorAggregateEvent<*, *>) {
-		val projectionEvent = fixme.addEvent(event)
+	// FIXME use controller?
+	private suspend fun process(batch: RaptorAggregateEventBatch<*, *>) {
+		val projectionEvents = batch.events.mapNotNull { fixme.addEvent(it) }
 
-		eventStream.add(event)
+		eventStream.add(batch)
 
-		if (projectionEvent != null)
-			projectionEventStream.add(projectionEvent)
+		if (projectionEvents.isNotEmpty()) {
+			val lastProjectionEvent = projectionEvents.last()
+
+			projectionEventStream.add(RaptorAggregateProjectionEventBatch(
+				events = when (projectionEvents.size) {
+					1 -> projectionEvents
+					else -> projectionEvents.map { it.copy(lastVersionInBatch = lastProjectionEvent.version) }
+				},
+				isReplay = lastProjectionEvent.isReplay,
+				projectionId = lastProjectionEvent.projectionId,
+				version = lastProjectionEvent.version,
+			))
+		}
 	}
 }

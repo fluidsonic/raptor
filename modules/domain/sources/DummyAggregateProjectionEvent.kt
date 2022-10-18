@@ -14,8 +14,21 @@ internal fun dummyAggregateProjectionEvent(): RaptorAggregateProjectionEvent<*, 
 	)
 
 
+internal fun dummyAggregateProjectionEventBatch(): RaptorAggregateProjectionEventBatch<*, *, *> =
+	RaptorAggregateProjectionEventBatch(
+		events = listOf(dummyAggregateProjectionEvent()),
+		isReplay = false,
+		projectionId = DummyAggregateProjectionId,
+		version = 1,
+	)
+
+
 internal fun RaptorAggregateProjectionEvent<*, *, *>.isDummy() =
 	projection === DummyProjection
+
+
+internal fun RaptorAggregateProjectionEventBatch<*, *, *>.isDummy() =
+	projectionId === DummyAggregateProjectionId
 
 
 private object DummyAggregateProjectionChange : RaptorAggregateChange<DummyAggregateProjectionId>

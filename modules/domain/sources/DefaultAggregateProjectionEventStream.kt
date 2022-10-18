@@ -8,19 +8,26 @@ import kotlinx.coroutines.flow.*
 // FIXME Error handling? Make sure Flow never stops.
 internal class DefaultAggregateProjectionEventStream : RaptorAggregateProjectionEventStream {
 
-	private val flow = MutableSharedFlow<RaptorAggregateProjectionEvent<*, *, *>>()
-	private val stopEvent = dummyAggregateProjectionEvent()
+	private val flow = MutableSharedFlow<RaptorAggregateProjectionEventBatch<*, *, *>>()
+	private val stopEvent = dummyAggregateProjectionEventBatch()
 
 
-	suspend fun add(event: RaptorAggregateProjectionEvent<*, *, *>) {
-		flow.emit(event)
+	suspend fun add(batch: RaptorAggregateProjectionEventBatch<*, *, *>) {
+		flow.emit(batch)
 	}
 
 
-	override fun asFlow(): Flow<RaptorAggregateProjectionEvent<*, *, *>> =
+	override fun asBatchFlow(): Flow<RaptorAggregateProjectionEventBatch<*, *, *>> =
 		flow
 			.takeWhile { it !== stopEvent }
 			.filterNot { it.isDummy() }
+
+
+	@OptIn(FlowPreview::class)
+	override fun asFlow(): Flow<RaptorAggregateProjectionEvent<*, *, *>> =
+		flow.flatMapConcat { batch ->
+			batch.events.asFlow()
+		}
 
 
 	suspend fun stop() {
@@ -32,7 +39,7 @@ internal class DefaultAggregateProjectionEventStream : RaptorAggregateProjection
 
 
 	override suspend fun wait() {
-		val waitEvent = dummyAggregateProjectionEvent()
+		val waitEvent = dummyAggregateProjectionEventBatch()
 
 		coroutineScope {
 			flow
