@@ -1,11 +1,9 @@
 package io.fluidsonic.raptor
 
-import io.fluidsonic.time.*
 import kotlin.time.*
 import kotlinx.datetime.*
 
 
-@OptIn(ExperimentalTime::class)
 public sealed class RaptorJobTiming {
 
 	public data class AtDateTime(val dateTime: LocalDateTime, val timeZone: TimeZone) : RaptorJobTiming()

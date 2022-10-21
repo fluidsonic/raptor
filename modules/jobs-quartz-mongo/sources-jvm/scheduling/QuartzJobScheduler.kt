@@ -252,4 +252,4 @@ private val RaptorJobTiming.AtDateTime.cronExpression
 
 
 private val RaptorJobTiming.DailyAtTime.cronExpression
-	get() = "${time.second} ${time.minute} ${time.hour} * * * *"
+	get() = "${time.second} ${time.minute} ${time.hour} * * ?"
