@@ -19,7 +19,7 @@ internal class DefaultAggregateController<
 	override fun execute(command: RaptorAggregateCommand<Id>): List<RaptorAggregateEvent<Id, RaptorAggregateChange<Id>>> {
 		@Suppress("NAME_SHADOWING")
 		val command = definition.castOrNull(command)
-			?: error("Unsupported command.") // FIXME
+			?: error("Command not registered for ${aggregate::class}: $command")
 
 		return aggregate.execute(command).map { change ->
 			eventFactory.create(
@@ -36,7 +36,7 @@ internal class DefaultAggregateController<
 	override fun handle(event: RaptorAggregateEvent<Id, RaptorAggregateChange<Id>>) {
 		@Suppress("NAME_SHADOWING")
 		val event = definition.castOrNull(event)
-			?: error("Unsupported event.") // FIXME
+			?: error("Change not registered for ${aggregate::class}: $event")
 
 		check(event.aggregateId == id) { "Cannot apply an event for a aggregate '${event.aggregateId.debug}' to aggregate '${id.debug}':\n$event" }
 		check(event.version == version + 1) {

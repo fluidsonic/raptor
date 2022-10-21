@@ -6,7 +6,8 @@ import kotlinx.datetime.*
 import kotlinx.datetime.TimeZone.*
 
 
+@Suppress("RemoveExplicitTypeArguments")
 public fun Companion.bsonDefinition(): RaptorBsonDefinition = raptor.bson.definition<TimeZone> {
 	decode<String> { ofOrNull(it) ?: error("Invalid TimeZone ID: $it") }
-	encode(TimeZone::id)
+	encode(TimeZone::id, includingSubclasses = true)
 }
