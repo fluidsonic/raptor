@@ -26,8 +26,8 @@ public object RaptorJobsQuartzMongoPlugin : RaptorPlugin {
 
 		configure(RaptorLifecyclePlugin) {
 			lifecycle {
-				onStart(Int.MIN_VALUE) { di.get<RaptorJobScheduler>().castOrNull<QuartzJobScheduler>()?.start() }
-				onStop(Int.MAX_VALUE) { di.get<RaptorJobScheduler>().castOrNull<QuartzJobScheduler>()?.stop() }
+				onStart(-1) { di.get<RaptorJobScheduler>().castOrNull<QuartzJobScheduler>()?.start() }
+				onStop(1) { di.get<RaptorJobScheduler>().castOrNull<QuartzJobScheduler>()?.stop() }
 			}
 		}
 	}
