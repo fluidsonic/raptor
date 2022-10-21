@@ -4,11 +4,11 @@ package io.fluidsonic.raptor.domain
 public interface RaptorAggregate<
 	Id : RaptorAggregateId,
 	in Command : RaptorAggregateCommand<Id>,
-	Event : RaptorAggregateChange<Id>,
+	Change : RaptorAggregateChange<Id>,
 	> : RaptorEntity<Id> {
 
 	public override val id: Id
 
-	public fun execute(command: Command): List<Event>
-	public fun handle(event: Event)
+	public fun execute(command: Command): List<Change>
+	public fun handle(change: Change)
 }

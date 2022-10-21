@@ -70,13 +70,13 @@ class BankAccountAggregate(
 	}
 
 
-	override fun handle(event: BankAccountChange) {
-		when (event) {
-			is Created -> handle(event)
-			is Deleted -> handle(event)
-			is Deposited -> handle(event)
-			is Labeled -> handle(event)
-			is Withdrawn -> handle(event)
+	override fun handle(change: BankAccountChange) {
+		when (change) {
+			is Created -> handle(change)
+			is Deleted -> handle(change)
+			is Deposited -> handle(change)
+			is Labeled -> handle(change)
+			is Withdrawn -> handle(change)
 		}
 	}
 
