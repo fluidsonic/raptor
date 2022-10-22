@@ -221,7 +221,6 @@ private fun RaptorJobTiming.createSchedule() =
 	}
 
 
-@OptIn(ExperimentalTime::class)
 private fun RaptorJobTiming.isValidTrigger(trigger: Trigger) =
 	when (this) {
 		is RaptorJobTiming.AtDateTime ->

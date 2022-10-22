@@ -1,7 +1,6 @@
 package io.fluidsonic.raptor.domain
 
 import java.util.concurrent.*
-import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.Flow
 
@@ -44,9 +43,7 @@ internal class DefaultAggregateProjectionLoader<
 
 	override fun loadAll(): Flow<Projection> =
 		flow {
-			withContext(Dispatchers.Default) { // TODO Ok?
-				projectors.values.mapNotNull { it.projection }.forEach { emit(it) } // TODO Probably not concurrency-safe.
-			}
+			projectors.values.mapNotNull { it.projection }.forEach { emit(it) } // TODO Probably not concurrency-safe.
 		}
 
 
