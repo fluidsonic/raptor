@@ -17,6 +17,6 @@ public fun RaptorAssemblyQuery<RaptorAggregatesComponent>.mongoEventFactory(cloc
 @RaptorDsl
 public fun RaptorAssemblyQuery<RaptorAggregatesComponent>.mongoStore(collection: MongoCollection<RaptorAggregateEvent<*, *>>) {
 	each {
-		store(RaptorMongoAggregateStore(collection = collection))
+		store(RaptorAggregateStore.mongo(collection = collection))
 	}
 }

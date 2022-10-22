@@ -7,4 +7,7 @@ public interface RaptorAggregateStore {
 
 	public suspend fun add(events: List<RaptorAggregateEvent<*, *>>)
 	public fun load(): Flow<RaptorAggregateEvent<*, *>>
+
+
+	public companion object
 }

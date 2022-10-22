@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.*
 
 
 // FIXME race
-internal class MemoryAggregateStore : RaptorAggregateStore {
+private class MemoryAggregateStore : RaptorAggregateStore {
 
 	private val events: MutableList<RaptorAggregateEvent<*, *>> = mutableListOf()
 
@@ -17,3 +17,7 @@ internal class MemoryAggregateStore : RaptorAggregateStore {
 	override fun load() =
 		events.toList().asFlow()
 }
+
+
+public fun RaptorAggregateStore.Companion.memory(): RaptorAggregateStore =
+	MemoryAggregateStore()

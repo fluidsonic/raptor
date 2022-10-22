@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.*
 
 
 // TODO Support horizontal scaling.
-public class RaptorMongoAggregateStore(
+private class MongoAggregateStore(
 	private val collection: MongoCollection<RaptorAggregateEvent<*, *>>,
 ) : RaptorAggregateStore {
 
@@ -20,3 +20,7 @@ public class RaptorMongoAggregateStore(
 	override fun load(): Flow<RaptorAggregateEvent<*, *>> =
 		collection.find() // FIXME Needs explicit order. Capped collections won't work as they are size-limited & don't support transactions.
 }
+
+
+public fun RaptorAggregateStore.Companion.mongo(collection: MongoCollection<RaptorAggregateEvent<*, *>>): RaptorAggregateStore =
+	MongoAggregateStore(collection = collection)
