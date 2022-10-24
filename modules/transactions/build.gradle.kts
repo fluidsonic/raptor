@@ -1,7 +1,7 @@
 import io.fluidsonic.gradle.*
 
-// FIXME rn module to raptor-transaction?
-fluidLibraryModule(description = "FIXME") {
+// TODO Rename module to raptor-transaction?
+fluidLibraryModule(description = "TODO") {
 	targets {
 		jvm {
 			dependencies {

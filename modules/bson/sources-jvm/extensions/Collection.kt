@@ -5,7 +5,7 @@ import io.fluidsonic.raptor.*
 
 internal object CollectionExtensions {
 
-	// FIXME Support decoding of common subtypes.
+	// TODO Support decoding of common subtypes.
 	internal fun bsonDefinition() = raptor.bson.definition<Collection<*>> {
 		decode { arguments ->
 			val valueType = arguments?.singleOrNull()?.type ?: error("Explicit type argument required in order to decode a Collection.")

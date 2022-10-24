@@ -27,7 +27,7 @@ internal class RaptorKtorServerInternal(
 
 	private val stateRef = atomic(State.initial)
 
-	// FIXME child context w/ own DI?
+	// TODO child context w/ own DI?
 	val context = parentContext
 
 
@@ -129,7 +129,7 @@ internal class RaptorKtorServerInternal(
 
 
 	private fun stopEngineBlocking() {
-		checkNotNull(engine).stop(0, 10, TimeUnit.SECONDS) // FIXME
+		checkNotNull(engine).stop(0, 10, TimeUnit.SECONDS) // TODO
 
 		this.engine = null
 	}
@@ -139,7 +139,7 @@ internal class RaptorKtorServerInternal(
 		get() = configuration.tags
 
 
-	// FIXME rework
+	// TODO rework
 	private fun Application.configure() {
 		attributes.put(Keys.serverKtorAttribute, this@RaptorKtorServerInternal)
 
@@ -153,7 +153,7 @@ internal class RaptorKtorServerInternal(
 			header(HttpHeaders.Server, "Raptor")
 		}
 
-		// FIXME Make configurable.
+		// TODO Make configurable.
 //		install(CORS) {
 //			allowNonSimpleContentTypes = true
 //
@@ -196,10 +196,10 @@ internal class RaptorKtorServerInternal(
 				for (customConfiguration in configuration.customConfigurations)
 					customConfiguration()
 
-				// FIXME Rework.
+				// TODO Rework.
 				configuration.transactionFactory?.let { transactionFactory ->
 					intercept(ApplicationCallPipeline.Setup) {
-						val parentTransaction = context.raptorTransaction // FIXME What if not set?
+						val parentTransaction = context.raptorTransaction // TODO What if not set?
 						val parentContext = parentTransaction.context
 
 						val transaction = transactionFactory.createTransaction(

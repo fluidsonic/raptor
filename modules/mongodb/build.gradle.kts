@@ -1,7 +1,7 @@
 import io.fluidsonic.gradle.*
 
-// FIXME rn module to raptor-mongo
-fluidLibraryModule(description = "FIXME") {
+// TODO rn module to raptor-mongo
+fluidLibraryModule(description = "TODO") {
 	targets {
 		jvm {
 			dependencies {

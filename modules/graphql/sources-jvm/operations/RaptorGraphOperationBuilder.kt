@@ -26,6 +26,7 @@ public class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi inte
 	private val name = when (name) {
 		RaptorGraphDefinition.defaultName -> operation.defaultName()
 			?: error("Cannot derive name from operation ${operation::class}. It must be defined explicitly: define(name = …)")
+
 		else -> name
 	}
 
@@ -41,13 +42,13 @@ public class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi inte
 		val outputKotlinType = outputKotlinType
 		val operation = operation
 
-		// FIXME hack
+		// TODO hack
 		if (outputKotlinType.classifier == RaptorUnion2::class) {
 			additionalDefinitions += UnionGraphDefinition(
 				additionalDefinitions = emptyList(),
 				description = null,
 				kotlinType = outputKotlinType,
-				name = defaultOutputObjectName(), // FIXME custom names
+				name = defaultOutputObjectName(), // TODO custom names
 				stackTrace = stackTrace,
 			)
 		}
@@ -64,10 +65,10 @@ public class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi inte
 				description?.let(this::description)
 
 				resolver {
-					val inputScope = object : RaptorGraphInputScope, RaptorGraphScope by context { // FIXME improve
+					val inputScope = object : RaptorGraphInputScope, RaptorGraphScope by context { // TODO improve
 
 						override fun invalid(details: String?): Nothing =
-							error("invalid argument") // FIXME
+							error("invalid argument") // TODO
 					}
 
 					val input = inputFactory(inputScope)
@@ -75,6 +76,7 @@ public class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi inte
 					val output = with(operation) {
 						this@resolver.execute(input)
 					}
+					@Suppress("UNCHECKED_CAST")
 					if (output is RaptorUnion2<*, *>)
 						return@resolver output.value as Output
 
@@ -121,7 +123,7 @@ public class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi inte
 		additionalDefinitions += definition
 
 		val input by argumentContainer.argument<Input>(type = inputKotlinType) {
-			// FIXME configurable name & description
+			// TODO configurable name & description
 			name("input")
 		}
 
@@ -149,7 +151,6 @@ public fun <Output : Any> RaptorGraphOperationBuilder<*, Output>.outputObject(
 ) {
 	check(outputDefinition === null) { "Cannot define multiple outputs." }
 
-	@Suppress("UNCHECKED_CAST")
 	val definition = RaptorObjectGraphDefinitionBuilder<Output>(
 		kotlinType = outputKotlinType,
 		name = RaptorGraphDefinition.resolveName(name, defaultName = this::defaultOutputObjectName),
@@ -170,7 +171,6 @@ public fun <Output : Any> RaptorGraphOperationBuilder<*, Output>.outputUnion(
 ) {
 	check(outputDefinition === null) { "Cannot define multiple outputs." }
 
-	@Suppress("UNCHECKED_CAST")
 	val definition = RaptorUnionGraphDefinitionBuilder<Output>(
 		kotlinType = outputKotlinType,
 		name = RaptorGraphDefinition.resolveName(name, defaultName = this::defaultOutputObjectName),

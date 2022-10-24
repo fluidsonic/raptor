@@ -22,7 +22,7 @@ internal class GraphSystemBuilder private constructor(
 	)
 
 
-	// FIXME validate
+	// TODO validate
 	private fun buildSchema() = GSchema(
 		document = GDocument(definitions = buildDirectiveDefinitions() + buildTypeDefinitions()),
 		supportOptional = true,
@@ -214,12 +214,13 @@ internal class GraphSystemBuilder private constructor(
 	private fun resolvePossibleTypesForKotlinType(kotlinType: KotlinType): List<GNamedTypeRef> =
 		when (kotlinType.classifier) {
 			RaptorUnion2::class -> listOf(
-				// FIXME hack
+				// TODO hack
 				GNamedTypeRef(((typeSystem.resolveOutputType(kotlinType.typeArguments[0]!!)
 					?: error("Cannot resolve GraphQL type for Kotlin type '${kotlinType.typeArguments[0]}'.")) as NamedGraphType).name),
 				GNamedTypeRef(((typeSystem.resolveOutputType(kotlinType.typeArguments[1]!!)
 					?: error("Cannot resolve GraphQL type for Kotlin type '${kotlinType.typeArguments[1]}'.")) as NamedGraphType).name),
 			)
+
 			else -> typeSystem.types
 				.filterIsInstance<ObjectGraphType>()
 				.filterNot { it.kotlinType.isGeneric }
@@ -235,7 +236,7 @@ internal class GraphSystemBuilder private constructor(
 		val nonNullKotlinType = kotlinType.withNullable(false)
 
 		return when (nonNullKotlinType.classifier) {
-			Collection::class, List::class, Set::class -> // FIXME improve
+			Collection::class, List::class, Set::class -> // TODO improve
 				GListTypeRef(typeRef(checkNotNull(nonNullKotlinType.typeArguments.single()), isInput = isInput))
 
 			Maybe::class ->
@@ -245,7 +246,7 @@ internal class GraphSystemBuilder private constructor(
 				true -> typeSystem.resolveInputType(nonNullKotlinType)
 				false -> typeSystem.resolveOutputType(nonNullKotlinType)
 			}
-				.ifNull { error("Cannot resolve GraphQL type for Kotlin type '$nonNullKotlinType'.") } // FIXME print stacktrace of usage(s) here
+				.ifNull { error("Cannot resolve GraphQL type for Kotlin type '$nonNullKotlinType'.") } // TODO print stacktrace of usage(s) here
 				.let { type ->
 					when (type) {
 						is AliasGraphType -> when {
@@ -271,7 +272,7 @@ internal class GraphSystemBuilder private constructor(
 		val kotlinType = kotlinType.withNullable(false)
 
 		return when (kotlinType.classifier) {
-			Collection::class, List::class, Maybe::class, Set::class -> // FIXME improve
+			Collection::class, List::class, Maybe::class, Set::class -> // TODO improve
 				underlyingType(checkNotNull(kotlinType.typeArguments.single()), isInput = isInput)
 
 			else -> when (isInput) {

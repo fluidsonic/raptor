@@ -5,7 +5,7 @@ internal class DefaultComponentRegistry(
 	override val parent: RaptorComponentRegistry? = null,
 ) : RaptorComponentRegistry {
 
-	//	private var configurationEnded = false // FIXME Needs a per-plugin check.
+	//	private var configurationEnded = false // TODO Needs a per-plugin check.
 	private val setsByKey: MutableMap<RaptorComponentKey<*>, RegistrationSet<*>> = hashMapOf()
 
 
@@ -16,7 +16,8 @@ internal class DefaultComponentRegistry(
 	}
 
 
-	private inline fun checkIsConfigurable(message: () -> String) {
+	private inline fun checkIsConfigurable(@Suppress("UNUSED_PARAMETER") message: () -> String) {
+		// TODO
 //		if (configurationEnded)
 //			error(message())
 	}
@@ -67,7 +68,7 @@ internal class DefaultComponentRegistry(
 			?.component
 
 
-	// FIXME Throw when registering a component of a plugin that isn't installed.
+	// TODO Throw when registering a component of a plugin that isn't installed.
 	override fun <Component : RaptorComponent<in Component>> register(key: RaptorComponentKey<in Component>, component: Component): Component {
 		checkIsConfigurable { "Cannot register a component after the configuration phase has ended." }
 

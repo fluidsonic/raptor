@@ -24,7 +24,6 @@ public class RaptorInterfaceExtensionGraphDefinitionBuilder<Type : Any> internal
 		)
 
 
-	@OptIn(ExperimentalStdlibApi::class)
 	@RaptorDsl
 	public inline fun <reified FieldType> field(
 		name: String,
@@ -40,7 +39,7 @@ public class RaptorInterfaceExtensionGraphDefinitionBuilder<Type : Any> internal
 		property: KProperty1<Type, FieldType>,
 		noinline configure: RaptorGraphFieldBuilder.() -> Unit = {},
 	) {
-		field(name = property.name, type = property.returnType, configure = configure) // FIXME
+		field(name = property.name, type = property.returnType, configure = configure) // TODO
 	}
 
 

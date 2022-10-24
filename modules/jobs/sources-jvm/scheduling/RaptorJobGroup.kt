@@ -16,6 +16,6 @@ public inline fun <reified Data> RaptorJobsDsl.group(id: String): RaptorJobGroup
 
 
 @RaptorDsl
-@Suppress("unused")
+@Suppress("UnusedReceiverParameter")
 public fun <Data> RaptorJobsDsl.group(id: String, serializer: KSerializer<Data>): RaptorJobGroup<Data> =
 	RaptorJobGroupImpl(id = id, serializer = serializer)

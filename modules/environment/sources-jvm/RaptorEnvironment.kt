@@ -22,7 +22,7 @@ public class RaptorEnvironment private constructor(
 
 
 	// TODO Fail on empty key?
-	public fun resolve(key: String): String =
+	private fun resolve(key: String): String =
 		when {
 			prefix.isEmpty() || key.isEmpty() -> key
 			else -> "$prefix$key"
@@ -65,12 +65,11 @@ public inline fun <Result> RaptorEnvironment.scope(key: String, separator: Strin
 
 
 @RaptorDsl
-@Suppress("unused")
+@Suppress("UnusedReceiverParameter")
 public val RaptorGlobalDsl.environment: RaptorEnvironment
 	get() = RaptorEnvironment.instance
 
 
 @RaptorDsl
-@Suppress("unused")
 public inline fun <Result> RaptorGlobalDsl.environment(block: RaptorEnvironment.() -> Result): Result =
 	with(environment, block)

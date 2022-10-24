@@ -16,6 +16,7 @@ internal class BankAccountProjector : RaptorAggregateProjector.Incremental<BankA
 		if (this != null)
 			check(id == event.aggregateId) { "Cannot apply event for aggregate ${event.aggregateId} to $id." }
 
+		@Suppress("KotlinConstantConditions")
 		return when (val change = event.change) {
 			is Created -> when (this) {
 				null -> BankAccount(

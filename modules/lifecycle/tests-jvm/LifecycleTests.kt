@@ -13,7 +13,7 @@ import org.junit.jupiter.api.*
 @OptIn(ExperimentalCoroutinesApi::class)
 class LifecycleTests {
 
-	// TODO Needs to intentionally delay starts & stops for proper teseting.
+	// TODO Needs to intentionally delay starts & stops for proper testing.
 	@Disabled
 	@Test
 	fun testLifecycle() = runTest {

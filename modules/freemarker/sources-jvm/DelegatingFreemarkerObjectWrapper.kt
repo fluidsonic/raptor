@@ -7,7 +7,7 @@ import kotlin.reflect.*
 
 
 internal class DelegatingFreemarkerObjectWrapper(
-	wrappersByClass: Map<KClass<*>, RaptorFreemarkerObjectWrapper<*>>
+	wrappersByClass: Map<KClass<*>, RaptorFreemarkerObjectWrapper<*>>,
 ) : DefaultObjectWrapper(Configuration.VERSION_2_3_30) {
 
 	private val wrappersByClass: MutableMap<Class<*>, RaptorFreemarkerObjectWrapper<*>> = wrappersByClass.mapKeysTo(ConcurrentHashMap()) { it.key.java }
@@ -18,7 +18,6 @@ internal class DelegatingFreemarkerObjectWrapper(
 			return super.handleUnknownType(obj)
 		}
 
-		// FIXME take over the side that sets this
 		val context = Environment.getCurrentEnvironment().getCustomState(RaptorContext::class) as RaptorContext
 
 		return wrapper.wrap(value = obj, baseWrapper = this, context = context)

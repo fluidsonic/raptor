@@ -5,7 +5,7 @@ import io.fluidsonic.stdlib.*
 import kotlin.reflect.*
 
 
-// FIXME remove unreferenced definitions
+// TODO remove unreferenced definitions
 internal class GraphTypeSystemBuilder private constructor(
 	systemDefinition: GraphSystemDefinition,
 ) {
@@ -36,7 +36,6 @@ internal class GraphTypeSystemBuilder private constructor(
 		)
 
 
-	@OptIn(ExperimentalStdlibApi::class)
 	private fun buildType(operationType: RaptorGraphOperationType, definitions: Collection<GraphOperationDefinition>) =
 		ObjectGraphType(
 			description = null,
@@ -50,7 +49,7 @@ internal class GraphTypeSystemBuilder private constructor(
 				allowNull = false,
 				allowedVariance = KVariance.INVARIANT,
 				requireSpecialization = false
-			)!!, // FIXME
+			),
 			fields = definitions.map { buildField(it.fieldDefinition) },
 			name = operationType.gqlType.defaultObjectTypeName
 		)
@@ -118,7 +117,7 @@ internal class GraphTypeSystemBuilder private constructor(
 					description = argumentDefinition.description,
 					directives = directivesForArgument(argumentDefinition),
 					kotlinType = argumentDefinition.kotlinType.specialize(),
-					name = argumentDefinition.name!! // FIXME
+					name = argumentDefinition.name!! // TODO
 				)
 			},
 			description = definition.description,
@@ -126,6 +125,7 @@ internal class GraphTypeSystemBuilder private constructor(
 			name = definition.name,
 			resolve = definition.resolve
 		)
+
 		is GraphFieldDefinition.Unresolvable -> GraphField.Unresolvable(
 			arguments = definition.argumentDefinitions.map { argumentDefinition ->
 				GraphArgument(
@@ -133,7 +133,7 @@ internal class GraphTypeSystemBuilder private constructor(
 					description = argumentDefinition.description,
 					directives = directivesForArgument(argumentDefinition),
 					kotlinType = argumentDefinition.kotlinType.specialize(),
-					name = argumentDefinition.name!! // FIXME
+					name = argumentDefinition.name!! // TODO
 				)
 			},
 			description = definition.description,
@@ -152,7 +152,7 @@ internal class GraphTypeSystemBuilder private constructor(
 					description = argumentDefinition.description,
 					directives = directivesForArgument(argumentDefinition),
 					kotlinType = argumentDefinition.kotlinType.specialize(),
-					name = argumentDefinition.name!! // FIXME
+					name = argumentDefinition.name!! // TODO
 				)
 			},
 			create = definition.create,

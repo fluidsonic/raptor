@@ -44,7 +44,7 @@ private class FallbackRaptorPropertySet(
 
 
 	override fun toString() =
-		set.toString() // FIXME add fallback
+		set.toString() // TODO Also print fallback.
 }
 
 

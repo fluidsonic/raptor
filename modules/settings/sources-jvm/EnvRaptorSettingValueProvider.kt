@@ -28,6 +28,6 @@ public fun RaptorSettings.ValueProvider.Companion.env(name: String, default: Str
 
 
 @RaptorDsl
-@Suppress("unused")
+@Suppress("UnusedReceiverParameter")
 public fun RaptorSettings.Builder.env(name: String, default: String? = null): RaptorSettings.ValueProvider<String> =
 	RaptorSettings.ValueProvider.env(name = name, default = default)

@@ -4,7 +4,7 @@ import io.fluidsonic.stdlib.*
 import kotlin.reflect.*
 
 
-// FIXME remove unreferenced definitions
+// TODO remove unreferenced definitions
 internal class GraphTypeSystemBuilder private constructor(
 	systemDefinition: GraphSystemDefinition,
 ) {
@@ -48,7 +48,7 @@ internal class GraphTypeSystemBuilder private constructor(
 				allowNull = false,
 				allowedVariance = KVariance.INVARIANT,
 				requireSpecialization = false
-			), // FIXME
+			),
 			fields = definitions.map { buildField(it.fieldDefinition) },
 			name = operationType.gqlType.defaultObjectTypeName
 		)
@@ -116,7 +116,7 @@ internal class GraphTypeSystemBuilder private constructor(
 					description = argumentDefinition.description,
 					directives = directivesForArgument(argumentDefinition),
 					kotlinType = argumentDefinition.kotlinType.specialize(),
-					name = argumentDefinition.name!! // FIXME
+					name = argumentDefinition.name!! // TODO Hack.
 				)
 			},
 			description = definition.description,
@@ -132,7 +132,7 @@ internal class GraphTypeSystemBuilder private constructor(
 					description = argumentDefinition.description,
 					directives = directivesForArgument(argumentDefinition),
 					kotlinType = argumentDefinition.kotlinType.specialize(),
-					name = argumentDefinition.name!! // FIXME
+					name = argumentDefinition.name!! // TODO Hack.
 				)
 			},
 			description = definition.description,
@@ -151,7 +151,7 @@ internal class GraphTypeSystemBuilder private constructor(
 					description = argumentDefinition.description,
 					directives = directivesForArgument(argumentDefinition),
 					kotlinType = argumentDefinition.kotlinType.specialize(),
-					name = argumentDefinition.name!! // FIXME
+					name = argumentDefinition.name!! // TODO Hack.
 				)
 			},
 			create = definition.create,

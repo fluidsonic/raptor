@@ -4,6 +4,7 @@ import kotlin.reflect.*
 import kotlin.reflect.full.*
 
 
+@Suppress("MemberVisibilityCanBePrivate") // Add tests.
 public data class RaptorAggregateDefinition<
 	Aggregate : RaptorAggregate<Id, Command, Change>,
 	Id : RaptorAggregateId,

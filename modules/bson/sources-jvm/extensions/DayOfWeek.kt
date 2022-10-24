@@ -4,7 +4,7 @@ import io.fluidsonic.raptor.*
 import java.time.*
 
 
-@Suppress("FunctionName")
+@Suppress("FunctionName", "RemoveExplicitTypeArguments")
 public fun DayOfWeek_bsonDefinition(): RaptorBsonDefinition = raptor.bson.definition<DayOfWeek> {
 	decode<String> { string ->
 		when (string) {

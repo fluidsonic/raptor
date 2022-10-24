@@ -5,8 +5,8 @@ import io.fluidsonic.raptor.transactions.*
 import io.ktor.server.routing.*
 
 
-// FIXME needs custom property set scope & hierarchy
-//FIXME continue here
+// TODO needs custom property set scope & hierarchy
+// TODO continue here
 public class RaptorKtorRouteComponent internal constructor(
 	private val host: String?,
 	private val path: String,
@@ -21,21 +21,21 @@ public class RaptorKtorRouteComponent internal constructor(
 	private var wrapper: (Route.(next: Route.() -> Unit) -> Unit)? = null
 
 
-	// FIXME Rethink architecture.
-	//       At this point we need a per-route propertyRegistry (hierarchical) and transactionFactory (hierarchical).
-	//       Standardize RaptorTransactionGeneratingComponent -> RaptorTransactionBoundary and add RaptorPropertyBoundary.
-	//       Make sure that RaptorComponentConfigurationStartScope2 and RaptorComponentConfigurationEndScope2 are consistent and component-bound.
-	//       Allow requiring the completed configuration of other plugins (in end scope) and detect cycles.
-	//       Eventually force scope for referencing other plugins, e.g. complete(RaptorGraphPlugin) { graph(tag) }.
-	//       (handy once we have context receivers to extend other types)
-	//       Alternatively make each plugin have it's own shortcut for "require and use", e.g. val graphPlugin = use(plugins.graph)
-	//       or make plugins.graph.… automatically finalize its configurations.
-	//       How do we know what component belongs to what plugin?
-	//       Should we allow plugin configuration on installation? Rarely needed & adds complexity.
-	//       Should we allow dynamic plugins? I.e. class instead of object. How does that affect API?
-	//       Should we allow plugins to be installed at defined boundaries?
-	//           e.g. RaptorKtorRoutePlugin : RaptorBoundaryPlugin<RaptorKtorRouteComponent>, class RaptorKtorRouteComponent: RaptorPluginBoundary
-	//       Make all component companions internal and use them for component definition? (label, key, "return type")
+	// TODO Rethink architecture.
+	//      At this point we need a per-route propertyRegistry (hierarchical) and transactionFactory (hierarchical).
+	//      Standardize RaptorTransactionGeneratingComponent -> RaptorTransactionBoundary and add RaptorPropertyBoundary.
+	//      Make sure that RaptorComponentConfigurationStartScope2 and RaptorComponentConfigurationEndScope2 are consistent and component-bound.
+	//      Allow requiring the completed configuration of other plugins (in end scope) and detect cycles.
+	//      Eventually force scope for referencing other plugins, e.g. complete(RaptorGraphPlugin) { graph(tag) }.
+	//      (handy once we have context receivers to extend other types)
+	//      Alternatively make each plugin have it's own shortcut for "require and use", e.g. val graphPlugin = use(plugins.graph)
+	//      or make plugins.graph.… automatically finalize its configurations.
+	//      How do we know what component belongs to what plugin?
+	//      Should we allow plugin configuration on installation? Rarely needed & adds complexity.
+	//      Should we allow dynamic plugins? I.e. class instead of object. How does that affect API?
+	//      Should we allow plugins to be installed at defined boundaries?
+	//          e.g. RaptorKtorRoutePlugin : RaptorBoundaryPlugin<RaptorKtorRouteComponent>, class RaptorKtorRouteComponent: RaptorPluginBoundary
+	//      Make all component companions internal and use them for component definition? (label, key, "return type")
 	internal fun complete() = checkNotNull(configuration)
 
 
@@ -71,7 +71,7 @@ public class RaptorKtorRouteComponent internal constructor(
 	}
 
 
-	// FIXME use DSL instead of overridden functions? see Ktor 2
+	// TODO use DSL instead of overridden functions? see Ktor 2
 	override fun RaptorComponentConfigurationEndScope<RaptorKtorRouteComponent>.onConfigurationEnded() {
 		if (plugins.isNotEmpty()) {
 			val scope = ConfigurationEndScope(parent = this)
@@ -89,7 +89,7 @@ public class RaptorKtorRouteComponent internal constructor(
 			host = host,
 			path = path,
 			properties = this@RaptorKtorRouteComponent.propertyRegistry.toSet(),
-			transactionFactory = transactionFactory(), // FIXME use component-bound scope
+			transactionFactory = transactionFactory(), // TODO use component-bound scope
 			wrapper = wrapper,
 		)
 	}

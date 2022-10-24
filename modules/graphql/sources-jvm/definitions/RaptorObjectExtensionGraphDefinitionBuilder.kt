@@ -24,7 +24,6 @@ public class RaptorObjectExtensionGraphDefinitionBuilder<Type : Any> internal co
 		)
 
 
-	@OptIn(ExperimentalStdlibApi::class)
 	@RaptorDsl
 	public inline fun <reified FieldType> field(
 		name: String,
@@ -41,9 +40,9 @@ public class RaptorObjectExtensionGraphDefinitionBuilder<Type : Any> internal co
 	) {
 		field(
 			name = property.name,
-			type = property.returnType, // FIXME
+			type = property.returnType, // TODO
 			stackTrace = stackTrace(skipCount = 1),
-			implicitResolver = { property.get(it as Type) }, // FIXME
+			implicitResolver = { property.get(it as Type) }, // TODO
 			configure = configure
 		)
 	}
@@ -58,7 +57,7 @@ public class RaptorObjectExtensionGraphDefinitionBuilder<Type : Any> internal co
 			name = function.name,
 			type = function.returnType,
 			stackTrace = stackTrace(skipCount = 1),
-			implicitResolver = { function(it as Type, context) }, // FIXME
+			implicitResolver = { function(it as Type, context) }, // TODO
 			configure = configure
 		)
 	}

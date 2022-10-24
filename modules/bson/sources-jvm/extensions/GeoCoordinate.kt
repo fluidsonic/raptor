@@ -5,6 +5,7 @@ import io.fluidsonic.stdlib.*
 import io.fluidsonic.stdlib.GeoCoordinate.*
 
 
+@Suppress("RemoveExplicitTypeArguments")
 public fun Companion.bsonDefinition(): RaptorBsonDefinition = raptor.bson.definition<GeoCoordinate> {
 	decode {
 		var coordinate: GeoCoordinate? = null

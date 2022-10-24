@@ -37,7 +37,7 @@ public class RaptorAliasGraphDefinitionBuilder<Type : Any, ReferencedType : Any>
 		)
 
 
-	// FIXME rn
+	// TODO Rename.
 	@RaptorDsl
 	public fun parse(convert: RaptorGraphInputScope.(input: ReferencedType) -> Type) {
 		check(this.convertReferencedToAlias === null) { "Cannot define multiple parsers." }
@@ -47,7 +47,7 @@ public class RaptorAliasGraphDefinitionBuilder<Type : Any, ReferencedType : Any>
 	}
 
 
-	// FIXME rn
+	// TODO Rename.
 	@RaptorDsl
 	public fun serialize(convert: RaptorGraphOutputScope.(output: Type) -> ReferencedType) {
 		check(this.convertAliasToReferenced === null) { "Cannot define multiple serializers." }
@@ -57,7 +57,7 @@ public class RaptorAliasGraphDefinitionBuilder<Type : Any, ReferencedType : Any>
 	}
 
 
-	// FIXME rn
+	// TODO Rename.
 	@RaptorDsl
 	public fun serialize(convert: KFunction1<Type, ReferencedType>) {
 		serialize { convert(it) }

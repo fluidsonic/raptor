@@ -1,6 +1,6 @@
 package io.fluidsonic.raptor.graph
 
-// FIXME
+// TODO Still needed?
 //
 //internal class GraphInputContext(
 //	private val arguments: Map<String, Any?>,
@@ -33,6 +33,6 @@ package io.fluidsonic.raptor.graph
 //		val current
 //			get() = threadLocalContext.get()
 //				?: error("GraphInputContext.current can only be used in code wrapped by GraphInputContext.use/useBlocking { … }")
-//		// FIXME This error is actually raised if you try to access an input object argument by delegate outside of the factory. Improve detection/error message here!
+//		// TODO This error is actually raised if you try to access an input object argument by delegate outside of the factory. Improve detection/error message here!
 //	}
 //}

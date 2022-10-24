@@ -54,7 +54,7 @@ public class RaptorInterfaceGraphDefinitionBuilder<Type : Any> internal construc
 		function: KSuspendFunction2<Type, RaptorTransactionContext, FieldType>,
 		noinline configure: RaptorGraphFieldBuilder.() -> Unit = {},
 	) {
-		field(name = function.name, type = typeOf<FieldType>(), configure = configure) // FIXME
+		field(name = function.name, type = typeOf<FieldType>(), configure = configure) // TODO
 	}
 
 

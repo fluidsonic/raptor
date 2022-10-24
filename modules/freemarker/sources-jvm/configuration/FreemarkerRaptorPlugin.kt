@@ -8,7 +8,7 @@ private val freemarkerComponentKey = RaptorComponentKey<FreemarkerRaptorComponen
 private val freemarkerPropertyKey = RaptorPropertyKey<Configuration>("freemarker configuration")
 
 
-public object FreemarkerRaptorPlugin : RaptorPlugin { // FIXME rm
+public object FreemarkerRaptorPlugin : RaptorPlugin {
 
 	override fun RaptorPluginInstallationScope.install() {
 		componentRegistry.register(freemarkerComponentKey, FreemarkerRaptorComponent())

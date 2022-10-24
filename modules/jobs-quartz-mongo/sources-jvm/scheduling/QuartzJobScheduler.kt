@@ -36,7 +36,7 @@ internal class QuartzJobScheduler(
 				createScheduler(
 					name,
 					SimpleInstanceIdGenerator().generateInstanceId(),
-					SimpleThreadPool(100, Thread.NORM_PRIORITY), // FIXME ok?
+					SimpleThreadPool(100, Thread.NORM_PRIORITY), // TODO ok?
 					MongoDBJobStore(database),
 				)
 
@@ -51,7 +51,7 @@ internal class QuartzJobScheduler(
 		val executor = registry[key.group]
 			.ifNull { error("Cannot execute job '${key.name}' in group '${key.group}' as no executor has been registered for that group.") }
 			.let { it as RaptorJobExecutor<Any?> }
-		// FIXME logging
+		// TODO logging
 		if (executor.group.serializer === Unit.serializer())
 			executor.execute(context, Unit)
 		else {
@@ -201,7 +201,6 @@ internal class QuartzJobScheduler(
 }
 
 
-@OptIn(ExperimentalTime::class)
 private fun RaptorJobTiming.createSchedule() =
 	when (this) {
 		is RaptorJobTiming.AtDateTime ->

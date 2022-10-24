@@ -1,6 +1,7 @@
 package io.fluidsonic.raptor.graph
 
 
+@Suppress("MemberVisibilityCanBePrivate") // TODO Add tests.
 public data class RaptorGraphPluginConfiguration(
 	val graphs: Collection<RaptorGraph>,
 ) {

@@ -10,7 +10,7 @@ internal class DefaultRaptorGraph(
 ) : RaptorGraph {
 
 	private val executor = GExecutor.default(
-		exceptionHandler = ExceptionHandler(), // FIXME improve
+		exceptionHandler = ExceptionHandler(), // TODO improve
 		schema = schema,
 		nodeInputCoercer = NodeInputCoercer,
 		variableInputCoercer = VariableInputCoercer,

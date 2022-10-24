@@ -7,6 +7,7 @@ import io.ktor.http.*
 import io.ktor.http.Url.*
 
 
+@Suppress("RemoveExplicitTypeArguments")
 public fun Companion.bsonDefinition(): RaptorBsonDefinition = raptor.bson.definition<Url> {
 	decode<String>(::Url)
 	encode(Url::toString)

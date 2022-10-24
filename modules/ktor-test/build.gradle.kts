@@ -1,6 +1,6 @@
 import io.fluidsonic.gradle.*
 
-fluidLibraryModule(description = "FIXME") {
+fluidLibraryModule(description = "TODO") {
 	custom {
 		explicitApi()
 	}

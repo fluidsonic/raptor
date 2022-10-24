@@ -7,6 +7,7 @@ private val componentKey = RaptorComponentKey<RaptorSettingsComponent>("settings
 
 
 // TODO inject with DI? or should this only be used at assembly-time?
+@Suppress("MemberVisibilityCanBePrivate") // Add tests.
 public interface RaptorSettings {
 
 	public fun valueProvider(path: String): ValueProvider<*>?
@@ -156,7 +157,7 @@ public fun RaptorAssemblyInstallationScope.install(settings: RaptorSettings) {
 
 
 @RaptorDsl
-@Suppress("unused")
+@Suppress("UnusedReceiverParameter")
 public fun RaptorGlobalDsl.settings(configure: RaptorSettings.Builder.() -> Unit): RaptorSettings =
 	RaptorSettings.Builder().apply(configure).build()
 

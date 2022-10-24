@@ -3,8 +3,8 @@ package io.fluidsonic.raptor.graph
 
 @Suppress("UnusedReceiverParameter")
 public fun Unit.graphDefinition(): RaptorGraphDefinition = graphScalarDefinition<Unit> {
-	// outputOnly() // FIXME add this
+	// outputOnly() // TODO add this
 
 	parseInt { TODO() }
-	serialize { 42 } // FIXME
+	serialize { 42 } // TODO
 }

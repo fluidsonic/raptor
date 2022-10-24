@@ -4,7 +4,7 @@ import kotlinx.coroutines.flow.*
 
 
 public class ParallelDispatchEventProcessor(
-	private val onError: (error: Throwable, event: RaptorEvent) -> Unit, // FIXME Add error handling.
+	private val onError: (error: Throwable, event: RaptorEvent) -> Unit, // FIXME Actually use.
 ) : RaptorEventProcessor, RaptorEventSource {
 
 	private val flow: MutableSharedFlow<RaptorEvent> = MutableSharedFlow()

@@ -18,7 +18,7 @@ public suspend fun RaptorTransactionScope.commit() {
 }
 
 
-// FIXME per-tx only, rename to aggregateProjectionLoader vvvvvv
+// FIXME per-tx only, rename to aggregateProjectionLoader
 @RaptorDsl
 public fun <Projection : RaptorAggregateProjection<Id>, Id : RaptorAggregateProjectionId> RaptorTransactionScope.projectionLoader(
 	idClass: KClass<Id>,

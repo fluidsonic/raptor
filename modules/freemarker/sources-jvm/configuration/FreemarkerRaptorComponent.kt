@@ -16,7 +16,7 @@ public class FreemarkerRaptorComponent : RaptorComponent.Base<FreemarkerRaptorCo
 		valueClass: KClass<out Value>,
 		wrapper: RaptorFreemarkerObjectWrapper<Value>,
 	) {
-		objectWrappers[valueClass] = wrapper // FIXME catch duplicates
+		objectWrappers[valueClass] = wrapper
 	}
 
 
@@ -33,8 +33,6 @@ public class FreemarkerRaptorComponent : RaptorComponent.Base<FreemarkerRaptorCo
 
 
 	override fun RaptorComponentConfigurationEndScope<FreemarkerRaptorComponent>.onConfigurationEnded() {
-		// FIXME make configurable
-		// FIXME per-plugin configuration?
 		propertyRegistry.register(Configuration(Configuration.VERSION_2_3_30).apply {
 			defaultEncoding = Charsets.UTF_8.name()
 			logTemplateExceptions = false

@@ -4,6 +4,7 @@ import io.fluidsonic.stdlib.*
 import kotlin.reflect.*
 
 
+@Suppress("MemberVisibilityCanBePrivate")
 internal data class KotlinType(
 	val classifier: KClass<*>,
 	val typeArguments: List<KotlinType?> = emptyList(),
@@ -43,6 +44,7 @@ internal data class KotlinType(
 					allowedVariance = KVariance.OUT,
 					requireSpecialization = true
 				)
+
 				else -> typeArgument.specialize()
 			}
 		})
@@ -60,13 +62,13 @@ internal data class KotlinType(
 			return KotlinType(classifier = typeArgument.classifier, isNullable = isNullable || typeArgument.isNullable)
 		}
 
-		// FIXME specialize arguments
+		// TODO specialize arguments
 		return withTypeArguments(typeArguments)
 
-		// FIXME
+		// TODO
 //		return when (val thisTypeArgument = this.typeArgument) {
 //			null -> withTypeArgument(typeArgument)
-//			else -> thisTypeArgument.specialize(typeArgument) // FIXME correct?
+//			else -> thisTypeArgument.specialize(typeArgument) // TODO correct?
 //		}
 	}
 
@@ -114,7 +116,7 @@ internal data class KotlinType(
 				requireSpecialization = requireSpecialization,
 				rootType = type
 			)// ?: error("Type '$type' is not valid here.")
-				?: KotlinType(classifier = Any::class, isNullable = type.isMarkedNullable) // FIXME so many hacks… basically means totally generic type, e.g. <Value>
+				?: KotlinType(classifier = Any::class, isNullable = type.isMarkedNullable) // TODO so many hacks… basically means totally generic type, e.g. <Value>
 
 
 		private fun of(

@@ -5,6 +5,7 @@ import kotlin.reflect.full.*
 
 
 public fun <Id : RaptorEntityId> RaptorEntityId.Definition<Id>.graphDefinition(): RaptorGraphDefinition =
+	@Suppress("RemoveExplicitTypeArguments")
 	graphIdAliasDefinition<Id>(idDescriptor.instanceClass.starProjectedType) {
 		parse { decodeOrNull(it) ?: invalid("\"$it\" is not a valid '${idDescriptor.discriminator}' ID.") }
 		serialize { encode(it, includeDiscriminator = true) }
@@ -12,6 +13,7 @@ public fun <Id : RaptorEntityId> RaptorEntityId.Definition<Id>.graphDefinition()
 
 
 internal fun RaptorEntityId.Companion.graphDefinition(definitions: Collection<RaptorEntityId.Definition<*>>): RaptorGraphDefinition =
+	@Suppress("RemoveExplicitTypeArguments")
 	graphIdAliasDefinition<RaptorEntityId> {
 		val discriminatorsByClass = definitions.associate { it.idDescriptor.instanceClass to it.idDescriptor.discriminator }
 		val definitionsByDiscriminator = definitions.associateBy { it.idDescriptor.discriminator }

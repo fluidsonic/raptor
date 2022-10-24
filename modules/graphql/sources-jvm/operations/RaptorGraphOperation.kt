@@ -10,7 +10,7 @@ public sealed class RaptorGraphOperation<Input : Any, Output> {
 	internal abstract val defaultNameSuffixToRemove: String
 	internal abstract val type: RaptorGraphOperationType
 
-	public abstract val definition: RaptorGraphDefinition // FIXME fun graphDefinition() like the others?
+	public abstract val definition: RaptorGraphDefinition // TODO fun graphDefinition() like the others?
 
 	public abstract suspend fun RaptorGraphScope.execute(input: Input): Output
 
@@ -32,7 +32,7 @@ public suspend fun <Input : Any, Output> RaptorGraphOperation<Input, Output>.exe
 	context.asScope().execute(input)
 
 
-// FIXME check that subclass name doesn't end in Query
+// TODO check that subclass name doesn't end in Query
 public abstract class RaptorGraphMutation<Input : Any, Output> : RaptorGraphOperation<Input, Output>() {
 
 	final override val defaultNameSuffixToRemove
@@ -44,7 +44,7 @@ public abstract class RaptorGraphMutation<Input : Any, Output> : RaptorGraphOper
 }
 
 
-// FIXME check that subclass name doesn't end in Mutation
+// TODO check that subclass name doesn't end in Mutation
 public abstract class RaptorGraphQuery<Input : Any, Output> : RaptorGraphOperation<Input, Output>() {
 
 	final override val defaultNameSuffixToRemove
@@ -56,7 +56,6 @@ public abstract class RaptorGraphQuery<Input : Any, Output> : RaptorGraphOperati
 }
 
 
-@OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
 public inline fun <reified Input : Any, reified Output> RaptorGraphOperation<Input, Output>.define(
 	name: String = RaptorGraphDefinition.defaultName,
@@ -65,7 +64,6 @@ public inline fun <reified Input : Any, reified Output> RaptorGraphOperation<Inp
 	define(name = name, inputType = typeOf<Input>(), outputType = typeOf<Output>(), configure = configure)
 
 
-@OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
 public inline fun <reified Input : Any, reified Output> RaptorGraphOperation<Input, Output>.define(
 	name: String = RaptorGraphDefinition.defaultName,
@@ -74,7 +72,7 @@ public inline fun <reified Input : Any, reified Output> RaptorGraphOperation<Inp
 ): RaptorGraphDefinition =
 	define(name = name, inputType = typeOf<Input>(), outputType = typeOf<Output>()) {
 		input {
-			// https://youtrack.jetbrains.com/issue/KT-39434 FIXME is fixed?
+			// https://youtrack.jetbrains.com/issue/KT-39434 TODO is fixed?
 			val inputArgument = argument<Input> {
 				name(inputArgumentName)
 			}
@@ -87,7 +85,7 @@ public inline fun <reified Input : Any, reified Output> RaptorGraphOperation<Inp
 	}
 
 
-// FIXME validate KTypes
+// TODO validate KTypes
 @RaptorDsl
 public fun <Input : Any, Output> RaptorGraphOperation<Input, Output>.define(
 	name: String = RaptorGraphDefinition.defaultName,

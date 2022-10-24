@@ -1,6 +1,7 @@
 import io.fluidsonic.gradle.*
 
-fluidLibraryModule(description = "FIXME") {
+// TODO Deprecated module. Delete.
+fluidLibraryModule(description = "TODO") {
 	custom {
 		explicitApi()
 	}
@@ -9,9 +10,9 @@ fluidLibraryModule(description = "FIXME") {
 		jvm {
 			dependencies {
 				implementation(kotlin("reflect"))
-				implementation(project(":raptor-bson")) // FIXME extract to own
+				implementation(project(":raptor-bson"))
 				implementation(project(":raptor-di"))
-				implementation(project(":raptor-graph")) // FIXME extract to own
+				implementation(project(":raptor-graph"))
 				implementation(project(":raptor-ktor"))
 				implementation(project(":raptor-transactions"))
 				implementation(fluid("stdlib", Versions.fluid_stdlib))

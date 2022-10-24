@@ -3,7 +3,8 @@ package io.fluidsonic.raptor.graph
 import io.fluidsonic.raptor.*
 
 
-// FIXME raptor-model module?
+// TODO raptor-model module?
+@Suppress("MemberVisibilityCanBePrivate") // TODO Add tests.
 public open class InvalidValueException(
 	public val userMessage: String,
 ) : Exception(userMessage) {
@@ -93,7 +94,7 @@ public open class InvalidValueException(
 }
 
 
-// FIXME not top-level!
+// TODO not top-level!
 @RaptorDsl
 public fun invalidValueError(): Nothing =
 	throw InvalidValueException(userMessage = "The value is invalid.")

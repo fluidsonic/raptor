@@ -21,7 +21,7 @@ public class RaptorGraphArgumentDefinitionBuilder<Value> internal constructor(
 	internal fun build() =
 		GraphArgumentDefinition(
 			defaultValue = default,
-			description = null, // FIXME
+			description = null, // TODO
 			kotlinType = kotlinType,
 			name = name,
 			resolver = resolver,
@@ -38,7 +38,7 @@ public class RaptorGraphArgumentDefinitionBuilder<Value> internal constructor(
 	}
 
 
-	// FIXME refactor
+	// TODO refactor
 
 	@RaptorDsl
 	public fun defaultList() {
@@ -107,7 +107,7 @@ public class RaptorGraphArgumentDefinitionBuilder<Value> internal constructor(
 
 
 	internal class ContainerImpl(
-		private val parentKotlinType: KotlinType, // FIXME
+		private val parentKotlinType: KotlinType, // TODO
 		factoryName: String,
 	) : ContainerInternal {
 
@@ -116,7 +116,7 @@ public class RaptorGraphArgumentDefinitionBuilder<Value> internal constructor(
 
 
 		override fun add(argument: GraphArgumentDefinition) {
-			// FIXME we need to evaluate all arguments lazily when the parent builder is done because provideDelegate won't be called yet and name is null
+			// TODO we need to evaluate all arguments lazily when the parent builder is done because provideDelegate won't be called yet and name is null
 			if (argumentDefinitions.any { it.name === argument.name })
 				error("Cannot define multiple arguments named '${argument.name}'.")
 
@@ -171,7 +171,6 @@ public class RaptorGraphArgumentDefinitionBuilder<Value> internal constructor(
 }
 
 
-@OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
 public inline fun <reified ArgumentValue> RaptorGraphArgumentDefinitionBuilder.Container.argument(
 	noinline configure: RaptorGraphArgumentDefinitionBuilder<ArgumentValue>.() -> Unit = {},

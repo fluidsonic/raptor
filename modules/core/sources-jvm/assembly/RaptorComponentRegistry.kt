@@ -10,7 +10,7 @@ public interface RaptorComponentRegistry {
 	public fun <Component : RaptorComponent<out Component>> oneOrNull(key: RaptorComponentKey<out Component>): Component?
 	public fun <Component : RaptorComponent<out Component>> many(key: RaptorComponentKey<out Component>): List<Component>
 
-	@Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE") // FIXME
+	@Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE") // TODO Avoid this.
 	@kotlin.internal.LowPriorityInOverloadResolution
 	public fun <Component : RaptorComponent<in Component>> register(key: RaptorComponentKey<in Component>, component: Component): Component
 	override fun toString(): String

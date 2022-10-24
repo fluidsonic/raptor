@@ -10,5 +10,6 @@ internal class RaptorEntityBsonIdFactory<out Id : RaptorEntityId>(private val wr
 }
 
 
+@Suppress("FunctionName")
 public fun <Id : RaptorEntityId> RaptorEntityBsonIdFactory(wrap: (String) -> Id): RaptorEntityIdFactory<Id> =
 	RaptorEntityBsonIdFactory { id: ObjectId -> wrap(id.toHexString()) }

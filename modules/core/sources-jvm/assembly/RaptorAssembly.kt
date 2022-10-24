@@ -22,7 +22,7 @@ internal class RaptorAssembly(
 
 	private inner class Completion(
 		private val componentRegistry: DefaultComponentRegistry,
-		pluginsAndDependents: Collection<Pair<RaptorPluginWithConfiguration<*>, Set<RaptorPluginWithConfiguration<*>>>>, // FIXME improve
+		pluginsAndDependents: Collection<Pair<RaptorPluginWithConfiguration<*>, Set<RaptorPluginWithConfiguration<*>>>>, // TODO Improve this.
 	) {
 
 		private val lazyContext = LazyRootContext()
@@ -95,7 +95,7 @@ internal class RaptorAssembly(
 			}
 
 
-			// FIXME Detect and report cycles.
+			// TODO Detect and report cycles.
 			override fun <OtherPlugin : RaptorPluginWithConfiguration<*>> configure(
 				plugin: OtherPlugin,
 				action: RaptorPluginScope<OtherPlugin>.() -> Unit,
@@ -125,7 +125,7 @@ internal class RaptorAssembly(
 				}.also { configuration = it }
 
 				// TODO In the future we could complete the components after the plugin and allow the plugin to force-complete using scope.completeComponents().
-				// FIXME Won't work properly. A component of the plugin might depend on plugin dependencies to be completed first.
+				// TODO Won't work reliably. A component of the plugin might depend on plugin dependencies to be completed first.
 				//       But we'll only know about that below.
 				//       Potential solutions:
 				//       - Require dependencies to also be declared in install(). Then complete them before completing the components.
@@ -135,13 +135,14 @@ internal class RaptorAssembly(
 				//         component-specific access using e.g. scope.graph(component). Downside is that we cannot automatically detect references
 				//         to components that have not been completed yet.
 				//       - Never allow components to depend on each other. Only support communication through properties or plugins configurations.
+				//       -> Rework all of this!
 				completeComponents()
 
 				return configuration
 			}
 
 
-			// FIXME Detect and report cycles.
+			// TODO Detect and report cycles.
 			override fun <Configuration : Any, Plugin : RaptorPluginWithConfiguration<Configuration>> require(plugin: Plugin): Configuration {
 				check(configuration == null) { "Plugin $plugin cannot configure any plugins as its assembly was already completed." }
 
@@ -208,7 +209,7 @@ internal class RaptorAssembly(
 			val plugin: RaptorPluginWithConfiguration<*>,
 		) : RaptorPluginInstallationScope {
 
-			var dependents: MutableSet<RaptorPluginWithConfiguration<*>> = hashSetOf() // FIXME visiblity
+			var dependents: MutableSet<RaptorPluginWithConfiguration<*>> = hashSetOf() // TODO Reduce visibility.
 			private var notInstalledException: RaptorPluginNotInstalledException? = null
 			private var pendingActions: MutableList<() -> Unit>? = null
 

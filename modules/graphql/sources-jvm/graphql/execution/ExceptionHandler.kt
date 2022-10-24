@@ -10,7 +10,7 @@ internal class ExceptionHandler : GExceptionHandler {
 
 	override fun GExceptionHandlerContext.handleException(exception: Throwable): GError {
 		val failure = exception as? ServerFailure ?: ServerFailure.internal(exception)
-		LoggerFactory.getLogger(GraphSystem::class.java).error("Endpoint failure", failure) // FIXME
+		LoggerFactory.getLogger(GraphSystem::class.java).error("Endpoint failure", failure) // TODO
 
 		val extensions = hashMapOf(
 			"code" to failure.code,
@@ -19,7 +19,7 @@ internal class ExceptionHandler : GExceptionHandler {
 		if (failure.userMessage != failure.developerMessage)
 			extensions["userMessage"] = failure.userMessage
 
-		// FIXME origin/locations/nodes
+		// TODO origin/locations/nodes
 		return GError(
 			message = failure.developerMessage,
 			extensions = extensions,

@@ -6,13 +6,11 @@ import kotlin.collections.component2
 import kotlin.reflect.*
 
 
-// FIXME rework
 internal class RaptorAnyEntityResolver(
 	context: RaptorContext,
 	resolverTypes: Map<KClass<out RaptorEntityId>, KType>,
 ) : RaptorEntityResolver<RaptorEntity, RaptorEntityId> {
 
-	@Suppress("UNCHECKED_CAST")
 	private val resolversByIdClass = run {
 		val di = context.di
 

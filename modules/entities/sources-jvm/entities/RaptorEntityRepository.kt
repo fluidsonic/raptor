@@ -9,7 +9,6 @@ public interface RaptorEntityRepository<out Entity : RaptorEntity, in Id : Rapto
 	public suspend fun queryOrSkip(ids: Iterable<Id>): Collection<Entity>
 
 
-	// FIXME rework
 	override suspend fun resolveOrNull(id: Id): Entity? =
 		queryOrNull(id)
 
@@ -22,7 +21,7 @@ public interface RaptorEntityRepository<out Entity : RaptorEntity, in Id : Rapto
 public suspend fun <Value : RaptorEntity, Id : RaptorEntityId> RaptorEntityRepository<Value, Id>.query(id: Id): Value =
 	queryOrNull(id) ?: throw ServerFailure.ofUser(
 		code = "not found",
-		userMessage = "There is no entity '$id'." // FIXME i18n is done by library user
+		userMessage = "There is no entity '$id'." // TODO i18n is done by library user
 	)
 
 
@@ -40,7 +39,7 @@ public suspend fun <Value : RaptorEntity, Id : RaptorEntityId> RaptorEntityRepos
 		fetchedEntities.firstOrNull { it.id == id }
 			?: throw throw ServerFailure.ofUser(
 				code = "not found",
-				userMessage = "There is no entity '$id'." // FIXME i18n is done by library user
+				userMessage = "There is no entity '$id'." // TODO i18n is done by library user
 			)
 	}
 }

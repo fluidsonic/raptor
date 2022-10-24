@@ -8,7 +8,6 @@ internal class BsonCodecProviderDefinition(
 	val codecProvider: CodecProvider,
 ) : RaptorBsonDefinition {
 
-	@Suppress("UNCHECKED_CAST")
 	override fun <Value : Any> codecForValueClass(valueClass: KClass<Value>, registry: RaptorBsonCodecRegistry) =
 		codecProvider.get(valueClass.java, registry.internal())
 			?.let { BsonCodecDefinition(it) }

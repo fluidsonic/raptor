@@ -5,6 +5,7 @@ import io.fluidsonic.i18n.*
 import io.fluidsonic.locale.*
 
 
+@Suppress("RemoveExplicitTypeArguments")
 public fun Country.Companion.graphDefinition(): RaptorGraphDefinition = graphObjectDefinition<Country> {
 	field(Country::code)
 	field("name") {

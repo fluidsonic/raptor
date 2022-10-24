@@ -110,7 +110,7 @@ public class RaptorObjectGraphDefinitionBuilder<Type : Any> internal constructor
 			name = property.name,
 			type = type,
 			stackTrace = stackTrace(skipCount = 1),
-			implicitResolver = { property.get(it as Type) }, // FIXME
+			implicitResolver = { property.get(it as Type) }, // TODO
 			configure = configure
 		)
 	}
@@ -125,7 +125,7 @@ public class RaptorObjectGraphDefinitionBuilder<Type : Any> internal constructor
 			name = function.name,
 			type = function.returnType,
 			stackTrace = stackTrace(skipCount = 1),
-			implicitResolver = { function(it as Type, context) }, // FIXME
+			implicitResolver = { function(it as Type, context) }, // TODO
 			configure = configure
 		)
 	}
@@ -141,7 +141,7 @@ public class RaptorObjectGraphDefinitionBuilder<Type : Any> internal constructor
 			name = function.name,
 			type = function.returnType,
 			stackTrace = stackTrace(skipCount = 1),
-			implicitResolver = { function(it as Type, context) }, // FIXME
+			implicitResolver = { function(it as Type, context) }, // TODO
 			configure = configure
 		)
 	}

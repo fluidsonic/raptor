@@ -3,7 +3,7 @@ package io.fluidsonic.raptor
 
 internal class RaptorComponentRegistration<Component : RaptorComponent<Component>>(
 	val component: Component,
-	var configurationEnded: Boolean = false,
+	private var configurationEnded: Boolean = false,
 	var configurationStarted: Boolean = false,
 	val registry: DefaultComponentRegistry,
 ) {
@@ -22,7 +22,7 @@ internal class RaptorComponentRegistration<Component : RaptorComponent<Component
 
 		configurationEnded = true
 
-		// FIXME Rework.
+		// TODO Rework.
 		val componentScope = object : RaptorComponentConfigurationEndScope<Component>, RaptorAssemblyCompletionScope by scope {
 
 			override val component: Component

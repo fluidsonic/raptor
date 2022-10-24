@@ -9,10 +9,10 @@ internal class ArgumentResolver(
 	private val factoryName: String,
 ) {
 
-	private val currentContext = ThreadLocal<Context>() // FIXME won't work with coroutines
+	private val currentContext = ThreadLocal<Context>() // TODO won't work with coroutines
 
 
-	// FIXME refactor
+	// TODO refactor
 	private fun Context.resolve(name: String, transforms: List<RaptorGraphInputScope.(Any?) -> Any?>): Any? {
 		val context = execution.raptorContext
 			?: return null
@@ -24,10 +24,10 @@ internal class ArgumentResolver(
 		if (expectsMaybe && !argumentValues.containsKey(name))
 			return Maybe.nothing
 
-		val inputScope = object : RaptorGraphInputScope, RaptorTransactionScope by context { // FIXME improve
+		val inputScope = object : RaptorGraphInputScope, RaptorTransactionScope by context { // TODO improve
 
 			override fun invalid(details: String?): Nothing =
-				error("invalid argument ($details)") // FIXME
+				error("invalid argument ($details)") // TODO
 		}
 
 		var value = argumentValues[name]?.let { value ->
@@ -61,7 +61,7 @@ internal class ArgumentResolver(
 	}
 
 
-	// FIXME Consolidate list handling
+	// TODO Consolidate list handling
 	private fun RaptorGraphInputScope.parseAliasValue(value: Any, parse: RaptorGraphInputScope.(input: Any) -> Any, typeRef: GTypeRef): Any =
 		when (typeRef) {
 			is GListTypeRef -> (value as Collection<Any?>).map { element ->
@@ -74,7 +74,6 @@ internal class ArgumentResolver(
 
 
 	internal inline fun <Result> withArguments(
-		// FIXME
 		argumentValues: Map<String, Any?>,
 		argumentDefinitions: Collection<GArgumentDefinition>,
 		context: GExecutorContext,

@@ -6,7 +6,7 @@ import io.fluidsonic.stdlib.*
 import kotlin.reflect.*
 
 
-// FIXME check duplicate op field names
+// TODO check duplicate op field names
 internal class GraphSystemDefinitionBuilder private constructor(
 	private val initialDefinitions: Collection<RaptorGraphDefinition>,
 ) {
@@ -31,13 +31,13 @@ internal class GraphSystemDefinitionBuilder private constructor(
 		process()
 
 		return GraphSystemDefinition(
-			definitions = registeredDefinitions.mapNotNull { definition -> // FIXME refactor
+			definitions = registeredDefinitions.mapNotNull { definition -> // TODO refactor
 				when (definition) {
 					is GraphTypeSystemDefinition -> when (definition.kotlinType.isSpecialized) {
 						true -> definition
 						false -> {
 							val typeArguments = definition.kotlinType.classifier.typeParameters.map { it.upperBounds.single() }
-							if (typeArguments.any { it.classifier == Any::class }) // FIXME ok?
+							if (typeArguments.any { it.classifier == Any::class }) // TODO ok?
 								return@mapNotNull null
 
 							definition.specialize(
@@ -49,12 +49,13 @@ internal class GraphSystemDefinitionBuilder private constructor(
 										allowNull = true,
 										allowedVariance = KVariance.OUT,
 										requireSpecialization = true
-									)!! // FIXME
+									) // TODO
 								},
 								namePrefix = ""
 							)
 						}
 					}
+
 					is GraphOperationDefinition -> definition
 				}
 			}
@@ -271,7 +272,7 @@ internal class GraphSystemDefinitionBuilder private constructor(
 	}
 
 
-	// FIXME rework
+	// TODO rework
 	private fun resolveReferences(definition: RaptorGraphDefinition) {
 		when (definition) {
 			is AliasGraphTypeDefinition -> Unit
@@ -310,7 +311,7 @@ internal class GraphSystemDefinitionBuilder private constructor(
 			is GraphOperationDefinition -> {
 				val outputType = definition.fieldDefinition.kotlinType
 				val resolved = outputTypeDefinitionRegistry.resolve(outputType, referee = definition.fieldDefinition)
-				if (resolved == null && outputType.classifier != Collection::class && outputType.classifier != List::class) // FIXME
+				if (resolved == null && outputType.classifier != Collection::class && outputType.classifier != List::class) // TODO
 					error("Cannot resolve output type of $definition")
 			}
 		}
@@ -318,11 +319,11 @@ internal class GraphSystemDefinitionBuilder private constructor(
 
 
 	private fun specializeGenericTypeDefinition(kotlinType: KotlinType, typeArgument: KotlinType, argumentType: GraphTypeDefinition) {
-		argumentType as NamedGraphTypeDefinition // FIXME
+		argumentType as NamedGraphTypeDefinition // TODO
 
 		val definitions = checkNotNull(unspecializedDefinitionsByClassifier[kotlinType.withNullable(false)])
 		for (definition in definitions)
-			registerDefinition(definition.specialize(typeArguments = listOf(typeArgument), namePrefix = argumentType.name)) // FIXME multiple
+			registerDefinition(definition.specialize(typeArguments = listOf(typeArgument), namePrefix = argumentType.name)) // TODO multiple
 	}
 
 
@@ -360,7 +361,7 @@ internal class GraphSystemDefinitionBuilder private constructor(
 		}
 
 
-		// FIXME handle alias and generic alias argument
+		// TODO handle alias and generic alias argument
 		fun resolve(kotlinType: KotlinType, referee: RaptorGraphNode): GraphTypeDefinition? {
 			@Suppress("NAME_SHADOWING")
 			val kotlinType = kotlinType.withNullable(false)
@@ -368,8 +369,8 @@ internal class GraphSystemDefinitionBuilder private constructor(
 			definitionsByKotlinType[kotlinType]
 				?.let { return it }
 
-			// FIXME nesting
-			val typeArgument = kotlinType.typeArguments.singleOrNull() ?: run { // FIXME
+			// TODO nesting
+			val typeArgument = kotlinType.typeArguments.singleOrNull() ?: run { // TODO
 				check(!unspecializedDefinitionsByClassifier.containsKey(kotlinType)) {
 					"A GraphQL definition cannot reference the generic Kotlin type '$kotlinType' without specifying a type argument:\n" +
 						"$referee\n---"

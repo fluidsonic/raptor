@@ -6,7 +6,6 @@ package io.fluidsonic.raptor
 import kotlin.time.*
 
 
-@OptIn(ExperimentalTime::class)
 public fun Duration.Companion.graphDefinition(): RaptorGraphDefinition = graphScalarDefinition {
 	parseString { parseIsoStringOrNull(it) ?: invalid() }
 	serialize(Duration::toIsoString)

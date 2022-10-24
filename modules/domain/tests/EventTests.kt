@@ -76,6 +76,7 @@ class EventTests {
 
 		raptor.lifecycle.stop()
 
+		@Suppress("RemoveExplicitTypeArguments")
 		assertEquals<List<RaptorAggregateEvent<BankAccountNumber, BankAccountChange>>>(
 			actual = events,
 			expected = listOf(RaptorAggregateEvent(
@@ -87,6 +88,8 @@ class EventTests {
 				version = 1,
 			)),
 		)
+
+		@Suppress("RemoveExplicitTypeArguments")
 		assertEquals<List<RaptorAggregateProjectionEvent<BankAccountNumber, BankAccount, BankAccountChange>>>(
 			actual = projectionEvents,
 			expected = listOf(RaptorAggregateProjectionEvent(

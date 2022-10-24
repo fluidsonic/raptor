@@ -8,7 +8,7 @@ public interface RaptorGraphArgumentDelegate<out Type> : PropertyDelegateProvide
 
 	@RaptorDsl
 	public fun <TransformedType> map(
-		// FIXME rn to transform?
+		// TODO rn to transform?
 		transform: RaptorGraphInputScope.(value: Type) -> TransformedType,
 	): RaptorGraphArgumentDelegate<TransformedType>
 }

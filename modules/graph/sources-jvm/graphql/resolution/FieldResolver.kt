@@ -12,7 +12,7 @@ internal object FieldResolver : GFieldResolver<Any> {
 		val resolve = checkNotNull(field.resolve)
 		val argumentResolver = checkNotNull(field.argumentResolver)
 
-		val outputScope = object : RaptorGraphOutputScope, RaptorTransactionScope by context {}  // FIXME improve
+		val outputScope = object : RaptorGraphOutputScope, RaptorTransactionScope by context {}  // TODO improve
 
 		val value = argumentResolver.withArguments(
 			argumentValues = arguments,
@@ -28,7 +28,7 @@ internal object FieldResolver : GFieldResolver<Any> {
 	}
 
 
-	// FIXME Consolidate list handling
+	// TODO Consolidate list handling
 	private fun RaptorGraphOutputScope.serializeAliasValue(value: Any, serialize: RaptorGraphOutputScope.(value: Any) -> Any?, typeRef: GTypeRef): Any? =
 		when (typeRef) {
 			is GListTypeRef -> when (value) {

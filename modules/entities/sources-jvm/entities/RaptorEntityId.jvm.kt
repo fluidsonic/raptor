@@ -4,8 +4,8 @@
 //
 //
 //internal fun RaptorEntityId.Companion.graphDefinition() = graphIdAliasDefinition<RaptorEntityId> {
-//	parse { TODO() } // FIXME
-//	serialize { TODO() } // FIXME input only
+//	parse { TODO() }
+//	serialize { TODO() }
 //}
 //
 //
@@ -27,7 +27,7 @@
 //
 //
 //	public fun Id.serialize(): String =
-//		definition.serialize(this) // FIXME add namespace
+//		definition.serialize(this) // TODO add namespace
 //}
 //
 //

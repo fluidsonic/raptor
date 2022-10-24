@@ -6,6 +6,7 @@ import kotlinx.datetime.*
 import kotlinx.datetime.LocalDate.*
 
 
+@Suppress("RemoveExplicitTypeArguments")
 public fun Companion.bsonDefinition(): RaptorBsonDefinition = raptor.bson.definition<LocalDate> {
 	decode {
 		reader.timestamp().toLocalDate(TimeZone.UTC)

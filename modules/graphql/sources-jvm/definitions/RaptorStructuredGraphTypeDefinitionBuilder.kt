@@ -35,7 +35,7 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 	@RaptorDsl
 	public inner class NestedBuilder internal constructor() {
 
-		// FIXME use global names (graphEnumDefinition) & scope or else users may accidentally use the wrong one!
+		// TODO use global names (graphEnumDefinition) & scope or else users may accidentally use the wrong one!
 		@RaptorDsl
 		public inline fun <reified Type : Enum<Type>> enumDefinition(
 			name: String = RaptorGraphDefinition.defaultName,
@@ -54,7 +54,7 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 		public fun <Type : Enum<Type>> enumDefinition(
 			name: String = RaptorGraphDefinition.defaultName,
 			type: KType,
-			values: List<Type>, // FIXME validate
+			values: List<Type>, // TODO validate
 			configure: RaptorEnumGraphDefinitionBuilder<Type>.() -> Unit = {},
 		) {
 			nestedDefinitions += RaptorEnumGraphDefinitionBuilder(
@@ -136,7 +136,7 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 			type: KType,
 			configure: RaptorInterfaceGraphDefinitionBuilder<Type>.() -> Unit,
 		) {
-			// FIXME building lazily removes definition-site from the stack trace for errors thrown by the builder
+			// TODO building lazily removes definition-site from the stack trace for errors thrown by the builder
 			nestedDefinitions += RaptorInterfaceGraphDefinitionBuilder<Type>(
 				kotlinType = KotlinType.of(
 					type = type,
@@ -160,7 +160,7 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 		@RaptorDsl
 		public inline fun <reified Type : Any> objectDefinition(
 			name: String = RaptorGraphDefinition.defaultName,
-			noinline configure: RaptorObjectGraphDefinitionBuilder<Type>.() -> Unit = {}, // FIXME get rid of BuilderInference everywhere. too fragile.
+			noinline configure: RaptorObjectGraphDefinitionBuilder<Type>.() -> Unit = {}, // TODO get rid of BuilderInference everywhere. too fragile.
 		) {
 			objectDefinition(
 				name = name,

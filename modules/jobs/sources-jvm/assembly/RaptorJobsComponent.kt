@@ -34,7 +34,6 @@ public inline fun <Data, reified Dependency> RaptorAssemblyQuery<RaptorJobsCompo
 
 
 @RaptorDsl
-@Suppress("UNCHECKED_CAST")
 public fun <Data, Dependency> RaptorAssemblyQuery<RaptorJobsComponent>.register(
 	group: RaptorJobGroup<Data>,
 	dependencyType: KType,

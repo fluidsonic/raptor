@@ -5,7 +5,8 @@ import io.fluidsonic.raptor.transactions.*
 import kotlin.reflect.*
 
 
-// FIXME remove, per-tx only vvvvvv
+// FIXME remove, per-tx only
+
 @RaptorDsl
 public fun <Projection : RaptorAggregateProjection<Id>, Id : RaptorAggregateProjectionId> RaptorScope.projectionLoader(
 	idClass: KClass<Id>,

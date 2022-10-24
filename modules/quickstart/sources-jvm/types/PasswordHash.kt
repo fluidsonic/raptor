@@ -12,6 +12,7 @@ public value class PasswordHash(public val value: String) {
 
 	public companion object {
 
+		@Suppress("RemoveExplicitTypeArguments")
 		public fun bsonDefinition(): RaptorBsonDefinition = raptor.bson.definition<PasswordHash> {
 			decode(::PasswordHash)
 			encode(PasswordHash::value)

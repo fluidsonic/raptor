@@ -129,14 +129,12 @@ public class RaptorScalarGraphDefinitionBuilder<Type : Any> internal constructor
 
 
 	@RaptorDsl
-	@Suppress("UNCHECKED_CAST")
 	public fun serialize(serialize: KFunction1<Type, Any>) {
 		serialize { serialize(it) }
 	}
 
 
 	@RaptorDsl
-	@Suppress("UNCHECKED_CAST")
 	public fun serialize(serialize: KProperty1<Type, Any>) {
 		serialize(serialize::invoke)
 	}

@@ -18,7 +18,7 @@ public val RaptorDIBoundary<*>.di: RaptorDIComponent<*>
 	get() = componentRegistry.oneOrRegister(factoryKey, ::RaptorDIFactoryComponent)
 
 
-// FIXME throw if plugin not installed?
+// TODO Throw if plugin isn't installed.
 @RaptorDsl
 public fun RaptorComponentConfigurationEndScope<out RaptorDIBoundary<*>>.diFactory(name: String): RaptorDI.Factory =
 	componentRegistry.oneOrNull(factoryKey)?.toFactory(name = name) ?: RaptorDI.Factory.empty

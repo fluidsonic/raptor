@@ -58,7 +58,7 @@ public fun <Component : RaptorTaggableComponent<Component>> RaptorAssemblyQuery<
 
 
 // TODO Support multiple tags with OR combination. OR: tagged(A, B) - AND: tagged(A).tagged(B)
-// FIXME Doesn't work because it conflicts with the RaptorComponentSet extension.
+// TODO This doesn't work because it conflicts with the RaptorComponentSet extension.
 @kotlin.internal.LowPriorityInOverloadResolution
 @JvmName("taggedSetQuery")
 @RaptorDsl

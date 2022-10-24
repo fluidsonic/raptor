@@ -7,8 +7,8 @@ import io.fluidsonic.stdlib.*
 import kotlin.internal.*
 import kotlin.reflect.*
 
-// FIXME Allow nested definitions in structured definitions & reuse in RaptorGraphOperationBuilder.
-// FIXME Can also improve automatic name generation.
+// TODO Allow nested definitions in structured definitions & reuse in RaptorGraphOperationBuilder.
+// TODO Can also improve automatic name generation.
 
 
 @RaptorDsl
@@ -69,7 +69,7 @@ public inline fun <reified Type : Enum<Type>> graphEnumDefinition(
 public fun <Type : Enum<Type>> graphEnumDefinition(
 	name: String = RaptorGraphDefinition.defaultName,
 	type: KType,
-	values: List<@NoInfer Type>, // FIXME validate
+	values: List<@NoInfer Type>, // TODO validate
 	configure: RaptorEnumGraphDefinitionBuilder<@NoInfer Type>.() -> Unit = {},
 ): RaptorGraphDefinition =
 	RaptorEnumGraphDefinitionBuilder(
@@ -226,7 +226,7 @@ public fun <Type : Any> graphInterfaceExtensionDefinition(
 		.build()
 
 
-// FIXME put all dsl behind an object for grouping & reuse in nested{} blocks
+// TODO put all dsl behind an object for grouping & reuse in nested{} blocks
 @RaptorDsl
 public inline fun <reified Type : Any> graphObjectDefinition(
 	name: String = RaptorGraphDefinition.defaultName,

@@ -6,12 +6,12 @@ import io.fluidsonic.raptor.transactions.*
 
 internal object InputObjectCoercer : GNodeInputCoercer<Map<String, Any?>>, GVariableInputCoercer<Map<String, Any?>> {
 
-	private fun GInputCoercerContext.coerceInput(input: Map<String, Any?>): Any? {
+	private fun GInputCoercerContext.coerceInput(input: Map<String, Any?>): Any {
 		val context = checkNotNull(execution.raptorContext)
 		val type = type as GInputObjectType
 		val definition = type.raptorType as InputObjectGraphType
 
-		val inputScope = object : RaptorGraphInputScope, RaptorTransactionScope by context { // FIXME improve
+		val inputScope = object : RaptorGraphInputScope, RaptorTransactionScope by context { // TODO improve
 
 			override fun invalid(details: String?): Nothing =
 				this@coerceInput.invalid(details = details)
@@ -25,10 +25,10 @@ internal object InputObjectCoercer : GNodeInputCoercer<Map<String, Any?>>, GVari
 	}
 
 
-	override fun GNodeInputCoercerContext.coerceNodeInput(input: Map<String, Any?>): Any? =
+	override fun GNodeInputCoercerContext.coerceNodeInput(input: Map<String, Any?>): Any =
 		coerceInput(input)
 
 
-	override fun GVariableInputCoercerContext.coerceVariableInput(input: Map<String, Any?>): Any? =
+	override fun GVariableInputCoercerContext.coerceVariableInput(input: Map<String, Any?>): Any =
 		coerceInput(input)
 }

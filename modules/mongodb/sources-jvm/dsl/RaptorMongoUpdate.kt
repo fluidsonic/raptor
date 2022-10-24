@@ -42,7 +42,7 @@ public suspend inline fun <Document : Any> MongoCollection<Document>.upsertOne(c
 	execute(RaptorMongodbUpdateBuilder(isUpsert = true).apply(configure).build())!!
 
 
-public suspend fun <Document : Any> MongoCollection<Document>.upsertOneById(id: Any?, configure: RaptorMongodbUpdateBuilder.() -> Unit): Document? =
+public suspend fun <Document : Any> MongoCollection<Document>.upsertOneById(id: Any?, configure: RaptorMongodbUpdateBuilder.() -> Unit): Document =
 	upsertOne {
 		filter { id(id) }
 

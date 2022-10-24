@@ -36,7 +36,7 @@ public class RaptorInputObjectGraphDefinitionBuilder<Type : Any> internal constr
 		)
 
 
-	// FIXME rn
+	// TODO Rename.
 	@RaptorDsl
 	public fun factory(create: RaptorGraphInputScope.() -> Type) {
 		check(this.create === null) { "Cannot define multiple factories." }

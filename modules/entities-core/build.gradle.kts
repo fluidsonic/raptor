@@ -1,6 +1,7 @@
 import io.fluidsonic.gradle.*
 
-fluidLibraryModule(description = "FIXME") {
+// TODO Deprecated module. Delete.
+fluidLibraryModule(description = "TODO") {
 	targets {
 		common {
 			dependencies {

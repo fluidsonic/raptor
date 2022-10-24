@@ -8,11 +8,11 @@ internal object VariableInputCoercer : GVariableInputCoercer<Any?> {
 	override fun GVariableInputCoercerContext.coerceVariableInput(input: Any?): Any? {
 		return next()
 
-		// FIXME why is this needed here?
+		// TODO why is this needed here?
 //		var coercedValue = super.coerceValue(value, typeRef, variable, context)
 //		if (coercedValue != null && typeRef is GNamedTypeRef) {
-//			val typeDefinition = typeDefinitionsByGraphName[typeRef.underlyingName] // FIXME lists and non-null
-//			// FIXME refactor
+//			val typeDefinition = typeDefinitionsByGraphName[typeRef.underlyingName] // TODO lists and non-null
+//			// TODO refactor
 //			coercedValue = when (typeDefinition) {
 //				null -> coercedValue
 //				is GraphEnumDefinition -> typeDefinition.values.filterIsInstance<Enum<*>>().first { it.name == value }

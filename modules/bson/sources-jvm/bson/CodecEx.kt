@@ -5,7 +5,7 @@ import org.bson.*
 import org.bson.codecs.*
 
 
-// FIXME rn
+// TODO Rename.
 public interface CodecEx<TDocument : Any> : Codec<TDocument> {
 
 	override fun decode(reader: BsonReader, decoderContext: DecoderContext): TDocument =

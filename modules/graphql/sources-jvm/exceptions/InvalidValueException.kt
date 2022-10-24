@@ -3,7 +3,8 @@ package io.fluidsonic.raptor
 import io.fluidsonic.raptor.ktor.*
 
 
-// FIXME raptor-model module?
+// TODO raptor-model module?
+@Suppress("MemberVisibilityCanBePrivate")
 public open class InvalidValueException(
 	userMessage: String,
 ) : ServerFailure(
@@ -98,7 +99,7 @@ public open class InvalidValueException(
 }
 
 
-// FIXME not top-level!
+// TODO not top-level!
 @RaptorDsl
 public fun invalidValueError(): Nothing =
 	throw InvalidValueException(userMessage = "The value is invalid.")

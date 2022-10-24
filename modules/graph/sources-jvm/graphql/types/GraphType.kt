@@ -1,7 +1,5 @@
 package io.fluidsonic.raptor.graph
 
-import io.fluidsonic.raptor.*
-
 
 internal class AliasGraphType(
 	val convertReferencedToAlias: RaptorGraphInputScope.(input: Any) -> Any,

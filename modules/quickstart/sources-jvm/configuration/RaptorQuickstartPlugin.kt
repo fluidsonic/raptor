@@ -22,7 +22,7 @@ public object RaptorQuickstartPlugin : RaptorPlugin {
 
 			definitions(
 				PasswordHash.bsonDefinition(),
-				Url.bsonDefinition() // FIXME move to either BsonPlugin or KtorPlugin with ifAvailable
+				Url.bsonDefinition() // TODO move to either BsonPlugin or KtorPlugin with ifAvailable
 			)
 		}
 

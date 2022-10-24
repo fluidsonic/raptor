@@ -5,6 +5,7 @@ import io.fluidsonic.currency.CurrencyCode.*
 import io.fluidsonic.raptor.*
 
 
+@Suppress("RemoveExplicitTypeArguments")
 public fun Companion.bsonDefinition(): RaptorBsonDefinition = raptor.bson.definition<CurrencyCode> {
 	decode(::parse)
 	encode(CurrencyCode::toString)

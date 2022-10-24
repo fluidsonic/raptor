@@ -10,7 +10,7 @@ internal object EnumCoercer : GNodeInputCoercer<Any>, GOutputCoercer<Any>, GVari
 		val context = checkNotNull(execution.raptorContext)
 		val raptorType = (type as GEnumType).raptorType as EnumGraphType
 
-		val inputScope = object : RaptorGraphInputScope, RaptorTransactionScope by context { // FIXME improve
+		val inputScope = object : RaptorGraphInputScope, RaptorTransactionScope by context { // TODO improve
 
 			override fun invalid(details: String?): Nothing =
 				this@coerceInput.invalid(details = details)
@@ -30,7 +30,7 @@ internal object EnumCoercer : GNodeInputCoercer<Any>, GOutputCoercer<Any>, GVari
 		val context = checkNotNull(execution.raptorContext)
 		val raptorType = (type as GEnumType).raptorType as EnumGraphType
 
-		val outputScope = object : RaptorGraphOutputScope, RaptorTransactionScope by context {}  // FIXME improve
+		val outputScope = object : RaptorGraphOutputScope, RaptorTransactionScope by context {}  // TODO improve
 
 		return raptorType.serialize(outputScope, output)
 	}

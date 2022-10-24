@@ -4,10 +4,10 @@ import io.fluidsonic.graphql.*
 import io.fluidsonic.raptor.transactions.*
 
 
-// FIXME allow some kind of invalidValueError() in all Raptor parsers & serializers
+// TODO allow some kind of invalidValueError() in all Raptor parsers & serializers
 internal object ScalarCoercer : GNodeInputCoercer<GValue>, GOutputCoercer<Any>, GVariableInputCoercer<Any> {
 
-	private fun GInputCoercerContext.coerceInput(input: Any): Any? {
+	private fun GInputCoercerContext.coerceInput(input: Any): Any {
 		val context = checkNotNull(execution.raptorContext)
 		val raptorType = (type as GCustomScalarType).raptorType as ScalarGraphType
 
@@ -21,7 +21,7 @@ internal object ScalarCoercer : GNodeInputCoercer<GValue>, GOutputCoercer<Any>, 
 	}
 
 
-	override fun GNodeInputCoercerContext.coerceNodeInput(input: GValue): Any? =
+	override fun GNodeInputCoercerContext.coerceNodeInput(input: GValue): Any =
 		coerceInput(input.unwrap() ?: invalid())
 
 
@@ -29,12 +29,12 @@ internal object ScalarCoercer : GNodeInputCoercer<GValue>, GOutputCoercer<Any>, 
 		val context = checkNotNull(execution.raptorContext)
 		val raptorType = (type as GCustomScalarType).raptorType as ScalarGraphType
 
-		val outputScope = object : RaptorGraphOutputScope, RaptorTransactionScope by context {}  // FIXME improve
+		val outputScope = object : RaptorGraphOutputScope, RaptorTransactionScope by context {}  // TODO improve
 
 		return raptorType.serialize(outputScope, output)
 	}
 
 
-	override fun GVariableInputCoercerContext.coerceVariableInput(input: Any): Any? =
+	override fun GVariableInputCoercerContext.coerceVariableInput(input: Any): Any =
 		coerceInput(input)
 }

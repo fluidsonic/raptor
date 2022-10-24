@@ -5,7 +5,7 @@ import java.util.*
 import kotlinx.datetime.*
 
 
-// FIXME move to fluid-time
+// TODO move to fluid-time
 
 public fun Date.toKotlinInstant(): Timestamp =
 	Instant.fromEpochMilliseconds(time)

@@ -11,19 +11,17 @@ public object RaptorEntitiesPlugin : RaptorPlugin {
 
 		val resolverTypes = componentRegistry.oneOrNull(RaptorEntitiesComponent.key)?.resolverTypes.orEmpty()
 
-		// FIXME
 		configure(RaptorDIPlugin) {
 			di.provide<RaptorEntityResolver<RaptorEntity, RaptorEntityId>> {
 				RaptorAnyEntityResolver(context = get(), resolverTypes = resolverTypes)
 			}
 		}
 
-		// FIXME
-		//			graphs.definitions(
-		//				RaptorEntity.graphDefinition(),
-		////				RaptorEntityId.graphDefinition()
-		//			)
-		// }
+		// TODO
+//		graphs.definitions(
+//			RaptorEntity.graphDefinition(),
+//			RaptorEntityId.graphDefinition()
+//		)
 	}
 
 

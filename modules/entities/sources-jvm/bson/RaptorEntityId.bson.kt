@@ -5,7 +5,6 @@ import org.bson.*
 import org.bson.types.*
 
 
-// FIXME different types
 public fun <Id : RaptorEntityId> RaptorEntityId.Definition<Id>.bsonDefinition(): RaptorBsonDefinition =
 	raptor.bson.definition(idDescriptor.instanceClass) {
 		decode {

@@ -149,7 +149,7 @@ public class RaptorKtorServerComponent internal constructor(
 
 	override fun RaptorComponentConfigurationStartScope.onConfigurationStarted() {
 		transactions.di.provide<ApplicationCall> {
-			// FIXME improve
+			// TODO improve
 			get<RaptorTransactionContext>().ktorCall ?: error("Cannot find Ktor ApplicationCall.")
 		}
 	}

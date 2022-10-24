@@ -32,7 +32,7 @@ public sealed class RaptorGraphDefinition(
 		internal const val defaultName: String = "<default>"
 
 
-		// FIXME move
+		// TODO move
 		internal fun resolveName(
 			name: String,
 			defaultNamePrefix: String? = null,
@@ -41,7 +41,7 @@ public sealed class RaptorGraphDefinition(
 			resolveName(name) { defaultNamePrefix.orEmpty() + type.defaultGraphName() }
 
 
-		// FIXME move
+		// TODO move
 		internal inline fun resolveName(
 			name: String,
 			defaultName: () -> String,
@@ -148,7 +148,7 @@ internal class GraphArgumentDefinition(
 	private var isProvided = false
 	private var transforms = emptyList<RaptorGraphInputScope.(Any?) -> Any?>()
 
-	internal var name = name // FIXME validate uniqueness
+	internal var name = name // TODO validate uniqueness
 		private set
 
 
@@ -157,7 +157,7 @@ internal class GraphArgumentDefinition(
 
 
 	override fun <TransformedType> map(transform: RaptorGraphInputScope.(value: Any?) -> TransformedType): RaptorGraphArgumentDelegate<TransformedType> {
-		// FIXME freeze after builder is done
+		// TODO freeze after builder is done
 
 		transforms = transforms + transform
 
@@ -175,7 +175,6 @@ internal class GraphArgumentDefinition(
 		this.isProvided = true
 		this.name = name
 
-		@Suppress("UNCHECKED_CAST")
 		return ReadOnlyProperty { _, _ ->
 			resolveArgument(name = name, variableName = variableName)
 		}

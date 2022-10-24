@@ -16,8 +16,8 @@ internal class GraphRoute(
 ) {
 
 	suspend fun handle(call: ApplicationCall) {
-		// FIXME rewrite JSON parsing
-		// FIXME disallow mutation for GET
+		// TODO rewrite JSON parsing
+		// TODO disallow mutation for GET
 
 		val context = DefaultRaptorGraphContext(
 			parent = call.raptorContext,
@@ -33,11 +33,12 @@ internal class GraphRoute(
 			operationName = null
 			variableValues = emptyMap()
 		}
-		else { // FIXME check contentType is json or not specified
+		else { // TODO check contentType is json or not specified
 			val json = JsonParser.default.parseMap(call.receiveText())
 
 			query = json["query"] as String
 			operationName = json["operationName"] as String?
+			@Suppress("UNCHECKED_CAST")
 			variableValues = (json["variables"] as Map<String, Any?>?).orEmpty()
 		}
 
@@ -50,7 +51,7 @@ internal class GraphRoute(
 				context = context
 			)
 		}
-		// FIXME
+		// TODO
 		LoggerFactory.getLogger(GraphRoute::class.java).info("Execution took ${time}ms")
 
 		call.respondText(

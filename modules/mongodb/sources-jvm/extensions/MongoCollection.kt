@@ -13,7 +13,7 @@ import org.bson.conversions.*
 
 private val bsonDecoderContext = DecoderContext.builder().build()!!
 
-// FIXME move to fluid-mongo?
+// TODO move to fluid-mongo?
 
 public suspend fun MongoCollection<*>.deleteOneById(id: Any?, options: DeleteOptions = DeleteOptions()): DeleteResult =
 	deleteOne(filter = eq("_id", id), options = options)

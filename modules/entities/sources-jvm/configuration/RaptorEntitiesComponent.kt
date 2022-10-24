@@ -16,7 +16,6 @@ public class RaptorEntitiesComponent internal constructor() : RaptorComponent.Ba
 }
 
 
-// FIXME
 @RaptorDsl
 public inline fun <reified Id : RaptorEntityId, reified Resolver : RaptorEntityResolver<*, Id>> RaptorAssemblyQuery<RaptorEntitiesComponent>.resolver() {
 	resolver(id = Id::class, resolverType = typeOf<Resolver>())
@@ -25,5 +24,5 @@ public inline fun <reified Id : RaptorEntityId, reified Resolver : RaptorEntityR
 
 @RaptorDsl
 public fun RaptorAssemblyQuery<RaptorEntitiesComponent>.resolver(id: KClass<out RaptorEntityId>, resolverType: KType) {
-	this { this.resolverTypes[id] = resolverType } // FIXME check collision
+	this { this.resolverTypes[id] = resolverType }
 }

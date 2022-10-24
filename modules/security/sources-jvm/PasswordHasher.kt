@@ -9,10 +9,11 @@ import kotlin.experimental.*
 
 
 // initially from https://crackstation.net/hashing-security.htm
+@Suppress("PrivatePropertyName")
 public class PasswordHasher(
 	private val hashLength: Int = 18,
 	private val iterationCount: Int = 64000,
-	private val saltLength: Int = 24
+	private val saltLength: Int = 24,
 ) {
 
 	private val HASH_SECTIONS = 5
@@ -71,7 +72,8 @@ public class PasswordHasher(
 
 		val iterations = try {
 			Integer.parseInt(params[ITERATION_INDEX])
-		} catch (e: NumberFormatException) {
+		}
+		catch (e: NumberFormatException) {
 			throw InvalidHashException("Could not parse the iteration count as an integer.", cause = e)
 		}
 
@@ -81,19 +83,22 @@ public class PasswordHasher(
 
 		val salt = try {
 			fromBase64(params[SALT_INDEX])
-		} catch (e: IllegalArgumentException) {
+		}
+		catch (e: IllegalArgumentException) {
 			throw InvalidHashException("Base64 decoding of salt failed.", cause = e)
 		}
 
 		val hash = try {
 			fromBase64(params[PBKDF2_INDEX])
-		} catch (e: IllegalArgumentException) {
+		}
+		catch (e: IllegalArgumentException) {
 			throw InvalidHashException("Base64 decoding of pbkdf2 output failed.", cause = e)
 		}
 
 		val storedHashSize = try {
 			Integer.parseInt(params[HASH_SIZE_INDEX])
-		} catch (e: NumberFormatException) {
+		}
+		catch (e: NumberFormatException) {
 			throw InvalidHashException("Could not parse the hash size as an integer.", cause = e)
 		}
 
@@ -129,9 +134,11 @@ public class PasswordHasher(
 			val spec = PBEKeySpec(password, salt, iterations, bytes * 8)
 			val skf = SecretKeyFactory.getInstance(algorithmName)
 			return skf.generateSecret(spec).encoded
-		} catch (e: NoSuchAlgorithmException) {
+		}
+		catch (e: NoSuchAlgorithmException) {
 			throw CannotPerformOperationException("Hash algorithm not supported.", cause = e)
-		} catch (e: InvalidKeySpecException) {
+		}
+		catch (e: InvalidKeySpecException) {
 			throw CannotPerformOperationException("Invalid key spec.", cause = e)
 		}
 	}
@@ -147,12 +154,12 @@ public class PasswordHasher(
 
 	private class InvalidHashException(
 		message: String,
-		cause: Throwable? = null
+		cause: Throwable? = null,
 	) : Exception(message, cause)
 
 
 	private class CannotPerformOperationException(
 		message: String,
-		cause: Throwable? = null
+		cause: Throwable? = null,
 	) : Exception(message, cause)
 }

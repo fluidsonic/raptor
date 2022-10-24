@@ -31,7 +31,6 @@ public class RaptorInterfaceGraphDefinitionBuilder<Type : Any> internal construc
 		)
 
 
-	@OptIn(ExperimentalStdlibApi::class)
 	@RaptorDsl
 	public inline fun <reified FieldType> field(
 		name: String,
@@ -58,7 +57,7 @@ public class RaptorInterfaceGraphDefinitionBuilder<Type : Any> internal construc
 		function: KSuspendFunction2<Type, RaptorGraphContext, FieldType>,
 		noinline configure: RaptorGraphFieldBuilder.() -> Unit = {},
 	) {
-		field(name = function.name, type = function.reflect()!!.returnType, configure = configure) // FIXME
+		field(name = function.name, type = function.reflect()!!.returnType, configure = configure) // TODO
 	}
 
 

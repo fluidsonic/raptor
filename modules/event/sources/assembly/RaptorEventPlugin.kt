@@ -8,7 +8,7 @@ public object RaptorEventPlugin : RaptorPluginWithConfiguration<RaptorEventPlugi
 
 	override fun RaptorPluginCompletionScope.complete(): RaptorEventPluginConfiguration {
 		// TODO Make configurable.
-		val processor = ParallelDispatchEventProcessor { _, _ -> } // FIXME
+		val processor = ParallelDispatchEventProcessor { _, _ -> } // FIXME Implement.
 		val emitter = ProcessingEventEmitter(processor = processor)
 
 		return RaptorEventPluginConfiguration(

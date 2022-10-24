@@ -6,14 +6,13 @@ import io.fluidsonic.raptor.*
 
 internal object FieldResolver : GFieldResolver<Any> {
 
-	@Suppress("UNCHECKED_CAST")
 	override suspend fun GFieldResolverContext.resolveField(parent: Any): Any? {
 		val context = checkNotNull(execution.raptorContext)
 		val field = checkNotNull(fieldDefinition.raptorField) as GraphField.Resolvable
 		val resolve = checkNotNull(field.resolve)
 		val argumentResolver = checkNotNull(field.argumentResolver)
 
-		val outputScope = object : RaptorGraphOutputScope, RaptorGraphScope by context {}  // FIXME improve
+		val outputScope = object : RaptorGraphOutputScope, RaptorGraphScope by context {}  // TODO improve
 
 		val value = argumentResolver.withArguments(
 			argumentValues = arguments,
@@ -29,15 +28,17 @@ internal object FieldResolver : GFieldResolver<Any> {
 	}
 
 
-	// FIXME Consolidate list handling
+	// TODO Consolidate list handling
 	private fun RaptorGraphOutputScope.serializeAliasValue(value: Any, serialize: RaptorGraphOutputScope.(value: Any) -> Any?, typeRef: GTypeRef): Any? =
 		when (typeRef) {
 			is GListTypeRef -> when (value) {
 				is Iterable<*> -> value.map { element ->
 					element?.let { serializeAliasValue(it, serialize = serialize, typeRef = typeRef.elementType) }
 				}
+
 				else -> serializeAliasValue(value, serialize = serialize, typeRef = typeRef.elementType)
 			}
+
 			is GNamedTypeRef -> serialize(value)
 			is GNonNullTypeRef -> serializeAliasValue(value, serialize = serialize, typeRef = typeRef.nullableRef)
 		}

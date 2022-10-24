@@ -457,7 +457,6 @@ public fun RaptorBsonReader.timestampOrNull(field: String): Timestamp? {
 }
 
 
-@OptIn(ExperimentalStdlibApi::class)
 @RaptorDsl
 public inline fun <reified Value> RaptorBsonReader.value(): Value {
 	if (bsonType() == BsonType.NULL && typeOf<Value>().isMarkedNullable) {

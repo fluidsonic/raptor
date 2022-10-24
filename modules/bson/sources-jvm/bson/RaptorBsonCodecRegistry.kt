@@ -23,7 +23,6 @@ public interface RaptorBsonCodecRegistry {
 }
 
 
-@Suppress("UNCHECKED_CAST")
 public fun <Value : Any> RaptorBsonCodecRegistry.decode(
 	scope: RaptorBsonReaderScope,
 	valueClass: KClass<Value>,

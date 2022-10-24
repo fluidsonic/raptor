@@ -5,5 +5,5 @@ package io.fluidsonic.raptor
 public typealias RaptorFeatureScope = RaptorPluginInstallationScope
 
 
-@RaptorDsl // FIXME Use DSL for what scopes?
+@RaptorDsl // TODO Revisit what scope should use a DSL marker.
 public interface RaptorPluginInstallationScope : RaptorAssemblyInstallationScope

@@ -3,7 +3,7 @@ package io.fluidsonic.raptor.graph
 import io.fluidsonic.raptor.*
 
 
-// FIXME customize value definitions
+// TODO customize value definitions
 @RaptorDsl
 public class RaptorEnumGraphDefinitionBuilder<Type : Enum<Type>> internal constructor(
 	kotlinType: KotlinType,
@@ -28,8 +28,8 @@ public class RaptorEnumGraphDefinitionBuilder<Type : Enum<Type>> internal constr
 			parse = { name ->
 				this@RaptorEnumGraphDefinitionBuilder.values.firstOrNull { it.name == name }
 					?: invalid(details = "valid values: ${this@RaptorEnumGraphDefinitionBuilder.values.sortedBy { it.name }.joinToString(separator = ", ") { it.name }}")
-			}, // FIXME leak. rework
-			serialize = { (it as Type).name }, // FIXME rework
+			}, // TODO leak. rework
+			serialize = { (it as Type).name }, // TODO rework
 			stackTrace = stackTrace,
 			values = values.mapTo(hashSetOf()) { it.name }
 		)

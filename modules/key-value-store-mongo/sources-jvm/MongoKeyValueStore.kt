@@ -52,6 +52,7 @@ private class MongoKeyValueStore<Key : Any, Value : Any>(
 }
 
 
+@Suppress("FunctionName")
 internal fun <Key : Any, Value : Any> MongoKeyValueStore(
 	database: MongoDatabase,
 	collectionName: String,
@@ -72,6 +73,7 @@ internal fun <Key : Any, Value : Any> MongoKeyValueStore(
 	)
 
 
+@Suppress("FunctionName")
 internal inline fun <reified Key : Any, reified Value : Any> MongoKeyValueStore(
 	database: MongoDatabase,
 	collectionName: String,

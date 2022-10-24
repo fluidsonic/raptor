@@ -32,7 +32,7 @@ public object GraphKtorPlugin : RaptorKtorRoutePlugin {
 }
 
 
-// FIXME
+// TODO
 //@RaptorDsl
 //public val RaptorTopLevelConfigurationScope.graphs: RaptorComponentSet2<GraphRaptorComponent>
 //	get() = ktor.servers.all.routes.new(recursive = true).withComponentAuthoring {

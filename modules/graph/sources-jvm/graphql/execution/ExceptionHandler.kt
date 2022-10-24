@@ -3,16 +3,16 @@ package io.fluidsonic.raptor.graph
 import io.fluidsonic.graphql.*
 
 
-// FIXME Add ServerFailure & InvalidValueException handlers.
+// FIXME Rework exception handling.
 internal class ExceptionHandler : GExceptionHandler {
 
 	override fun GExceptionHandlerContext.handleException(exception: Throwable): GError {
-		//return GError(message = "FIXME")
+		//return GError(message = "TODO")
 
 //		val failure = exception as? ServerFailure ?: ServerFailure.internal(exception)
-		// FIXME
+		// TODO
 		exception.printStackTrace()
-		//LoggerFactory.getLogger(ExceptionHandler::class.java).error("Endpoint failure", failure) // FIXME
+		//LoggerFactory.getLogger(ExceptionHandler::class.java).error("Endpoint failure", failure) // TODO
 //
 //		val extensions = hashMapOf(
 //			"code" to failure.code,
@@ -21,7 +21,7 @@ internal class ExceptionHandler : GExceptionHandler {
 //		if (failure.userMessage != failure.developerMessage)
 //			extensions["userMessage"] = failure.userMessage
 
-		// FIXME origin/locations/nodes/user message
+		// TODO add origin/locations/nodes/user message
 		return GError(
 			message = exception.message.orEmpty(),
 			extensions = emptyMap(),

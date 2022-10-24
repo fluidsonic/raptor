@@ -4,7 +4,7 @@ import io.fluidsonic.graphql.*
 
 
 internal class GraphArgument(
-	// FIXME actually a definition
+	// TODO This is actually an argument definition, not an argument.
 	val defaultValue: GValue?,
 	val description: String?,
 	val directives: Collection<GraphDirective>,
