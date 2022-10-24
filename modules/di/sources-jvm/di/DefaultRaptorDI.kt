@@ -2,30 +2,11 @@ package io.fluidsonic.raptor.di
 
 import io.fluidsonic.raptor.*
 import java.util.concurrent.locks.*
-import kotlin.collections.List
-import kotlin.collections.Map
-import kotlin.collections.MutableMap
-import kotlin.collections.associateWith
 import kotlin.collections.component1
 import kotlin.collections.component2
-import kotlin.collections.forEach
-import kotlin.collections.forEachIndexed
-import kotlin.collections.hashMapOf
-import kotlin.collections.hashSetOf
-import kotlin.collections.isNotEmpty
-import kotlin.collections.listOf
-import kotlin.collections.listOfNotNull
-import kotlin.collections.map
-import kotlin.collections.mutableListOf
-import kotlin.collections.plus
-import kotlin.collections.plusAssign
-import kotlin.collections.removeLast
-import kotlin.collections.reversed
 import kotlin.collections.set
-import kotlin.collections.sortedBy
 import kotlin.concurrent.*
 import kotlin.reflect.*
-import kotlin.reflect.full.*
 
 
 internal class DefaultRaptorDI(
@@ -33,43 +14,35 @@ internal class DefaultRaptorDI(
 	private val parent: RaptorDI?,
 ) : RaptorDI {
 
-	private val dependenciesByModule: Map<RaptorDI.Module, MutableMap<KType, Any?>> = modules
+	private val dependenciesByModule: Map<RaptorDI.Module, MutableMap<RaptorDIKey<*>, Any?>> = modules
 		.reversed()
 		.associateWith { hashMapOf() }
 
-	private val dependenciesByType: MutableMap<KType, Any?> = hashMapOf()
-	private val currentlyResolvingTypes = mutableListOf<KType>()
+	private val dependenciesByKey: MutableMap<RaptorDIKey<*>, Any?> = hashMapOf()
+	private val currentlyResolvingKeys = mutableListOf<RaptorDIKey<*>>()
 	private val lock = ReentrantLock()
 
 
-	@Suppress("NAME_SHADOWING")
-	override fun get(type: KType): Any? {
-		val isNullable = type.isMarkedNullable
-		val type = type.withNullability(false)
-
-		val value = getOrResolveDependency(type)
-		if (value == null && !isNullable)
-			reportMissingDependency(type)
-
-		return value
-	}
+	override fun <Value : Any> get(key: RaptorDIKey<out Value>): Value =
+		getOrNull(key) ?: reportMissingDependency(key)
 
 
-	private fun getOrResolveDependency(type: KType): Any? =
+	@Suppress("UNCHECKED_CAST")
+	override fun <Value : Any> getOrNull(key: RaptorDIKey<out Value>): Value? =
 		lock.withLock { // TODO Add fast-path if dependency is already resolved.
-			dependenciesByType.getOrPutNullable(type) {
-				if (currentlyResolvingTypes.contains(type))
-					reportCyclicDependency(type)
+			dependenciesByKey.getOrPutNullable(key) {
+				if (currentlyResolvingKeys.contains(key))
+					reportCyclicDependency(key)
 
-				currentlyResolvingTypes += type
+				currentlyResolvingKeys += key
 
 				try {
-					resolve(type)
+					resolve(key)
 				}
 				finally {
-					currentlyResolvingTypes.removeLast()
+					currentlyResolvingKeys.removeLast()
 				}
-			}
+			} as Value?
 		}
 
 
@@ -77,49 +50,44 @@ internal class DefaultRaptorDI(
 		lazy { factory() }
 
 
-	private fun reportCyclicDependency(type: KType): Nothing {
+	private fun reportCyclicDependency(key: RaptorDIKey<*>): Nothing {
 		error(buildString {
 			append("Dependency injection has encountered a dependency cycle:\n\n")
 
-			currentlyResolvingTypes.forEachIndexed { index, resolvingType ->
+			currentlyResolvingKeys.forEachIndexed { index, resolvingKey ->
 				repeat(index) { append('\t') }
-				append(resolvingType)
+				append(resolvingKey)
 
-				if (resolvingType == type)
+				if (resolvingKey == key)
 					append("  <--")
 
 				append('\n')
 			}
 
-			repeat(currentlyResolvingTypes.size) { append('\t') }
-			append(type)
+			repeat(currentlyResolvingKeys.size) { append('\t') }
+			append(key)
 			append("  <--\n\nDI:\n")
-			append(this) // FIXME will print wrong DI - `this` may not be the DI that initiated the resolution
+			append(this) // TODO will print wrong DI - `this` may not be the DI that initiated the resolution
 		})
 	}
 
 
-	private fun reportMissingDependency(type: KType): Nothing {
-		error("Cannot resolve dependency of type '$type'.\n\nDI:\n$this") // FIXME will print wrong DI - `this` may not be the DI that initiated the resolution
+	private fun reportMissingDependency(key: RaptorDIKey<*>): Nothing {
+		error("Cannot resolve dependency for key '$key'.\n\nDI:\n$this") // TODO will print wrong DI - `this` may not be the DI that initiated the resolution
 	}
 
 
-	private fun resolve(type: KType): Any? {
-		dependenciesByModule.forEach { (module, moduleDependenciesByType) ->
-			val provider = module.providerForType(type) ?: return@forEach
-
-			val value = when (provider.type) {
-				type -> provider.provide(this@DefaultRaptorDI) ?: return@forEach
-				else -> getOrResolveDependency(provider.type)
-			}
-
-			moduleDependenciesByType[type] = value
+	private fun <Value : Any> resolve(key: RaptorDIKey<out Value>): Value? {
+		dependenciesByModule.forEach { (module, moduleDependenciesByKey) ->
+			val provider = module.providerForKey(key) ?: return@forEach
+			val value = provider.provide(this@DefaultRaptorDI) ?: return@forEach
+			moduleDependenciesByKey[key] = value
 
 			return value
 		}
 
 		parent?.let { parent ->
-			return (parent as DefaultRaptorDI).getOrResolveDependency(type) // FIXME make abstract
+			return (parent as DefaultRaptorDI).getOrNull(key) // TODO make abstract
 		}
 
 		return null
@@ -127,27 +95,27 @@ internal class DefaultRaptorDI(
 
 
 	override fun toString() = buildString {
-		val processedTypes = hashSetOf<KType>()
+		val processedKeys = hashSetOf<RaptorDIKey<*>>()
 
-		dependenciesByModule.forEach { (module, moduleDependenciesByType) ->
+		dependenciesByModule.forEach { (module, moduleDependenciesByKey) ->
 			append(module.name)
 			append(" {")
 
 			if (module.providers.isNotEmpty()) {
 				append("\n")
 				module.providers
-					.map { provider -> provider to provider.type.toString() }
+					.map { provider -> provider to provider.key.toString() }
 					.sortedBy { it.second }
 					.forEach { (provider, typeString) ->
-						val type = provider.type
+						val key = provider.key
 
 						append("\t")
 						append(typeString)
 						append(" = ")
 
-						if (processedTypes.add(type))
-							when (moduleDependenciesByType.containsKey(type)) {
-								true -> append(moduleDependenciesByType[type]?.let { it::class.qualifiedName ?: "<anonymous class>" })
+						if (processedKeys.add(key))
+							when (moduleDependenciesByKey.containsKey(key)) {
+								true -> append(moduleDependenciesByKey[key]?.let { it::class.qualifiedName ?: "<anonymous class>" })
 								false -> append("<not yet requested>")
 							}
 						else
@@ -171,7 +139,11 @@ internal class DefaultRaptorDI(
 		private val modules: List<RaptorDI.Module>,
 	) : RaptorDI.Factory {
 
-		override fun createDI(context: RaptorContext, type: KType, configuration: RaptorDIBuilder.() -> Unit): RaptorDI {
+		override fun <Context : RaptorContext> createDI(
+			context: Context,
+			key: RaptorDIKey<in Context>,
+			configuration: RaptorDIBuilder.() -> Unit,
+		): RaptorDI {
 			val parentContext = context.parent
 			val parentDI = when (context) {
 				is RaptorContext.Lazy -> parentContext?.di
@@ -180,9 +152,10 @@ internal class DefaultRaptorDI(
 
 			val contextModule = Module(
 				name = "raptor (context)",
-				providers = listOf(RaptorDI.provider(type) {
+				providers = listOf(RaptorDI.provider(key) {
 					// TODO Looks type-unsafe.
-					(context as? RaptorContext.Lazy)?.context ?: context
+					@Suppress("UNCHECKED_CAST")
+					((context as? RaptorContext.Lazy)?.context ?: context) as Context
 				})
 			)
 
@@ -201,14 +174,14 @@ internal class DefaultRaptorDI(
 
 	internal class Module(
 		override val name: String,
-		override val providers: List<RaptorDI.Provider>,
+		override val providers: List<RaptorDI.Provider<*>>,
 	) : RaptorDI.Module
 
 
-	internal class Provider(
-		private val provide: RaptorDI.() -> Any?,
-		override val type: KType,
-	) : RaptorDI.Provider {
+	internal class Provider<Value : Any>(
+		override val key: RaptorDIKey<Value>,
+		private val provide: RaptorDI.() -> Value?,
+	) : RaptorDI.Provider<Value> {
 
 		override fun provide(di: RaptorDI) =
 			with(di) { provide() }

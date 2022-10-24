@@ -81,10 +81,12 @@ public class RaptorAggregateComponent<
 		with(topLevelScope) { // FIXME remove hack
 			optional(RaptorDIPlugin) {
 //				transactions { // FIXME
-				di.provide(RaptorAggregateProjectionLoader::class.createType(listOf(
-					KTypeProjection.invariant(projectionClass.starProjectedType),
-					KTypeProjection.invariant(this@RaptorAggregateComponent.idClass.starProjectedType),
-				))) {
+				di.provide<RaptorAggregateProjectionLoader<RaptorAggregateProjection<*>, RaptorAggregateProjectionId>>(
+					RaptorAggregateProjectionLoader::class.createType(listOf(
+						KTypeProjection.invariant(projectionClass.starProjectedType),
+						KTypeProjection.invariant(this@RaptorAggregateComponent.idClass.starProjectedType),
+					))
+				) {
 					// FIXME Improve.
 					// FIXME (context as RaptorTransactionContext)
 					context.projectionLoader(this@RaptorAggregateComponent.idClass)

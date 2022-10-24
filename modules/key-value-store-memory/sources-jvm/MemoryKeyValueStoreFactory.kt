@@ -4,12 +4,12 @@ import io.fluidsonic.raptor.keyvaluestore.*
 import kotlin.reflect.*
 
 
-private object MemoryKeyValueStoreFactory : KeyValueStoreFactory {
+private object MemoryKeyValueStoreFactory : RaptorKeyValueStoreFactory {
 
-	override fun <Key : Any, Value : Any> create(name: String, keyClass: KClass<Key>, valueClass: KClass<Value>): KeyValueStore<Key, Value> =
+	override fun <Key : Any, Value : Any> create(name: String, keyClass: KClass<Key>, valueClass: KClass<Value>): RaptorKeyValueStore<Key, Value> =
 		MemoryKeyValueStore()
 }
 
 
-public fun KeyValueStoreFactory.Companion.memory(): KeyValueStoreFactory =
+public fun RaptorKeyValueStoreFactory.Companion.memory(): RaptorKeyValueStoreFactory =
 	MemoryKeyValueStoreFactory

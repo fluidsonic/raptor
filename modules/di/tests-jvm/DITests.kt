@@ -17,14 +17,14 @@ class DITests {
 		}.context.di
 
 		assertEquals(expected = FooImpl1, actual = di.get<Foo>())
-		assertEquals(expected = FooImpl1, actual = di.get<Foo?>())
+		assertEquals(expected = FooImpl1, actual = di.getOrNull<Foo>())
 		assertFails { di.get<FooImpl1>() }
-		assertNull(di.get<FooImpl1?>())
+		assertNull(di.getOrNull<FooImpl1>())
 
 		assertEquals(expected = BarImpl1, actual = di.get<Bar>())
-		assertEquals(expected = BarImpl1, actual = di.get<Bar?>())
+		assertEquals(expected = BarImpl1, actual = di.getOrNull<Bar>())
 		assertFails { di.get<BarImpl1>() }
-		assertNull(di.get<BarImpl1?>())
+		assertNull(di.getOrNull<BarImpl1>())
 	}
 
 
@@ -45,9 +45,9 @@ class DITests {
 		assertEquals(expected = 0, actual = resolutionCount)
 
 		di.get<Foo>()
-		di.get<Foo?>()
+		di.getOrNull<Foo>()
 		di.get<Foo>()
-		di.get<Foo?>()
+		di.getOrNull<Foo>()
 
 		assertEquals(expected = 1, actual = resolutionCount)
 	}
@@ -71,13 +71,13 @@ class DITests {
 		assertEquals(expected = 0, actual = resolutionCount)
 
 		di.get<Foo>()
-		di.get<Foo?>()
+		di.getOrNull<Foo>()
 		di.get<Foo>()
-		di.get<Foo?>()
+		di.getOrNull<Foo>()
 		di.get<FooImpl1>()
-		di.get<FooImpl1?>()
+		di.getOrNull<FooImpl1>()
 		di.get<FooImpl1>()
-		di.get<FooImpl1?>()
+		di.getOrNull<FooImpl1>()
 
 		assertEquals(expected = 1, actual = resolutionCount)
 	}
@@ -106,13 +106,13 @@ class DITests {
 		assertEquals(expected = 0, actual = resolutionCount)
 
 		di.get<Foo>()
-		di.get<Foo?>()
+		di.getOrNull<Foo>()
 		di.get<Foo>()
-		di.get<Foo?>()
+		di.getOrNull<Foo>()
 		di.get<FooImpl1>()
-		di.get<FooImpl1?>()
+		di.getOrNull<FooImpl1>()
 		di.get<FooImpl1>()
-		di.get<FooImpl1?>()
+		di.getOrNull<FooImpl1>()
 
 		assertEquals(expected = 1, actual = implResolutionCount)
 		assertEquals(expected = 0, actual = overriddenResolutionCount)
@@ -133,10 +133,10 @@ class DITests {
 		}.context.di
 
 		assertEquals(expected = FooImpl2, actual = di.get<Foo>())
-		assertEquals(expected = FooImpl2, actual = di.get<Foo?>())
+		assertEquals(expected = FooImpl2, actual = di.getOrNull<Foo>())
 
 		assertEquals(expected = BarImpl2, actual = di.get<Bar>())
-		assertEquals(expected = BarImpl2, actual = di.get<Bar?>())
+		assertEquals(expected = BarImpl2, actual = di.getOrNull<Bar>())
 	}
 
 
@@ -158,18 +158,18 @@ class DITests {
 		}.context.di
 
 		assertEquals(expected = FooImpl2, actual = di.get<Foo>())
-		assertEquals(expected = FooImpl2, actual = di.get<Foo?>())
+		assertEquals(expected = FooImpl2, actual = di.getOrNull<Foo>())
 		assertEquals(expected = FooImpl1, actual = di.get<FooImpl1>())
-		assertEquals(expected = FooImpl1, actual = di.get<FooImpl1?>())
+		assertEquals(expected = FooImpl1, actual = di.getOrNull<FooImpl1>())
 		assertEquals(expected = FooImpl2, actual = di.get<FooImpl2>())
-		assertEquals(expected = FooImpl2, actual = di.get<FooImpl2?>())
+		assertEquals(expected = FooImpl2, actual = di.getOrNull<FooImpl2>())
 
 		assertEquals(expected = BarImpl2, actual = di.get<Bar>())
-		assertEquals(expected = BarImpl2, actual = di.get<Bar?>())
+		assertEquals(expected = BarImpl2, actual = di.getOrNull<Bar>())
 		assertEquals(expected = BarImpl1, actual = di.get<BarImpl1>())
-		assertEquals(expected = BarImpl1, actual = di.get<BarImpl1?>())
+		assertEquals(expected = BarImpl1, actual = di.getOrNull<BarImpl1>())
 		assertEquals(expected = BarImpl2, actual = di.get<BarImpl2>())
-		assertEquals(expected = BarImpl2, actual = di.get<BarImpl2?>())
+		assertEquals(expected = BarImpl2, actual = di.getOrNull<BarImpl2>())
 	}
 
 
@@ -190,18 +190,18 @@ class DITests {
 		}.context.di
 
 		assertEquals(expected = FooImpl1, actual = di.get<FooImpl1>())
-		assertEquals(expected = FooImpl1, actual = di.get<FooImpl1?>())
+		assertEquals(expected = FooImpl1, actual = di.getOrNull<FooImpl1>())
 		assertEquals(expected = FooImpl2, actual = di.get<Foo>())
-		assertEquals(expected = FooImpl2, actual = di.get<Foo?>())
+		assertEquals(expected = FooImpl2, actual = di.getOrNull<Foo>())
 		assertEquals(expected = FooImpl2, actual = di.get<FooImpl2>())
-		assertEquals(expected = FooImpl2, actual = di.get<FooImpl2?>())
+		assertEquals(expected = FooImpl2, actual = di.getOrNull<FooImpl2>())
 
 		assertEquals(expected = BarImpl1, actual = di.get<BarImpl1>())
-		assertEquals(expected = BarImpl1, actual = di.get<BarImpl1?>())
+		assertEquals(expected = BarImpl1, actual = di.getOrNull<BarImpl1>())
 		assertEquals(expected = BarImpl2, actual = di.get<Bar>())
-		assertEquals(expected = BarImpl2, actual = di.get<Bar?>())
+		assertEquals(expected = BarImpl2, actual = di.getOrNull<Bar>())
 		assertEquals(expected = BarImpl2, actual = di.get<BarImpl2>())
-		assertEquals(expected = BarImpl2, actual = di.get<BarImpl2?>())
+		assertEquals(expected = BarImpl2, actual = di.getOrNull<BarImpl2>())
 	}
 
 

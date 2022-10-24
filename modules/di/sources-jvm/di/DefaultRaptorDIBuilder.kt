@@ -8,17 +8,24 @@ import kotlin.reflect.full.*
 
 internal class DefaultRaptorDIBuilder : RaptorDIBuilder {
 
-	private val providers: MutableList<Provider> = mutableListOf()
+	private val providers: MutableList<Provider<*>> = mutableListOf()
 
 
 	fun createModule(name: String) =
 		RaptorDI.module(name = name, providers = providers)
 
 
-	override fun provide(type: KType, provide: RaptorDI.() -> Any?) {
-		validateType(type)
+	// TODO Split into provide & provideOptional.
+	override fun <Value : Any> provide(key: RaptorDIKey<in Value>, provide: RaptorDI.() -> Value?) {
+		validateKey(key)
 
-		providers += RaptorDI.provider(type = type, provide = provide)
+		providers += RaptorDI.provider(key = key, provide = provide)
+	}
+
+
+	private fun validateKey(key: RaptorDIKey<*>) {
+		if (key is KTypeDIKey<*>)
+			validateType(key.type)
 	}
 
 

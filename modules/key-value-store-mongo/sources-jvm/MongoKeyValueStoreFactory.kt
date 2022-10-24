@@ -7,9 +7,9 @@ import kotlin.reflect.*
 
 private class MongoKeyValueStoreFactory(
 	private val database: MongoDatabase,
-) : KeyValueStoreFactory {
+) : RaptorKeyValueStoreFactory {
 
-	override fun <Key : Any, Value : Any> create(name: String, keyClass: KClass<Key>, valueClass: KClass<Value>): KeyValueStore<Key, Value> =
+	override fun <Key : Any, Value : Any> create(name: String, keyClass: KClass<Key>, valueClass: KClass<Value>): RaptorKeyValueStore<Key, Value> =
 		MongoKeyValueStore(
 			database = database,
 			collectionName = name,
@@ -19,5 +19,5 @@ private class MongoKeyValueStoreFactory(
 }
 
 
-public fun KeyValueStoreFactory.Companion.mongo(database: MongoDatabase): KeyValueStoreFactory =
+public fun RaptorKeyValueStoreFactory.Companion.mongo(database: MongoDatabase): RaptorKeyValueStoreFactory =
 	MongoKeyValueStoreFactory(database = database)

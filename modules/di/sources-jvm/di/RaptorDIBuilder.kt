@@ -1,39 +1,35 @@
 package io.fluidsonic.raptor.di
 
 import io.fluidsonic.raptor.*
-import kotlin.reflect.*
-import kotlin.reflect.full.*
 
 
 @RaptorDsl
 public interface RaptorDIBuilder {
 
 	@RaptorDsl
-	public fun provide(type: KType, provide: RaptorDI.() -> Any?)
+	public fun <Value : Any> provide(key: RaptorDIKey<in Value>, provide: RaptorDI.() -> Value?)
 }
 
 
 @RaptorDsl
-public inline fun <reified Dependency : Any> RaptorDIBuilder.provide(noinline provide: RaptorDI.() -> Dependency) {
-	// withNullability(false) to work around https://youtrack.jetbrains.com/issue/KT-45066
-	provide(typeOf<Dependency>().withNullability(false), provide = provide)
+public inline fun <reified Value : Any> RaptorDIBuilder.provide(noinline provide: RaptorDI.() -> Value) {
+	provide(RaptorDIKey<Value>(), provide = provide)
 }
 
 
 @RaptorDsl
-public inline fun <reified Dependency : Any> RaptorDIBuilder.provide(dependency: Dependency) {
-	provide { dependency }
+public inline fun <reified Value : Any> RaptorDIBuilder.provide(value: Value) {
+	provide { value }
 }
 
 
 @RaptorDsl
-public inline fun <reified Dependency : Any> RaptorDIBuilder.provideOptional(noinline provide: RaptorDI.() -> Dependency?) {
-	// withNullability(false) to work around https://youtrack.jetbrains.com/issue/KT-45066
-	provide(typeOf<Dependency>().withNullability(false), provide = provide)
+public inline fun <reified Value : Any> RaptorDIBuilder.provideOptional(noinline provide: RaptorDI.() -> Value?) {
+	provide(RaptorDIKey<Value>(), provide = provide)
 }
 
 
 @RaptorDsl
-public inline fun <reified Dependency : Any> RaptorDIBuilder.provideOptional(dependency: Dependency?) {
-	provideOptional { dependency }
+public inline fun <reified Value : Any> RaptorDIBuilder.provideOptional(value: Value?) {
+	provideOptional { value }
 }

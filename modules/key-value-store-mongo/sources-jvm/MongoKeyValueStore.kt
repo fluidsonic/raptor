@@ -5,7 +5,7 @@ import io.fluidsonic.mongo.*
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.bson.*
 import io.fluidsonic.raptor.keyvaluestore.*
-import io.fluidsonic.raptor.keyvaluestore.KeyValueStore.*
+import io.fluidsonic.raptor.keyvaluestore.RaptorKeyValueStore.*
 import io.fluidsonic.raptor.mongo.*
 import kotlin.reflect.*
 import kotlinx.coroutines.flow.*
@@ -18,7 +18,7 @@ private class MongoKeyValueStore<Key : Any, Value : Any>(
 	private val collection: MongoCollection<Entry<Key, Value>>,
 	private val keyClass: KClass<Key>,
 	private val valueClass: KClass<Value>,
-) : KeyValueStore<Key, Value> {
+) : RaptorKeyValueStore<Key, Value> {
 
 	override suspend fun clear() {
 		collection.deleteMany(Document())
@@ -57,7 +57,7 @@ internal fun <Key : Any, Value : Any> MongoKeyValueStore(
 	collectionName: String,
 	keyClass: KClass<Key>,
 	valueClass: KClass<Value>,
-): KeyValueStore<Key, Value> =
+): RaptorKeyValueStore<Key, Value> =
 	MongoKeyValueStore(
 		collection = database.getCollectionOf<Entry<Key, Value>>(collectionName)
 			.withCodecRegistry(CodecRegistries.fromRegistries(
@@ -75,7 +75,7 @@ internal fun <Key : Any, Value : Any> MongoKeyValueStore(
 internal inline fun <reified Key : Any, reified Value : Any> MongoKeyValueStore(
 	database: MongoDatabase,
 	collectionName: String,
-): KeyValueStore<Key, Value> =
+): RaptorKeyValueStore<Key, Value> =
 	MongoKeyValueStore(
 		database = database,
 		collectionName = collectionName,

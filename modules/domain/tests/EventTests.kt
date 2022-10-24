@@ -115,7 +115,7 @@ class EventTests {
 					version = 0,
 				)
 			}.message,
-			expected = "Version number must be positive: 0"
+			expected = "'version' must be positive: 0"
 		)
 	}
 }

@@ -2,7 +2,6 @@ package io.fluidsonic.raptor.di
 
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.transactions.*
-import kotlin.reflect.*
 
 
 private val key = RaptorComponentKey<TransactionDIRaptorComponent>("transaction DI")
@@ -18,8 +17,13 @@ private class TransactionDIRaptorComponent :
 	val factoryPropertyKey: RaptorPropertyKey<RaptorDI.Factory> = RaptorPropertyKey("transaction DI factory")
 
 
-	override fun provide(type: KType, provide: RaptorDI.() -> Any?) {
-		builder.provide(type = type, provide = provide)
+	override fun <Value : Any> provide(key: RaptorDIKey<in Value>, provide: RaptorDI.() -> Value) {
+		builder.provide(key = key, provide = provide)
+	}
+
+
+	override fun <Value : Any> provideOptional(key: RaptorDIKey<in Value>, provide: RaptorDI.() -> Value?) {
+		builder.provide(key = key, provide = provide)
 	}
 
 

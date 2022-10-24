@@ -1,7 +1,6 @@
 package io.fluidsonic.raptor.di
 
 import io.fluidsonic.raptor.*
-import kotlin.reflect.*
 
 
 internal class RaptorDIFactoryComponent :
@@ -11,8 +10,13 @@ internal class RaptorDIFactoryComponent :
 	private val builder = DefaultRaptorDIBuilder()
 
 
-	override fun provide(type: KType, provide: RaptorDI.() -> Any?) {
-		builder.provide(type = type, provide = provide)
+	override fun <Value : Any> provide(key: RaptorDIKey<in Value>, provide: RaptorDI.() -> Value) {
+		builder.provide(key = key, provide = provide)
+	}
+
+
+	override fun <Value : Any> provideOptional(key: RaptorDIKey<in Value>, provide: RaptorDI.() -> Value?) {
+		builder.provide(key = key, provide = provide)
 	}
 
 

@@ -3,7 +3,7 @@ package io.fluidsonic.raptor.keyvaluestore
 import kotlinx.coroutines.flow.*
 
 
-public interface KeyValueStore<Key : Any, Value : Any> {
+public interface RaptorKeyValueStore<Key : Any, Value : Any> {
 
 	public suspend fun clear()
 	public fun entries(): Flow<Entry<Key, Value>>

@@ -1,13 +1,13 @@
 package io.fluidsonic.raptor.keyvaluestore.memory
 
 import io.fluidsonic.raptor.keyvaluestore.*
-import io.fluidsonic.raptor.keyvaluestore.KeyValueStore.*
+import io.fluidsonic.raptor.keyvaluestore.RaptorKeyValueStore.*
 import java.util.concurrent.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.Flow
 
 
-internal class MemoryKeyValueStore<Key : Any, Value : Any> : KeyValueStore<Key, Value> {
+internal class MemoryKeyValueStore<Key : Any, Value : Any> : RaptorKeyValueStore<Key, Value> {
 
 	private val valuesByKey = ConcurrentHashMap<Key, Value>()
 

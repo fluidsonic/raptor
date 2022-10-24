@@ -4,6 +4,7 @@ import io.fluidsonic.raptor.*
 import kotlin.internal.*
 import kotlin.properties.*
 import kotlin.reflect.*
+import kotlin.reflect.full.*
 
 
 private val propertyKey = RaptorPropertyKey<RaptorDI>("DI")
@@ -13,7 +14,11 @@ private val propertyKey = RaptorPropertyKey<RaptorDI>("DI")
 public interface RaptorDI {
 
 	@RaptorDsl
-	public fun get(type: KType): Any?
+	public fun <Value : Any> get(key: RaptorDIKey<out Value>): Value
+
+
+	@RaptorDsl
+	public fun <Value : Any> getOrNull(key: RaptorDIKey<out Value>): Value?
 
 
 	@RaptorDsl
@@ -31,13 +36,13 @@ public interface RaptorDI {
 
 
 		@RaptorInternalApi
-		public fun module(name: String, providers: List<Provider>): Module =
+		public fun module(name: String, providers: List<Provider<*>>): Module =
 			DefaultRaptorDI.Module(name = name, providers = providers.toList())
 
 
 		@RaptorInternalApi
-		public fun provider(type: KType, provide: RaptorDI.() -> Any?): Provider =
-			DefaultRaptorDI.Provider(provide = provide, type = type)
+		public fun <Value : Any> provider(key: RaptorDIKey<Value>, provide: RaptorDI.() -> Value?): Provider<Value> =
+			DefaultRaptorDI.Provider(provide = provide, key = key)
 	}
 
 
@@ -45,7 +50,11 @@ public interface RaptorDI {
 	@RaptorInternalApi
 	public interface Factory {
 
-		public fun createDI(context: RaptorContext, type: KType, configuration: RaptorDIBuilder.() -> Unit = {}): RaptorDI
+		public fun <Context : RaptorContext> createDI(
+			context: Context,
+			key: RaptorDIKey<in Context>,
+			configuration: RaptorDIBuilder.() -> Unit = {},
+		): RaptorDI
 
 
 		public companion object {
@@ -59,16 +68,16 @@ public interface RaptorDI {
 	public interface Module {
 
 		public val name: String
-		public val providers: List<Provider>
+		public val providers: List<Provider<*>>
 	}
 
 
 	@RaptorInternalApi
-	public interface Provider {
+	public interface Provider<Value : Any> {
 
-		public val type: KType
+		public val key: RaptorDIKey<Value>
 
-		public fun provide(di: RaptorDI): Any?
+		public fun provide(di: RaptorDI): Value?
 	}
 }
 
@@ -79,8 +88,23 @@ public val RaptorDI.context: RaptorContext
 
 
 @RaptorDsl
-public inline fun <reified Value> RaptorDI.get(): Value =
-	get(typeOf<Value>()) as Value
+public inline fun <reified Value : Any> RaptorDI.get(): Value =
+	get(typeOf<Value>())
+
+
+@RaptorDsl
+public fun <Value : Any> RaptorDI.get(type: KType): Value =
+	get(RaptorDIKey<Value>(type))
+
+
+@RaptorDsl
+public inline fun <reified Value : Any> RaptorDI.getOrNull(): Value? =
+	getOrNull(typeOf<Value>())
+
+
+@RaptorDsl
+public fun <Value : Any> RaptorDI.getOrNull(type: KType): Value? =
+	getOrNull(RaptorDIKey<Value>(type))
 
 
 @RaptorDsl
@@ -100,11 +124,12 @@ internal inline fun <reified Context : RaptorContext> RaptorDI.Factory.createDI(
 	context: @NoInfer Context,
 	noinline configuration: RaptorDIBuilder.() -> Unit = {},
 ): RaptorDI =
-	createDI(context = context, type = typeOf<Context>(), configuration = configuration)
+	createDI(context = context, key = RaptorDIKey<Context>(), configuration = configuration)
 
 
-public fun RaptorDI.Module.providerForType(type: KType): RaptorDI.Provider? =
-	providers.lastOrNull { it.type == type }
+@Suppress("UNCHECKED_CAST")
+public fun <Value : Any> RaptorDI.Module.providerForKey(key: RaptorDIKey<out Value>): RaptorDI.Provider<Value>? =
+	providers.lastOrNull { it.key == key } as RaptorDI.Provider<Value>?
 
 
 internal fun RaptorPropertyRegistry.register(di: RaptorDI) {

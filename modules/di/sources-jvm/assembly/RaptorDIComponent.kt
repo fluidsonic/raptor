@@ -5,57 +5,71 @@ package io.fluidsonic.raptor.di
 import io.fluidsonic.raptor.*
 import kotlin.internal.*
 import kotlin.reflect.*
-import kotlin.reflect.full.*
 
 
 public interface RaptorDIComponent<Component : RaptorDIComponent<Component>> : RaptorComponent<Component> {
 
 	@RaptorDsl
-	public fun provide(type: KType, provide: RaptorDI.() -> Any?)
+	public fun <Value : Any> provide(key: RaptorDIKey<in Value>, provide: RaptorDI.() -> Value)
+
+	@RaptorDsl
+	public fun <Value : Any> provideOptional(key: RaptorDIKey<in Value>, provide: RaptorDI.() -> Value?)
 }
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery<RaptorDIComponent<*>>.provide(type: KType, provide: RaptorDI.() -> Any?) {
+public fun <Value : Any> RaptorAssemblyQuery<RaptorDIComponent<*>>.provide(key: RaptorDIKey<in Value>, provide: RaptorDI.() -> Value) {
 	each {
-		provide(type = type, provide = provide)
+		provide(key = key, provide = provide)
 	}
 }
 
 
 @RaptorDsl
-public inline fun <reified Dependency : Any> RaptorAssemblyQuery<RaptorDIComponent<*>>.provide(
-	noinline provide: RaptorDI.() -> @NoInfer Dependency,
+public fun <Value : Any> RaptorAssemblyQuery<RaptorDIComponent<*>>.provide(type: KType, provide: RaptorDI.() -> @NoInfer Value) {
+	provide(key = RaptorDIKey<Value>(type), provide = provide)
+}
+
+
+@RaptorDsl
+public inline fun <reified Value : Any> RaptorAssemblyQuery<RaptorDIComponent<*>>.provide(
+	noinline provide: RaptorDI.() -> @NoInfer Value,
 ) {
-	// withNullability(false) to work around https://youtrack.jetbrains.com/issue/KT-45066
-	provide(typeOf<Dependency>().withNullability(false), provide = provide)
+	provide<Value>(type = typeOf<Value>(), provide = provide)
 }
 
 
 @LowPriorityInOverloadResolution // https://youtrack.jetbrains.com/issue/KT-54478/NoInfer-causes-CONFLICTINGOVERLOADS
 @RaptorDsl
-public inline fun <reified Dependency : Any> RaptorAssemblyQuery<RaptorDIComponent<*>>.provide(dependency: @NoInfer Dependency) {
-	provide<Dependency> { dependency }
+public inline fun <reified Value : Any> RaptorAssemblyQuery<RaptorDIComponent<*>>.provide(value: @NoInfer Value) {
+	provide<Value> { value }
 }
 
 
 @RaptorDsl
-public inline fun <reified Dependency : Any> RaptorAssemblyQuery<RaptorDIComponent<*>>.provideOptional(
-	noinline provide: RaptorDI.() -> @NoInfer Dependency?,
+public fun <Value : Any> RaptorAssemblyQuery<RaptorDIComponent<*>>.provideOptional(key: RaptorDIKey<in Value>, provide: RaptorDI.() -> Value?) {
+	each {
+		provideOptional(key = key, provide = provide)
+	}
+}
+
+
+@RaptorDsl
+public fun <Value : Any> RaptorAssemblyQuery<RaptorDIComponent<*>>.provideOptional(type: KType, provide: RaptorDI.() -> @NoInfer Value?) {
+	provideOptional(key = RaptorDIKey<Value>(type), provide = provide)
+}
+
+
+@RaptorDsl
+public inline fun <reified Value : Any> RaptorAssemblyQuery<RaptorDIComponent<*>>.provideOptional(
+	noinline provide: RaptorDI.() -> @NoInfer Value?,
 ) {
-	// withNullability(false) to work around https://youtrack.jetbrains.com/issue/KT-45066
-	provideOptional(typeOf<Dependency>().withNullability(false), provide = provide)
-}
-
-
-@RaptorDsl
-public fun RaptorAssemblyQuery<RaptorDIComponent<*>>.provideOptional(type: KType, provide: RaptorDI.() -> Any?) {
-	provide(type = type, provide = provide)
+	provideOptional<Value>(type = typeOf<Value>(), provide = provide)
 }
 
 
 @LowPriorityInOverloadResolution // https://youtrack.jetbrains.com/issue/KT-54478/NoInfer-causes-CONFLICTINGOVERLOADS
 @RaptorDsl
-public inline fun <reified Dependency : Any> RaptorAssemblyQuery<RaptorDIComponent<*>>.provideOptional(dependency: @NoInfer Dependency?) {
-	provideOptional<Dependency> { dependency }
+public inline fun <reified Value : Any> RaptorAssemblyQuery<RaptorDIComponent<*>>.provideOptional(dependency: @NoInfer Value?) {
+	provideOptional<Value> { dependency }
 }
