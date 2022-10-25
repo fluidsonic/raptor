@@ -4,6 +4,7 @@ import io.github.cdimascio.dotenv.*
 
 
 @RaptorDsl
+@Suppress("MemberVisibilityCanBePrivate") // TODO Add tests.
 public class RaptorEnvironment private constructor(
 	private val dotenv: Dotenv = dotenv { ignoreIfMissing = true },
 	private val prefix: String = "",
@@ -22,7 +23,7 @@ public class RaptorEnvironment private constructor(
 
 
 	// TODO Fail on empty key?
-	private fun resolve(key: String): String =
+	public fun resolve(key: String): String =
 		when {
 			prefix.isEmpty() || key.isEmpty() -> key
 			else -> "$prefix$key"

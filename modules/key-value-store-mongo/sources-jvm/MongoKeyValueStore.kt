@@ -92,22 +92,30 @@ private class KeyValueEntryBsonCodec<Key : Any, Value : Any>(
 ) : Codec<Entry<Key, Value>> {
 
 	override fun decode(reader: BsonReader, decoderContext: DecoderContext): Entry<Key, Value> {
+		reader.readStartDocument()
+
 		reader.readName(Fields.key)
 		val key = keyCodec.decode(reader, null)
 
 		reader.readName(Fields.value)
 		val value = valueCodec.decode(reader, null)
 
+		reader.readEndDocument()
+
 		return Entry(key = key, value = value)
 	}
 
 
 	override fun encode(writer: BsonWriter, value: Entry<Key, Value>, encoderContext: EncoderContext) {
+		writer.writeStartDocument()
+
 		writer.writeName(Fields.key)
 		keyCodec.encode(writer, value.key, null)
 
 		writer.writeName(Fields.value)
 		valueCodec.encode(writer, value.value, null)
+
+		writer.writeEndDocument()
 	}
 
 
