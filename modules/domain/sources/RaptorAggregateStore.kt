@@ -8,6 +8,8 @@ public interface RaptorAggregateStore {
 	public suspend fun add(events: List<RaptorAggregateEvent<*, *>>)
 	public fun load(): Flow<RaptorAggregateEvent<*, *>>
 
+	public suspend fun start() {}
+
 
 	public companion object
 }

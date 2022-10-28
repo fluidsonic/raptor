@@ -31,6 +31,7 @@ public object RaptorDomainPlugin : RaptorPluginWithConfiguration<RaptorDomainPlu
 
 			lifecycle {
 				onStart(priority = Int.MIN_VALUE) {
+					context.plugins.domain.aggregates.store.start()
 					context.plugins.domain.aggregates.manager.load()
 				}
 				onStop(priority = Int.MAX_VALUE) {

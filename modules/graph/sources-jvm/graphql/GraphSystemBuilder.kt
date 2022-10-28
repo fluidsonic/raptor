@@ -42,7 +42,14 @@ internal class GraphSystemBuilder private constructor(
 	private fun buildEnumDefinition(type: EnumGraphType) = GEnumType(
 		description = type.description,
 		name = type.name,
-		values = type.values.map { GEnumValueDefinition(name = it) }.sortedBy { it.name },
+		values = type.values
+			.map { value ->
+				GEnumValueDefinition(
+					description = value.description,
+					name = value.name,
+				)
+			}
+			.sortedBy { it.name },
 		extensions = GNodeExtensionSet {
 			outputCoercer = EnumCoercer
 			nodeInputCoercer = EnumCoercer

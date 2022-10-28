@@ -14,6 +14,7 @@ public class RaptorGraphArgumentDefinitionBuilder<Value> internal constructor(
 ) {
 
 	private var default: GValue? = null
+	private var description: String? = null
 	private val isMaybe = kotlinType.classifier == Maybe::class
 	private var name: String? = null
 
@@ -21,7 +22,7 @@ public class RaptorGraphArgumentDefinitionBuilder<Value> internal constructor(
 	internal fun build() =
 		GraphArgumentDefinition(
 			defaultValue = default,
-			description = null, // TODO
+			description = description?.ifEmpty { null },
 			kotlinType = kotlinType,
 			name = name,
 			resolver = resolver,
@@ -79,6 +80,14 @@ public class RaptorGraphArgumentDefinitionBuilder<Value> internal constructor(
 	@RaptorDsl
 	public fun defaultString(default: String) {
 		default(GStringValue(default))
+	}
+
+
+	@RaptorDsl
+	public fun description(description: String) {
+		check(this.description === null) { "Cannot define multiple descriptions." }
+
+		this.description = description
 	}
 
 

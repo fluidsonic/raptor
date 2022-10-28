@@ -38,7 +38,7 @@ public class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi inte
 		if (inputFactory == null && inputKotlinType.classifier == Unit::class)
 			inputFactory = { Unit as Input }
 
-		val description = description
+		val description = description?.ifEmpty { null }
 		val inputFactory = checkNotNull(inputFactory) { "The input must be defined: input { … } or inputObject { … }" }
 		val outputKotlinType = outputKotlinType
 		val operation = operation
@@ -94,6 +94,14 @@ public class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi inte
 
 	internal fun defaultOutputObjectName() =
 		name.replaceFirstChar { it.uppercase() } + "Output"
+
+
+	@RaptorDsl
+	public fun description(description: String) {
+		check(this.description === null) { "Cannot define multiple descriptions." }
+
+		this.description = description
+	}
 
 
 	@RaptorDsl

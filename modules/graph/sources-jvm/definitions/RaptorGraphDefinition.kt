@@ -107,7 +107,7 @@ internal class EnumGraphDefinition(
 	val parse: RaptorGraphInputScope.(input: String) -> Any,
 	val serialize: RaptorGraphOutputScope.(output: Any) -> String,
 	stackTrace: List<StackTraceElement>,
-	val values: Set<String>,
+	val values: Collection<EnumValue>,
 ) : NamedGraphTypeDefinition(
 	additionalDefinitions = additionalDefinitions,
 	description = description,

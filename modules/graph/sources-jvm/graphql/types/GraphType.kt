@@ -27,7 +27,7 @@ internal class EnumGraphType(
 	name: String,
 	val parse: RaptorGraphInputScope.(input: String) -> Any,
 	val serialize: RaptorGraphOutputScope.(output: Any) -> String,
-	val values: Set<String>,
+	val values: Collection<EnumValue>,
 ) : NamedGraphType(
 	description = description,
 	kotlinType = kotlinType,
@@ -38,6 +38,12 @@ internal class EnumGraphType(
 		require(isInput || isOutput)
 	}
 }
+
+
+internal class EnumValue(
+	val description: String?,
+	val name: String,
+)
 
 
 internal sealed class GraphType(

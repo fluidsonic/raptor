@@ -103,7 +103,7 @@ internal class GraphTypeSystemBuilder private constructor(
 			name = definition.name,
 			parse = definition.parse,
 			serialize = definition.serialize,
-			values = definition.values
+			values = definition.values,
 		)
 
 

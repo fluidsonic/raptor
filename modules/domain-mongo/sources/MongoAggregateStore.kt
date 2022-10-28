@@ -1,7 +1,10 @@
 package io.fluidsonic.raptor.domain.mongo
 
+import com.mongodb.client.model.*
+import com.mongodb.client.model.Sorts.*
 import io.fluidsonic.mongo.*
 import io.fluidsonic.raptor.domain.*
+import io.fluidsonic.raptor.domain.mongo.RaptorAggregateEventBson.Fields
 import kotlinx.coroutines.flow.*
 
 
@@ -17,8 +20,17 @@ private class MongoAggregateStore(
 	}
 
 
+	// TODO Can still lead to different order than written. We don't have enough data to maintain insertion order.
 	override fun load(): Flow<RaptorAggregateEvent<*, *>> =
-		collection.find() // FIXME Needs explicit order. Capped collections won't work as they are size-limited & don't support transactions.
+		collection.find().sort(orderBy(
+			ascending(Fields.timestamp),
+			ascending(Fields.version),
+		))
+
+
+	override suspend fun start() {
+		collection.createIndex(Indexes.ascending(Fields.timestamp))
+	}
 }
 
 
