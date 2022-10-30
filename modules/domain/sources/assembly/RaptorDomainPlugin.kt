@@ -4,6 +4,7 @@ import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.di.*
 import io.fluidsonic.raptor.lifecycle.*
 import io.fluidsonic.raptor.transactions.*
+import kotlinx.coroutines.*
 
 
 public object RaptorDomainPlugin : RaptorPluginWithConfiguration<RaptorDomainPluginConfiguration> {
@@ -31,8 +32,16 @@ public object RaptorDomainPlugin : RaptorPluginWithConfiguration<RaptorDomainPlu
 
 			lifecycle {
 				onStart(priority = Int.MIN_VALUE) {
-					context.plugins.domain.aggregates.store.start()
-					context.plugins.domain.aggregates.manager.load()
+					val configuration = context.plugins.domain
+					configuration.aggregates.store.start()
+					configuration.aggregates.manager.load()
+
+					val actions = configuration.onLoadedActions
+					configuration.onLoadedActions = emptyList()
+
+					coroutineScope {
+						actions.map { async { it() } }.awaitAll()
+					}
 				}
 				onStop(priority = Int.MAX_VALUE) {
 					context.plugins.domain.aggregates.eventStreamInternal.stop()

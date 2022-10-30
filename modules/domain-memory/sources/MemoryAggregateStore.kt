@@ -3,7 +3,8 @@ package io.fluidsonic.raptor.domain
 import kotlinx.coroutines.flow.*
 
 
-// FIXME race
+// FIXME Prevent race conditions.
+// FIXME Check for version conflicts.
 private class MemoryAggregateStore : RaptorAggregateStore {
 
 	private val events: MutableList<RaptorAggregateEvent<*, *>> = mutableListOf()

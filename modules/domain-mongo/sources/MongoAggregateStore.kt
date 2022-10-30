@@ -1,22 +1,33 @@
 package io.fluidsonic.raptor.domain.mongo
 
+import com.mongodb.*
 import com.mongodb.client.model.*
 import com.mongodb.client.model.Sorts.*
 import io.fluidsonic.mongo.*
 import io.fluidsonic.raptor.domain.*
 import io.fluidsonic.raptor.domain.mongo.RaptorAggregateEventBson.Fields
+import io.fluidsonic.raptor.mongo.*
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 
 // TODO Support horizontal scaling.
 private class MongoAggregateStore(
+	private val client: MongoClient,
 	private val collection: MongoCollection<RaptorAggregateEvent<*, *>>,
 ) : RaptorAggregateStore {
 
 	override suspend fun add(events: List<RaptorAggregateEvent<*, *>>) {
 		// TODO Batch in case the number of events is large.
-		// FIXME tx
-		collection.insertMany(events)
+		try {
+			client.transaction { session ->
+				collection.insertMany(session, events, InsertManyOptions().ordered(false))
+			}
+		}
+		catch (e: MongoBulkWriteException) {
+			// FIXME Check for duplicate key errors.
+			throw RaptorAggregateVersionConflict(e)
+		}
 	}
 
 
@@ -29,10 +40,13 @@ private class MongoAggregateStore(
 
 
 	override suspend fun start() {
-		collection.createIndex(Indexes.ascending(Fields.timestamp))
+		coroutineScope {
+			launch { collection.createIndex(Indexes.ascending(Fields.timestamp)) }
+			launch { collection.createIndex(Indexes.ascending(Fields.aggregateId, Fields.version), IndexOptions().unique(true)) }
+		}
 	}
 }
 
 
-public fun RaptorAggregateStore.Companion.mongo(collection: MongoCollection<RaptorAggregateEvent<*, *>>): RaptorAggregateStore =
-	MongoAggregateStore(collection = collection)
+public fun RaptorAggregateStore.Companion.mongo(client: MongoClient, databaseName: String, collectionName: String): RaptorAggregateStore =
+	MongoAggregateStore(client = client, collection = client.getDatabase(databaseName).getCollectionOf(collectionName))
