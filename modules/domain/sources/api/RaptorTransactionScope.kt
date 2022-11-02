@@ -6,7 +6,7 @@ import kotlin.reflect.*
 
 
 @RaptorDsl
-public fun <Id : RaptorAggregateId> RaptorTransactionScope.execute(id: Id, command: RaptorAggregateCommand<Id>) {
+public suspend fun <Id : RaptorAggregateId> RaptorTransactionScope.execute(id: Id, command: RaptorAggregateCommand<Id>) {
 	context.plugins.domain.aggregates.manager.execute(id, command)
 }
 

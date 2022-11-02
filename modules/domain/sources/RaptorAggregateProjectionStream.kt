@@ -1,3 +1,5 @@
+// FIXME Needs refactoring.
+
 package io.fluidsonic.raptor.domain
 
 import kotlin.reflect.*
@@ -7,10 +9,24 @@ import kotlinx.coroutines.flow.*
 
 public interface RaptorAggregateProjectionEventStream {
 
-	public fun asBatchFlow(): Flow<RaptorAggregateProjectionEventBatch<*, *, *>>
-	public fun asFlow(): Flow<RaptorAggregateProjectionEvent<*, *, *>>
+	public val messages: Flow<RaptorAggregateProjectionStreamMessage<*, *, *>>
+
 	public suspend fun wait()
 }
+
+
+@OptIn(FlowPreview::class)
+public fun <
+	ProjectionId : RaptorAggregateProjectionId,
+	Projection : RaptorProjection<ProjectionId>,
+	Change : RaptorAggregateChange<ProjectionId>,
+	> Flow<RaptorAggregateProjectionStreamMessage<ProjectionId, Projection, Change>>.events(): Flow<RaptorAggregateProjectionEvent<ProjectionId, Projection, Change>> =
+	flatMapConcat { message ->
+		when (message) {
+			is RaptorAggregateProjectionEventBatch<ProjectionId, Projection, Change> -> message.events.asFlow()
+			else -> emptyFlow()
+		}
+	}
 
 
 @JvmName("subscribeBatchIn")
@@ -19,7 +35,7 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 	RaptorAggregateProjectionEventStream.subscribeIn(
 	scope: CoroutineScope,
 	collector: suspend (event: RaptorAggregateProjectionEventBatch<Id, Projection, Change>) -> Unit,
-	errorStrategy: RaptorAggregateEventStream.ErrorStrategy = RaptorAggregateEventStream.ErrorStrategy.skip, // FIXME use
+	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip, // FIXME use
 	changeClass: KClass<Change>,
 	idClass: KClass<Id>,
 	projectionClass: KClass<Projection>,
@@ -28,13 +44,14 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 	val completion = CompletableDeferred<Unit>()
 	var failedProjectionIds: MutableSet<RaptorAggregateProjectionId>? = null
 
-	return asBatchFlow()
+	return messages
 		.let { flow ->
 			when (includeReplays) {
 				true -> flow
-				false -> flow.filter { !it.isReplay }
+				false -> flow.dropWhile { it !is RaptorAggregateProjectionStreamMessage.Loaded }
 			}
 		}
+		.filterIsInstance<RaptorAggregateProjectionEventBatch<*, *, *>>()
 		.filter { idClass.isInstance(it.projectionId) }
 		.mapNotNull { batch ->
 			batch.events
@@ -70,7 +87,7 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 	RaptorAggregateProjectionEventStream.subscribeIn(
 	scope: CoroutineScope,
 	collector: suspend (event: RaptorAggregateProjectionEvent<Id, Projection, Change>) -> Unit,
-	errorStrategy: RaptorAggregateEventStream.ErrorStrategy = RaptorAggregateEventStream.ErrorStrategy.skip, // FIXME use
+	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip, // FIXME use
 	changeClass: KClass<Change>,
 	idClass: KClass<Id>,
 	projectionClass: KClass<Projection>,
@@ -79,13 +96,14 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 	val completion = CompletableDeferred<Unit>()
 	var failedProjectionIds: MutableSet<RaptorAggregateProjectionId>? = null
 
-	return asFlow()
+	return messages
 		.let { flow ->
 			when (includeReplays) {
 				true -> flow
-				false -> flow.filter { !it.isReplay }
+				false -> flow.dropWhile { it !is RaptorAggregateProjectionStreamMessage.Loaded }
 			}
 		}
+		.events()
 		.filterIsInstance(changeClass = changeClass, idClass = idClass, projectionClass = projectionClass)
 		.onEach { event ->
 			val projectionId = event.projectionId
@@ -115,7 +133,7 @@ public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Cha
 	RaptorAggregateProjectionEventStream.subscribeIn(
 	scope: CoroutineScope,
 	noinline collector: suspend (event: RaptorAggregateProjectionEventBatch<Id, Projection, Change>) -> Unit,
-	errorStrategy: RaptorAggregateEventStream.ErrorStrategy = RaptorAggregateEventStream.ErrorStrategy.skip,
+	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip,
 	includeReplays: Boolean = false,
 ): Job =
 	subscribeIn(
@@ -133,7 +151,7 @@ public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Cha
 	RaptorAggregateProjectionEventStream.subscribeIn(
 	scope: CoroutineScope,
 	noinline collector: suspend (event: RaptorAggregateProjectionEvent<Id, Projection, Change>) -> Unit,
-	errorStrategy: RaptorAggregateEventStream.ErrorStrategy = RaptorAggregateEventStream.ErrorStrategy.skip,
+	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip,
 	includeReplays: Boolean = false,
 ): Job =
 	subscribeIn(
@@ -144,6 +162,55 @@ public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Cha
 		idClass = Id::class,
 		projectionClass = Projection::class,
 		includeReplays = includeReplays,
+	)
+
+
+@Suppress("UNCHECKED_CAST")
+public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>, Projection : RaptorProjection<Id>>
+	RaptorAggregateProjectionEventStream.subscribeMessagesIn(
+	scope: CoroutineScope,
+	collector: suspend (message: RaptorAggregateProjectionStreamMessage<Id, Projection, Change>) -> Unit,
+	changeClass: KClass<Change>,
+	idClass: KClass<Id>,
+	projectionClass: KClass<Projection>,
+): Job {
+	val completion = CompletableDeferred<Unit>()
+
+	return messages
+		.mapNotNull { message ->
+			when (message) {
+				is RaptorAggregateProjectionEventBatch<*, *, *> ->
+					message
+						.takeIf { idClass.isInstance(it.projectionId) }
+						?.events
+						?.mapNotNull { it.castOrNull(changeClass = changeClass, idClass = idClass, projectionClass = projectionClass) }
+						?.ifEmpty { null }
+						?.let { message.copy(events = it as List<RaptorAggregateProjectionEvent<Nothing, Nothing, Nothing>>) }
+
+				else -> message
+			}
+		}
+		.let { it as Flow<RaptorAggregateProjectionStreamMessage<Id, Projection, Change>> }
+		.onEach { event ->
+			collector(event)
+		}
+		.onStart { completion.complete(Unit) }
+		.launchIn(scope)
+		.also { completion.await() }
+}
+
+
+public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Change : RaptorAggregateChange<Id>, reified Projection : RaptorProjection<Id>>
+	RaptorAggregateProjectionEventStream.subscribeMessagesIn(
+	scope: CoroutineScope,
+	noinline collector: suspend (message: RaptorAggregateProjectionStreamMessage<Id, Projection, Change>) -> Unit,
+): Job =
+	subscribeMessagesIn(
+		scope = scope,
+		collector = collector,
+		changeClass = Change::class,
+		idClass = Id::class,
+		projectionClass = Projection::class,
 	)
 
 

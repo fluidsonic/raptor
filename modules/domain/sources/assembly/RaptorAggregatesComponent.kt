@@ -28,8 +28,8 @@ public class RaptorAggregatesComponent internal constructor(
 			DIPlaceholder -> DIAggregateEventFactory(context = context)
 			else -> eventFactory
 		}
-		val eventStream = DefaultAggregateEventStream()
-		val projectionEventStream = DefaultAggregateProjectionEventStream()
+		val eventStream = DefaultAggregateStream()
+		val projectionEventStream = DefaultAggregateProjectionStream()
 		val projectionLoaderManager = DefaultAggregateProjectionLoaderManager(
 			definitions = definitions.mapNotNull { it.projectionDefinition },
 		)

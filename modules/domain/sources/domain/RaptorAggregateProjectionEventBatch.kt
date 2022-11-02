@@ -7,10 +7,10 @@ public data class RaptorAggregateProjectionEventBatch<
 	out Change : RaptorAggregateChange<ProjectionId>,
 	>(
 	val events: List<RaptorAggregateProjectionEvent<ProjectionId, Projection, Change>>,
-	val isReplay: Boolean, // TODO calculate?
+	val isReplay: Boolean, // TODO calculate? // FIXME rm
 	val projectionId: ProjectionId, // TODO calculate?
 	val version: Int, // TODO calculate?
-) {
+) : RaptorAggregateProjectionStreamMessage<ProjectionId, Projection, Change> {
 
 	init {
 		require(events.isNotEmpty()) { "'events' must not be empty." }

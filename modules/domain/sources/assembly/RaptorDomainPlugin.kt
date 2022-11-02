@@ -22,7 +22,7 @@ public object RaptorDomainPlugin : RaptorPluginWithConfiguration<RaptorDomainPlu
 		optional(RaptorDIPlugin) {
 			di.provide<RaptorAggregateCommandExecutor> { context.plugins.domain.aggregates.manager }
 			di.provide<RaptorAggregateEventFactory> { context.plugins.domain.aggregates.eventFactory }
-			di.provide<RaptorAggregateEventStream> { context.plugins.domain.aggregates.eventStream }
+			di.provide<RaptorAggregateStream> { context.plugins.domain.aggregates.eventStream }
 			di.provide<RaptorAggregateProjectionEventStream> { context.plugins.domain.aggregates.projectionEventStream }
 			di.provide<RaptorAggregateStore> { context.plugins.domain.aggregates.store }
 		}
@@ -34,7 +34,7 @@ public object RaptorDomainPlugin : RaptorPluginWithConfiguration<RaptorDomainPlu
 				onStart(priority = Int.MIN_VALUE) {
 					val configuration = context.plugins.domain
 					configuration.aggregates.store.start()
-					configuration.aggregates.manager.load()
+					configuration.aggregates.manager.start()
 
 					val actions = configuration.onLoadedActions
 					configuration.onLoadedActions = emptyList()
@@ -44,8 +44,8 @@ public object RaptorDomainPlugin : RaptorPluginWithConfiguration<RaptorDomainPlu
 					}
 				}
 				onStop(priority = Int.MAX_VALUE) {
-					context.plugins.domain.aggregates.eventStreamInternal.stop()
-					context.plugins.domain.aggregates.projectionEventStreamInternal.stop()
+					val configuration = context.plugins.domain
+					configuration.aggregates.manager.stop()
 				}
 			}
 		}

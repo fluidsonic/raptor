@@ -1,14 +1,16 @@
 package io.fluidsonic.raptor.domain
 
+//import kotlin.reflect.*
+//import kotlinx.coroutines.*
 import kotlin.reflect.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 
-public interface RaptorAggregateEventStream {
+public interface RaptorAggregateStream {
 
-	public fun asBatchFlow(): Flow<RaptorAggregateEventBatch<*, *>>
-	public fun asFlow(): Flow<RaptorAggregateEvent<*, *>>
+	public val messages: Flow<RaptorAggregateStreamMessage<*, *>>
+
 	public suspend fun wait()
 
 
@@ -21,13 +23,26 @@ public interface RaptorAggregateEventStream {
 }
 
 
+@OptIn(FlowPreview::class)
+public fun <
+	AggregateId : RaptorAggregateId,
+	Change : RaptorAggregateChange<AggregateId>,
+	> Flow<RaptorAggregateStreamMessage<AggregateId, Change>>.events(): Flow<RaptorAggregateEvent<AggregateId, Change>> =
+	flatMapConcat { message ->
+		when (message) {
+			is RaptorAggregateEventBatch<AggregateId, Change> -> message.events.asFlow()
+			else -> emptyFlow()
+		}
+	}
+
+
 @JvmName("subscribeBatchIn")
 @Suppress("UNCHECKED_CAST")
 public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
-	RaptorAggregateEventStream.subscribeIn(
+	RaptorAggregateStream.subscribeIn(
 	scope: CoroutineScope,
 	collector: suspend (event: RaptorAggregateEventBatch<Id, Change>) -> Unit,
-	errorStrategy: RaptorAggregateEventStream.ErrorStrategy = RaptorAggregateEventStream.ErrorStrategy.skip, // FIXME use
+	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip, // FIXME use
 	changeClass: KClass<Change>,
 	idClass: KClass<Id>,
 	includeReplays: Boolean = false,
@@ -36,13 +51,14 @@ public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 	var failedAggregateIds: MutableSet<RaptorAggregateId>? = null
 
 	// FIXME Using a Flow means that the events are no longer processed synchronously. OK? Workarounds?
-	return asBatchFlow()
+	return messages
 		.let { flow ->
 			when (includeReplays) {
 				true -> flow
-				false -> flow.filter { !it.isReplay }
+				false -> flow.dropWhile { it !is RaptorAggregateStreamMessage.Loaded }
 			}
 		}
+		.filterIsInstance<RaptorAggregateEventBatch<*, *>>()
 		.filter { idClass.isInstance(it.aggregateId) }
 		.mapNotNull { batch ->
 			when {
@@ -79,10 +95,10 @@ public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 
 
 public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
-	RaptorAggregateEventStream.subscribeIn(
+	RaptorAggregateStream.subscribeIn(
 	scope: CoroutineScope,
 	collector: suspend (event: RaptorAggregateEvent<Id, Change>) -> Unit,
-	errorStrategy: RaptorAggregateEventStream.ErrorStrategy = RaptorAggregateEventStream.ErrorStrategy.skip, // FIXME use
+	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip, // FIXME use
 	changeClass: KClass<Change>,
 	idClass: KClass<Id>,
 	includeReplays: Boolean = false,
@@ -91,13 +107,14 @@ public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 	var failedAggregateIds: MutableSet<RaptorAggregateId>? = null
 
 	// FIXME Using a Flow means that the events are no longer processed synchronously. OK? Workarounds?
-	return asFlow()
+	return messages
 		.let { flow ->
 			when (includeReplays) {
 				true -> flow
-				false -> flow.filter { !it.isReplay }
+				false -> flow.dropWhile { it !is RaptorAggregateStreamMessage.Loaded }
 			}
 		}
+		.events()
 		.filterIsInstance(changeClass = changeClass, idClass = idClass)
 		.onEach { event ->
 			val aggregateId = event.aggregateId
@@ -124,10 +141,10 @@ public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 
 @JvmName("subscribeBatchIn")
 public suspend inline fun <reified Id : RaptorAggregateId, reified Change : RaptorAggregateChange<Id>>
-	RaptorAggregateEventStream.subscribeIn(
+	RaptorAggregateStream.subscribeIn(
 	scope: CoroutineScope,
 	noinline collector: suspend (event: RaptorAggregateEventBatch<Id, Change>) -> Unit,
-	errorStrategy: RaptorAggregateEventStream.ErrorStrategy = RaptorAggregateEventStream.ErrorStrategy.skip,
+	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip,
 	includeReplays: Boolean = false,
 ): Job =
 	subscribeIn(
@@ -141,10 +158,10 @@ public suspend inline fun <reified Id : RaptorAggregateId, reified Change : Rapt
 
 
 public suspend inline fun <reified Id : RaptorAggregateId, reified Change : RaptorAggregateChange<Id>>
-	RaptorAggregateEventStream.subscribeIn(
+	RaptorAggregateStream.subscribeIn(
 	scope: CoroutineScope,
 	noinline collector: suspend (event: RaptorAggregateEvent<Id, Change>) -> Unit,
-	errorStrategy: RaptorAggregateEventStream.ErrorStrategy = RaptorAggregateEventStream.ErrorStrategy.skip,
+	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip,
 	includeReplays: Boolean = false,
 ): Job =
 	subscribeIn(

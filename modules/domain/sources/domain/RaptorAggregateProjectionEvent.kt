@@ -11,7 +11,7 @@ public data class RaptorAggregateProjectionEvent<
 	>(
 	val change: Change,
 	override val id: RaptorAggregateEventId,
-	val isReplay: Boolean,
+	val isReplay: Boolean, // FIXME rm
 	val previousProjection: Projection? = null,
 	val projection: Projection?,
 	val timestamp: Timestamp,

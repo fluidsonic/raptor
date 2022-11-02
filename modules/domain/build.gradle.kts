@@ -9,6 +9,7 @@ fluidLibraryModule(description = "TODO") {
 				api(fluid("time", Versions.fluid_time))
 				implementation(project(":raptor-di"))
 				implementation(kotlin("reflect"))
+				implementation(kotlinx("atomicfu", Versions.kotlinx_atomicfu, usePrefix = false))
 				implementation(kotlinx("coroutines-core", Versions.kotlinx_coroutines))
 				implementation("org.slf4j:slf4j-api:${Versions.slf4j}")
 			}

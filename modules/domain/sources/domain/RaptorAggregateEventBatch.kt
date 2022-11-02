@@ -3,13 +3,13 @@ package io.fluidsonic.raptor.domain
 
 public data class RaptorAggregateEventBatch<
 	out AggregateId : RaptorAggregateId,
-	out AggregateChange : RaptorAggregateChange<AggregateId>,
+	out Change : RaptorAggregateChange<AggregateId>,
 	>(
 	val aggregateId: AggregateId, // TODO Calculate?
-	val events: List<RaptorAggregateEvent<AggregateId, AggregateChange>>,
-	val isReplay: Boolean, // TODO Calculate?
+	val events: List<RaptorAggregateEvent<AggregateId, Change>>,
+	val isReplay: Boolean, // TODO Calculate? // FIXME rm
 	val version: Int, // TODO Calculate?
-) {
+) : RaptorAggregateStreamMessage<AggregateId, Change> {
 
 	init {
 		require(events.isNotEmpty()) { "'events' must not be empty." }
