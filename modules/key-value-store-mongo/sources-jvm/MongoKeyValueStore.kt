@@ -95,10 +95,10 @@ private class KeyValueEntryBsonCodec<Key : Any, Value : Any>(
 		reader.readStartDocument()
 
 		reader.readName(Fields.key)
-		val key = keyCodec.decode(reader, null)
+		val key = keyCodec.decode(reader, decoderContext)
 
 		reader.readName(Fields.value)
-		val value = valueCodec.decode(reader, null)
+		val value = valueCodec.decode(reader, decoderContext)
 
 		reader.readEndDocument()
 
@@ -110,10 +110,10 @@ private class KeyValueEntryBsonCodec<Key : Any, Value : Any>(
 		writer.writeStartDocument()
 
 		writer.writeName(Fields.key)
-		keyCodec.encode(writer, value.key, null)
+		keyCodec.encode(writer, value.key, encoderContext)
 
 		writer.writeName(Fields.value)
-		valueCodec.encode(writer, value.value, null)
+		valueCodec.encode(writer, value.value, encoderContext)
 
 		writer.writeEndDocument()
 	}
