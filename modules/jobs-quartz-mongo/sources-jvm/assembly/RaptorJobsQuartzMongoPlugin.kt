@@ -18,6 +18,8 @@ public object RaptorJobsQuartzMongoPlugin : RaptorPluginWithConfiguration<Raptor
 		require(RaptorDIPlugin)
 		require(RaptorJobsPlugin)
 		require(RaptorLifecyclePlugin)
+
+		install(QuartzJobScheduler)
 	}
 
 
