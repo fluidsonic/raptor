@@ -19,3 +19,11 @@ public interface RaptorKeyValueStore<Key : Any, Value : Any> {
 		val value: Value,
 	)
 }
+
+
+public suspend fun <Key : Any, Value : Any> RaptorKeyValueStore<Key, Value>.setOrRemove(key: Key, value: Value?) {
+	when (value) {
+		null -> remove(key)
+		else -> set(key, value)
+	}
+}

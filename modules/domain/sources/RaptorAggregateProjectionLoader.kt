@@ -11,4 +11,14 @@ public interface RaptorAggregateProjectionLoader<out Projection : RaptorAggregat
 	public fun loadAll(): Flow<Projection>
 
 	public suspend fun loadOrNull(id: Id): Projection?
+
+	public fun loadOrSkip(ids: Iterable<Id>): Flow<Projection> {
+		@Suppress("NAME_SHADOWING")
+		val ids = ids.toSet()
+
+		return flow {
+			for (id in ids)
+				loadOrNull(id)?.let { emit(it) }
+		}
+	}
 }
