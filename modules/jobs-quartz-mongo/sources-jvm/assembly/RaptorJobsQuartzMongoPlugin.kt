@@ -2,41 +2,21 @@ package io.fluidsonic.raptor
 
 import io.fluidsonic.raptor.di.*
 import io.fluidsonic.raptor.lifecycle.*
-import io.fluidsonic.stdlib.*
 
 
-private val configurationExtensionKey = RaptorComponentExtensionKey<RaptorJobsQuartzMongoConfiguration>("quartz mongo configuration")
+private val configurationExtensionKey = RaptorComponentExtensionKey<RaptorJobsQuartzMongoPluginConfiguration>("quartz mongo configuration")
 
 
-public object RaptorJobsQuartzMongoPlugin : RaptorPlugin {
+public object RaptorJobsQuartzMongoPlugin : RaptorPluginWithConfiguration<RaptorJobsQuartzMongoPluginConfiguration> {
 
-	override fun RaptorPluginCompletionScope.complete() {
-		val configuration = jobs.extensions[configurationExtensionKey] ?: return
-
-		configure(RaptorDIPlugin) {
-			di.provide<RaptorJobScheduler> {
-				QuartzJobScheduler(
-					context = get(),
-					dispatcher = configuration.dispatcher,
-					database = configuration.database(this),
-					registry = get(),
-				)
-			}
-		}
-
-		configure(RaptorLifecyclePlugin) {
-			lifecycle {
-				onStart(-1) { di.get<RaptorJobScheduler>().castOrNull<QuartzJobScheduler>()?.start() }
-				onStop(1) { di.get<RaptorJobScheduler>().castOrNull<QuartzJobScheduler>()?.stop() }
-			}
-		}
-	}
+	override fun RaptorPluginCompletionScope.complete(): RaptorJobsQuartzMongoPluginConfiguration =
+		jobs.extensions[configurationExtensionKey]
+			?: error("jobs.quartzMongo { … } configuration required.")
 
 
 	override fun RaptorPluginInstallationScope.install() {
-		install(RaptorJobsPlugin)
-
 		require(RaptorDIPlugin)
+		require(RaptorJobsPlugin)
 		require(RaptorLifecyclePlugin)
 	}
 
@@ -46,10 +26,10 @@ public object RaptorJobsQuartzMongoPlugin : RaptorPlugin {
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery<RaptorJobsComponent>.quartzMongo(configure: RaptorJobsQuartzMongoConfiguration.Builder.() -> Unit) {
+public fun RaptorAssemblyQuery<RaptorJobsComponent>.quartzMongo(configure: RaptorJobsQuartzMongoPluginConfiguration.Builder.() -> Unit) {
 	// TODO Check that plugin is installed.
 
-	val configuration = RaptorJobsQuartzMongoConfiguration.Builder().apply(configure).build()
+	val configuration = RaptorJobsQuartzMongoPluginConfiguration.Builder().apply(configure).build()
 
 	each {
 		check(extensions[configurationExtensionKey] == null) { "Cannot configure jobs.quartzMongo() multiple times." }

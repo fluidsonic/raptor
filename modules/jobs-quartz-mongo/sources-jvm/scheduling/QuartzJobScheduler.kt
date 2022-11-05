@@ -2,6 +2,8 @@ package io.fluidsonic.raptor
 
 import com.mongodb.client.*
 import com.novemberain.quartz.mongodb.*
+import io.fluidsonic.raptor.di.*
+import io.fluidsonic.raptor.lifecycle.*
 import io.fluidsonic.stdlib.*
 import io.fluidsonic.time.*
 import java.util.*
@@ -9,6 +11,7 @@ import kotlin.collections.set
 import kotlin.time.*
 import kotlinx.atomicfu.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.sync.*
 import kotlinx.serialization.builtins.*
 import kotlinx.serialization.json.*
 import org.quartz.*
@@ -24,6 +27,7 @@ internal class QuartzJobScheduler(
 	private val registry: RaptorJobRegistry,
 ) : RaptorJobScheduler {
 
+	private val jobExecutionLock = Mutex(locked = true)
 	private val json: Json = Json
 	private var quartzScheduler: Scheduler? = null
 
@@ -47,6 +51,9 @@ internal class QuartzJobScheduler(
 
 	@Suppress("UNCHECKED_CAST")
 	private suspend fun executeJob(executionContext: JobExecutionContext) {
+		// Don't start jobs before raptor is ready.
+		jobExecutionLock.withLock { }
+
 		val key = executionContext.jobDetail.key
 		val executor = registry[key.group]
 			.ifNull { error("Cannot execute job '${key.name}' in group '${key.group}' as no executor has been registered for that group.") }
@@ -169,16 +176,23 @@ internal class QuartzJobScheduler(
 	}
 
 
+	fun startJobExecution() {
+		jobExecutionLock.unlock()
+	}
+
+
 	suspend fun stop() {
 		withContext(dispatcher) {
 			checkNotNull(quartzScheduler).shutdown(true)
 
 			quartzScheduler = null
 		}
+
+		jobExecutionLock.lock()
 	}
 
 
-	companion object {
+	companion object : RaptorPlugin {
 
 		private const val quartzSchedulerContextKey = "JobScheduler"
 
@@ -197,6 +211,29 @@ internal class QuartzJobScheduler(
 			set(value) {
 				context[quartzSchedulerContextKey] = value
 			}
+
+
+		override fun RaptorPluginInstallationScope.install() {
+			di {
+				provide<QuartzJobScheduler> {
+					val configuration = context.plugins[RaptorJobsQuartzMongoPlugin]
+
+					QuartzJobScheduler(
+						context = get(),
+						dispatcher = configuration.dispatcher,
+						database = configuration.database(this),
+						registry = get(),
+					)
+				}
+				provide<RaptorJobScheduler> { get<QuartzJobScheduler>() }
+			}
+
+			lifecycle {
+				onStart(Int.MAX_VALUE) { di.get<QuartzJobScheduler>().start() }
+				onStart(Int.MIN_VALUE) { di.get<QuartzJobScheduler>().startJobExecution() }
+				onStop(Int.MIN_VALUE) { di.get<QuartzJobScheduler>().stop() }
+			}
+		}
 	}
 }
 

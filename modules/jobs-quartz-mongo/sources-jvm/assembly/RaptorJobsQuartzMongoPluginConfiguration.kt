@@ -5,7 +5,7 @@ import io.fluidsonic.raptor.di.*
 import kotlinx.coroutines.*
 
 
-public class RaptorJobsQuartzMongoConfiguration internal constructor(
+public class RaptorJobsQuartzMongoPluginConfiguration internal constructor(
 	internal val database: RaptorDI.() -> MongoDatabase,
 	internal val dispatcher: CoroutineDispatcher,
 ) {
@@ -17,7 +17,7 @@ public class RaptorJobsQuartzMongoConfiguration internal constructor(
 
 
 		internal fun build() =
-			RaptorJobsQuartzMongoConfiguration(
+			RaptorJobsQuartzMongoPluginConfiguration(
 				database = database ?: error("A database must be provided."),
 				dispatcher = dispatcher ?: Dispatchers.Default,
 			)
