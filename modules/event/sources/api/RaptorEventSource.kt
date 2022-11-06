@@ -2,6 +2,7 @@ package io.fluidsonic.raptor.event
 
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.di.*
+import io.fluidsonic.raptor.lifecycle.*
 import kotlin.reflect.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -14,7 +15,7 @@ public interface RaptorEventSource {
 
 
 @Suppress("UNCHECKED_CAST")
-public fun <Event : RaptorEvent> RaptorEventSource.subscribeIn(
+public suspend fun <Event : RaptorEvent> RaptorEventSource.subscribeIn(
 	scope: CoroutineScope,
 	event: KClass<out Event>,
 	action: suspend (Event) -> Unit,
@@ -22,11 +23,10 @@ public fun <Event : RaptorEvent> RaptorEventSource.subscribeIn(
 	asFlow()
 		.filter(event::isInstance)
 		.let { it as Flow<Event> }
-		.onEach(action)
-		.launchIn(scope)
+		.startIn(scope, action)
 
 
-public inline fun <reified Event : RaptorEvent> RaptorEventSource.subscribeIn(
+public suspend inline fun <reified Event : RaptorEvent> RaptorEventSource.subscribeIn(
 	scope: CoroutineScope,
 	noinline action: suspend (Event) -> Unit,
 ): Job =

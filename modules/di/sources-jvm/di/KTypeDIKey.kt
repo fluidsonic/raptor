@@ -24,12 +24,10 @@ internal class KTypeDIKey<Value : Any>(
 }
 
 
-@Suppress("FunctionName")
 public fun <Value : Any> RaptorDIKey(type: KType): RaptorDIKey<@NoInfer Value> =
 	// withNullability(false) to work around https://youtrack.jetbrains.com/issue/KT-45066
 	KTypeDIKey(type = type.withNullability(false))
 
 
-@Suppress("FunctionName")
 public inline fun <reified Value : Any> RaptorDIKey(): RaptorDIKey<@NoInfer Value> =
 	RaptorDIKey<Value>(typeOf<Value>())

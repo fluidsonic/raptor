@@ -43,7 +43,7 @@ public object RaptorDomainPlugin : RaptorPluginWithConfiguration<RaptorDomainPlu
 						actions.map { async { it() } }.awaitAll()
 					}
 				}
-				onStop(priority = Int.MAX_VALUE) {
+				onStop(priority = Int.MIN_VALUE) {
 					val configuration = context.plugins.domain
 					configuration.aggregates.manager.stop()
 				}

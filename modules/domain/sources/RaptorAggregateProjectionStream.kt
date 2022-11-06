@@ -41,7 +41,6 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 	projectionClass: KClass<Projection>,
 	includeReplays: Boolean = false,
 ): Job {
-	val completion = CompletableDeferred<Unit>()
 	var failedProjectionIds: MutableSet<RaptorAggregateProjectionId>? = null
 
 	return messages
@@ -60,11 +59,11 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 				?.let { batch.copy(events = it as List<RaptorAggregateProjectionEvent<Nothing, Nothing, Nothing>>) }
 		}
 		.let { it as Flow<RaptorAggregateProjectionEventBatch<Id, Projection, Change>> }
-		.onEach { event ->
+		.startIn(scope) { event ->
 			val projectionId = event.projectionId
 
 			if (failedProjectionIds?.contains(projectionId) == true)
-				return@onEach
+				return@startIn
 
 			try {
 				collector(event)
@@ -77,9 +76,6 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 					.add(projectionId)
 			}
 		}
-		.onStart { completion.complete(Unit) }
-		.launchIn(scope)
-		.also { completion.await() }
 }
 
 
@@ -93,7 +89,6 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 	projectionClass: KClass<Projection>,
 	includeReplays: Boolean = false,
 ): Job {
-	val completion = CompletableDeferred<Unit>()
 	var failedProjectionIds: MutableSet<RaptorAggregateProjectionId>? = null
 
 	return messages
@@ -105,11 +100,11 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 		}
 		.events()
 		.filterIsInstance(changeClass = changeClass, idClass = idClass, projectionClass = projectionClass)
-		.onEach { event ->
+		.startIn(scope) { event ->
 			val projectionId = event.projectionId
 
 			if (failedProjectionIds?.contains(projectionId) == true)
-				return@onEach
+				return@startIn
 
 			try {
 				collector(event)
@@ -122,9 +117,6 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 					.add(projectionId)
 			}
 		}
-		.onStart { completion.complete(Unit) }
-		.launchIn(scope)
-		.also { completion.await() }
 }
 
 
@@ -173,10 +165,8 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 	changeClass: KClass<Change>,
 	idClass: KClass<Id>,
 	projectionClass: KClass<Projection>,
-): Job {
-	val completion = CompletableDeferred<Unit>()
-
-	return messages
+): Job =
+	messages
 		.mapNotNull { message ->
 			when (message) {
 				is RaptorAggregateProjectionEventBatch<*, *, *> ->
@@ -191,13 +181,7 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 			}
 		}
 		.let { it as Flow<RaptorAggregateProjectionStreamMessage<Id, Projection, Change>> }
-		.onEach { event ->
-			collector(event)
-		}
-		.onStart { completion.complete(Unit) }
-		.launchIn(scope)
-		.also { completion.await() }
-}
+		.startIn(scope, collector)
 
 
 public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Change : RaptorAggregateChange<Id>, reified Projection : RaptorProjection<Id>>
