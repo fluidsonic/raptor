@@ -7,7 +7,6 @@ import kotlin.reflect.full.*
 
 
 internal class GraphSystemBuilder private constructor(
-	private val tags: Set<Any>,
 	private val typeSystem: GraphTypeSystem,
 ) {
 
@@ -16,7 +15,8 @@ internal class GraphSystemBuilder private constructor(
 		.associateBy { it.kotlinType }
 
 
-	private fun build() = DefaultRaptorGraph(schema = buildSchema(), tags = tags)
+	private fun build() =
+		buildSchema()
 
 
 	// TODO validate
@@ -294,7 +294,7 @@ internal class GraphSystemBuilder private constructor(
 
 	companion object {
 
-		fun build(tags: Set<Any>, typeSystem: GraphTypeSystem): DefaultRaptorGraph =
-			GraphSystemBuilder(tags = tags, typeSystem = typeSystem).build()
+		fun build(typeSystem: GraphTypeSystem): GSchema =
+			GraphSystemBuilder(typeSystem = typeSystem).build()
 	}
 }

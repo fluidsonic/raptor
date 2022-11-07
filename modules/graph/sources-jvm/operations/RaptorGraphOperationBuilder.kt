@@ -69,7 +69,7 @@ public class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi inte
 					val inputScope = object : RaptorGraphInputScope, RaptorTransactionScope by context { // TODO improve
 
 						override fun invalid(details: String?): Nothing =
-							error("invalid argument") // TODO
+							error("invalid argument") // FIXME
 					}
 
 					val input = inputFactory(inputScope)

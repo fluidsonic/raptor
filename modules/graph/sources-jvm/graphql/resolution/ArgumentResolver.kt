@@ -27,7 +27,7 @@ internal class ArgumentResolver(
 		val inputScope = object : RaptorGraphInputScope, RaptorTransactionScope by context { // TODO improve
 
 			override fun invalid(details: String?): Nothing =
-				error("invalid argument ($details)") // TODO
+				error("invalid argument ($details)") // FIXME
 		}
 
 		var value = argumentValues[name]?.let { value ->

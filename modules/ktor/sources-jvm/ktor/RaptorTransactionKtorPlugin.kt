@@ -24,8 +24,10 @@ internal val RaptorTransactionKtorPlugin = createApplicationPlugin(
 		})
 	}
 
-	on(CallFailed) { call, _ ->
+	on(CallFailed) { call, cause ->
 		call.attributes.remove(attributeKey)
+
+		throw cause
 	}
 
 	on(ResponseSent) { call ->

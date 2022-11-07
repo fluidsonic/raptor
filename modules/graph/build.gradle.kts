@@ -2,8 +2,10 @@ import io.fluidsonic.gradle.*
 
 fluidLibraryModule(description = "TODO") {
 	targets {
-		common {
+		jvm {
 			dependencies {
+				api(project(":raptor-di"))
+				api(project(":raptor-transactions"))
 				implementation(kotlin("reflect"))
 				implementation(fluid("country", Versions.fluid_country))
 				implementation(fluid("currency", Versions.fluid_currency))
@@ -12,17 +14,12 @@ fluidLibraryModule(description = "TODO") {
 				implementation(fluid("locale", Versions.fluid_locale))
 				implementation(fluid("stdlib", Versions.fluid_stdlib))
 				implementation(fluid("time", Versions.fluid_time))
-
-				api(project(":raptor-transactions"))
+				implementation("org.slf4j:slf4j-api:${Versions.slf4j}")
 			}
 
 			testDependencies {
-				api(project(":raptor-di"))
+				implementation("ch.qos.logback:logback-classic:${Versions.logback}")
 			}
 		}
-
-//		darwin()
-//		js(KotlinJsCompilerType.BOTH)
-		jvm()
 	}
 }

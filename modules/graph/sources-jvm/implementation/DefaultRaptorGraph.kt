@@ -5,14 +5,15 @@ import io.fluidsonic.raptor.transactions.*
 
 
 internal class DefaultRaptorGraph(
+	exceptionHandlers: Collection<GraphExceptionHandler<*>>,
 	override val schema: GSchema,
 	override val tags: Set<Any>,
 ) : RaptorGraph {
 
 	private val executor = GExecutor.default(
-		exceptionHandler = ExceptionHandler(), // TODO improve
-		schema = schema,
+		exceptionHandler = ExceptionHandler(handlers = exceptionHandlers),
 		nodeInputCoercer = NodeInputCoercer,
+		schema = schema,
 		variableInputCoercer = VariableInputCoercer,
 	)
 

@@ -1,8 +1,7 @@
-@file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
-
 package io.fluidsonic.raptor.graph
 
 import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.transactions.*
 import kotlin.internal.*
 import kotlin.reflect.*
 
@@ -11,14 +10,32 @@ public class RaptorGraphComponent internal constructor() :
 	RaptorComponent.Base<RaptorGraphComponent>(RaptorGraphPlugin),
 	RaptorTaggableComponent<RaptorGraphComponent> {
 
+	private val exceptionHandlers: MutableList<GraphExceptionHandler<*>> = mutableListOf()
+
 	@RaptorDsl
 	public val definitions: Definitions = Definitions()
+
+
+	@RaptorDsl
+	public fun <Exception : Throwable> handle(
+		exceptionClass: KClass<Exception>,
+		handle: RaptorTransactionContext.(exception: Exception) -> RaptorGraphError,
+	) {
+		exceptionHandlers.add(GraphExceptionHandler(exceptionClass = exceptionClass, handle = handle))
+	}
 
 
 	internal fun complete(): RaptorGraph =
 		GraphSystemDefinitionBuilder.build(definitions.list)
 			.let(GraphTypeSystemBuilder::build)
-			.let { GraphSystemBuilder.build(tags = tags(), typeSystem = it) }
+			.let(GraphSystemBuilder::build)
+			.let { schema ->
+				DefaultRaptorGraph(
+					exceptionHandlers = exceptionHandlers.toList(),
+					schema = schema,
+					tags = tags(),
+				)
+			}
 
 
 	public inner class Definitions : RaptorAssemblyQuery<Definitions> {
@@ -54,6 +71,25 @@ public class RaptorGraphComponent internal constructor() :
 
 
 @RaptorDsl
+public fun <Exception : Throwable> RaptorAssemblyQuery<RaptorGraphComponent>.handle(
+	exceptionClass: KClass<Exception>,
+	handle: RaptorTransactionContext.(exception: Exception) -> RaptorGraphError,
+) {
+	each {
+		handle(exceptionClass = exceptionClass, handle = handle)
+	}
+}
+
+
+@RaptorDsl
+public inline fun <reified Exception : Throwable> RaptorAssemblyQuery<RaptorGraphComponent>.handle(
+	noinline handle: RaptorTransactionContext.(exception: Exception) -> RaptorGraphError,
+) {
+	handle(exceptionClass = Exception::class, handle = handle)
+}
+
+
+@RaptorDsl
 public val RaptorAssemblyQuery<RaptorGraphComponent>.definitions: RaptorAssemblyQuery<RaptorGraphComponent.Definitions>
 	get() = map { it.definitions }
 
@@ -81,6 +117,7 @@ public fun RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.includeDefault(
 
 
 @RaptorDsl
+@Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
 public inline fun <reified Type : Enum<Type>> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newEnum(
 	name: String = RaptorGraphDefinition.defaultName,
 	noinline configure: RaptorEnumGraphDefinitionBuilder<@NoInfer Type>.() -> Unit = {},
@@ -95,6 +132,7 @@ public inline fun <reified Type : Enum<Type>> RaptorAssemblyQuery<RaptorGraphCom
 
 
 @RaptorDsl
+@Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
 public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newIdAlias(
 	noinline configure: RaptorAliasGraphDefinitionBuilder<@NoInfer Type, String>.() -> Unit,
 ) {
@@ -106,6 +144,7 @@ public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.
 
 
 @RaptorDsl
+@Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
 public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newInputObject(
 	name: String = RaptorGraphDefinition.defaultName,
 	noinline configure: RaptorInputObjectGraphDefinitionBuilder<@NoInfer Type>.() -> Unit,
@@ -119,6 +158,7 @@ public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.
 
 
 @RaptorDsl
+@Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
 public fun <Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newInterface(
 	name: String = RaptorGraphDefinition.defaultName,
 	type: KType,
@@ -129,6 +169,7 @@ public fun <Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.ne
 
 
 @RaptorDsl
+@Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
 public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newInterface(
 	name: String = RaptorGraphDefinition.defaultName,
 	noinline configure: RaptorInterfaceGraphDefinitionBuilder<@NoInfer Type>.() -> Unit,
@@ -142,6 +183,7 @@ public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.
 
 
 @RaptorDsl
+@Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
 public fun <Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newObject(
 	name: String = RaptorGraphDefinition.defaultName,
 	type: KType,
@@ -152,6 +194,7 @@ public fun <Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.ne
 
 
 @RaptorDsl
+@Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
 public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newObject(
 	name: String = RaptorGraphDefinition.defaultName,
 	noinline configure: RaptorObjectGraphDefinitionBuilder<@NoInfer Type>.() -> Unit = {},
@@ -161,6 +204,7 @@ public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.
 
 
 @RaptorDsl
+@Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
 public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newScalar(
 	name: String = RaptorGraphDefinition.defaultName,
 	noinline configure: RaptorScalarGraphDefinitionBuilder<@NoInfer Type>.() -> Unit,
@@ -174,6 +218,7 @@ public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.
 
 
 @RaptorDsl
+@Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
 public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newUnion(
 	name: String = RaptorGraphDefinition.defaultName,
 	noinline configure: RaptorUnionGraphDefinitionBuilder<@NoInfer Type>.() -> Unit = {},
