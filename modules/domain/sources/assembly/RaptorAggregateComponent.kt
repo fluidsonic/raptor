@@ -2,7 +2,6 @@ package io.fluidsonic.raptor.domain
 
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.di.*
-import io.fluidsonic.raptor.transactions.*
 import kotlin.collections.set
 import kotlin.reflect.*
 import kotlin.reflect.full.*

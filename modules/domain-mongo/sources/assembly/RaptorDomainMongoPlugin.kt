@@ -13,7 +13,7 @@ public object RaptorDomainMongoPlugin : RaptorPlugin {
 
 		configure(RaptorBsonPlugin) {
 			bson.definitions(
-				RaptorAggregateEventBson.bson(definitions = domainConfiguration.aggregates.definitions),
+				RaptorAggregateEventBson.bson(definitions = domainConfiguration.aggregateDefinitions),
 				RaptorAggregateEventBson.idBson(),
 			)
 		}

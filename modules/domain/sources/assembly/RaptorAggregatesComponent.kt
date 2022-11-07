@@ -1,8 +1,8 @@
 package io.fluidsonic.raptor.domain
 
 import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.di.*
 import kotlin.reflect.*
-import kotlinx.coroutines.flow.*
 
 
 @RaptorDsl
@@ -11,7 +11,6 @@ public class RaptorAggregatesComponent internal constructor(
 ) : RaptorComponent.Base<RaptorAggregatesComponent>(RaptorDomainPlugin),
 	RaptorComponentSet<RaptorAggregateComponent<*, *, *, *>> { // FIXME ok? conflicting Set/Query esp. as we remove Set
 
-	private var eventFactory: RaptorAggregateEventFactory? = null
 	private var store: RaptorAggregateStore? = null
 
 
@@ -20,51 +19,46 @@ public class RaptorAggregatesComponent internal constructor(
 		get() = componentRegistry.all(Keys.aggregateComponent).all
 
 
-	// TODO rework
-	internal fun complete(context: RaptorContext): RaptorAggregatesConfiguration {
+	internal fun completeIn(scope: RaptorPluginCompletionScope): RaptorAggregateDefinitions {
 		val definitions = RaptorAggregateDefinitions(componentRegistry.many(Keys.aggregateComponent).mapTo(hashSetOf()) { it.complete() })
-		val eventFactory = when (val eventFactory = eventFactory) {
-			null -> error("An aggregate event factory must be defined: domain.aggregates.eventFactory(…)")
-			DIPlaceholder -> DIAggregateEventFactory(context = context)
-			else -> eventFactory
+		val store = store
+
+		scope.configure(RaptorDIPlugin) {
+			di {
+				provide<DefaultAggregateManager> {
+					DefaultAggregateManager(
+						clock = get(),
+						definitions = definitions,
+						eventStream = get(),
+						projectionEventStream = get(),
+						projectionLoaderManager = get(),
+						store = get(),
+					)
+				}
+				provide<DefaultAggregateProjectionLoaderManager> {
+					DefaultAggregateProjectionLoaderManager(
+						definitions = get<RaptorAggregateDefinitions>().mapNotNull { it.projectionDefinition },
+					)
+				}
+				provide<DefaultAggregateProjectionStream> {
+					DefaultAggregateProjectionStream()
+				}
+				provide<DefaultAggregateStream> {
+					DefaultAggregateStream()
+				}
+
+				provide<RaptorAggregateCommandExecutor> { get<DefaultAggregateManager>() }
+				provide<RaptorAggregateDefinitions>(definitions)
+				provide<RaptorAggregateProjectionLoaderManager> { get<DefaultAggregateProjectionLoaderManager>() }
+				provide<RaptorAggregateProjectionStream> { get<DefaultAggregateProjectionStream>() }
+				provide<RaptorAggregateStream> { get<DefaultAggregateStream>() }
+
+				if (store != null)
+					provide<RaptorAggregateStore>(store)
+			}
 		}
-		val eventStream = DefaultAggregateStream()
-		val projectionEventStream = DefaultAggregateProjectionStream()
-		val projectionLoaderManager = DefaultAggregateProjectionLoaderManager(
-			definitions = definitions.mapNotNull { it.projectionDefinition },
-		)
-		val store = when (val store = store) {
-			null -> error("An aggregate store must be defined: domain.aggregates.store(…)")
-			DIPlaceholder -> DIAggregateStore(context = context)
-			else -> store
-		}
 
-		val manager = DefaultAggregateManager(
-			definitions = definitions,
-			eventFactory = eventFactory,
-			eventStream = eventStream,
-			fixme = projectionLoaderManager,
-			projectionEventStream = projectionEventStream,
-			store = store,
-		)
-
-		return RaptorAggregatesConfiguration(
-			definitions = definitions,
-			eventFactory = eventFactory,
-			eventStreamInternal = eventStream,
-			manager = manager,
-			projectionEventStreamInternal = projectionEventStream,
-			projectionLoaderManager = projectionLoaderManager,
-			store = store,
-		)
-	}
-
-
-	@RaptorDsl
-	public fun eventFactory(factory: RaptorAggregateEventFactory) {
-		check(this.eventFactory == null) { "Cannot set multiple aggregate event factories." }
-
-		this.eventFactory = factory
+		return definitions
 	}
 
 
@@ -99,43 +93,6 @@ public class RaptorAggregatesComponent internal constructor(
 		check(this.store == null) { "Cannot set multiple aggregate stores." }
 
 		this.store = store
-	}
-
-
-	// FIXME hack
-	internal object DIPlaceholder : RaptorAggregateEventFactory, RaptorAggregateStore {
-
-		override suspend fun add(events: List<RaptorAggregateEvent<*, *>>) {
-			error("Placeholder.")
-		}
-
-		override fun load(): Flow<RaptorAggregateEvent<*, *>> {
-			error("Placeholder.")
-		}
-
-		override fun <Id : RaptorAggregateId, Event : RaptorAggregateChange<Id>> create(aggregateId: Id, data: Event, version: Int): RaptorAggregateEvent<Id, Event> {
-			error("Placeholder.")
-		}
-	}
-}
-
-
-@RaptorDsl
-public fun RaptorAssemblyQuery<RaptorAggregatesComponent>.diEventFactory() {
-	eventFactory(RaptorAggregatesComponent.DIPlaceholder)
-}
-
-
-@RaptorDsl
-public fun RaptorAssemblyQuery<RaptorAggregatesComponent>.diStore() {
-	store(RaptorAggregatesComponent.DIPlaceholder)
-}
-
-
-@RaptorDsl
-public fun RaptorAssemblyQuery<RaptorAggregatesComponent>.eventFactory(factory: RaptorAggregateEventFactory) {
-	each {
-		eventFactory(factory)
 	}
 }
 

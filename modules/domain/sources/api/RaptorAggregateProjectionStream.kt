@@ -7,7 +7,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
 
-public interface RaptorAggregateProjectionEventStream {
+public interface RaptorAggregateProjectionStream {
 
 	public val messages: Flow<RaptorAggregateProjectionStreamMessage<*, *, *>>
 
@@ -32,7 +32,7 @@ public fun <
 @JvmName("subscribeBatchIn")
 @Suppress("UNCHECKED_CAST")
 public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>, Projection : RaptorProjection<Id>>
-	RaptorAggregateProjectionEventStream.subscribeIn(
+	RaptorAggregateProjectionStream.subscribeIn(
 	scope: CoroutineScope,
 	collector: suspend (event: RaptorAggregateProjectionEventBatch<Id, Projection, Change>) -> Unit,
 	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip, // FIXME use
@@ -80,7 +80,7 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 
 
 public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>, Projection : RaptorProjection<Id>>
-	RaptorAggregateProjectionEventStream.subscribeIn(
+	RaptorAggregateProjectionStream.subscribeIn(
 	scope: CoroutineScope,
 	collector: suspend (event: RaptorAggregateProjectionEvent<Id, Projection, Change>) -> Unit,
 	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip, // FIXME use
@@ -122,7 +122,7 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 
 @JvmName("subscribeBatchIn")
 public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Change : RaptorAggregateChange<Id>, reified Projection : RaptorProjection<Id>>
-	RaptorAggregateProjectionEventStream.subscribeIn(
+	RaptorAggregateProjectionStream.subscribeIn(
 	scope: CoroutineScope,
 	noinline collector: suspend (event: RaptorAggregateProjectionEventBatch<Id, Projection, Change>) -> Unit,
 	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip,
@@ -140,7 +140,7 @@ public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Cha
 
 
 public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Change : RaptorAggregateChange<Id>, reified Projection : RaptorProjection<Id>>
-	RaptorAggregateProjectionEventStream.subscribeIn(
+	RaptorAggregateProjectionStream.subscribeIn(
 	scope: CoroutineScope,
 	noinline collector: suspend (event: RaptorAggregateProjectionEvent<Id, Projection, Change>) -> Unit,
 	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip,
@@ -159,7 +159,7 @@ public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Cha
 
 @Suppress("UNCHECKED_CAST")
 public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>, Projection : RaptorProjection<Id>>
-	RaptorAggregateProjectionEventStream.subscribeMessagesIn(
+	RaptorAggregateProjectionStream.subscribeMessagesIn(
 	scope: CoroutineScope,
 	collector: suspend (message: RaptorAggregateProjectionStreamMessage<Id, Projection, Change>) -> Unit,
 	changeClass: KClass<Change>,
@@ -185,7 +185,7 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 
 
 public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Change : RaptorAggregateChange<Id>, reified Projection : RaptorProjection<Id>>
-	RaptorAggregateProjectionEventStream.subscribeMessagesIn(
+	RaptorAggregateProjectionStream.subscribeMessagesIn(
 	scope: CoroutineScope,
 	noinline collector: suspend (message: RaptorAggregateProjectionStreamMessage<Id, Projection, Change>) -> Unit,
 ): Job =

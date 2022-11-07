@@ -1,9 +1,9 @@
 import BankAccountChange.*
 import BankAccountCommand.*
 import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.di.*
 import io.fluidsonic.raptor.domain.*
 import io.fluidsonic.raptor.lifecycle.*
-import io.fluidsonic.raptor.transactions.*
 import io.fluidsonic.time.*
 import kotlin.test.*
 import kotlinx.coroutines.*
@@ -19,7 +19,6 @@ class EventTests {
 		val id = BankAccountNumber("1")
 
 		val clock = ManualClock()
-		val eventFactory = TestAggregateEventFactory(clock = clock)
 		val store = TestAggregateStore()
 
 		val events: MutableList<RaptorAggregateEvent<BankAccountNumber, BankAccountChange>> = mutableListOf()
@@ -34,12 +33,13 @@ class EventTests {
 		}
 
 		val raptor = raptor {
+			install(RaptorDIPlugin)
 			install(RaptorDomainPlugin)
 			install(RaptorLifecyclePlugin)
-			install(RaptorTransactionPlugin)
+
+			di.provide<Clock>(clock)
 
 			domain.aggregates {
-				eventFactory(eventFactory)
 				store(store)
 
 				new(::BankAccountAggregate, "bank account") {
@@ -60,18 +60,16 @@ class EventTests {
 			}
 
 			lifecycle.onStart {
-				val configuration = context.plugins.domain
-				configuration.aggregates.eventStream.subscribeIn(this, ::handleEvent)
-				configuration.aggregates.projectionEventStream.subscribeIn(this, ::handleProjectionEvent)
+				aggregateStream.subscribeIn(this, ::handleEvent)
+				aggregateProjectionStream.subscribeIn(this, ::handleProjectionEvent)
 			}
 		}
 
 		raptor.lifecycle.startIn(this)
 
-		raptor.transaction {
+		with(raptor.context.asScope()) {
 			clock.set(Timestamp.fromEpochSeconds(1))
 			execute(id, Create(owner = "owner"))
-			commit()
 		}
 
 		raptor.lifecycle.stop()
@@ -82,8 +80,7 @@ class EventTests {
 			expected = listOf(RaptorAggregateEvent(
 				aggregateId = id,
 				change = Created(owner = "owner"),
-				id = RaptorAggregateEventId("1"),
-				isReplay = false,
+				id = RaptorAggregateEventId(1),
 				timestamp = Timestamp.fromEpochSeconds(1),
 				version = 1,
 			)),
@@ -94,8 +91,7 @@ class EventTests {
 			actual = projectionEvents,
 			expected = listOf(RaptorAggregateProjectionEvent(
 				change = Created(owner = "owner"),
-				id = RaptorAggregateEventId("1"),
-				isReplay = false,
+				id = RaptorAggregateEventId(1),
 				previousProjection = null,
 				projection = BankAccount(amount = 0, id = id, label = null, owner = "owner"),
 				timestamp = Timestamp.fromEpochSeconds(1),
@@ -112,8 +108,7 @@ class EventTests {
 				RaptorAggregateEvent(
 					aggregateId = BankAccountNumber("1"),
 					change = Created(owner = "owner"),
-					id = RaptorAggregateEventId("event 1"),
-					isReplay = false,
+					id = RaptorAggregateEventId(1),
 					timestamp = Timestamp.fromEpochSeconds(0),
 					version = 0,
 				)

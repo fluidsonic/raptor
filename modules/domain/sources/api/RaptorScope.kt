@@ -1,17 +1,61 @@
 package io.fluidsonic.raptor.domain
 
 import io.fluidsonic.raptor.*
-import io.fluidsonic.raptor.transactions.*
+import io.fluidsonic.raptor.di.*
+import kotlin.contracts.*
 import kotlin.reflect.*
 
 
-// FIXME remove, per-tx only
+@RaptorDsl
+public val RaptorScope.aggregateStream: RaptorAggregateStream
+	get() = di.get()
+
+
+@RaptorDsl
+public val RaptorScope.aggregateProjectionStream: RaptorAggregateProjectionStream
+	get() = di.get()
+
+
+@RaptorDsl
+public val RaptorScope.aggregateStore: RaptorAggregateStore
+	get() = di.get()
+
+
+@RaptorDsl
+public val RaptorScope.commandExecutor: RaptorAggregateCommandExecutor
+	get() = di.get()
+
+
+@RaptorDsl
+public suspend fun <Id : RaptorAggregateId> RaptorScope.execute(id: Id, command: RaptorAggregateCommand<Id>) {
+	execute(id = id, version = null, command = command)
+}
+
+
+@RaptorDsl
+public suspend fun <Id : RaptorAggregateId> RaptorScope.execute(id: Id, version: Int?, command: RaptorAggregateCommand<Id>) {
+	commandExecutor.execute(id = id, command = command, version = version)
+}
+
+
+@RaptorDsl
+public suspend inline fun <Result> RaptorScope.execution(
+	retryOnVersionConflict: Boolean = false,
+	action: RaptorAggregateCommandExecution.() -> Result,
+): Result {
+	contract {
+		callsInPlace(action, InvocationKind.AT_LEAST_ONCE)
+	}
+
+	return commandExecutor.execution(retryOnVersionConflict = retryOnVersionConflict, action = action)
+}
+
 
 @RaptorDsl
 public fun <Projection : RaptorAggregateProjection<Id>, Id : RaptorAggregateProjectionId> RaptorScope.projectionLoader(
 	idClass: KClass<Id>,
 ): RaptorAggregateProjectionLoader<Projection, Id> =
-	context.plugins.domain.aggregates.projectionLoaderManager.getOrCreate(idClass)
+	di.get<RaptorAggregateProjectionLoaderManager>().getOrCreate(idClass)
 
 
 @RaptorDsl

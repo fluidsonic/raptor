@@ -1,6 +1,8 @@
 package io.fluidsonic.raptor.domain
 
 import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.lifecycle.*
+import kotlinx.coroutines.*
 
 
 @RaptorDsl
@@ -17,11 +19,34 @@ public class RaptorDomainComponent internal constructor(
 
 
 	// TODO rework & standardize
-	internal fun complete(context: RaptorContext): RaptorDomainPluginConfiguration =
-		RaptorDomainPluginConfiguration(
-			aggregates = aggregates.complete(context = context),
-			onLoadedActions = onLoadedActions.toList(),
-		)
+	internal fun completeIn(scope: RaptorPluginCompletionScope): RaptorAggregateDefinitions {
+		var onLoadedActions = onLoadedActions.toList()
+
+		val definitions = aggregates.completeIn(scope)
+
+		scope.configure(RaptorLifecyclePlugin) {
+			lifecycle {
+				onStart(priority = Int.MIN_VALUE) {
+					context.aggregateStore.start()
+					context.aggregateManager.start()
+
+					val actions = onLoadedActions
+					onLoadedActions = emptyList()
+
+					coroutineScope {
+						actions.map { async { it() } }.awaitAll()
+					}
+				}
+
+				// FIXME Delay onStop until manager & store have completed their work.
+				onStop(priority = Int.MIN_VALUE) {
+					context.aggregateManager.stop()
+				}
+			}
+		}
+
+		return definitions
+	}
 
 
 	@RaptorDsl

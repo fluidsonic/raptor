@@ -2,5 +2,5 @@ package io.fluidsonic.raptor.domain
 
 
 public class RaptorAggregateVersionConflict(
-	cause: Throwable,
+	cause: Throwable? = null,
 ) : Exception(cause)

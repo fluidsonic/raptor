@@ -10,7 +10,6 @@ public data class RaptorAggregateEvent<
 	val aggregateId: AggregateId,
 	val change: Change,
 	override val id: RaptorAggregateEventId,
-	val isReplay: Boolean, // FIXME rm
 	val timestamp: Timestamp,
 	val version: Int,
 	val lastVersionInBatch: Int = version,

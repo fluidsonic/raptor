@@ -12,6 +12,14 @@ class BankAccountAggregate(
 	private var label: String? = null
 
 
+	override fun copy() =
+		BankAccountAggregate(id).also { copy ->
+			copy.amount = amount
+			copy.isCreated = isCreated
+			copy.label = label
+		}
+
+
 	override fun execute(command: BankAccountCommand): List<BankAccountChange> =
 		listOfNotNull(when (command) {
 			is Create -> execute(command)

@@ -22,6 +22,7 @@ internal object RaptorAggregateEventBson {
 				var aggregateId: RaptorAggregateId? = null
 				var change: RaptorAggregateChange<*>? = null
 				var id: RaptorAggregateEventId? = null
+				var lastVersionInBatch: Int? = null
 				var timestamp: Timestamp? = null
 				var version: Int? = null
 
@@ -66,8 +67,9 @@ internal object RaptorAggregateEventBson {
 						}
 
 						Fields.id -> id = value()
+						Fields.lastVersionInBatch -> lastVersionInBatch = int()
 						Fields.timestamp -> timestamp = value()
-						Fields.version -> version = value()
+						Fields.version -> version = int()
 						else -> skipValue()
 					}
 				}
@@ -76,7 +78,7 @@ internal object RaptorAggregateEventBson {
 					aggregateId = aggregateId ?: missingFieldValue(Fields.aggregateId),
 					change = change ?: missingFieldValue(Fields.change),
 					id = id ?: missingFieldValue(Fields.id),
-					isReplay = true,
+					lastVersionInBatch = lastVersionInBatch ?: missingFieldValue(Fields.lastVersionInBatch),
 					timestamp = timestamp ?: missingFieldValue(Fields.timestamp),
 					version = version ?: missingFieldValue(Fields.version),
 				)
@@ -97,6 +99,7 @@ internal object RaptorAggregateEventBson {
 					value(Fields.changeType, changeDefinition.discriminator)
 					value(Fields.change, value.change)
 					value(Fields.id, value.id)
+					value(Fields.lastVersionInBatch, value.lastVersionInBatch)
 					value(Fields.timestamp, value.timestamp)
 					value(Fields.version, value.version)
 				}
@@ -106,13 +109,8 @@ internal object RaptorAggregateEventBson {
 
 
 	fun idBson() = raptor.bson.definition {
-		decode {
-			RaptorAggregateEventId(reader.objectId().toString())
-		}
-
-		encode { value ->
-			writer.value(ObjectIdOrNull(value.toString()) ?: error("Invalid aggregate event id: $value"))
-		}
+		decode(::RaptorAggregateEventId)
+		encode(RaptorAggregateEventId::toLong)
 	}
 
 
@@ -123,6 +121,7 @@ internal object RaptorAggregateEventBson {
 		const val change = "change"
 		const val changeType = "changeType"
 		const val id = "_id"
+		const val lastVersionInBatch = "lastVersionInBatch"
 		const val timestamp = "timestamp"
 		const val version = "version"
 	}

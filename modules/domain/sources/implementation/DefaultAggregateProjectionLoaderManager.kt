@@ -5,7 +5,7 @@ import kotlin.reflect.*
 
 internal class DefaultAggregateProjectionLoaderManager(
 	definitions: Collection<RaptorAggregateProjectionDefinition<*, *, *>>,
-) : RaptorAggregateProjectorLoaderManager {
+) : RaptorAggregateProjectionLoaderManager {
 
 	private val factoriesByClass: Map<KClass<out RaptorAggregateProjectionId>, (() -> RaptorAggregateProjector.Incremental<RaptorAggregateProjection<*>, out RaptorAggregateProjectionId, *>)?> =
 		definitions.associate { it.idClass to it.factory }

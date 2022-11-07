@@ -12,6 +12,15 @@ public class RaptorAggregateDefinitions internal constructor(
 		values.associateByTo(hashMapOf()) { it.idClass }
 
 
+	@Suppress("UNCHECKED_CAST")
+	public fun <Id : RaptorAggregateId> create(id: Id): RaptorAggregate<out Id, RaptorAggregateCommand<Nothing>, RaptorAggregateChange<Id>>? =
+		get(id)
+			?.let { it as RaptorAggregateDefinition<RaptorAggregate<RaptorAggregateId, *, *>, RaptorAggregateId, *, *>? }
+			?.factory
+			?.create(id)
+			as RaptorAggregate<out Id, RaptorAggregateCommand<Nothing>, RaptorAggregateChange<Id>>?
+
+
 	override fun equals(other: Any?): Boolean =
 		this === other || (other is RaptorAggregateDefinitions && values == other.values)
 

@@ -1,27 +1,24 @@
 import BankAccountChange.*
 import BankAccountCommand.*
 import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.di.*
 import io.fluidsonic.raptor.domain.*
 import io.fluidsonic.raptor.lifecycle.*
-import io.fluidsonic.raptor.transactions.*
 import kotlin.test.*
-import kotlinx.datetime.*
 
 
 class AssemblyTests {
 
 	@Test
 	fun testNewAggregate() {
-		val eventFactory = TestAggregateEventFactory(clock = Clock.System)
 		val store = TestAggregateStore()
 
 		val raptor = raptor {
+			install(RaptorDIPlugin)
 			install(RaptorDomainPlugin)
 			install(RaptorLifecyclePlugin)
-			install(RaptorTransactionPlugin)
 
 			domain.aggregates {
-				eventFactory(eventFactory)
 				store(store)
 
 				new(::BankAccountAggregate, "bank account") {
@@ -43,7 +40,7 @@ class AssemblyTests {
 		}
 
 		val configuration = raptor.context.plugins.domain
-		assertEquals(actual = configuration.aggregates.definitions, expected = RaptorAggregateDefinitions(setOf(
+		assertEquals(actual = configuration.aggregateDefinitions, expected = RaptorAggregateDefinitions(setOf(
 			RaptorAggregateDefinition(
 				aggregateClass = BankAccountAggregate::class,
 				changeClass = BankAccountChange::class,
@@ -72,7 +69,6 @@ class AssemblyTests {
 				),
 			),
 		)))
-		assertEquals(actual = configuration.aggregates.eventFactory, expected = eventFactory)
-		assertEquals(actual = configuration.aggregates.store, expected = store)
+		assertEquals(actual = raptor.context.aggregateStore, expected = store)
 	}
 }

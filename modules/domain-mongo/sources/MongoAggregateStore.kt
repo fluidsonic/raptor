@@ -26,7 +26,11 @@ private class MongoAggregateStore(
 		}
 		catch (e: MongoBulkWriteException) {
 			// FIXME Check for duplicate key errors.
-			throw RaptorAggregateVersionConflict(e)
+			// throw RaptorAggregateVersionConflict(e)
+
+			// FIXME We actually cannot recover from this without stopping Raptor & starting a new one.
+			//       We only support a single instance for now.
+			throw e
 		}
 	}
 

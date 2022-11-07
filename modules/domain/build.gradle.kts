@@ -4,10 +4,9 @@ fluidLibraryModule(description = "TODO") {
 	targets {
 		common {
 			dependencies {
+				api(project(":raptor-di"))
 				api(project(":raptor-lifecycle"))
-				api(project(":raptor-transactions"))
 				api(fluid("time", Versions.fluid_time))
-				implementation(project(":raptor-di"))
 				implementation(kotlin("reflect"))
 				implementation(kotlinx("atomicfu", Versions.kotlinx_atomicfu, usePrefix = false))
 				implementation(kotlinx("coroutines-core", Versions.kotlinx_coroutines))

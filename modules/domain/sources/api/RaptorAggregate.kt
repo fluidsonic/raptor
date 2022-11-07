@@ -9,6 +9,7 @@ public interface RaptorAggregate<
 
 	public override val id: Id
 
+	public fun copy(): RaptorAggregate<Id, Command, Change>
 	public fun execute(command: Command): List<Change>
 	public fun handle(change: Change)
 }

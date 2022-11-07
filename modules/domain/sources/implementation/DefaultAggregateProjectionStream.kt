@@ -6,7 +6,7 @@ import kotlinx.coroutines.flow.*
 
 // FIXME Make sure all subscribers subscribe before the first events are emitted.
 // FIXME Error handling? Make sure Flow never stops.
-internal class DefaultAggregateProjectionStream : RaptorAggregateProjectionEventStream {
+internal class DefaultAggregateProjectionStream : RaptorAggregateProjectionStream {
 
 	private val flow = MutableSharedFlow<RaptorAggregateProjectionStreamMessage<*, *, *>>()
 	private val stopMessage = RaptorAggregateProjectionStreamMessage.Other(Ping)
