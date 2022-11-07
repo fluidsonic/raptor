@@ -42,7 +42,12 @@ private class MongoAggregateStore(
 
 	override suspend fun start() {
 		coroutineScope {
-			launch { collection.createIndex(Indexes.ascending(Fields.aggregateId, Fields.version), IndexOptions().unique(true)) }
+			launch {
+				collection.createIndex(
+					Indexes.ascending(Fields.aggregateType, Fields.aggregateId, Fields.version),
+					IndexOptions().unique(true),
+				)
+			}
 		}
 	}
 }
