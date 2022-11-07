@@ -223,6 +223,8 @@ internal class DefaultAggregateManager(
 		// TODO Probably some incorrect generic casts here. How to make more type-safe?
 		@Suppress("UNCHECKED_CAST")
 		fun <Id : RaptorAggregateId> add(id: Id, expectedVersion: Int?, commands: List<RaptorAggregateCommand<Id>>) {
+			check(!aggregates.containsKey(id)) { "Cannot add commands for aggregate ${id.debug} multiple times." }
+
 			val state = aggregateStates[id] as AggregateState<Id>?
 			val aggregate = state?.aggregate
 				?.copy()
