@@ -37,15 +37,11 @@ private class MongoAggregateStore(
 
 	// TODO Can still lead to different order than written. We don't have enough data to maintain insertion order.
 	override fun load(): Flow<RaptorAggregateEvent<*, *>> =
-		collection.find().sort(orderBy(
-			ascending(Fields.timestamp),
-			ascending(Fields.version),
-		))
+		collection.find().sort(ascending(Fields.id))
 
 
 	override suspend fun start() {
 		coroutineScope {
-			launch { collection.createIndex(Indexes.ascending(Fields.timestamp)) }
 			launch { collection.createIndex(Indexes.ascending(Fields.aggregateId, Fields.version), IndexOptions().unique(true)) }
 		}
 	}
