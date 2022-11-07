@@ -212,7 +212,7 @@ internal class DefaultAggregateManager(
 	private class Commit(
 		private val aggregateStates: Map<RaptorAggregateId, AggregateState<*>>,
 		private val definitions: RaptorAggregateDefinitions,
-		private val nextEventId: Long,
+		private var nextEventId: Long,
 		private val timestamp: Timestamp,
 	) {
 
@@ -250,7 +250,7 @@ internal class DefaultAggregateManager(
 					RaptorAggregateEvent(
 						aggregateId = id,
 						change = change,
-						id = RaptorAggregateEventId(nextEventId + index),
+						id = RaptorAggregateEventId(nextEventId++),
 						timestamp = timestamp,
 						version = version + index + 1,
 						lastVersionInBatch = lastVersionInBatch,

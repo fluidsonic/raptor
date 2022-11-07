@@ -13,11 +13,12 @@ public suspend inline fun MongoClient.transaction(
 
 		try {
 			block(session)
-			session.commitTransaction()
 		}
 		catch (e: Throwable) {
 			session.abortTransaction()
 			throw e
 		}
+
+		session.commitTransaction()
 	}
 }
