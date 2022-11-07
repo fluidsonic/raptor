@@ -56,6 +56,8 @@ internal class DefaultAggregateManager(
 			if (commit.eventBatches.isEmpty())
 				return
 
+			// FIXME If the store operation succeeds but we lose connection we end up in an unrecoverable state.
+			//       Events were not dispatched and nextEventId is incorrect.
 			store.add(commit.eventBatches.flatMap { it.events })
 
 			nextEventId = commit.eventBatches
@@ -151,8 +153,11 @@ internal class DefaultAggregateManager(
 
 		if (batchEventsByAggregateId.isNotEmpty())
 			error(
-				"The aggregate store returned incomplete batches when loading events for the following IDs:\n" +
-					batchEventsByAggregateId.keys.map { it.debug }.sorted().joinToString(", ")
+				"The aggregate store returned incomplete batches for the following events:\n" +
+					batchEventsByAggregateId.values
+						.flatMap { events -> events.map { it.id.toLong() } }
+						.sorted()
+						.joinToString(", ")
 			)
 
 		mutex.withLock {
