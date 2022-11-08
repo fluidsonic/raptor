@@ -233,7 +233,9 @@ internal class DefaultAggregateManager(
 			val version = state?.version ?: 0
 
 			if (expectedVersion != null && version != expectedVersion)
-				throw RaptorAggregateVersionConflict() // FIXME add info
+				throw RaptorAggregateVersionConflict(
+					"Expected aggregate ${id.debug} at version $expectedVersion but encountered version $version.",
+				)
 
 			val changes = commands
 				.flatMap { command ->
