@@ -1,5 +1,6 @@
 package io.fluidsonic.raptor
 
+import io.fluidsonic.raptor.bson.*
 import io.fluidsonic.raptor.di.*
 import io.fluidsonic.raptor.ktor.*
 
@@ -7,6 +8,9 @@ import io.fluidsonic.raptor.ktor.*
 public object RaptorEntitiesPlugin : RaptorPlugin {
 
 	override fun RaptorPluginCompletionScope.complete() {
+		completeComponents()
+
+		configure(RaptorBsonPlugin)
 		require(RaptorKtorPlugin)
 
 		val resolverTypes = componentRegistry.oneOrNull(RaptorEntitiesComponent.key)?.resolverTypes.orEmpty()
@@ -26,6 +30,7 @@ public object RaptorEntitiesPlugin : RaptorPlugin {
 
 
 	override fun RaptorPluginInstallationScope.install() {
+		require(RaptorBsonPlugin)
 		require(RaptorDIPlugin)
 	}
 }
