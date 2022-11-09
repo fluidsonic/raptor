@@ -15,12 +15,13 @@ import kotlinx.coroutines.flow.*
 private class MongoAggregateStore(
 	private val client: MongoClient,
 	private val collection: MongoCollection<RaptorAggregateEvent<*, *>>,
+	private val transactionOptions: TransactionOptions,
 ) : RaptorAggregateStore {
 
 	override suspend fun add(events: List<RaptorAggregateEvent<*, *>>) {
 		// TODO Batch in case the number of events is large.
 		try {
-			client.transaction { session ->
+			client.transaction(transactionOptions) { session ->
 				collection.insertMany(session, events, InsertManyOptions().ordered(false))
 			}
 		}
@@ -35,7 +36,6 @@ private class MongoAggregateStore(
 	}
 
 
-	// TODO Can still lead to different order than written. We don't have enough data to maintain insertion order.
 	override fun load(): Flow<RaptorAggregateEvent<*, *>> =
 		collection.find().sort(ascending(Fields.id))
 
@@ -53,5 +53,14 @@ private class MongoAggregateStore(
 }
 
 
-public fun RaptorAggregateStore.Companion.mongo(client: MongoClient, databaseName: String, collectionName: String): RaptorAggregateStore =
-	MongoAggregateStore(client = client, collection = client.getDatabase(databaseName).getCollectionOf(collectionName))
+public fun RaptorAggregateStore.Companion.mongo(
+	client: MongoClient,
+	databaseName: String,
+	collectionName: String,
+	transactionOptions: TransactionOptions = TransactionOptions.builder().build(),
+): RaptorAggregateStore =
+	MongoAggregateStore(
+		client = client,
+		collection = client.getDatabase(databaseName).getCollectionOf(collectionName),
+		transactionOptions = transactionOptions,
+	)
