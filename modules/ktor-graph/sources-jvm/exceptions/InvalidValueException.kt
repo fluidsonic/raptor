@@ -98,9 +98,3 @@ public open class InvalidValueException(
 		}
 	}
 }
-
-
-// TODO not top-level!
-@RaptorDsl
-public fun invalidValueError(): Nothing =
-	throw InvalidValueException(userMessage = "The value is invalid.")
