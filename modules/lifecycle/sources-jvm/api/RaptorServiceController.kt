@@ -6,7 +6,7 @@ import org.slf4j.*
 
 
 internal class RaptorServiceController(
-	private val diKey: ServiceDIKey,
+	private val diKey: ServiceDIKey<*>,
 	private val name: String,
 ) {
 

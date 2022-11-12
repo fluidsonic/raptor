@@ -1,7 +1,7 @@
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.di.*
+import kotlin.reflect.*
 import kotlin.test.*
-
 
 @Suppress("RemoveExplicitTypeArguments")
 class DITests {
@@ -205,6 +205,21 @@ class DITests {
 	}
 
 
+	@Test
+	fun testFunctionReference() {
+		val di = raptor {
+			install(RaptorDIPlugin)
+			di {
+				provide<Foo>(FooImpl1)
+				provide<Bar>(BarImpl1)
+				provide<Composite>(::Composite)
+			}
+		}.context.di
+
+		assertIs<Composite>(di.get<Composite>())
+	}
+
+
 	interface Bar
 	object BarImpl1 : Bar
 	object BarImpl2 : Bar
@@ -212,4 +227,9 @@ class DITests {
 	interface Foo
 	object FooImpl1 : Foo
 	object FooImpl2 : Foo
+
+	class Composite(
+		val bar: Bar,
+		val foo: Foo,
+	)
 }

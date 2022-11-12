@@ -25,16 +25,31 @@ class ServiceTests {
 			di.provide<Logger> { LoggerFactory.getLogger("test") }
 
 			service(::PrintService)
+				.provides(PrintInterface::class)
 		}
 
 		raptor.lifecycle.startIn(this)
+
+		assertIs<PrintService>(raptor.context.di.get<PrintInterface>())
+
 		raptor.lifecycle.stop()
+	}
+
+
+	private interface PrintInterface {
+
+		fun print()
 	}
 
 
 	private class PrintService(
 		private val logger: Logger,
-	) : RaptorService() {
+	) : RaptorService(), PrintInterface {
+
+		override fun print() {
+			println("Hello world!")
+		}
+
 
 		override suspend fun RaptorServiceCreationScope.created() {
 			logger.info("Service created.")

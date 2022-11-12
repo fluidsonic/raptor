@@ -3,9 +3,9 @@ package io.fluidsonic.raptor.lifecycle
 import io.fluidsonic.raptor.di.*
 
 
-internal class ServiceDIKey(
+internal class ServiceDIKey<Service : RaptorService>(
 	val name: String,
-) : RaptorDIKey<RaptorService> {
+) : RaptorDIKey<Service> {
 
 	override fun toString(): String =
 		"RaptorService ($name)"

@@ -8,7 +8,6 @@ import io.fluidsonic.raptor.di.*
 // TODO Replace star/stop actions with full observers. Properly call stop/failure callbacks if startup/stop fails.
 public class RaptorLifecycleComponent internal constructor() : RaptorComponent.Base<RaptorLifecycleComponent>(RaptorLifecyclePlugin) {
 
-	private val serviceRegistrations: MutableList<ServiceRegistration> = mutableListOf()
 	private val startActions: MutableList<LifecycleAction<RaptorLifecycleStartScope>> = mutableListOf()
 	private val stopActions: MutableList<LifecycleAction<RaptorLifecycleStopScope>> = mutableListOf()
 
@@ -31,13 +30,15 @@ public class RaptorLifecycleComponent internal constructor() : RaptorComponent.B
 	}
 
 
-	internal fun service(name: String, factory: RaptorDI.() -> RaptorService) {
-		serviceRegistrations += ServiceRegistration(factory = factory, name = name)
-	}
+	internal fun <Service : RaptorService> service(
+		name: String,
+		factory: RaptorDI.() -> Service,
+	): RaptorServiceComponent<Service> =
+		componentRegistry.register(Keys.serviceComponent, RaptorServiceComponent(factory = factory, name = name))
 
 
-	internal fun serviceRegistrations() =
-		serviceRegistrations.toList()
+	internal fun serviceRegistrations(): Collection<RaptorServiceRegistration<*>> =
+		componentRegistry.many(Keys.serviceComponent).map { it.registration() }
 
 
 	override fun RaptorComponentConfigurationEndScope<RaptorLifecycleComponent>.onConfigurationEnded() {
@@ -50,15 +51,6 @@ public class RaptorLifecycleComponent internal constructor() : RaptorComponent.B
 
 
 	override fun toString(): String = "lifecycle"
-
-
-	internal class ServiceRegistration(
-		val factory: RaptorDI.() -> RaptorService,
-		val name: String,
-	) {
-
-		val diKey = ServiceDIKey(name)
-	}
 }
 
 

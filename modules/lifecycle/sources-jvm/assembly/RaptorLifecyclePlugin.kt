@@ -14,8 +14,9 @@ public object RaptorLifecyclePlugin : RaptorPluginWithConfiguration<RaptorLifecy
 
 		if (serviceRegistrations.isNotEmpty())
 			configure(RaptorDIPlugin) {
-				for (registration in serviceRegistrations) {
-					di.provide(registration.diKey, registration.factory)
+				di {
+					for (registration in serviceRegistrations)
+						registration.install(this)
 				}
 			}
 
@@ -58,20 +59,18 @@ public val RaptorPluginScope<in RaptorLifecyclePlugin>.lifecycle: RaptorLifecycl
 
 
 @RaptorDsl
-public fun RaptorPluginScope<in RaptorLifecyclePlugin>.service(
+public fun <Service : RaptorService> RaptorPluginScope<in RaptorLifecyclePlugin>.service(
 	name: String,
-	factory: RaptorDI.() -> RaptorService,
-) {
+	factory: RaptorDI.() -> Service,
+): RaptorServiceComponent<Service> =
 	lifecycle.service(name = name, factory = factory)
-}
 
 
 @RaptorDsl
 public inline fun <reified Service : RaptorService> RaptorPluginScope<in RaptorLifecyclePlugin>.service(
 	noinline factory: RaptorDI.() -> Service,
-) {
+): RaptorServiceComponent<Service> =
 	service(name = Service::class.qualifiedName ?: "<anonymous service>", factory = factory)
-}
 
 
 @JvmName("service0")
@@ -80,9 +79,8 @@ public inline fun
 	<reified Service : RaptorService>
 	RaptorPluginScope<in RaptorLifecyclePlugin>.service(
 	factory: KFunction0<Service>,
-) {
+): RaptorServiceComponent<Service> =
 	service { factory() }
-}
 
 
 @JvmName("service1")
@@ -94,9 +92,8 @@ public inline fun
 		>
 	RaptorPluginScope<in RaptorLifecyclePlugin>.service(
 	factory: KFunction1<A1, Service>,
-) {
+): RaptorServiceComponent<Service> =
 	service { factory(get()) }
-}
 
 
 @JvmName("service2")
@@ -108,9 +105,8 @@ public inline fun
 		>
 	RaptorPluginScope<in RaptorLifecyclePlugin>.service(
 	factory: KFunction2<A1, A2, Service>,
-) {
+): RaptorServiceComponent<Service> =
 	service { factory(get(), get()) }
-}
 
 
 @JvmName("service3")
@@ -122,9 +118,8 @@ public inline fun
 		>
 	RaptorPluginScope<in RaptorLifecyclePlugin>.service(
 	factory: KFunction3<A1, A2, A3, Service>,
-) {
+): RaptorServiceComponent<Service> =
 	service { factory(get(), get(), get()) }
-}
 
 
 @JvmName("service4")
@@ -136,9 +131,8 @@ public inline fun
 		>
 	RaptorPluginScope<in RaptorLifecyclePlugin>.service(
 	factory: KFunction4<A1, A2, A3, A4, Service>,
-) {
+): RaptorServiceComponent<Service> =
 	service { factory(get(), get(), get(), get()) }
-}
 
 
 @JvmName("service5")
@@ -150,9 +144,8 @@ public inline fun
 		>
 	RaptorPluginScope<in RaptorLifecyclePlugin>.service(
 	factory: KFunction5<A1, A2, A3, A4, A5, Service>,
-) {
+): RaptorServiceComponent<Service> =
 	service { factory(get(), get(), get(), get(), get()) }
-}
 
 
 @JvmName("service6")
@@ -164,9 +157,8 @@ public inline fun
 		>
 	RaptorPluginScope<in RaptorLifecyclePlugin>.service(
 	factory: KFunction6<A1, A2, A3, A4, A5, A6, Service>,
-) {
+): RaptorServiceComponent<Service> =
 	service { factory(get(), get(), get(), get(), get(), get()) }
-}
 
 
 @JvmName("service7")
@@ -178,9 +170,8 @@ public inline fun
 		>
 	RaptorPluginScope<in RaptorLifecyclePlugin>.service(
 	factory: KFunction7<A1, A2, A3, A4, A5, A6, A7, Service>,
-) {
+): RaptorServiceComponent<Service> =
 	service { factory(get(), get(), get(), get(), get(), get(), get()) }
-}
 
 
 @JvmName("service8")
@@ -192,9 +183,8 @@ public inline fun
 		>
 	RaptorPluginScope<in RaptorLifecyclePlugin>.service(
 	factory: KFunction8<A1, A2, A3, A4, A5, A6, A7, A8, Service>,
-) {
+): RaptorServiceComponent<Service> =
 	service { factory(get(), get(), get(), get(), get(), get(), get(), get()) }
-}
 
 
 @JvmName("service9")
@@ -206,9 +196,8 @@ public inline fun
 		>
 	RaptorPluginScope<in RaptorLifecyclePlugin>.service(
 	factory: KFunction9<A1, A2, A3, A4, A5, A6, A7, A8, A9, Service>,
-) {
+): RaptorServiceComponent<Service> =
 	service { factory(get(), get(), get(), get(), get(), get(), get(), get(), get()) }
-}
 
 
 @JvmName("service10")
@@ -220,9 +209,8 @@ public inline fun
 		>
 	RaptorPluginScope<in RaptorLifecyclePlugin>.service(
 	factory: KFunction10<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, Service>,
-) {
+): RaptorServiceComponent<Service> =
 	service { factory(get(), get(), get(), get(), get(), get(), get(), get(), get(), get()) }
-}
 
 
 @JvmName("service11")
@@ -235,14 +223,13 @@ public inline fun
 		>
 	RaptorPluginScope<in RaptorLifecyclePlugin>.service(
 	factory: KFunction11<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, Service>,
-) {
+): RaptorServiceComponent<Service> =
 	service {
 		factory(
 			get(), get(), get(), get(), get(), get(), get(), get(), get(), get(),
 			get(),
 		)
 	}
-}
 
 
 @JvmName("service12")
@@ -255,14 +242,13 @@ public inline fun
 		>
 	RaptorPluginScope<in RaptorLifecyclePlugin>.service(
 	factory: KFunction12<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, Service>,
-) {
+): RaptorServiceComponent<Service> =
 	service {
 		factory(
 			get(), get(), get(), get(), get(), get(), get(), get(), get(), get(),
 			get(), get(),
 		)
 	}
-}
 
 
 @JvmName("service13")
@@ -275,14 +261,13 @@ public inline fun
 		>
 	RaptorPluginScope<in RaptorLifecyclePlugin>.service(
 	factory: KFunction13<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, Service>,
-) {
+): RaptorServiceComponent<Service> =
 	service {
 		factory(
 			get(), get(), get(), get(), get(), get(), get(), get(), get(), get(),
 			get(), get(), get(),
 		)
 	}
-}
 
 
 @JvmName("service14")
@@ -295,14 +280,13 @@ public inline fun
 		>
 	RaptorPluginScope<in RaptorLifecyclePlugin>.service(
 	factory: KFunction14<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, Service>,
-) {
+): RaptorServiceComponent<Service> =
 	service {
 		factory(
 			get(), get(), get(), get(), get(), get(), get(), get(), get(), get(),
 			get(), get(), get(), get(),
 		)
 	}
-}
 
 
 @JvmName("service15")
@@ -315,14 +299,13 @@ public inline fun
 		>
 	RaptorPluginScope<in RaptorLifecyclePlugin>.service(
 	factory: KFunction15<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, Service>,
-) {
+): RaptorServiceComponent<Service> =
 	service {
 		factory(
 			get(), get(), get(), get(), get(), get(), get(), get(), get(), get(),
 			get(), get(), get(), get(), get(),
 		)
 	}
-}
 
 
 @JvmName("service16")
@@ -335,14 +318,13 @@ public inline fun
 		>
 	RaptorPluginScope<in RaptorLifecyclePlugin>.service(
 	factory: KFunction16<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, Service>,
-) {
+): RaptorServiceComponent<Service> =
 	service {
 		factory(
 			get(), get(), get(), get(), get(), get(), get(), get(), get(), get(),
 			get(), get(), get(), get(), get(), get(),
 		)
 	}
-}
 
 
 @JvmName("service17")
@@ -355,14 +337,13 @@ public inline fun
 		>
 	RaptorPluginScope<in RaptorLifecyclePlugin>.service(
 	factory: KFunction17<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, Service>,
-) {
+): RaptorServiceComponent<Service> =
 	service {
 		factory(
 			get(), get(), get(), get(), get(), get(), get(), get(), get(), get(),
 			get(), get(), get(), get(), get(), get(), get(),
 		)
 	}
-}
 
 
 @JvmName("service18")
@@ -375,14 +356,13 @@ public inline fun
 		>
 	RaptorPluginScope<in RaptorLifecyclePlugin>.service(
 	factory: KFunction18<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, Service>,
-) {
+): RaptorServiceComponent<Service> =
 	service {
 		factory(
 			get(), get(), get(), get(), get(), get(), get(), get(), get(), get(),
 			get(), get(), get(), get(), get(), get(), get(), get(),
 		)
 	}
-}
 
 
 @JvmName("service19")
@@ -395,14 +375,13 @@ public inline fun
 		>
 	RaptorPluginScope<in RaptorLifecyclePlugin>.service(
 	factory: KFunction19<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, Service>,
-) {
+): RaptorServiceComponent<Service> =
 	service {
 		factory(
 			get(), get(), get(), get(), get(), get(), get(), get(), get(), get(),
 			get(), get(), get(), get(), get(), get(), get(), get(), get(),
 		)
 	}
-}
 
 
 @JvmName("service20")
@@ -415,12 +394,10 @@ public inline fun
 		>
 	RaptorPluginScope<in RaptorLifecyclePlugin>.service(
 	factory: KFunction20<A1, A2, A3, A4, A5, A6, A7, A8, A9, A10, A11, A12, A13, A14, A15, A16, A17, A18, A19, A20, Service>,
-) {
+): RaptorServiceComponent<Service> =
 	service {
 		factory(
 			get(), get(), get(), get(), get(), get(), get(), get(), get(), get(),
 			get(), get(), get(), get(), get(), get(), get(), get(), get(), get(),
 		)
 	}
-}
-

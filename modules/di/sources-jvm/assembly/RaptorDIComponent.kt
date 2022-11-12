@@ -73,3 +73,25 @@ public inline fun <reified Value : Any> RaptorAssemblyQuery<RaptorDIComponent<*>
 public inline fun <reified Value : Any> RaptorAssemblyQuery<RaptorDIComponent<*>>.provideOptional(dependency: @NoInfer Value?) {
 	provideOptional<Value> { dependency }
 }
+
+
+@JvmName("provide0")
+@RaptorDsl
+public inline fun <reified Value : Any> RaptorAssemblyQuery<RaptorDIComponent<*>>.provide(factory: KFunction0<@NoInfer Value>) {
+	provide<Value> { factory() }
+}
+
+
+@RaptorDsl
+public inline fun <reified Value : Any> RaptorAssemblyQuery<RaptorDIComponent<*>>.provide(factory: KFunction<@NoInfer Value>) {
+	val keys = factory.parameters.map { RaptorDIKey<Any>(it.type) }
+
+	provide<Value> {
+		val array = arrayOfNulls<Any>(keys.size)
+		keys.forEachIndexed { index, key ->
+			array[index] = get(key)
+		}
+
+		factory.call(*array)
+	}
+}
