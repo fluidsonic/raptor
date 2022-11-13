@@ -6,6 +6,7 @@ import com.mongodb.client.result.*
 import io.fluidsonic.mongo.*
 import io.fluidsonic.stdlib.*
 import kotlin.reflect.*
+import kotlinx.coroutines.flow.*
 import org.bson.*
 import org.bson.codecs.*
 import org.bson.conversions.*
@@ -37,7 +38,34 @@ public suspend fun <TDocument : Any> MongoCollection<TDocument>.findOneById(id: 
 
 
 public suspend fun <TResult : Any> MongoCollection<*>.findOneById(id: Any?, resultClass: KClass<out TResult>): TResult? =
-	find(filter = eq("_id", id), resultClass = resultClass).firstOrNull()
+	find(filter = eq(id), resultClass = resultClass).firstOrNull()
+
+
+public inline fun <reified TResult : Any> MongoCollection<*>.findOneField(fieldName: String): Flow<TResult> =
+	findOneField(fieldName = fieldName, resultClass = TResult::class)
+
+
+public fun <TResult : Any> MongoCollection<*>.findOneField(fieldName: String, resultClass: KClass<out TResult>): Flow<TResult> =
+	find(resultClass = RawBsonDocument::class)
+		.projection(
+			if (fieldName == "_id") Projections.include(fieldName)
+			else Projections.fields(Projections.include(fieldName), Projections.excludeId())
+		)
+		.mapNotNull { document ->
+			with(document.asBsonReader()) {
+				readStartDocument()
+
+				val result = (readBsonType() != BsonType.END_OF_DOCUMENT).thenTake {
+					check(readName() == fieldName)
+
+					codecRegistry.get(resultClass.java).decode(this, bsonDecoderContext)
+				}
+
+				readEndDocument()
+
+				result
+			}
+		}
 
 
 public suspend inline fun <reified TResult : Any> MongoCollection<*>.findOneFieldById(id: Any?, fieldName: String): TResult? =

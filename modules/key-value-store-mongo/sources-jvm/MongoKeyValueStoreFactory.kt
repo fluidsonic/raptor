@@ -11,8 +11,7 @@ private class MongoKeyValueStoreFactory(
 
 	override fun <Key : Any, Value : Any> create(name: String, keyClass: KClass<Key>, valueClass: KClass<Value>): RaptorKeyValueStore<Key, Value> =
 		MongoKeyValueStore(
-			database = database,
-			collectionName = name,
+			collection = database.getCollectionOf(name),
 			keyClass = keyClass,
 			valueClass = valueClass,
 		)

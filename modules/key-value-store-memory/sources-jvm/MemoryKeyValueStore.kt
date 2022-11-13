@@ -1,7 +1,6 @@
 package io.fluidsonic.raptor.keyvaluestore.memory
 
 import io.fluidsonic.raptor.keyvaluestore.*
-import io.fluidsonic.raptor.keyvaluestore.RaptorKeyValueStore.*
 import java.util.concurrent.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.Flow
@@ -17,10 +16,10 @@ internal class MemoryKeyValueStore<Key : Any, Value : Any> : RaptorKeyValueStore
 	}
 
 
-	override fun entries(): Flow<Entry<Key, Value>> =
+	override fun entries(): Flow<Pair<Key, Value>> =
 		valuesByKey.entries
 			.asFlow()
-			.map { (key, value) -> Entry(key, value) }
+			.map { it.toPair() }
 
 
 	override fun keys(): Flow<Key> =
@@ -36,9 +35,12 @@ internal class MemoryKeyValueStore<Key : Any, Value : Any> : RaptorKeyValueStore
 	}
 
 
-	override suspend fun remove(key: Key) {
-		valuesByKey.remove(key)
-	}
+	override suspend fun setIfAbsent(key: Key, value: Value): Boolean =
+		valuesByKey.putIfAbsent(key, value) == null
+
+
+	override suspend fun remove(key: Key): Boolean =
+		valuesByKey.remove(key) != null
 
 
 	override suspend fun get(key: Key): Value? =
