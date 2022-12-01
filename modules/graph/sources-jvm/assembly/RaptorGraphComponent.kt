@@ -16,6 +16,13 @@ public class RaptorGraphComponent internal constructor() :
 	public val definitions: Definitions = Definitions()
 
 
+	init {
+		handle<InvalidValueException> { exception ->
+			RaptorGraphError(message = exception.userMessage, extensions = mapOf("code" to "invalid value"))
+		}
+	}
+
+
 	@RaptorDsl
 	public fun <Exception : Throwable> handle(
 		exceptionClass: KClass<Exception>,

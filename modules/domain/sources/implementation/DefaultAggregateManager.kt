@@ -239,8 +239,18 @@ internal class DefaultAggregateManager(
 
 			val changes = commands
 				.flatMap { command ->
-					aggregate.execute(command).onEach { change ->
-						aggregate.handle(change)
+					try {
+						aggregate.execute(command)
+					}
+					catch (e: Throwable) {
+						throw RuntimeException("Failed executing command on aggregate ${id.debug}: $command", e)
+					}.onEach { change ->
+						try {
+							aggregate.handle(change)
+						}
+						catch (e: Throwable) {
+							throw RuntimeException("Failed handling change to aggregate ${id.debug}: $change", e)
+						}
 					}
 				}
 				.ifEmpty { return }
