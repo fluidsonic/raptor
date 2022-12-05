@@ -31,10 +31,10 @@ internal class ExceptionHandler(
 
 	// TODO add origin/locations/nodes
 	override fun GExceptionHandlerContext.handleException(exception: Throwable): GError =
-		checkNotNull(origin.context.execution.raptorContext).handleException(exception)
+		checkNotNull(origin.context.execution.raptorContext).handleException(exception, origin = origin)
 
 
-	private fun RaptorTransactionContext.handleException(exception: Throwable, depth: Int = 1): GError {
+	private fun RaptorTransactionContext.handleException(exception: Throwable, origin: GExceptionOrigin, depth: Int = 1): GError {
 		if (exception is GErrorException)
 			throw exception
 
@@ -56,7 +56,7 @@ internal class ExceptionHandler(
 						exception::class -> throw e
 						else -> when {
 							depth >= 100 -> throw RuntimeException("GraphQL exception handlers caused a cycle.", e)
-							else -> return handleException(e, depth = depth + 1)
+							else -> return handleException(e, origin = origin, depth = depth + 1)
 						}
 					}
 				}
@@ -69,7 +69,7 @@ internal class ExceptionHandler(
 				exception.printStackTrace()
 			}
 
-			else -> logger.error("Unhandled GraphQL exception.", exception)
+			else -> logger.error("Unhandled GraphQL exception at '${origin.path}'.", exception)
 		}
 
 		return internalError
