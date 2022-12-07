@@ -1,6 +1,7 @@
 package io.fluidsonic.raptor.domain
 
 import java.util.concurrent.*
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.Flow
 
@@ -13,6 +14,7 @@ internal class DefaultAggregateProjectionLoader<
 	Change : RaptorAggregateChange<Id>,
 	>(
 	private val factory: () -> RaptorAggregateProjector.Incremental<Projection, Id, Change>,
+	private val loaded: CompletableDeferred<Unit>,
 ) : RaptorAggregateProjectionLoader<Projection, Id> {
 
 	private val projectors = ConcurrentHashMap<Id, RaptorAggregateProjector.Incremental<Projection, Id, Change>>()
@@ -40,12 +42,16 @@ internal class DefaultAggregateProjectionLoader<
 	}
 
 
-	override fun loadAll(): Flow<Projection> =
+	override fun fetchAll(): Flow<Projection> =
 		flow {
 			projectors.values.mapNotNull { it.projection }.forEach { emit(it) } // TODO Probably not concurrency-safe.
 		}
 
 
-	override suspend fun loadOrNull(id: Id): Projection? =
+	override suspend fun fetchOrNull(id: Id): Projection? =
 		projectors[id]?.projection
+
+
+	override suspend fun loaded() =
+		apply { loaded.await() }
 }

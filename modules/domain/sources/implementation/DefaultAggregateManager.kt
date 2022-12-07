@@ -163,6 +163,8 @@ internal class DefaultAggregateManager(
 		mutex.withLock {
 			status = Status.started
 
+			projectionLoaderManager.noteLoaded()
+
 			// TODO Might have deadlock potential. Add buffer somewhere?
 			eventStream.emit(RaptorAggregateStreamMessage.Loaded)
 			projectionEventStream.emit(RaptorAggregateProjectionStreamMessage.Loaded)
