@@ -49,7 +49,7 @@ public class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi inte
 				additionalDefinitions = emptyList(),
 				description = null,
 				kotlinType = outputKotlinType,
-				name = defaultOutputObjectName(), // TODO custom names
+				name = defaultOutputTypeName(), // TODO custom names
 				stackTrace = stackTrace,
 			)
 		}
@@ -92,13 +92,13 @@ public class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi inte
 		name.replaceFirstChar { it.uppercase() } + "Input"
 
 
-	internal fun defaultOutputObjectName() =
+	internal fun defaultOutputTypeName() =
 		name.replaceFirstChar { it.uppercase() } + "Output"
 
 
 	@RaptorDsl
 	public fun description(description: String) {
-		check(this.description === null) { "Cannot define multiple descriptions." }
+		check(this.description == null) { "Cannot define multiple descriptions." }
 
 		this.description = description
 	}
@@ -106,7 +106,7 @@ public class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi inte
 
 	@RaptorDsl
 	public fun input(configure: InputBuilder.() -> Unit) {
-		check(inputFactory === null) { "Cannot define multiple inputs." }
+		check(inputFactory == null) { "Cannot define multiple inputs." }
 
 		InputBuilder().apply(configure)
 
@@ -119,7 +119,7 @@ public class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi inte
 		name: String = RaptorGraphDefinition.defaultName,
 		configure: RaptorInputObjectGraphDefinitionBuilder<Input>.() -> Unit,
 	) {
-		check(inputFactory === null) { "Cannot define multiple inputs." }
+		check(inputFactory == null) { "Cannot define multiple inputs." }
 
 		val definition = RaptorInputObjectGraphDefinitionBuilder<Input>(
 			kotlinType = inputKotlinType,
@@ -145,7 +145,7 @@ public class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi inte
 
 		@RaptorDsl
 		public fun factory(factory: RaptorGraphInputScope.() -> Input) {
-			check(this@RaptorGraphOperationBuilder.inputFactory === null) { "Cannot define multiple factories." }
+			check(this@RaptorGraphOperationBuilder.inputFactory == null) { "Cannot define multiple factories." }
 
 			this@RaptorGraphOperationBuilder.inputFactory = factory
 		}
@@ -154,15 +154,35 @@ public class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi inte
 
 
 @RaptorDsl
+public fun <Output : Any> RaptorGraphOperationBuilder<*, Output>.outputInterface(
+	name: String = RaptorGraphDefinition.defaultName,
+	configure: RaptorInterfaceGraphDefinitionBuilder<Output>.() -> Unit,
+) {
+	check(outputDefinition == null) { "Cannot define multiple outputs." }
+
+	val definition = RaptorInterfaceGraphDefinitionBuilder<Output>(
+		kotlinType = outputKotlinType,
+		name = RaptorGraphDefinition.resolveName(name, defaultName = this::defaultOutputTypeName),
+		stackTrace = stackTrace(skipCount = 1)
+	)
+		.apply(configure)
+		.build()
+
+	additionalDefinitions += definition
+	outputDefinition = definition
+}
+
+
+@RaptorDsl
 public fun <Output : Any> RaptorGraphOperationBuilder<*, Output>.outputObject(
 	name: String = RaptorGraphDefinition.defaultName,
 	configure: RaptorObjectGraphDefinitionBuilder<Output>.() -> Unit,
 ) {
-	check(outputDefinition === null) { "Cannot define multiple outputs." }
+	check(outputDefinition == null) { "Cannot define multiple outputs." }
 
 	val definition = RaptorObjectGraphDefinitionBuilder<Output>(
 		kotlinType = outputKotlinType,
-		name = RaptorGraphDefinition.resolveName(name, defaultName = this::defaultOutputObjectName),
+		name = RaptorGraphDefinition.resolveName(name, defaultName = this::defaultOutputTypeName),
 		stackTrace = stackTrace(skipCount = 1)
 	)
 		.apply(configure)
@@ -178,11 +198,11 @@ public fun <Output : Any> RaptorGraphOperationBuilder<*, Output>.outputUnion(
 	name: String = RaptorGraphDefinition.defaultName,
 	configure: RaptorUnionGraphDefinitionBuilder<Output>.() -> Unit,
 ) {
-	check(outputDefinition === null) { "Cannot define multiple outputs." }
+	check(outputDefinition == null) { "Cannot define multiple outputs." }
 
 	val definition = RaptorUnionGraphDefinitionBuilder<Output>(
 		kotlinType = outputKotlinType,
-		name = RaptorGraphDefinition.resolveName(name, defaultName = this::defaultOutputObjectName),
+		name = RaptorGraphDefinition.resolveName(name, defaultName = this::defaultOutputTypeName),
 		stackTrace = stackTrace(skipCount = 1)
 	)
 		.apply(configure)
