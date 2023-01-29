@@ -84,6 +84,8 @@ public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 			catch (e: Throwable) {
 				(failedAggregateIds ?: hashSetOf<RaptorAggregateId>().also { failedAggregateIds = it })
 					.add(aggregateId)
+
+				scope.launch { throw e }
 			}
 		}
 		.onStart { completion.complete(Unit) }
@@ -129,6 +131,8 @@ public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 			catch (e: Throwable) {
 				(failedAggregateIds ?: hashSetOf<RaptorAggregateId>().also { failedAggregateIds = it })
 					.add(aggregateId)
+
+				scope.launch { throw e }
 			}
 		}
 		.onStart { completion.complete(Unit) }
