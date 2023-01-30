@@ -36,8 +36,15 @@ private class MongoAggregateStore(
 	}
 
 
-	override fun load(): Flow<RaptorAggregateEvent<*, *>> =
-		collection.find().sort(ascending(Fields.id))
+	override fun load(after: RaptorAggregateEventId?): Flow<RaptorAggregateEvent<*, *>> =
+		collection.find()
+			.let { events ->
+				when (after) {
+					null -> events
+					else -> events.filter(Filters.gt(Fields.id, after))
+				}
+			}
+			.sort(ascending(Fields.id))
 
 
 	override suspend fun start() {

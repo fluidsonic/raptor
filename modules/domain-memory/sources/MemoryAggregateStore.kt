@@ -15,8 +15,15 @@ private class MemoryAggregateStore : RaptorAggregateStore {
 	}
 
 
-	override fun load() =
-		events.toList().asFlow()
+	override fun load(after: RaptorAggregateEventId?) =
+		events
+			.let { events ->
+				when (after) {
+					null -> events.toList()
+					else -> events.filter { it.id > after }
+				}
+			}
+			.asFlow()
 }
 
 

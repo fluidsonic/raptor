@@ -17,8 +17,15 @@ class TestAggregateStore(
 	}
 
 
-	override fun load() =
-		events.toList().asFlow()
+	override fun load(after: RaptorAggregateEventId?): Flow<RaptorAggregateEvent<*, *>> =
+		events
+			.let { events ->
+				when (after) {
+					null -> events.toList()
+					else -> events.filter { it.id > after }
+				}
+			}
+			.asFlow()
 
 
 	fun takeBatches(): List<List<RaptorAggregateEvent<*, *>>> {
