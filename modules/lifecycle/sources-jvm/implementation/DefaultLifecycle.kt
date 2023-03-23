@@ -31,6 +31,10 @@ internal class DefaultLifecycle(
 		.sortedByDescending { it.priority }
 		.map { it.block }
 
+	private val logger: Logger by lazy {
+		context.di.get()
+	}
+
 
 	override val coroutineContext: CoroutineContext
 		get() = checkNotNull(_coroutineContext)
@@ -41,7 +45,6 @@ internal class DefaultLifecycle(
 			return
 
 		val di = context.di
-		val logger = di.get<Logger>()
 
 		// TODO Rework.
 		coroutineScope {
@@ -52,6 +55,11 @@ internal class DefaultLifecycle(
 	}
 
 
+	private fun handleException(coroutineContext: CoroutineContext, exception: Throwable) {
+		logger.error("Unhandled exception in Raptor lifecycle.\nContext: $coroutineContext", exception)
+	}
+
+
 	override suspend fun startIn(scope: CoroutineScope) {
 		check(stateRef.compareAndSet(expect = State.stopped, update = State.starting)) {
 			"Lifecycle can only be started when stopped but it's ${stateRef.value}."
@@ -59,6 +67,7 @@ internal class DefaultLifecycle(
 
 		_coroutineContext = scope.coroutineContext +
 			SupervisorJob(parent = scope.coroutineContext.job) +
+			CoroutineExceptionHandler(::handleException) +
 			CoroutineName("Raptor: lifecycle") // TODO ok?
 
 		for (action in startActions)
