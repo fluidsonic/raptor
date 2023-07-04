@@ -156,9 +156,20 @@ public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.
 	name: String = RaptorGraphDefinition.defaultName,
 	noinline configure: RaptorInputObjectGraphDefinitionBuilder<@NoInfer Type>.() -> Unit,
 ) {
+	newInputObject<Type>(name = name, type = typeOf<Type>(), configure = configure)
+}
+
+
+@RaptorDsl
+@Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
+public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newInputObject(
+	name: String = RaptorGraphDefinition.defaultName,
+	type: KType,
+	noinline configure: RaptorInputObjectGraphDefinitionBuilder<@NoInfer Type>.() -> Unit,
+) {
 	add(graphInputObjectDefinition<Type>(
 		name = name,
-		type = typeOf<Type>(),
+		type = type,
 		configure = configure,
 	))
 }

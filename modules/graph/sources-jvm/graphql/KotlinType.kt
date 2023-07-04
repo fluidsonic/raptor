@@ -166,7 +166,7 @@ internal data class KotlinType(
 									type = argument,
 									containingType = containingType,
 									allowMaybe = false,
-									allowNull = allowNull,
+									allowNull = true,
 									allowedTypeParameterName = allowedTypeParameterName,
 									allowedVariance = allowedVariance,
 									requireSpecialization = requireSpecialization,
