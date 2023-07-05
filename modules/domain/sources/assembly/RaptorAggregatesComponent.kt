@@ -51,6 +51,7 @@ public class RaptorAggregatesComponent internal constructor(
 				provide<RaptorAggregateDefinitions>(definitions)
 				provide<RaptorAggregateProjectionLoaderManager> { get<DefaultAggregateProjectionLoaderManager>() }
 				provide<RaptorAggregateProjectionStream> { get<DefaultAggregateProjectionStream>() }
+				provide<RaptorAggregateProvider> { get<DefaultAggregateManager>() }
 				provide<RaptorAggregateStream> { get<DefaultAggregateStream>() }
 
 				if (store != null)

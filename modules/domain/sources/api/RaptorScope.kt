@@ -17,6 +17,11 @@ public val RaptorScope.aggregateProjectionStream: RaptorAggregateProjectionStrea
 
 
 @RaptorDsl
+public val RaptorScope.aggregateProvider: RaptorAggregateProvider
+	get() = di.get()
+
+
+@RaptorDsl
 public val RaptorScope.aggregateStore: RaptorAggregateStore
 	get() = di.get()
 

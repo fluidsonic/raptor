@@ -5,7 +5,7 @@ import kotlin.contracts.*
 
 public interface RaptorAggregateCommandExecutor {
 
-	public suspend fun execution(): RaptorAggregateCommandExecution
+	public fun execution(): RaptorAggregateCommandExecution
 }
 
 

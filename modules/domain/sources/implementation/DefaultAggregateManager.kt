@@ -16,31 +16,30 @@ internal class DefaultAggregateManager(
 	private val projectionEventStream: DefaultAggregateProjectionStream,
 	private val projectionLoaderManager: DefaultAggregateProjectionLoaderManager, // TODO Hack.
 	private val store: RaptorAggregateStore,
-) : RaptorAggregateCommandExecutor {
+) : RaptorAggregateCommandExecutor, RaptorAggregateProvider {
 
 	private val aggregateStates: MutableMap<RaptorAggregateId, AggregateState<*>> = hashMapOf()
 	private val mutex = Mutex()
 	private var nextEventId = 1L
-	private var status = Status.new
+	private var status = atomic(Status.new)
 
 
-	override suspend fun execution(): RaptorAggregateCommandExecution =
-		mutex.withLock {
-			when (status) {
-				Status.started, Status.stopping -> {}
-				Status.new, Status.starting -> error("Cannot execute commands before aggregate manager was started.")
-				Status.stopped -> error("Cannot execute commands after aggregate manager was stopped.")
-			}
-
-			Execution(manager = this)
+	override fun execution(): RaptorAggregateCommandExecution {
+		when (status.value) {
+			Status.started, Status.stopping -> {}
+			Status.new, Status.starting -> error("Cannot execute commands before aggregate manager was started.")
+			Status.stopped -> error("Cannot execute commands after aggregate manager was stopped.")
 		}
+
+		return Execution(manager = this)
+	}
 
 
 	// TODO Once supporting multiple instances: always auto-retry if the conflict is due to an event ID conflict.
 	@Suppress("UNCHECKED_CAST")
 	private suspend inline fun commit(action: Commit.() -> Unit) {
 		mutex.withLock {
-			when (status) {
+			when (status.value) {
 				Status.started, Status.stopping -> {}
 				Status.new, Status.starting -> error("Cannot commit changes before aggregate manager was started.")
 				Status.stopped -> error("Cannot commit changes after aggregate manager was stopped.")
@@ -106,11 +105,30 @@ internal class DefaultAggregateManager(
 
 
 	@Suppress("UNCHECKED_CAST")
-	suspend fun start() {
+	override suspend fun <Id : RaptorAggregateId> provide(
+		id: Id,
+	): Pair<RaptorAggregate<Id, RaptorAggregateCommand<Id>, RaptorAggregateChange<Id>>, Int> =
 		mutex.withLock {
-			check(status == Status.new) { "Cannot start an aggregate manager that is $status." }
-			status = Status.starting
+			when (status.value) {
+				Status.started, Status.stopping -> {}
+				Status.new, Status.starting -> error("Cannot provide aggregates before aggregate manager was started.")
+				Status.stopped -> error("Cannot provide aggregates after aggregate manager was stopped.")
+			}
+
+			val state = aggregateStates[id] as AggregateState<Id>?
+			val aggregate = state?.aggregate
+				?.copy()
+				?: definitions.create(id)?.let { it as RaptorAggregate<Id, RaptorAggregateCommand<Id>, RaptorAggregateChange<Id>> }
+				?: error("There's no aggregate definition for ID $id (${id::class.qualifiedName}).")
+			val version = state?.version ?: 0
+
+			aggregate to version
 		}
+
+
+	@Suppress("UNCHECKED_CAST")
+	suspend fun start() {
+		check(status.compareAndSet(Status.new, Status.starting)) { "Cannot start an aggregate manager that is $status." }
 
 		val batchEventsByAggregateId: MutableMap<RaptorAggregateId, MutableList<RaptorAggregateEvent<*, *>>> = hashMapOf()
 		var lastEventId = 0L
@@ -161,7 +179,7 @@ internal class DefaultAggregateManager(
 			)
 
 		mutex.withLock {
-			status = Status.started
+			status.value = Status.started
 
 			projectionLoaderManager.noteLoaded()
 
@@ -173,10 +191,7 @@ internal class DefaultAggregateManager(
 
 
 	suspend fun stop() {
-		mutex.withLock {
-			check(status == Status.started) { "Cannot stop an aggregate manager that is $status." }
-			status = Status.stopping
-		}
+		check(status.compareAndSet(Status.started, Status.stopping)) { "Cannot stop an aggregate manager that is $status." }
 
 		// FIXME If we launch commands async in response to events this will stop the manager too early.
 		coroutineScope {
@@ -185,7 +200,7 @@ internal class DefaultAggregateManager(
 		}
 
 		mutex.withLock {
-			status = Status.stopped
+			status.value = Status.stopped
 		}
 	}
 
