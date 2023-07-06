@@ -11,8 +11,10 @@ import kotlinx.datetime.*
 
 internal class DefaultAggregateManager(
 	private val clock: Clock,
+	private val context: RaptorContext,
 	private val definitions: RaptorAggregateDefinitions,
 	private val eventStream: DefaultAggregateStream,
+	private val onCommittedActions: List<suspend RaptorScope.() -> Unit>,
 	private val projectionEventStream: DefaultAggregateProjectionStream,
 	private val projectionLoaderManager: DefaultAggregateProjectionLoaderManager, // TODO Hack.
 	private val store: RaptorAggregateStore,
@@ -83,6 +85,9 @@ internal class DefaultAggregateManager(
 			for (batch in commit.eventBatches)
 				process(batch)
 		}
+
+		for (action in onCommittedActions)
+			action(context)
 	}
 
 

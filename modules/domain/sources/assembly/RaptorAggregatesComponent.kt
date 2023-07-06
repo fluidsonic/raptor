@@ -11,6 +11,7 @@ public class RaptorAggregatesComponent internal constructor(
 ) : RaptorComponent.Base<RaptorAggregatesComponent>(RaptorDomainPlugin),
 	RaptorComponentSet<RaptorAggregateComponent<*, *, *, *>> { // FIXME ok? conflicting Set/Query esp. as we remove Set
 
+	private val onCommittedActions: MutableList<suspend RaptorScope.() -> Unit> = mutableListOf()
 	private var store: RaptorAggregateStore? = null
 
 
@@ -21,6 +22,7 @@ public class RaptorAggregatesComponent internal constructor(
 
 	internal fun completeIn(scope: RaptorPluginCompletionScope): RaptorAggregateDefinitions {
 		val definitions = RaptorAggregateDefinitions(componentRegistry.many(Keys.aggregateComponent).mapTo(hashSetOf()) { it.complete() })
+		val onCommittedActions = onCommittedActions.toList()
 		val store = store
 
 		scope.configure(RaptorDIPlugin) {
@@ -28,8 +30,10 @@ public class RaptorAggregatesComponent internal constructor(
 				provide<DefaultAggregateManager> {
 					DefaultAggregateManager(
 						clock = get(),
+						context = get(),
 						definitions = definitions,
 						eventStream = get(),
+						onCommittedActions = onCommittedActions,
 						projectionEventStream = get(),
 						projectionLoaderManager = get(),
 						store = get(),
@@ -60,6 +64,12 @@ public class RaptorAggregatesComponent internal constructor(
 		}
 
 		return definitions
+	}
+
+
+	@RaptorDsl
+	public fun onCommitted(action: suspend RaptorScope.() -> Unit) {
+		onCommittedActions += action
 	}
 
 
@@ -289,6 +299,12 @@ public inline fun <
 		factory = factory,
 		idClass = Id::class,
 	)
+}
+
+
+@RaptorDsl
+public fun RaptorAssemblyQuery<RaptorAggregatesComponent>.onCommitted(action: suspend RaptorScope.() -> Unit) {
+	each { onCommitted(action) }
 }
 
 
