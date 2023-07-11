@@ -26,7 +26,7 @@ public class RaptorDomainComponent internal constructor(
 
 		scope.configure(RaptorLifecyclePlugin) {
 			lifecycle {
-				onStart(priority = Int.MIN_VALUE + 1) {
+				onStart(priority = Int.MIN_VALUE + 2) { // +2 to start before services
 					context.aggregateStore.start()
 					context.aggregateManager.start()
 

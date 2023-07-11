@@ -116,19 +116,23 @@ internal class DefaultBsonReaderScope(
 
 
 	@Suppress("UNCHECKED_CAST")
-	override fun <Value> value(type: KType): Value {
-		return when (type.classifier) {
-			ArrayList::class, MutableList::class, List::class, MutableCollection::class, Collection::class ->
-				collectionValue(type = type, destination = arrayListOf<Value>()) as Value
-
-			HashSet::class, LinkedHashSet::class, MutableSet::class, Set::class ->
-				collectionValue(type = type, destination = LinkedHashSet<Value>()) as Value
-
-			else -> when (bsonType()) {
-				BsonType.NULL -> when (type.isMarkedNullable) {
-					true -> null as Value
-					false -> error("Cannot decode BSON null value as type '$type'.")
+	override fun <Value> value(type: KType): Value =
+		when (bsonType()) {
+			BsonType.NULL -> when (type.isMarkedNullable) {
+				true -> {
+					readNull()
+					null as Value
 				}
+
+				false -> error("Cannot decode BSON null value as type '$type'.")
+			}
+
+			else -> when (type.classifier) {
+				ArrayList::class, MutableList::class, List::class, MutableCollection::class, Collection::class ->
+					collectionValue(type = type, destination = arrayListOf<Value>()) as Value
+
+				HashSet::class, LinkedHashSet::class, MutableSet::class, Set::class ->
+					collectionValue(type = type, destination = LinkedHashSet<Value>()) as Value
 
 				else -> {
 					val valueClass = type.classifier as? KClass<*>
@@ -138,5 +142,4 @@ internal class DefaultBsonReaderScope(
 				}
 			}
 		}
-	}
 }
