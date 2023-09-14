@@ -4,6 +4,7 @@ import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.di.*
 import io.fluidsonic.raptor.lifecycle.RaptorLifecycle.*
 import kotlin.coroutines.*
+import kotlin.time.*
 import kotlinx.atomicfu.*
 import kotlinx.coroutines.*
 import org.slf4j.*
@@ -25,11 +26,9 @@ internal class DefaultLifecycle(
 
 	private val startActions = startActions
 		.sortedByDescending { it.priority }
-		.map { it.block }
 
 	private val stopActions = stopActions
 		.sortedByDescending { it.priority }
-		.map { it.block }
 
 	private val logger: Logger by lazy {
 		context.di.get()
@@ -60,6 +59,7 @@ internal class DefaultLifecycle(
 	}
 
 
+	@OptIn(ExperimentalTime::class)
 	override suspend fun startIn(scope: CoroutineScope) {
 		check(stateRef.compareAndSet(expect = State.stopped, update = State.starting)) {
 			"Lifecycle can only be started when stopped but it's ${stateRef.value}."
@@ -70,8 +70,13 @@ internal class DefaultLifecycle(
 			CoroutineExceptionHandler(::handleException) +
 			CoroutineName("Raptor: lifecycle") // TODO ok?
 
-		for (action in startActions)
-			action()
+		for (action in startActions) {
+			val duration = measureTime {
+				action.block(this)
+			}
+
+			logger.debug("Started '${action.label}' in $duration.")
+		}
 
 		stateRef.value = State.started
 	}
@@ -87,6 +92,7 @@ internal class DefaultLifecycle(
 	}
 
 
+	@OptIn(ExperimentalTime::class)
 	override suspend fun stop() {
 		check(stateRef.compareAndSet(expect = State.started, update = State.stopping)) {
 			"Lifecycle can only be stopped when started but it's ${stateRef.value}."
@@ -94,8 +100,13 @@ internal class DefaultLifecycle(
 
 		val coroutineContext = checkNotNull(_coroutineContext)
 
-		for (action in stopActions)
-			action()
+		for (action in stopActions) {
+			val duration = measureTime {
+				action.block(this)
+			}
+
+			logger.debug("Stopped '${action.label}' in $duration.")
+		}
 
 		coroutineContext.cancel(CancellationException("Raptor was stopped."))
 

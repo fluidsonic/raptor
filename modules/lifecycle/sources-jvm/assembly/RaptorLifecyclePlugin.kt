@@ -42,9 +42,9 @@ public object RaptorLifecyclePlugin : RaptorPluginWithConfiguration<RaptorLifecy
 		}
 
 		lifecycle {
-			onStart { context.lifecycle.createServices() }
-			onStart(Int.MIN_VALUE + 1) { context.lifecycle.startServices() }
-			onStop(Int.MAX_VALUE) { context.lifecycle.stopServices() }
+			onStart("service creations") { context.lifecycle.createServices() }
+			onStart("services", Int.MIN_VALUE + 1) { context.lifecycle.startServices() }
+			onStop("services", Int.MAX_VALUE) { context.lifecycle.stopServices() }
 		}
 	}
 

@@ -21,10 +21,10 @@ public object RaptorKtorPlugin : RaptorPlugin {
 		componentRegistry.register(Keys.ktorComponent, RaptorKtorComponent())
 
 		lifecycle {
-			onStart(priority = Int.MIN_VALUE) {
+			onStart("ktor server", priority = Int.MIN_VALUE) {
 				checkNotNull(context.ktorInternal).start()
 			}
-			onStop(priority = Int.MAX_VALUE) {
+			onStop("ktor server", priority = Int.MAX_VALUE) {
 				checkNotNull(context.ktorInternal).stop()
 			}
 		}

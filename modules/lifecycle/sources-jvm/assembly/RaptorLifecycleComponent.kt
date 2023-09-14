@@ -14,19 +14,21 @@ public class RaptorLifecycleComponent internal constructor() : RaptorComponent.B
 
 	@RaptorDsl
 	public fun onStart(
+		label: String,
 		priority: Int = 0,
 		action: suspend RaptorLifecycleStartScope.() -> Unit,
 	) {
-		startActions += LifecycleAction(block = action, priority = priority)
+		startActions += LifecycleAction(block = action, label = label, priority = priority)
 	}
 
 
 	@RaptorDsl
 	public fun onStop(
+		label: String,
 		priority: Int = 0,
 		action: suspend RaptorLifecycleStopScope.() -> Unit,
 	) {
-		stopActions += LifecycleAction(block = action, priority = priority)
+		stopActions += LifecycleAction(block = action, label = label, priority = priority)
 	}
 
 
@@ -56,21 +58,23 @@ public class RaptorLifecycleComponent internal constructor() : RaptorComponent.B
 
 @RaptorDsl
 public fun RaptorAssemblyQuery<RaptorLifecycleComponent>.onStart(
+	label: String,
 	priority: Int = 0,
 	action: suspend RaptorLifecycleStartScope.() -> Unit,
 ) {
 	this {
-		onStart(priority = priority, action = action)
+		onStart(priority = priority, label = label, action = action)
 	}
 }
 
 
 @RaptorDsl
 public fun RaptorAssemblyQuery<RaptorLifecycleComponent>.onStop(
+	label: String,
 	priority: Int = 0,
 	action: suspend RaptorLifecycleStopScope.() -> Unit,
 ) {
 	this {
-		onStop(priority = priority, action = action)
+		onStop(priority = priority, label = label, action = action)
 	}
 }

@@ -8,7 +8,6 @@ import io.fluidsonic.stdlib.*
 import io.fluidsonic.time.*
 import java.util.*
 import kotlin.collections.set
-import kotlin.time.*
 import kotlinx.atomicfu.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.sync.*
@@ -229,9 +228,9 @@ internal class QuartzJobScheduler(
 			}
 
 			lifecycle {
-				onStart(Int.MAX_VALUE) { di.get<QuartzJobScheduler>().start() }
-				onStart(Int.MIN_VALUE) { di.get<QuartzJobScheduler>().startJobExecution() }
-				onStop(Int.MIN_VALUE) { di.get<QuartzJobScheduler>().stop() }
+				onStart("quartz job scheduler", Int.MAX_VALUE) { di.get<QuartzJobScheduler>().start() }
+				onStart("quartz job scheduler execution", Int.MIN_VALUE) { di.get<QuartzJobScheduler>().startJobExecution() }
+				onStop("quartz job scheduler", Int.MIN_VALUE) { di.get<QuartzJobScheduler>().stop() }
 			}
 		}
 	}

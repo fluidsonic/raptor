@@ -1,8 +1,11 @@
 package io.fluidsonic.raptor.domain
 
 import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.di.*
 import io.fluidsonic.raptor.lifecycle.*
+import kotlin.time.*
 import kotlinx.coroutines.*
+import org.slf4j.*
 
 
 @RaptorDsl
@@ -10,7 +13,7 @@ public class RaptorDomainComponent internal constructor(
 	private val topLevelScope: RaptorAssemblyInstallationScope, // FIXME remove hack
 ) : RaptorComponent.Base<RaptorDomainComponent>(RaptorDomainPlugin) {
 
-	private val onLoadedActions: MutableList<suspend RaptorScope.() -> Unit> = mutableListOf()
+	private val onLoadedActions: MutableList<LoadedAction> = mutableListOf()
 
 
 	@RaptorDsl
@@ -19,6 +22,7 @@ public class RaptorDomainComponent internal constructor(
 
 
 	// TODO rework & standardize
+	@OptIn(ExperimentalTime::class)
 	internal fun completeIn(scope: RaptorPluginCompletionScope): RaptorAggregateDefinitions {
 		var onLoadedActions = onLoadedActions.toList()
 
@@ -26,20 +30,37 @@ public class RaptorDomainComponent internal constructor(
 
 		scope.configure(RaptorLifecyclePlugin) {
 			lifecycle {
-				onStart(priority = Int.MIN_VALUE + 2) { // +2 to start before services
-					context.aggregateStore.start()
-					context.aggregateManager.start()
+				onStart("domain", priority = Int.MIN_VALUE + 2) { // +2 to start before services
+					val logger: Logger = context.di.get()
+
+					val storeStartDuration = measureTime {
+						context.aggregateStore.start()
+					}
+					logger.debug("Started 'domain: aggregate store' in $storeStartDuration.")
+
+					val managerStartDuration = measureTime {
+						context.aggregateManager.start()
+					}
+					logger.debug("Started 'domain: aggregate manager' in $managerStartDuration.")
 
 					val actions = onLoadedActions
 					onLoadedActions = emptyList()
 
-					coroutineScope {
-						actions.map { async { it() } }.awaitAll()
+					val loadCallbackDuration = measureTime {
+						coroutineScope {
+							actions.map { action ->
+								async {
+									val duration = measureTime { action.block(this@onStart) }
+									logger.debug("Started 'domain: load callback: ${action.label}' in $duration.")
+								}
+							}.awaitAll()
+						}
 					}
+					logger.debug("Started 'domain: load callbacks' in $loadCallbackDuration.")
 				}
 
 				// FIXME Delay onStop until manager & store have completed their work.
-				onStop(priority = Int.MIN_VALUE) {
+				onStop("domain", priority = Int.MIN_VALUE) {
 					context.aggregateManager.stop()
 				}
 			}
@@ -50,8 +71,8 @@ public class RaptorDomainComponent internal constructor(
 
 
 	@RaptorDsl
-	public fun onLoaded(action: suspend RaptorScope.() -> Unit) {
-		onLoadedActions += action
+	public fun onLoaded(label: String, block: suspend RaptorScope.() -> Unit) {
+		onLoadedActions += LoadedAction(block = block, label = label)
 	}
 
 
@@ -67,6 +88,15 @@ public val RaptorAssemblyQuery<RaptorDomainComponent>.aggregates: RaptorAssembly
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery<RaptorDomainComponent>.onLoaded(action: suspend RaptorScope.() -> Unit) {
-	each { onLoaded(action) }
+public fun RaptorAssemblyQuery<RaptorDomainComponent>.onLoaded(
+	label: String,
+	block: suspend RaptorScope.() -> Unit,
+) {
+	each { onLoaded(label, block) }
 }
+
+
+private class LoadedAction(
+	val block: suspend RaptorScope.() -> Unit,
+	val label: String,
+)

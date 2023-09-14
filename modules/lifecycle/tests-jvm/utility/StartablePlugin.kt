@@ -12,11 +12,11 @@ object StartablePlugin : RaptorPlugin {
 	override fun RaptorPluginInstallationScope.install() {
 		componentRegistry.register(startableComponentKey, StartableComponent())
 
-		lifecycle.onStart {
+		lifecycle.onStart("startable") {
 			context[Startable.propertyKey]!!.start()
 		}
 
-		lifecycle.onStop {
+		lifecycle.onStop("startable") {
 			context[Startable.propertyKey]!!.stop()
 		}
 	}
