@@ -1,6 +1,7 @@
 package tests
 
 import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.di.*
 import io.fluidsonic.raptor.lifecycle.*
 import io.fluidsonic.raptor.lifecycle.RaptorLifecycle.*
 import kotlin.test.*
@@ -8,6 +9,7 @@ import kotlin.test.Test
 import kotlinx.coroutines.*
 import kotlinx.coroutines.test.*
 import org.junit.jupiter.api.*
+import org.slf4j.*
 
 
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -18,8 +20,11 @@ class LifecycleTests {
 	@Test
 	fun testLifecycle() = runTest {
 		val raptor = raptor {
+			install(RaptorDIPlugin)
 			install(RaptorLifecyclePlugin)
 			install(StartablePlugin)
+
+			di.provide<Logger> { LoggerFactory.getLogger("test") }
 
 			startable.delayInMilliseconds = 100
 		}
@@ -93,8 +98,11 @@ class LifecycleTests {
 	@Test
 	fun testLifecycleWaitsForActions() = runTest {
 		val raptor = raptor {
+			install(RaptorDIPlugin)
 			install(RaptorLifecyclePlugin)
 			install(StartablePlugin)
+
+			di.provide<Logger> { LoggerFactory.getLogger("test") }
 
 			startable.delayInMilliseconds = 1_000L
 		}
