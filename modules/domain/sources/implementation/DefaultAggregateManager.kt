@@ -139,39 +139,41 @@ internal class DefaultAggregateManager(
 		val batchEventsByAggregateId: MutableMap<RaptorAggregateId, MutableList<RaptorAggregateEvent<*, *>>> = hashMapOf()
 		var lastEventId = 0L
 
-		store.load().collect { event ->
-			val batchEvents = batchEventsByAggregateId.getOrPut(event.aggregateId, ::mutableListOf)
-			batchEvents += event
+		store.load()
+			.buffer(capacity = 100_000)
+			.collect { event ->
+				val batchEvents = batchEventsByAggregateId.getOrPut(event.aggregateId, ::mutableListOf)
+				batchEvents += event
 
-			if (event.version == event.lastVersionInBatch) {
-				val id = event.aggregateId
+				if (event.version == event.lastVersionInBatch) {
+					val id = event.aggregateId
 
-				val state = aggregateStates.getOrPut(id) {
-					val definition =
-						checkNotNull(definitions[id]) as RaptorAggregateDefinition<
-							RaptorAggregate<RaptorAggregateId, RaptorAggregateCommand<RaptorAggregateId>, RaptorAggregateChange<RaptorAggregateId>>,
-							RaptorAggregateId,
-							RaptorAggregateCommand<RaptorAggregateId>,
-							RaptorAggregateChange<RaptorAggregateId>
-							>
+					val state = aggregateStates.getOrPut(id) {
+						val definition =
+							checkNotNull(definitions[id]) as RaptorAggregateDefinition<
+								RaptorAggregate<RaptorAggregateId, RaptorAggregateCommand<RaptorAggregateId>, RaptorAggregateChange<RaptorAggregateId>>,
+								RaptorAggregateId,
+								RaptorAggregateCommand<RaptorAggregateId>,
+								RaptorAggregateChange<RaptorAggregateId>
+								>
 
-					AggregateState(aggregate = definition.factory.create(id), definition = definition, version = 0)
-				} as AggregateState<RaptorAggregateId>
+						AggregateState(aggregate = definition.factory.create(id), definition = definition, version = 0)
+					} as AggregateState<RaptorAggregateId>
 
-				for (eventInBatch in batchEvents)
-					state.addEvent(eventInBatch)
+					for (eventInBatch in batchEvents)
+						state.addEvent(eventInBatch)
 
-				process(RaptorAggregateEventBatch(
-					aggregateId = id,
-					events = batchEvents,
-					version = event.version,
-				))
+					process(RaptorAggregateEventBatch(
+						aggregateId = id,
+						events = batchEvents,
+						version = event.version,
+					))
 
-				batchEventsByAggregateId.remove(id)
+					batchEventsByAggregateId.remove(id)
+				}
+
+				lastEventId = lastEventId.coerceAtLeast(event.id.toLong())
 			}
-
-			lastEventId = lastEventId.coerceAtLeast(event.id.toLong())
-		}
 
 		nextEventId = lastEventId + 1
 
