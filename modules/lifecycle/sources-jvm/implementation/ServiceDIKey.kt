@@ -7,6 +7,10 @@ internal class ServiceDIKey<Service : RaptorService>(
 	val name: String,
 ) : RaptorDIKey<Service> {
 
+	override val isOptional: Boolean
+		get() = false
+
+
 	override fun toString(): String =
 		"RaptorService ($name)"
 }

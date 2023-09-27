@@ -1,9 +1,7 @@
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.di.*
-import kotlin.reflect.*
 import kotlin.test.*
 
-@Suppress("RemoveExplicitTypeArguments")
 class DITests {
 
 	@Test

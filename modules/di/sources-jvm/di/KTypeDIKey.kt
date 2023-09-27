@@ -4,10 +4,9 @@ package io.fluidsonic.raptor.di
 
 import kotlin.internal.*
 import kotlin.reflect.*
-import kotlin.reflect.full.*
 
 
-internal class KTypeDIKey<Value : Any>(
+internal class KTypeDIKey<Value>(
 	val type: KType,
 ) : RaptorDIKey<Value> {
 
@@ -19,15 +18,18 @@ internal class KTypeDIKey<Value : Any>(
 		type.hashCode()
 
 
+	override val isOptional: Boolean
+		get() = type.isMarkedNullable
+
+
 	override fun toString(): String =
 		type.toString()
 }
 
 
-public fun <Value : Any> RaptorDIKey(type: KType): RaptorDIKey<@NoInfer Value> =
-	// withNullability(false) to work around https://youtrack.jetbrains.com/issue/KT-45066
-	KTypeDIKey(type = type.withNullability(false))
+public fun <Value> RaptorDIKey(type: KType): RaptorDIKey<@NoInfer Value> =
+	KTypeDIKey(type = type)
 
 
-public inline fun <reified Value : Any> RaptorDIKey(): RaptorDIKey<@NoInfer Value> =
+public inline fun <reified Value> RaptorDIKey(): RaptorDIKey<@NoInfer Value> =
 	RaptorDIKey<Value>(typeOf<Value>())

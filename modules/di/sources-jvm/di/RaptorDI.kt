@@ -4,7 +4,6 @@ import io.fluidsonic.raptor.*
 import kotlin.internal.*
 import kotlin.properties.*
 import kotlin.reflect.*
-import kotlin.reflect.full.*
 
 
 private val propertyKey = RaptorPropertyKey<RaptorDI>("DI")
@@ -14,11 +13,11 @@ private val propertyKey = RaptorPropertyKey<RaptorDI>("DI")
 public interface RaptorDI {
 
 	@RaptorDsl
-	public fun <Value : Any> get(key: RaptorDIKey<out Value>): Value
+	public fun <Value> get(key: RaptorDIKey<out Value>): Value
 
 
 	@RaptorDsl
-	public fun <Value : Any> getOrNull(key: RaptorDIKey<out Value>): Value?
+	public fun <Value> getOrNull(key: RaptorDIKey<out Value>): Value?
 
 
 	@RaptorDsl
@@ -41,7 +40,7 @@ public interface RaptorDI {
 
 
 		@RaptorInternalApi
-		public fun <Value : Any> provider(key: RaptorDIKey<Value>, provide: RaptorDI.() -> Value?): Provider<Value> =
+		public fun <Value> provider(key: RaptorDIKey<Value>, provide: RaptorDI.() -> Value?): Provider<Value> =
 			DefaultRaptorDI.Provider(provide = provide, key = key)
 	}
 
@@ -73,7 +72,7 @@ public interface RaptorDI {
 
 
 	@RaptorInternalApi
-	public interface Provider<Value : Any> {
+	public interface Provider<Value> {
 
 		public val key: RaptorDIKey<Value>
 
@@ -88,22 +87,22 @@ public val RaptorDI.context: RaptorContext
 
 
 @RaptorDsl
-public inline fun <reified Value : Any> RaptorDI.get(): Value =
+public inline fun <reified Value> RaptorDI.get(): Value =
 	get(typeOf<Value>())
 
 
 @RaptorDsl
-public fun <Value : Any> RaptorDI.get(type: KType): Value =
+public fun <Value> RaptorDI.get(type: KType): Value =
 	get(RaptorDIKey<Value>(type))
 
 
 @RaptorDsl
-public inline fun <reified Value : Any> RaptorDI.getOrNull(): Value? =
+public inline fun <reified Value> RaptorDI.getOrNull(): Value? =
 	getOrNull(typeOf<Value>())
 
 
 @RaptorDsl
-public fun <Value : Any> RaptorDI.getOrNull(type: KType): Value? =
+public fun <Value> RaptorDI.getOrNull(type: KType): Value? =
 	getOrNull(RaptorDIKey<Value>(type))
 
 
@@ -128,7 +127,7 @@ internal inline fun <reified Context : RaptorContext> RaptorDI.Factory.createDI(
 
 
 @Suppress("UNCHECKED_CAST")
-public fun <Value : Any> RaptorDI.Module.providerForKey(key: RaptorDIKey<out Value>): RaptorDI.Provider<Value>? =
+public fun <Value> RaptorDI.Module.providerForKey(key: RaptorDIKey<out Value>): RaptorDI.Provider<Value>? =
 	providers.lastOrNull { it.key == key } as RaptorDI.Provider<Value>?
 
 

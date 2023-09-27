@@ -6,12 +6,11 @@ import io.fluidsonic.raptor.domain.*
 import io.fluidsonic.raptor.lifecycle.*
 import io.fluidsonic.time.*
 import kotlin.test.*
-import kotlinx.coroutines.*
 import kotlinx.coroutines.test.*
 import kotlinx.datetime.*
+import org.slf4j.*
 
 
-@OptIn(ExperimentalCoroutinesApi::class)
 class ExecutionTests {
 
 	@Test
@@ -32,7 +31,10 @@ class ExecutionTests {
 			install(RaptorDomainPlugin)
 			install(RaptorLifecyclePlugin)
 
-			di.provide<Clock>(clock)
+			di {
+				provide<Clock>(clock)
+				provide<Logger> { LoggerFactory.getLogger("test") }
+			}
 
 			domain.aggregates {
 				store(store)

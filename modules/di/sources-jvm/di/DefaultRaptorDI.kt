@@ -6,7 +6,6 @@ import kotlin.collections.component1
 import kotlin.collections.component2
 import kotlin.collections.set
 import kotlin.concurrent.*
-import kotlin.reflect.*
 
 
 internal class DefaultRaptorDI(
@@ -23,12 +22,21 @@ internal class DefaultRaptorDI(
 	private val lock = ReentrantLock()
 
 
-	override fun <Value : Any> get(key: RaptorDIKey<out Value>): Value =
-		getOrNull(key) ?: reportMissingDependency(key)
+	override fun <Value> get(key: RaptorDIKey<out Value>): Value {
+		val value = getOrNull(key)
+		if (value != null)
+			return value
+
+		if (key.isOptional)
+			@Suppress("UNCHECKED_CAST")
+			return null as Value
+
+		reportMissingDependency(key)
+	}
 
 
 	@Suppress("UNCHECKED_CAST")
-	override fun <Value : Any> getOrNull(key: RaptorDIKey<out Value>): Value? =
+	override fun <Value> getOrNull(key: RaptorDIKey<out Value>): Value? =
 		lock.withLock { // TODO Add fast-path if dependency is already resolved.
 			dependenciesByKey.getOrPutNullable(key) {
 				if (currentlyResolvingKeys.contains(key))
@@ -77,7 +85,7 @@ internal class DefaultRaptorDI(
 	}
 
 
-	private fun <Value : Any> resolve(key: RaptorDIKey<out Value>): Value? {
+	private fun <Value> resolve(key: RaptorDIKey<out Value>): Value? {
 		dependenciesByModule.forEach { (module, moduleDependenciesByKey) ->
 			val provider = module.providerForKey(key) ?: return@forEach
 			val value = provider.provide(this@DefaultRaptorDI) ?: return@forEach
@@ -178,7 +186,7 @@ internal class DefaultRaptorDI(
 	) : RaptorDI.Module
 
 
-	internal class Provider<Value : Any>(
+	internal class Provider<Value>(
 		override val key: RaptorDIKey<Value>,
 		private val provide: RaptorDI.() -> Value?,
 	) : RaptorDI.Provider<Value> {

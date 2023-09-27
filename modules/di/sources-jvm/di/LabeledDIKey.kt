@@ -4,24 +4,25 @@ package io.fluidsonic.raptor.di
 
 import kotlin.internal.*
 import kotlin.reflect.*
-import kotlin.reflect.full.*
 
 
-internal class LabeledDIKey<Value : Any>(
+internal class LabeledDIKey<Value>(
 	val label: String,
 	val type: KType,
 ) : RaptorDIKey<Value> {
+
+	override val isOptional: Boolean
+		get() = type.isMarkedNullable
+
 
 	override fun toString() =
 		"$type ($label)"
 }
 
 
-@Suppress("FunctionName")
-public fun <Value : Any> RaptorDIKey(label: String, type: KType): RaptorDIKey<@NoInfer Value> =
-	LabeledDIKey(label = label, type = type.withNullability(false))
+public fun <Value> RaptorDIKey(label: String, type: KType): RaptorDIKey<@NoInfer Value> =
+	LabeledDIKey(label = label, type = type)
 
 
-@Suppress("FunctionName")
-public inline fun <reified Value : Any> RaptorDIKey(label: String): RaptorDIKey<@NoInfer Value> =
+public inline fun <reified Value> RaptorDIKey(label: String): RaptorDIKey<@NoInfer Value> =
 	RaptorDIKey<Value>(label = label, type = typeOf<Value>())
