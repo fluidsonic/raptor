@@ -4,6 +4,7 @@ package io.fluidsonic.raptor.di
 
 import kotlin.internal.*
 import kotlin.reflect.*
+import kotlin.reflect.full.*
 
 
 internal class KTypeDIKey<Value>(
@@ -28,7 +29,7 @@ internal class KTypeDIKey<Value>(
 
 
 public fun <Value> RaptorDIKey(type: KType): RaptorDIKey<@NoInfer Value> =
-	KTypeDIKey(type = type)
+	KTypeDIKey(type = type.withNullability(type.isMarkedNullable)) // Remove platform type.
 
 
 public inline fun <reified Value> RaptorDIKey(): RaptorDIKey<@NoInfer Value> =
