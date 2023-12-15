@@ -38,6 +38,8 @@ private class MongoAggregateStore(
 
 	override fun load(after: RaptorAggregateEventId?): Flow<RaptorAggregateEvent<*, *>> =
 		collection.find()
+			// Any significantly large batch size is fine. We max out what MongoDB allows. 4-6x speed increase until here.
+			.batchSize(1_000_000)
 			.let { events ->
 				when (after) {
 					null -> events
