@@ -23,6 +23,13 @@ internal class KTypeDIKey<Value>(
 		get() = type.isMarkedNullable
 
 
+	override fun notOptional(): KTypeDIKey<Value> =
+		when (type.isMarkedNullable) {
+			true -> KTypeDIKey(type.withNullability(false))
+			false -> this
+		}
+
+
 	override fun toString(): String =
 		type.toString()
 }

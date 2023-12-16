@@ -4,6 +4,7 @@ package io.fluidsonic.raptor.di
 
 import kotlin.internal.*
 import kotlin.reflect.*
+import kotlin.reflect.full.*
 
 
 internal class LabeledDIKey<Value>(
@@ -13,6 +14,13 @@ internal class LabeledDIKey<Value>(
 
 	override val isOptional: Boolean
 		get() = type.isMarkedNullable
+
+
+	override fun notOptional(): LabeledDIKey<Value> =
+		when (type.isMarkedNullable) {
+			true -> LabeledDIKey(label = label, type = type.withNullability(false))
+			false -> this
+		}
 
 
 	override fun toString() =

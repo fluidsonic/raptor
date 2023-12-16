@@ -36,16 +36,18 @@ internal class DefaultRaptorDI(
 
 
 	@Suppress("UNCHECKED_CAST")
-	override fun <Value> getOrNull(key: RaptorDIKey<out Value>): Value? =
+	override fun <Value : Any> getOrNull(key: RaptorDIKey<out Value?>): Value? =
 		lock.withLock { // TODO Add fast-path if dependency is already resolved.
 			dependenciesByKey.getOrPutNullable(key) {
-				if (currentlyResolvingKeys.contains(key))
-					reportCyclicDependency(key)
+				val notOptionalKey = key.notOptional()
 
-				currentlyResolvingKeys += key
+				if (currentlyResolvingKeys.contains(notOptionalKey))
+					reportCyclicDependency(notOptionalKey)
+
+				currentlyResolvingKeys += notOptionalKey
 
 				try {
-					resolve(key)
+					resolve(notOptionalKey)
 				}
 				finally {
 					currentlyResolvingKeys.removeLast()
@@ -86,6 +88,8 @@ internal class DefaultRaptorDI(
 
 
 	private fun <Value> resolve(key: RaptorDIKey<out Value>): Value? {
+		assert(!key.isOptional) { "Key must not be optional at this point." }
+
 		dependenciesByModule.forEach { (module, moduleDependenciesByKey) ->
 			val provider = module.providerForKey(key) ?: return@forEach
 			val value = provider.provide(this@DefaultRaptorDI) ?: return@forEach

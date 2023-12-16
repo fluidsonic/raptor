@@ -218,6 +218,22 @@ class DITests {
 	}
 
 
+	@Test
+	fun testOptional() {
+		val di = raptor {
+			install(RaptorDIPlugin)
+			di {
+				provide<Bar>(BarImpl1)
+			}
+		}.context.di
+
+		assertNull(di.get<Foo?>())
+		assertNull(di.getOrNull<Foo>())
+		assertEquals(actual = di.get<Bar?>(), expected = BarImpl1)
+		assertEquals(actual = di.getOrNull<Bar>(), expected = BarImpl1)
+	}
+
+
 	interface Bar
 	object BarImpl1 : Bar
 	object BarImpl2 : Bar

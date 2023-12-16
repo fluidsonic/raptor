@@ -17,7 +17,7 @@ public interface RaptorDI {
 
 
 	@RaptorDsl
-	public fun <Value> getOrNull(key: RaptorDIKey<out Value>): Value?
+	public fun <Value : Any> getOrNull(key: RaptorDIKey<out Value?>): Value?
 
 
 	@RaptorDsl
@@ -97,13 +97,13 @@ public fun <Value> RaptorDI.get(type: KType): Value =
 
 
 @RaptorDsl
-public inline fun <reified Value> RaptorDI.getOrNull(): Value? =
+public inline fun <reified Value : Any> RaptorDI.getOrNull(): Value? =
 	getOrNull(typeOf<Value>())
 
 
 @RaptorDsl
-public fun <Value> RaptorDI.getOrNull(type: KType): Value? =
-	getOrNull(RaptorDIKey<Value>(type))
+public fun <Value : Any> RaptorDI.getOrNull(type: KType): Value? =
+	getOrNull(RaptorDIKey<Value?>(type))
 
 
 @RaptorDsl

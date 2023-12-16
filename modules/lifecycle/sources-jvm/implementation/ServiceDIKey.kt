@@ -11,6 +11,10 @@ internal class ServiceDIKey<Service : RaptorService>(
 		get() = false
 
 
+	override fun notOptional(): ServiceDIKey<Service> =
+		this
+
+
 	override fun toString(): String =
 		"RaptorService ($name)"
 }
