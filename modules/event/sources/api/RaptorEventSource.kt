@@ -1,33 +1,21 @@
 package io.fluidsonic.raptor.event
 
-import io.fluidsonic.raptor.*
-import io.fluidsonic.raptor.di.*
-import io.fluidsonic.raptor.lifecycle.*
 import kotlin.reflect.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.flow.*
 
 
 public interface RaptorEventSource {
 
-	public fun asFlow(): Flow<RaptorEvent>
+	public fun <Event : RaptorEvent> subscribeIn(
+		scope: CoroutineScope,
+		handler: suspend (event: Event) -> Unit,
+		events: Set<KClass<out Event>>,
+	): Job
 }
 
 
-@Suppress("UNCHECKED_CAST")
-public suspend fun <Event : RaptorEvent> RaptorEventSource.subscribeIn(
+public inline fun <reified Event : RaptorEvent> RaptorEventSource.subscribeIn(
 	scope: CoroutineScope,
-	event: KClass<out Event>,
-	action: suspend (Event) -> Unit,
+	noinline handler: suspend (event: Event) -> Unit,
 ): Job =
-	asFlow()
-		.filter(event::isInstance)
-		.let { it as Flow<Event> }
-		.startIn(scope, action)
-
-
-public suspend inline fun <reified Event : RaptorEvent> RaptorEventSource.subscribeIn(
-	scope: CoroutineScope,
-	noinline action: suspend (Event) -> Unit,
-): Job =
-	subscribeIn(scope, event = Event::class, action = action)
+	subscribeIn(scope, handler, setOf(Event::class))
