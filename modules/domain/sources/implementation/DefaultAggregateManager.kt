@@ -3,7 +3,6 @@ package io.fluidsonic.raptor.domain
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.di.*
 import io.fluidsonic.time.*
-import kotlin.reflect.*
 import kotlinx.atomicfu.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -16,7 +15,6 @@ internal class DefaultAggregateManager(
 	private val context: RaptorContext,
 	private val definitions: RaptorAggregateDefinitions,
 	private val eventStream: DefaultAggregateStream,
-	private val hooks: List<RaptorDomainStreamHook>,
 	private val onCommittedActions: List<suspend RaptorScope.() -> Unit>,
 	private val projectionEventStream: DefaultAggregateProjectionStream,
 	private val projectionLoaderManager: DefaultAggregateProjectionLoaderManager, // TODO Hack.
@@ -29,8 +27,6 @@ internal class DefaultAggregateManager(
 	private var status = atomic(Status.new)
 
 	override val loaded = CompletableDeferred<RaptorDomain>()
-
-	private val hookDispatcher = HookDispatcher(hooks = hooks, definitions = definitions)
 
 
 	override fun execution(): RaptorAggregateCommandExecution {
@@ -61,64 +57,53 @@ internal class DefaultAggregateManager(
 				timestamp = clock.now(),
 			).apply(action)
 
-			if (commit.eventBatches.isEmpty())
+			if (commit.events.isEmpty())
 				return
 
-			// FIXME If the store operation succeeds but we lose connection we end up in an unrecoverable state.
-			//       Events were not dispatched and nextEventId is incorrect.
-			store.add(commit.eventBatches.flatMap { it.events })
+			// TODO If the store operation succeeds but we lose connection we end up in an unrecoverable state.
+			//      Events were not dispatched and nextEventId is incorrect.
+			store.add(commit.events)
 
-			nextEventId = commit.eventBatches
-				.maxOf { batch -> batch.events.maxOf { it.id.toLong() } }
+			nextEventId = commit.events
+				.maxOf { it.id.toLong() }
 				.plus(1)
 
-			for (batch in commit.eventBatches) {
-				val aggregate = checkNotNull(commit.aggregates[batch.aggregateId])
+			for (event in commit.events) {
+				val aggregate = checkNotNull(commit.aggregates[event.aggregateId])
 					as RaptorAggregate<RaptorAggregateId, RaptorAggregateCommand<RaptorAggregateId>, RaptorAggregateChange<RaptorAggregateId>>
 				val id = aggregate.id
 
 				aggregateStates.compute(id) { _, state ->
 					state
 						?.let { it as AggregateState<RaptorAggregateId> }
-						?.copy(aggregate = aggregate, version = batch.version)
+						// Not actually the correct aggregate for this version, but subsequent events in the same commit will fix it.
+						// TODO Improve performance by updating the state only once per aggregate.
+						?.copy(aggregate = aggregate, version = event.version)
 						?: AggregateState(
 							aggregate = aggregate,
 							definition = checkNotNull(definitions[id]) as RaptorAggregateDefinition<RaptorAggregate<RaptorAggregateId, RaptorAggregateCommand<RaptorAggregateId>, RaptorAggregateChange<RaptorAggregateId>>, RaptorAggregateId, RaptorAggregateCommand<RaptorAggregateId>, RaptorAggregateChange<RaptorAggregateId>>,
-							version = batch.version,
+							version = event.version,
 						)
 				}
 			}
 
-			for (batch in commit.eventBatches)
+			for (batch in commit.events)
 				process(batch)
 		}
 
-		for (action in onCommittedActions)
-			action(context)
+		for (onCommitted in onCommittedActions)
+			onCommitted(context)
 	}
 
 
-	private suspend fun process(batch: RaptorAggregateEventBatch<*, *>) {
-		// FIXME Rework projection event logic. Create batches before committing to ensure consistency.
-		val projectionBatch = batch.events
-			.mapNotNull { projectionLoaderManager.addEvent(it) }
-			.ifEmpty { null }
-			?.let { events ->
-				val lastEvent = events.last()
+	private suspend fun process(event: RaptorAggregateEvent<*, *>) {
+		// Make sure that the projection is updated before we emit any events.
+		val projectionEvent = projectionLoaderManager.addEvent(event)
 
-				RaptorAggregateProjectionEventBatch(
-					events = events,
-					projectionId = lastEvent.projectionId,
-					version = lastEvent.version,
-				)
-			}
+		eventStream.handleEvent(event)
 
-		hookDispatcher.dispatchLive(batch, projectionBatch)
-
-		eventStream.emit(batch)
-
-		if (projectionBatch != null)
-			projectionEventStream.emit(projectionBatch)
+		if (projectionEvent != null)
+			projectionEventStream.handleEvent(projectionEvent)
 	}
 
 
@@ -150,22 +135,22 @@ internal class DefaultAggregateManager(
 	) {
 		check(status.compareAndSet(Status.new, Status.starting)) { "Cannot start an aggregate manager that is $status." }
 
-		val batchEventsByAggregateId: MutableMap<RaptorAggregateId, MutableList<RaptorAggregateEvent<*, *>>> = hashMapOf()
 		var lastEventId = 0L
 
-		// Phase 1: Stream events from MongoDB, build aggregate state + projections, collect batches.
-		val batches = mutableListOf<RaptorAggregateEventBatch<*, *>>()
-		val batchAggregateIdClasses = mutableListOf<KClass<out RaptorAggregateId>>()
-		val projectionBatches = mutableListOf<RaptorAggregateProjectionEventBatch<*, *, *>>()
-		val projectionBatchIdClasses = mutableListOf<KClass<out RaptorAggregateProjectionId>>()
+		eventStream.handleSetupCompleted()
+		projectionEventStream.handleSetupCompleted()
 
-		store.load().buffer(capacity = 1_000_000).collect { event ->
-			check(event.id.toLong() == lastEventId + 1) { "Expected event ${lastEventId + 1} but got: $event" }
+		store.load()
+			.buffer(capacity = 2_000_000)
+			.collect { event ->
+				check(event.id.toLong() == lastEventId + 1) {
+					when (lastEventId) {
+						0L -> "Expected first aggregate event to have ID 1: $event"
+						else -> "There's a gap in IDs between event $lastEventId and event ${event.id}."
+					}
+				}
+				lastEventId = event.id.toLong()
 
-			val batchEvents = batchEventsByAggregateId.getOrPut(event.aggregateId, ::mutableListOf)
-			batchEvents += event
-
-			if (event.version == event.lastVersionInBatch) {
 				val id = event.aggregateId
 
 				val state = aggregateStates.getOrPut(id) {
@@ -180,64 +165,11 @@ internal class DefaultAggregateManager(
 					AggregateState(aggregate = definition.factory.create(id), definition = definition, version = 0)
 				} as AggregateState<RaptorAggregateId>
 
-				for (eventInBatch in batchEvents)
-					state.addEvent(eventInBatch)
-
-				val batch = RaptorAggregateEventBatch(
-					aggregateId = id,
-					events = batchEvents,
-					version = event.version,
-				)
-				batches += batch
-				batchAggregateIdClasses += state.definition.idClass
-
-				// Projection loading (no stream emission).
-				val projectionBatchEvents = batch.events.mapNotNull { projectionLoaderManager.addEvent(it) }
-
-				// Collect batches for cold replay dispatch.
-				if (projectionBatchEvents.isNotEmpty()) {
-					val lastProjectionEvent = projectionBatchEvents.last()
-
-					projectionBatches += RaptorAggregateProjectionEventBatch(
-						events = projectionBatchEvents,
-						projectionId = lastProjectionEvent.projectionId,
-						version = lastProjectionEvent.version,
-					)
-					projectionBatchIdClasses += checkNotNull(state.definition.projectionDefinition?.idClass) {
-						"Aggregate ${id.debug} produced a projection event but has no registered projection definition."
-					}
-				}
-
-				batchEventsByAggregateId.remove(id)
+				state.addEvent(event)
+				process(event)
 			}
 
-			lastEventId = event.id.toLong()
-		}
-
 		nextEventId = lastEventId + 1
-
-		if (batchEventsByAggregateId.isNotEmpty())
-			error(
-				"The aggregate store returned incomplete batches for the following events:\n" +
-					batchEventsByAggregateId.values
-						.flatMap { events -> events.map { it.id.toLong() } }
-						.sorted()
-						.joinToString(", ")
-			)
-
-		if (batches.isNotEmpty()) {
-			val batch = RaptorAggregateStreamMessage.Replay(batches)
-			val projectionBatch = projectionBatches
-				.ifEmpty { null }
-				?.let(RaptorAggregateProjectionStreamMessage<*, *, *>::Replay)
-
-			hookDispatcher.dispatchReplay(batch, batchAggregateIdClasses, projectionBatch, projectionBatchIdClasses)
-
-			eventStream.emit(batch)
-
-			if (projectionBatch != null)
-				projectionEventStream.emit(projectionBatch)
-		}
 
 		for (manager in individualManagers)
 			manager.load()
@@ -245,26 +177,15 @@ internal class DefaultAggregateManager(
 		mutex.withLock {
 			status.value = Status.started
 
+			eventStream.handleReplayCompleted()
+			projectionEventStream.handleReplayCompleted()
 			loaded.complete(this)
-			projectionLoaderManager.noteLoaded()
-
-			// TODO Might have deadlock potential. Add buffer somewhere?
-			hookDispatcher.dispatchLoaded()
-
-			eventStream.emit(RaptorAggregateStreamMessage.Loaded)
-			projectionEventStream.emit(RaptorAggregateProjectionStreamMessage.Loaded)
 		}
 	}
 
 
 	suspend fun stop() {
 		check(status.compareAndSet(Status.started, Status.stopping)) { "Cannot stop an aggregate manager that is $status." }
-
-		// FIXME If we launch commands async in response to events this will stop the manager too early.
-		coroutineScope {
-			launch { eventStream.stop() }
-			launch { projectionEventStream.stop() }
-		}
 
 		mutex.withLock {
 			status.value = Status.stopped
@@ -301,7 +222,7 @@ internal class DefaultAggregateManager(
 	) {
 
 		val aggregates: MutableMap<RaptorAggregateId, RaptorAggregate<*, *, *>> = hashMapOf()
-		val eventBatches: MutableList<RaptorAggregateEventBatch<*, *>> = mutableListOf()
+		val events: MutableList<RaptorAggregateEvent<*, *>> = mutableListOf()
 
 
 		// TODO Probably some incorrect generic casts here. How to make more type-safe?
@@ -346,20 +267,17 @@ internal class DefaultAggregateManager(
 			val lastVersionInBatch = version + changes.size
 
 			aggregates[id] = aggregate
-			eventBatches += RaptorAggregateEventBatch(
-				aggregateId = id,
-				events = changes.mapIndexed { index, change ->
-					RaptorAggregateEvent(
-						aggregateId = id,
-						change = change,
-						id = RaptorAggregateEventId(nextEventId++),
-						timestamp = timestamp,
-						version = version + index + 1,
-						lastVersionInBatch = lastVersionInBatch,
-					)
-				},
-				version = lastVersionInBatch,
-			)
+
+			changes.mapIndexedTo(events) { index, change ->
+				RaptorAggregateEvent(
+					aggregateId = id,
+					change = change,
+					id = RaptorAggregateEventId(nextEventId++),
+					timestamp = timestamp,
+					version = version + index + 1,
+					lastVersionInBatch = lastVersionInBatch,
+				)
+			}
 		}
 	}
 

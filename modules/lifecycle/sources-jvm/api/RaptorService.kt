@@ -71,7 +71,11 @@ public abstract class RaptorService {
 	}
 
 
-	protected fun Job.cancelOnStop() {
+	public val stopRequested: Deferred<Unit>
+		get() = checkNotNull(instance) { "Cannot access `scope` before the service was started." }.stopRequested
+
+
+	public fun Job.cancelOnStop() {
 		val instance = instance ?: error("Cannot call `Job.cancelOnStop()` before the service was created.")
 		instance.cancelOnStop(job)
 	}
@@ -167,12 +171,20 @@ public abstract class RaptorService {
 
 
 		private fun handleException(coroutineContext: CoroutineContext, exception: Throwable) {
-			status.value.let { status ->
-				if (status == Status.failed)
-					return
+			when (val status = status.value) {
+				Status.failed,
+				Status.stopping,
+				-> return
 
-				if (status != Status.started)
-					error("Unexpected service status '$status' when handling exception.")
+				Status.started,
+				-> {
+				}
+
+				Status.created,
+				Status.creating,
+				Status.new,
+				Status.stopped,
+				-> error("Unexpected service status '$status' when handling exception.")
 			}
 
 			try {
@@ -273,6 +285,10 @@ public abstract class RaptorService {
 				completionSignal.await()
 			}
 		}
+
+
+		val stopRequested: Deferred<Unit>
+			get() = shutdownStartedSignal
 	}
 
 
