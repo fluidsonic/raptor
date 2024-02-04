@@ -1,7 +1,7 @@
 package io.fluidsonic.raptor.domain
 
 
-public data class RaptorAggregateProjectionEventBatch<
+internal data class RaptorAggregateProjectionEventBatch<
 	out ProjectionId : RaptorAggregateProjectionId,
 	out Projection : RaptorProjection<ProjectionId>,
 	out Change : RaptorAggregateChange<ProjectionId>,
@@ -9,7 +9,7 @@ public data class RaptorAggregateProjectionEventBatch<
 	val events: List<RaptorAggregateProjectionEvent<ProjectionId, Projection, Change>>,
 	val projectionId: ProjectionId,
 	val version: Int,
-) : RaptorAggregateProjectionStreamMessage<ProjectionId, Projection, Change> {
+) {
 
 	init {
 		require(events.isNotEmpty()) { "'events' must not be empty." }

@@ -45,10 +45,10 @@ public class RaptorAggregatesComponent internal constructor(
 					)
 				}
 				provide<DefaultAggregateProjectionStream> {
-					DefaultAggregateProjectionStream()
+					DefaultAggregateProjectionStream(definitions = get())
 				}
 				provide<DefaultAggregateStream> {
-					DefaultAggregateStream()
+					DefaultAggregateStream(definitions = get())
 				}
 
 				provide<RaptorAggregateCommandExecutor> { get<DefaultAggregateManager>() }
@@ -57,6 +57,7 @@ public class RaptorAggregatesComponent internal constructor(
 				provide<RaptorAggregateProjectionStream> { get<DefaultAggregateProjectionStream>() }
 				provide<RaptorAggregateProvider> { get<DefaultAggregateManager>() }
 				provide<RaptorAggregateStream> { get<DefaultAggregateStream>() }
+				provide<RaptorDomain> { get<DefaultAggregateManager>() }
 
 				if (store != null)
 					provide<RaptorAggregateStore>(store)

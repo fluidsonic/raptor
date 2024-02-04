@@ -30,7 +30,8 @@ public class RaptorDomainComponent internal constructor(
 
 		scope.configure(RaptorLifecyclePlugin) {
 			lifecycle {
-				onStart("domain", priority = Int.MIN_VALUE + 2) { // +2 to start before services
+				// +3 to start before services and allow for starts between services and domain.
+				onStart("domain", priority = Int.MIN_VALUE + 3) {
 					val logger: Logger = context.di.get()
 
 					val storeStartDuration = measureTime {
