@@ -21,8 +21,6 @@ public interface RaptorAggregateProjectionLoader<out Projection : RaptorAggregat
 				fetchOrNull(id)?.let { emit(it) }
 		}
 	}
-
-	public suspend fun loaded(): RaptorAggregateProjectionLoader<Projection, Id>
 }
 
 

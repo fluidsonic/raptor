@@ -5,6 +5,6 @@ import kotlinx.coroutines.flow.*
 
 
 internal fun <T> Flow<T>.startIn(scope: CoroutineScope, action: suspend (T) -> Unit): Job =
-	scope.launch(RaptorEventDispatch, start = CoroutineStart.UNDISPATCHED) {
+	scope.launch(start = CoroutineStart.UNDISPATCHED) {
 		collect(action)
 	}

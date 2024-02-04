@@ -1,14 +1,14 @@
 package io.fluidsonic.raptor.domain
 
 
-public data class RaptorAggregateEventBatch<
+internal data class RaptorAggregateEventBatch<
 	out AggregateId : RaptorAggregateId,
 	out Change : RaptorAggregateChange<AggregateId>,
 	>(
 	val aggregateId: AggregateId,
 	val events: List<RaptorAggregateEvent<AggregateId, Change>>,
 	val version: Int,
-) : RaptorAggregateStreamMessage<AggregateId, Change> {
+) {
 
 	init {
 		require(events.isNotEmpty()) { "'events' must not be empty." }
