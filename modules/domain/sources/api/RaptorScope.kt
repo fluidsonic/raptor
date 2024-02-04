@@ -32,6 +32,11 @@ public val RaptorScope.commandExecutor: RaptorAggregateCommandExecutor
 
 
 @RaptorDsl
+public val RaptorScope.domain: RaptorDomain
+	get() = di.get()
+
+
+@RaptorDsl
 public suspend fun <Id : RaptorAggregateId> RaptorScope.execute(id: Id, command: RaptorAggregateCommand<Id>) {
 	execute(id = id, version = null, command = command)
 }

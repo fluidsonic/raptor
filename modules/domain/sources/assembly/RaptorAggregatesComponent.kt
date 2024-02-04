@@ -12,7 +12,6 @@ public class RaptorAggregatesComponent internal constructor(
 ) : RaptorComponent.Base<RaptorAggregatesComponent>(RaptorDomainPlugin),
 	RaptorComponentSet<RaptorAggregateComponent<*, *, *, *>> { // FIXME ok? conflicting Set/Query esp. as we remove Set
 
-	private val hooks: MutableList<context(RaptorDI) () -> RaptorDomainStreamHook> = mutableListOf()
 	private val onCommittedActions: MutableList<suspend RaptorScope.() -> Unit> = mutableListOf()
 	private var store: RaptorAggregateStore? = null
 
@@ -24,7 +23,6 @@ public class RaptorAggregatesComponent internal constructor(
 
 	internal fun completeIn(scope: RaptorPluginCompletionScope): RaptorAggregateDefinitions {
 		val definitions = RaptorAggregateDefinitions(componentRegistry.many(Keys.aggregateComponent()).mapTo(hashSetOf()) { it.complete() })
-		val hooks = hooks.toList()
 		val onCommittedActions = onCommittedActions.toList()
 		val store = store
 
@@ -35,7 +33,6 @@ public class RaptorAggregatesComponent internal constructor(
 						clock = get(),
 						context = get(),
 						definitions = definitions,
-						hooks = hooks.map { it() },
 						eventStream = get(),
 						onCommittedActions = onCommittedActions,
 						projectionEventStream = get(),
@@ -49,19 +46,19 @@ public class RaptorAggregatesComponent internal constructor(
 					)
 				}
 				provide<DefaultAggregateProjectionStream> {
-					DefaultAggregateProjectionStream()
+					DefaultAggregateProjectionStream(definitions = get())
 				}
 				provide<DefaultAggregateStream> {
-					DefaultAggregateStream()
+					DefaultAggregateStream(definitions = get())
 				}
 
 				provide<RaptorAggregateCommandExecutor> { get<DefaultAggregateManager>() }
 				provide<RaptorAggregateDefinitions>(definitions)
-				provide<RaptorDomain> { get<DefaultAggregateManager>() }
 				provide<RaptorAggregateProjectionLoaderManager> { get<DefaultAggregateProjectionLoaderManager>() }
 				provide<RaptorAggregateProjectionStream> { get<DefaultAggregateProjectionStream>() }
 				provide<RaptorAggregateProvider> { get<DefaultAggregateManager>() }
 				provide<RaptorAggregateStream> { get<DefaultAggregateStream>() }
+				provide<RaptorDomain> { get<DefaultAggregateManager>() }
 
 				if (store != null)
 					provide<RaptorAggregateStore>(store)
@@ -106,12 +103,6 @@ public class RaptorAggregatesComponent internal constructor(
 		}
 
 		return definitions
-	}
-
-
-	@RaptorDsl
-	public fun hook(factory: context(RaptorDI) () -> RaptorDomainStreamHook) {
-		hooks += factory
 	}
 
 
@@ -164,14 +155,6 @@ public class RaptorAggregatesComponent internal constructor(
 
 		this.store = store
 	}
-}
-
-
-@RaptorDsl
-public fun RaptorAssemblyQuery<RaptorAggregatesComponent>.hook(
-	factory: context(RaptorDI) () -> RaptorDomainStreamHook,
-) {
-	each { hook(factory) }
 }
 
 

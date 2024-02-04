@@ -1,7 +1,6 @@
 package io.fluidsonic.raptor.domain
 
 import kotlin.reflect.*
-import kotlinx.coroutines.*
 
 
 internal class DefaultAggregateProjectionLoaderManager(
@@ -12,7 +11,6 @@ internal class DefaultAggregateProjectionLoaderManager(
 		definitions.associate { it.idClass to it.factory }
 
 	// FIXME concurrent
-	private val loaded: CompletableDeferred<Unit> = CompletableDeferred()
 	private val loaders: MutableMap<KClass<out RaptorAggregateProjectionId>, RaptorAggregateProjectionLoader<*, *>> = hashMapOf()
 
 
@@ -35,11 +33,6 @@ internal class DefaultAggregateProjectionLoaderManager(
 				as (() -> RaptorAggregateProjector.Incremental<Projection, Id, *>)?
 				?: error("No projection factory registered for projection ID $idClass.")
 
-			DefaultAggregateProjectionLoader(factory = factory, loaded = loaded)
+			DefaultAggregateProjectionLoader(factory = factory)
 		} as RaptorAggregateProjectionLoader<Projection, Id>
-
-
-	internal fun noteLoaded() {
-		loaded.complete(Unit)
-	}
 }
