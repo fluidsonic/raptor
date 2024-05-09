@@ -45,19 +45,15 @@ public class RaptorAggregatesComponent internal constructor(
 						definitions = get<RaptorAggregateDefinitions>().mapNotNull { it.projectionDefinition },
 					)
 				}
-				provide<DefaultAggregateProjectionStream> {
-					DefaultAggregateProjectionStream(definitions = get())
-				}
-				provide<DefaultAggregateStream> {
-					DefaultAggregateStream(definitions = get())
-				}
+				provide<DefaultAggregateProjectionEventProcessor>(::DefaultAggregateProjectionEventProcessor)
+				provide<DefaultAggregateEventProcessor>(::DefaultAggregateEventProcessor)
 
 				provide<RaptorAggregateCommandExecutor> { get<DefaultAggregateManager>() }
 				provide<RaptorAggregateDefinitions>(definitions)
+				provide<RaptorAggregateEventSource> { get<DefaultAggregateEventProcessor>() }
+				provide<RaptorAggregateProjectionEventSource> { get<DefaultAggregateProjectionEventProcessor>() }
 				provide<RaptorAggregateProjectionLoaderManager> { get<DefaultAggregateProjectionLoaderManager>() }
-				provide<RaptorAggregateProjectionStream> { get<DefaultAggregateProjectionStream>() }
 				provide<RaptorAggregateProvider> { get<DefaultAggregateManager>() }
-				provide<RaptorAggregateStream> { get<DefaultAggregateStream>() }
 				provide<RaptorDomain> { get<DefaultAggregateManager>() }
 
 				if (store != null)

@@ -4,11 +4,9 @@ fluidLibraryModule(description = "TODO") {
 	targets {
 		common {
 			dependencies {
-				api(project(":raptor-lifecycle"))
-				api(fluid("time", Versions.fluid_time))
 				implementation(project(":raptor-di"))
+				implementation(project(":raptor-lifecycle"))
 				implementation(kotlinx("coroutines-core", Versions.kotlinx_coroutines))
-				implementation("org.slf4j:slf4j-api:${Versions.slf4j}")
 			}
 
 			testDependencies {
@@ -16,8 +14,6 @@ fluidLibraryModule(description = "TODO") {
 			}
 		}
 
-//		darwin()
-//		js(KotlinJsCompilerType.BOTH)
 		jvm()
 	}
 }
