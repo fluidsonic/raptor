@@ -19,8 +19,6 @@ fluidLibraryModule(description = "TODO") {
 			}
 		}
 
-//		darwin()
-//		js(KotlinJsCompilerType.BOTH)
 		jvm()
 	}
 }

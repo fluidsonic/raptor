@@ -8,12 +8,12 @@ import kotlinx.coroutines.flow.*
 
 
 @RaptorDsl
-public val RaptorScope.aggregateStream: RaptorAggregateStream
+public val RaptorScope.aggregateEventSource: RaptorAggregateEventSource
 	get() = di.get()
 
 
 @RaptorDsl
-public val RaptorScope.aggregateProjectionStream: RaptorAggregateProjectionStream
+public val RaptorScope.aggregateProjectionEventSource: RaptorAggregateProjectionEventSource
 	get() = di.get()
 
 
