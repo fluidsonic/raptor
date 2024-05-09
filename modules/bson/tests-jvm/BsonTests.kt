@@ -56,7 +56,10 @@ class BsonTests {
 		val configuration = raptor.context.bson
 
 		assertEquals(
-			expected = listOf(countryDefinition) + currencyDefinition + RaptorBsonDefinition.defaults,
+			expected = listOf(countryDefinition) +
+				currencyDefinition +
+				RaptorBsonDefinition.raptorDefaults +
+				RaptorBsonDefinition.bsonDefaults,
 			actual = configuration.definitions
 		)
 	}

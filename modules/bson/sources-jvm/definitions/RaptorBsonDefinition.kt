@@ -20,7 +20,14 @@ public interface RaptorBsonDefinition {
 
 	public companion object {
 
-		public val defaults: List<RaptorBsonDefinition> = listOf(
+		public val bsonDefaults: List<RaptorBsonDefinition> = listOf(
+			of(ValueCodecProvider()),
+			of(BsonValueCodecProvider()),
+			of(Jsr310CodecProvider()),
+			of(BsonCodecProvider())
+		)
+
+		public val raptorDefaults: List<RaptorBsonDefinition> = listOf(
 			CollectionExtensions.bsonDefinition(),
 			Country.bsonDefinition(),
 			CountryCode.bsonDefinition(),
@@ -34,10 +41,6 @@ public interface RaptorBsonDefinition {
 			LocalTime.bsonDefinition(),
 			Timestamp.bsonDefinition(),
 			TimeZone.bsonDefinition(),
-			of(ValueCodecProvider()),
-			of(BsonValueCodecProvider()),
-			of(Jsr310CodecProvider()),
-			of(BsonCodecProvider())
 		)
 
 

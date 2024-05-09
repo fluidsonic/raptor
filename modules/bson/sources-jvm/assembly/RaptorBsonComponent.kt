@@ -74,13 +74,15 @@ public class RaptorBsonComponent internal constructor() : RaptorComponent.Base<R
 
 
 	override fun RaptorComponentConfigurationEndScope<RaptorBsonComponent>.onConfigurationEnded() {
-		// These codecs must come last to allow all other codecs to override default behavior.
-		// Also, MongoDB would freak out with StackOverflowError if their own codecs don't come before these!
-		val definitions =
-			definitionsByPriority[Priority.high].orEmpty() +
-				definitionsByPriority[Priority.normal].orEmpty() +
-				definitionsByPriority[Priority.low].orEmpty() +
-				if (includesDefaultDefinitions) RaptorBsonDefinition.defaults else emptyList()
+		val definitions = listOfNotNull(
+			definitionsByPriority[Priority.high],
+			definitionsByPriority[Priority.normal],
+			RaptorBsonDefinition.raptorDefaults.takeIf { includesDefaultDefinitions },
+			definitionsByPriority[Priority.low],
+			// These codecs must come last to allow all other codecs to override default behavior.
+			// Also, MongoDB would freak out with StackOverflowError if their own codecs don't come before these!
+			RaptorBsonDefinition.bsonDefaults.takeIf { includesDefaultDefinitions },
+		).flatten()
 
 		propertyRegistry.register(bsonPropertyKey, DefaultRaptorBson(context = lazyContext, definitions = definitions))
 	}
