@@ -1,5 +1,6 @@
 package io.fluidsonic.raptor.domain
 
+import io.fluidsonic.raptor.event.*
 import io.fluidsonic.time.*
 
 
@@ -9,11 +10,11 @@ public data class RaptorAggregateEvent<
 	>(
 	val aggregateId: AggregateId,
 	val change: Change,
-	override val id: RaptorAggregateEventId,
+	val id: RaptorAggregateEventId,
 	val timestamp: Timestamp,
 	val version: Int,
 	val lastVersionInBatch: Int = version,
-) : RaptorEntity<RaptorAggregateEventId> {
+) : RaptorEvent {
 
 	init {
 		require(version > 0) { "'version' must be positive: $version" }

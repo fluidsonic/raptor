@@ -7,8 +7,8 @@ import io.fluidsonic.raptor.di.*
 public object RaptorEventPlugin : RaptorPluginWithConfiguration<RaptorEventPluginConfiguration> {
 
 	override fun RaptorPluginCompletionScope.complete(): RaptorEventPluginConfiguration {
-		// TODO Make configurable.
-		val processor = ParallelDispatchEventProcessor { _, _ -> } // FIXME Implement.
+		// TODO Make configurable and use DI only.
+		val processor = ParallelEventProcessor()
 		val emitter = ProcessingEventEmitter(processor = processor)
 
 		return RaptorEventPluginConfiguration(
@@ -25,6 +25,7 @@ public object RaptorEventPlugin : RaptorPluginWithConfiguration<RaptorEventPlugi
 		}
 
 		// TODO Use lifecycle to wind up/down event handling.
+		//      Especially, wait for all events to settle when shutting down.
 	}
 
 
