@@ -10,6 +10,7 @@ public interface RaptorEventSource {
 		scope: CoroutineScope,
 		handler: suspend (event: Event) -> Unit,
 		events: Set<KClass<out Event>>,
+		async: Boolean = false,
 	): Job
 }
 
@@ -17,5 +18,6 @@ public interface RaptorEventSource {
 public inline fun <reified Event : RaptorEvent> RaptorEventSource.subscribeIn(
 	scope: CoroutineScope,
 	noinline handler: suspend (event: Event) -> Unit,
+	async: Boolean = false,
 ): Job =
-	subscribeIn(scope, handler, setOf(Event::class))
+	subscribeIn(scope, handler, setOf(Event::class), async = async)
