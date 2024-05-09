@@ -2,6 +2,7 @@ package io.fluidsonic.raptor.domain
 
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.di.*
+import io.fluidsonic.raptor.event.*
 import io.fluidsonic.time.*
 import kotlinx.atomicfu.*
 import kotlinx.coroutines.*
@@ -14,9 +15,9 @@ internal class DefaultAggregateManager(
 	private val clock: Clock,
 	private val context: RaptorContext,
 	private val definitions: RaptorAggregateDefinitions,
-	private val eventStream: DefaultAggregateStream,
+	private val eventEmitter: RaptorEventEmitter,
+	private val eventSource: RaptorEventSource,
 	private val onCommittedActions: List<suspend RaptorScope.() -> Unit>,
-	private val projectionEventStream: DefaultAggregateProjectionStream,
 	private val projectionLoaderManager: DefaultAggregateProjectionLoaderManager, // TODO Hack.
 	private val store: RaptorAggregateStore,
 ) : RaptorAggregateCommandExecutor, RaptorAggregateProvider, RaptorDomain {
@@ -25,6 +26,7 @@ internal class DefaultAggregateManager(
 	private val mutex = Mutex()
 	private var nextEventId = 1L
 	private var status = atomic(Status.new)
+	private val stopJobs = mutableListOf<Job>()
 
 	override val loaded = CompletableDeferred<RaptorDomain>()
 
@@ -100,10 +102,11 @@ internal class DefaultAggregateManager(
 		// Make sure that the projection is updated before we emit any events.
 		val projectionEvent = projectionLoaderManager.addEvent(event)
 
-		eventStream.handleEvent(event)
+		// FIXME Emit in parallel.
+		eventEmitter.emit(event)
 
 		if (projectionEvent != null)
-			projectionEventStream.handleEvent(projectionEvent)
+			eventEmitter.emit(projectionEvent)
 	}
 
 
@@ -135,10 +138,10 @@ internal class DefaultAggregateManager(
 	) {
 		check(status.compareAndSet(Status.new, Status.starting)) { "Cannot start an aggregate manager that is $status." }
 
-		var lastEventId = 0L
+		stopJobs += eventSource.subscribeIn(scope, ::onAggregateEvent)
+		stopJobs += eventSource.subscribeIn(scope, ::onAggregateProjectionEvent)
 
-		eventStream.handleSetupCompleted()
-		projectionEventStream.handleSetupCompleted()
+		var lastEventId = 0L
 
 		store.load()
 			.buffer(capacity = 2_000_000)
@@ -177,15 +180,17 @@ internal class DefaultAggregateManager(
 		mutex.withLock {
 			status.value = Status.started
 
-			eventStream.handleReplayCompleted()
-			projectionEventStream.handleReplayCompleted()
 			loaded.complete(this)
+			eventEmitter.emit(RaptorAggregateReplayCompletedEvent)
 		}
 	}
 
 
 	suspend fun stop() {
 		check(status.compareAndSet(Status.started, Status.stopping)) { "Cannot stop an aggregate manager that is $status." }
+
+		for (job in stopJobs)
+			job.cancel()
 
 		mutex.withLock {
 			status.value = Status.stopped

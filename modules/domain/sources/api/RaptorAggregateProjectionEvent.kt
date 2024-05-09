@@ -1,5 +1,6 @@
 package io.fluidsonic.raptor.domain
 
+import io.fluidsonic.raptor.event.*
 import io.fluidsonic.time.*
 import kotlin.reflect.*
 
@@ -10,13 +11,13 @@ public data class RaptorAggregateProjectionEvent<
 	out Change : RaptorAggregateChange<ProjectionId>,
 	>(
 	val change: Change,
-	override val id: RaptorAggregateEventId,
+	val id: RaptorAggregateEventId,
 	val previousProjection: Projection? = null,
 	val projection: Projection?,
 	val timestamp: Timestamp,
 	val version: Int,
 	val lastVersionInBatch: Int = version,
-) : RaptorEntity<RaptorAggregateEventId> {
+) : RaptorEvent {
 
 	init {
 		require(previousProjection != null || projection != null) { "At least one of 'projection' or 'previousProjection' must be set." }
