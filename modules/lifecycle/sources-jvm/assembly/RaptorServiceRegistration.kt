@@ -7,7 +7,7 @@ import io.fluidsonic.raptor.di.*
 internal class RaptorServiceRegistration<Service : RaptorService>(
 	val factory: RaptorDI.() -> Service,
 	val name: String,
-	private val providedKeys: List<RaptorDIKey<in Service>>,
+	private val providedKeys: List<RaptorDIKey<out Service>>,
 ) : RaptorComponent.Base<RaptorServiceComponent<Service>>(RaptorLifecyclePlugin) {
 
 	val diKey = ServiceDIKey<Service>(name)
@@ -17,7 +17,9 @@ internal class RaptorServiceRegistration<Service : RaptorService>(
 		val diKey = diKey
 		di.provide(diKey, factory)
 
+		// TODO Improve.
+		@Suppress("UNCHECKED_CAST")
 		for (key in providedKeys)
-			di.provide(key) { get(diKey) }
+			di.provide(key as RaptorDIKey<Service>) { get(diKey) }
 	}
 }
