@@ -11,11 +11,11 @@ public class RaptorServiceComponent<Service : RaptorService> internal constructo
 ) : RaptorComponent.Base<RaptorServiceComponent<Service>>(RaptorLifecyclePlugin) {
 
 	private val diKey = ServiceDIKey<Service>(name)
-	private val providedKeys: MutableList<RaptorDIKey<in Service>> = mutableListOf()
+	private val providedKeys: MutableList<RaptorDIKey<out Service>> = mutableListOf()
 
 
 	@RaptorDsl
-	public fun provides(key: RaptorDIKey<in Service>): RaptorServiceComponent<Service> =
+	public fun provides(key: RaptorDIKey<out Service>): RaptorServiceComponent<Service> =
 		apply {
 			providedKeys += key
 		}
