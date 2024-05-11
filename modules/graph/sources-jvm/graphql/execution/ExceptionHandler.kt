@@ -30,11 +30,23 @@ internal class ExceptionHandler(
 
 
 	// TODO add origin/locations/nodes
-	override fun GExceptionHandlerContext.handleException(exception: Throwable): GError =
-		checkNotNull(origin.context.execution.raptorContext).handleException(exception, origin = origin)
+	override fun GExceptionHandlerContext.handleException(exception: Throwable): GError {
+		val context = object :
+			RaptorGraphExceptionHandlerContext,
+			RaptorTransactionContext by checkNotNull(origin.context.execution.raptorContext) {
+
+			override val graphPath: String? = origin.path?.toString()
+		}
+
+		return context.handleException(exception, origin = origin)
+	}
 
 
-	private fun RaptorTransactionContext.handleException(exception: Throwable, origin: GExceptionOrigin, depth: Int = 1): GError {
+	private fun RaptorGraphExceptionHandlerContext.handleException(
+		exception: Throwable,
+		origin: GExceptionOrigin,
+		depth: Int = 1,
+	): GError {
 		if (exception is GErrorException)
 			throw exception
 

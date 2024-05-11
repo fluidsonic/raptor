@@ -1,7 +1,6 @@
 package io.fluidsonic.raptor.graph
 
 import io.fluidsonic.raptor.*
-import io.fluidsonic.raptor.transactions.*
 import kotlin.internal.*
 import kotlin.reflect.*
 
@@ -26,7 +25,7 @@ public class RaptorGraphComponent internal constructor() :
 	@RaptorDsl
 	public fun <Exception : Throwable> handle(
 		exceptionClass: KClass<Exception>,
-		handle: RaptorTransactionContext.(exception: Exception) -> RaptorGraphError,
+		handle: RaptorGraphExceptionHandlerContext.(exception: Exception) -> RaptorGraphError,
 	) {
 		exceptionHandlers.add(GraphExceptionHandler(exceptionClass = exceptionClass, handle = handle))
 	}
@@ -80,7 +79,7 @@ public class RaptorGraphComponent internal constructor() :
 @RaptorDsl
 public fun <Exception : Throwable> RaptorAssemblyQuery<RaptorGraphComponent>.handle(
 	exceptionClass: KClass<Exception>,
-	handle: RaptorTransactionContext.(exception: Exception) -> RaptorGraphError,
+	handle: RaptorGraphExceptionHandlerContext.(exception: Exception) -> RaptorGraphError,
 ) {
 	each {
 		handle(exceptionClass = exceptionClass, handle = handle)
@@ -90,7 +89,7 @@ public fun <Exception : Throwable> RaptorAssemblyQuery<RaptorGraphComponent>.han
 
 @RaptorDsl
 public inline fun <reified Exception : Throwable> RaptorAssemblyQuery<RaptorGraphComponent>.handle(
-	noinline handle: RaptorTransactionContext.(exception: Exception) -> RaptorGraphError,
+	noinline handle: RaptorGraphExceptionHandlerContext.(exception: Exception) -> RaptorGraphError,
 ) {
 	handle(exceptionClass = Exception::class, handle = handle)
 }
@@ -129,12 +128,14 @@ public inline fun <reified Type : Enum<Type>> RaptorAssemblyQuery<RaptorGraphCom
 	name: String = RaptorGraphDefinition.defaultName,
 	noinline configure: RaptorEnumGraphDefinitionBuilder<@NoInfer Type>.() -> Unit = {},
 ) {
-	add(graphEnumDefinition(
-		name = name,
-		type = typeOf<Type>(),
-		values = enumValues<Type>().toList(),
-		configure = configure,
-	))
+	add(
+		graphEnumDefinition(
+			name = name,
+			type = typeOf<Type>(),
+			values = enumValues<Type>().toList(),
+			configure = configure,
+		)
+	)
 }
 
 
@@ -143,10 +144,12 @@ public inline fun <reified Type : Enum<Type>> RaptorAssemblyQuery<RaptorGraphCom
 public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.Definitions>.newIdAlias(
 	noinline configure: RaptorAliasGraphDefinitionBuilder<@NoInfer Type, String>.() -> Unit,
 ) {
-	add(graphIdAliasDefinition<Type>(
-		type = typeOf<Type>(),
-		configure = configure,
-	))
+	add(
+		graphIdAliasDefinition<Type>(
+			type = typeOf<Type>(),
+			configure = configure,
+		)
+	)
 }
 
 
@@ -167,11 +170,13 @@ public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.
 	type: KType,
 	noinline configure: RaptorInputObjectGraphDefinitionBuilder<@NoInfer Type>.() -> Unit,
 ) {
-	add(graphInputObjectDefinition<Type>(
-		name = name,
-		type = type,
-		configure = configure,
-	))
+	add(
+		graphInputObjectDefinition<Type>(
+			name = name,
+			type = type,
+			configure = configure,
+		)
+	)
 }
 
 
@@ -227,11 +232,13 @@ public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.
 	name: String = RaptorGraphDefinition.defaultName,
 	noinline configure: RaptorScalarGraphDefinitionBuilder<@NoInfer Type>.() -> Unit,
 ) {
-	add(graphScalarDefinition<Type>(
-		name = name,
-		type = typeOf<Type>(),
-		configure = configure,
-	))
+	add(
+		graphScalarDefinition<Type>(
+			name = name,
+			type = typeOf<Type>(),
+			configure = configure,
+		)
+	)
 }
 
 
@@ -241,9 +248,11 @@ public inline fun <reified Type : Any> RaptorAssemblyQuery<RaptorGraphComponent.
 	name: String = RaptorGraphDefinition.defaultName,
 	noinline configure: RaptorUnionGraphDefinitionBuilder<@NoInfer Type>.() -> Unit = {},
 ) {
-	add(graphUnionDefinition<Type>(
-		name = name,
-		type = typeOf<Type>(),
-		configure = configure,
-	))
+	add(
+		graphUnionDefinition<Type>(
+			name = name,
+			type = typeOf<Type>(),
+			configure = configure,
+		)
+	)
 }
