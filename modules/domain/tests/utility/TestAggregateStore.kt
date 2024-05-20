@@ -1,4 +1,5 @@
 import io.fluidsonic.raptor.domain.*
+import io.fluidsonic.time.Timestamp
 import kotlinx.coroutines.flow.*
 
 
@@ -15,6 +16,10 @@ class TestAggregateStore(
 
 		batches += events
 	}
+
+
+	override suspend fun lastEventTimestampOrNull(): Timestamp? =
+		events.maxOfOrNull { it.timestamp }
 
 
 	override fun load(after: RaptorAggregateEventId?): Flow<RaptorAggregateEvent<*, *>> =

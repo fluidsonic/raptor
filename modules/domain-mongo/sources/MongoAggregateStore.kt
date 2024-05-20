@@ -7,6 +7,7 @@ import io.fluidsonic.mongo.*
 import io.fluidsonic.raptor.domain.*
 import io.fluidsonic.raptor.domain.mongo.RaptorAggregateEventBson.Fields
 import io.fluidsonic.raptor.mongo.*
+import io.fluidsonic.time.Timestamp
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
 
@@ -34,6 +35,13 @@ private class MongoAggregateStore(
 			throw e
 		}
 	}
+
+	override suspend fun lastEventTimestampOrNull(): Timestamp? =
+		collection.find()
+			.sort(descending(Fields.id))
+			.limit(1)
+			.firstOrNull()
+			?.timestamp
 
 
 	override fun load(after: RaptorAggregateEventId?): Flow<RaptorAggregateEvent<*, *>> =
