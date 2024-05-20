@@ -39,7 +39,6 @@ private class MongoAggregateStore(
 	override suspend fun lastEventTimestampOrNull(): Timestamp? =
 		collection.find()
 			.sort(descending(Fields.id))
-			.limit(1)
 			.firstOrNull()
 			?.timestamp
 

@@ -19,7 +19,7 @@ class TestAggregateStore(
 
 
 	override suspend fun lastEventTimestampOrNull(): Timestamp? =
-		events.maxOfOrNull { it.timestamp }
+		events.lastOrNull()?.timestamp
 
 
 	override fun load(after: RaptorAggregateEventId?): Flow<RaptorAggregateEvent<*, *>> =
