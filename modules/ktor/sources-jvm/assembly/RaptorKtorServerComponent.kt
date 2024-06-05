@@ -37,14 +37,14 @@ public class RaptorKtorServerComponent internal constructor(
 
 
 	@RaptorDsl
-	internal fun engineEnvironmentFactory(factory: (configure: ApplicationEngineEnvironmentBuilder.() -> Unit) -> ApplicationEngineEnvironment) {
+	public fun engineEnvironmentFactory(factory: (configure: ApplicationEngineEnvironmentBuilder.() -> Unit) -> ApplicationEngineEnvironment) {
 		check(engineEnvironmentFactory == null) { "Factory already set." }
 		engineEnvironmentFactory = factory
 	}
 
 
 	@RaptorDsl
-	internal fun engineFactory(factory: (environment: ApplicationEngineEnvironment) -> ApplicationEngine) {
+	public fun engineFactory(factory: (environment: ApplicationEngineEnvironment) -> ApplicationEngine) {
 		check(engineFactory == null) { "Factory already set." }
 		engineFactory = factory
 	}
@@ -129,6 +129,7 @@ public class RaptorKtorServerComponent internal constructor(
 			engineFactory = engineFactory ?: {
 				// TODO make configurable
 				embeddedServer(Netty, it) {
+					responseWriteTimeoutSeconds = 30
 					httpServerCodec = {
 						HttpServerCodec(
 							4 * 4096, // for mmpt-k2-server project
@@ -185,7 +186,7 @@ public fun RaptorAssemblyQuery<RaptorKtorServerComponent>.custom(configuration: 
 
 
 @RaptorDsl
-internal fun RaptorAssemblyQuery<RaptorKtorServerComponent>.engineEnvironmentFactory(
+public fun RaptorAssemblyQuery<RaptorKtorServerComponent>.engineEnvironmentFactory(
 	factory: (
 		configure: ApplicationEngineEnvironmentBuilder.() -> Unit,
 	) -> ApplicationEngineEnvironment,
@@ -197,7 +198,7 @@ internal fun RaptorAssemblyQuery<RaptorKtorServerComponent>.engineEnvironmentFac
 
 
 @RaptorDsl
-internal fun RaptorAssemblyQuery<RaptorKtorServerComponent>.engineFactory(factory: (environment: ApplicationEngineEnvironment) -> ApplicationEngine) {
+public fun RaptorAssemblyQuery<RaptorKtorServerComponent>.engineFactory(factory: (environment: ApplicationEngineEnvironment) -> ApplicationEngine) {
 	this {
 		engineFactory(factory)
 	}
