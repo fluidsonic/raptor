@@ -4,14 +4,14 @@ import io.fluidsonic.raptor.*
 import org.bson.codecs.*
 
 
-internal object CollectionExtensions {
+internal object ListExtensions {
 
 	private val bsonTypeClassMap = BsonTypeClassMap()
 	private val decoderContext = DecoderContext.builder().build()
 
 
 	// TODO Support decoding of common subtypes.
-	internal fun bsonDefinition() = raptor.bson.definition<Collection<*>> {
+	internal fun bsonDefinition() = raptor.bson.definition<List<*>> {
 		decode { arguments ->
 			val valueType = arguments?.singleOrNull()?.type
 			val elements = mutableListOf<Any?>()

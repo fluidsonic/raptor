@@ -28,6 +28,7 @@ public interface RaptorBsonDefinition {
 		)
 
 		public val raptorDefaults: List<RaptorBsonDefinition> = listOf(
+			ListExtensions.bsonDefinition(),
 			CollectionExtensions.bsonDefinition(),
 			Country.bsonDefinition(),
 			CountryCode.bsonDefinition(),
