@@ -101,11 +101,13 @@ internal class DefaultAggregateManager(
 		if (projectionEvents.isNotEmpty()) {
 			val lastProjectionEvent = projectionEvents.last()
 
-			projectionEventStream.emit(RaptorAggregateProjectionEventBatch(
-				events = projectionEvents,
-				projectionId = lastProjectionEvent.projectionId,
-				version = lastProjectionEvent.version,
-			))
+			projectionEventStream.emit(
+				RaptorAggregateProjectionEventBatch(
+					events = projectionEvents,
+					projectionId = lastProjectionEvent.projectionId,
+					version = lastProjectionEvent.version,
+				)
+			)
 		}
 	}
 
@@ -142,6 +144,8 @@ internal class DefaultAggregateManager(
 		store.load()
 			.buffer(capacity = 100_000)
 			.collect { event ->
+				check(event.id.toLong() == lastEventId + 1) { "Expected event ${lastEventId + 1} but got: $event" }
+
 				val batchEvents = batchEventsByAggregateId.getOrPut(event.aggregateId, ::mutableListOf)
 				batchEvents += event
 
@@ -163,16 +167,18 @@ internal class DefaultAggregateManager(
 					for (eventInBatch in batchEvents)
 						state.addEvent(eventInBatch)
 
-					process(RaptorAggregateEventBatch(
-						aggregateId = id,
-						events = batchEvents,
-						version = event.version,
-					))
+					process(
+						RaptorAggregateEventBatch(
+							aggregateId = id,
+							events = batchEvents,
+							version = event.version,
+						)
+					)
 
 					batchEventsByAggregateId.remove(id)
 				}
 
-				lastEventId = lastEventId.coerceAtLeast(event.id.toLong())
+				lastEventId = event.id.toLong()
 			}
 
 		nextEventId = lastEventId + 1
