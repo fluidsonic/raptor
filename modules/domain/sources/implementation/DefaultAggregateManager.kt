@@ -136,8 +136,9 @@ internal class DefaultAggregateManager(
 	suspend fun start() {
 		check(status.compareAndSet(Status.new, Status.starting)) { "Cannot start an aggregate manager that is $status." }
 
-		stopJobs += eventSource.subscribeIn(scope, ::onAggregateEvent)
-		stopJobs += eventSource.subscribeIn(scope, ::onAggregateProjectionEvent)
+		// FIXME implement dispatching to listeners
+//		stopJobs += eventSource.subscribeIn(scope, ::onAggregateEvent)
+//		stopJobs += eventSource.subscribeIn(scope, ::onAggregateProjectionEvent)
 
 		var lastEventId = 0L
 

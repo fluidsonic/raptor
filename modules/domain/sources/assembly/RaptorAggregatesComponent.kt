@@ -32,9 +32,9 @@ public class RaptorAggregatesComponent internal constructor(
 						clock = get(),
 						context = get(),
 						definitions = definitions,
-						eventStream = get(),
+						eventEmitter = get(),
+						eventSource = get(),
 						onCommittedActions = onCommittedActions,
-						projectionEventStream = get(),
 						projectionLoaderManager = get(),
 						store = get(),
 					)
