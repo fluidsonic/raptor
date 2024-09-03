@@ -31,7 +31,7 @@ internal class DefaultAggregateProjectionEventProcessor(
 			0 -> return
 			1 -> subscriptions[0].handle(event)?.join()
 			else -> subscriptions
-				.mapNotNullTo(ArrayList(initialCapacity = size)) { it.handle(event) }
+				.mapNotNullTo(ArrayList(size)) { it.handle(event) }
 				.forEach { it.join() }
 		}
 	}
