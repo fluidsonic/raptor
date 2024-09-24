@@ -1,5 +1,6 @@
-package io.fluidsonic.raptor.domain
+package io.fluidsonic.raptor.domain.memory
 
+import io.fluidsonic.raptor.domain.*
 import io.fluidsonic.time.Timestamp
 import kotlinx.coroutines.flow.*
 
