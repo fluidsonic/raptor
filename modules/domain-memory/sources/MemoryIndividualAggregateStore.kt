@@ -1,16 +1,13 @@
 package io.fluidsonic.raptor.domain.memory
 
 import io.fluidsonic.raptor.domain.*
-import io.fluidsonic.time.*
-import kotlinx.coroutines.sync.*
 
 
 private class MemoryIndividualAggregateStore<Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>> :
 	RaptorIndividualAggregateStore<Id, Change> {
 
 	private val cache: MutableMap<Id, List<RaptorAggregateEvent<Id, Change>>> = hashMapOf()
-	private var lastEventId: Long = 0
-	private val mutex = Mutex()
+	private var lastEventId: RaptorAggregateEventId? = null
 
 
 	private fun appendToCache(id: Id, events: List<RaptorAggregateEvent<Id, Change>>) {
@@ -18,46 +15,48 @@ private class MemoryIndividualAggregateStore<Id : RaptorAggregateId, Change : Ra
 			previousEvents.orEmpty() + events
 		}
 
-		lastEventId = events.last().id.toLong()
+		lastEventId = events.last().id
 	}
 
 
+	override suspend fun lastEventId(): RaptorAggregateEventId? =
+		lastEventId
+
+
 	override suspend fun load(id: Id): List<RaptorAggregateEvent<Id, Change>> =
-		mutex.withLock {
-			cache[id].orEmpty()
+		cache[id].orEmpty()
+
+
+	override suspend fun reload(): List<RaptorAggregateEvent<Id, Change>> {
+		cache.clear()
+
+		return emptyList()
+	}
+
+
+	override suspend fun save(id: Id, events: List<RaptorAggregateEvent<Id, Change>>) {
+		if (events.isEmpty())
+			return
+
+		require(events.all { it.aggregateId == id }) { "All events must have aggregate id '$id': $events" }
+
+		var minimumEventId = lastEventId?.toLong() ?: 0
+		events.forEachIndexed { index, event ->
+			require(event.id.toLong() > minimumEventId) { "Event ${index + 1} ID ${event.id} must be > $minimumEventId: $events" }
+			minimumEventId = event.id.toLong()
 		}
 
-
-	override suspend fun preload() {}
-
-
-	override suspend fun save(id: Id, expectedVersion: Int, changes: List<Change>, timestamp: Timestamp) {
-		mutex.withLock {
-			val lastVersion = cache[id]?.lastOrNull()?.version ?: 0
-			if (lastVersion != expectedVersion)
-				throw RaptorAggregateVersionConflict(
-					"Expected aggregate ${id.debug} at version $expectedVersion but encountered version $lastVersion.",
-				)
-
-			if (changes.isEmpty())
-				return
-
-			val lastEventId = lastEventId
-
-			appendToCache(id, changes.mapIndexed { index, change ->
-				RaptorAggregateEvent(
-					aggregateId = id,
-					change = change,
-					id = RaptorAggregateEventId(lastEventId + 1 + index),
-					timestamp = timestamp,
-					version = lastVersion + 1 + index,
-				)
-			})
-		}
+		appendToCache(id, events)
 	}
 }
 
 
-public fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
+public fun RaptorIndividualAggregateStore.Companion.memory(): RaptorIndividualAggregateStore<*, *> =
+	MemoryIndividualAggregateStore<RaptorAggregateId, RaptorAggregateChange<RaptorAggregateId>>()
+
+
+@JvmName("memoryGeneric")
+@Suppress("UNCHECKED_CAST")
+public inline fun <reified Id : RaptorAggregateId, reified Change : RaptorAggregateChange<Id>>
 	RaptorIndividualAggregateStore.Companion.memory(): RaptorIndividualAggregateStore<Id, Change> =
-	MemoryIndividualAggregateStore()
+	memory() as RaptorIndividualAggregateStore<Id, Change>

@@ -40,35 +40,40 @@ class AssemblyTests {
 		}
 
 		val configuration = raptor.context.plugins.domain
-		assertEquals(actual = configuration.aggregateDefinitions, expected = RaptorAggregateDefinitions(setOf(
-			RaptorAggregateDefinition(
-				aggregateClass = BankAccountAggregate::class,
-				changeClass = BankAccountChange::class,
-				changeDefinitions = setOf(
-					RaptorAggregateChangeDefinition(discriminator = "created", changeClass = Created::class),
-					RaptorAggregateChangeDefinition(discriminator = "deleted", changeClass = Deleted::class),
-					RaptorAggregateChangeDefinition(discriminator = "deposited", changeClass = Deposited::class),
-					RaptorAggregateChangeDefinition(discriminator = "labeled", changeClass = Labeled::class),
-					RaptorAggregateChangeDefinition(discriminator = "withdrawn", changeClass = Withdrawn::class),
-				),
-				commandClass = BankAccountCommand::class,
-				commandDefinitions = setOf(
-					RaptorAggregateCommandDefinition(commandClass = Create::class),
-					RaptorAggregateCommandDefinition(commandClass = Delete::class),
-					RaptorAggregateCommandDefinition(commandClass = Deposit::class),
-					RaptorAggregateCommandDefinition(commandClass = Label::class),
-					RaptorAggregateCommandDefinition(commandClass = Withdraw::class),
-				),
-				discriminator = "bank account",
-				factory = RaptorAggregateFactory(::BankAccountAggregate),
-				idClass = BankAccountNumber::class,
-				projectionDefinition = RaptorAggregateProjectionDefinition(
-					factory = ::BankAccountProjector,
-					idClass = BankAccountNumber::class,
-					projectionClass = BankAccount::class
-				),
-			),
-		)))
+		assertEquals(
+			actual = configuration.aggregateDefinitions, expected = RaptorAggregateDefinitions(
+				setOf(
+					RaptorAggregateDefinition(
+						aggregateClass = BankAccountAggregate::class,
+						changeClass = BankAccountChange::class,
+						changeDefinitions = setOf(
+							RaptorAggregateChangeDefinition(discriminator = "created", changeClass = Created::class),
+							RaptorAggregateChangeDefinition(discriminator = "deleted", changeClass = Deleted::class),
+							RaptorAggregateChangeDefinition(discriminator = "deposited", changeClass = Deposited::class),
+							RaptorAggregateChangeDefinition(discriminator = "labeled", changeClass = Labeled::class),
+							RaptorAggregateChangeDefinition(discriminator = "withdrawn", changeClass = Withdrawn::class),
+						),
+						commandClass = BankAccountCommand::class,
+						commandDefinitions = setOf(
+							RaptorAggregateCommandDefinition(commandClass = Create::class),
+							RaptorAggregateCommandDefinition(commandClass = Delete::class),
+							RaptorAggregateCommandDefinition(commandClass = Deposit::class),
+							RaptorAggregateCommandDefinition(commandClass = Label::class),
+							RaptorAggregateCommandDefinition(commandClass = Withdraw::class),
+						),
+						discriminator = "bank account",
+						factory = RaptorAggregateFactory(::BankAccountAggregate),
+						idClass = BankAccountNumber::class,
+						isIndividual = false,
+						projectionDefinition = RaptorAggregateProjectionDefinition(
+							factory = ::BankAccountProjector,
+							idClass = BankAccountNumber::class,
+							projectionClass = BankAccount::class
+						),
+					),
+				)
+			)
+		)
 		assertEquals(actual = raptor.context.aggregateStore, expected = store)
 	}
 }

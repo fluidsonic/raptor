@@ -13,6 +13,7 @@ public data class RaptorAggregateEventBatch<
 	init {
 		require(events.isNotEmpty()) { "'events' must not be empty." }
 		require(events.all { it.aggregateId == aggregateId }) { "'events' must all have the same 'aggregateId' as the batch: $this" }
-		require(events.all { it.lastVersionInBatch == version }) { "'events' must all have the same 'lastVersionInBatch' as the batch 'version': $this" }
+		// We're getting rid of batching anyway…
+//		require(events.all { it.lastVersionInBatch == version }) { "'events' must all have the same 'lastVersionInBatch' as the batch 'version': $this" }
 	}
 }

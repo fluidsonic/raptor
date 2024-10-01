@@ -135,7 +135,9 @@ internal class DefaultAggregateManager(
 
 
 	@Suppress("UNCHECKED_CAST")
-	suspend fun start() {
+	suspend fun start(
+		individualManagers: Collection<DefaultIndividualAggregateManager<*, *>>,
+	) {
 		check(status.compareAndSet(Status.new, Status.starting)) { "Cannot start an aggregate manager that is $status." }
 
 		val batchEventsByAggregateId: MutableMap<RaptorAggregateId, MutableList<RaptorAggregateEvent<*, *>>> = hashMapOf()
@@ -191,6 +193,9 @@ internal class DefaultAggregateManager(
 						.sorted()
 						.joinToString(", ")
 			)
+
+		for (manager in individualManagers)
+			manager.load()
 
 		mutex.withLock {
 			status.value = Status.started
@@ -256,11 +261,15 @@ internal class DefaultAggregateManager(
 		fun <Id : RaptorAggregateId> add(id: Id, expectedVersion: Int?, commands: List<RaptorAggregateCommand<Id>>) {
 			check(!aggregates.containsKey(id)) { "Cannot add commands for aggregate ${id.debug} multiple times." }
 
-			val state = aggregateStates[id] as AggregateState<Id>?
-			val aggregate = state?.aggregate
-				?.copy()
-				?: definitions.create(id)?.let { it as RaptorAggregate<Id, RaptorAggregateCommand<Id>, RaptorAggregateChange<Id>> }
+			val definition = definitions[id]
+				as RaptorAggregateDefinition<out RaptorAggregate<Id, *, *>, Id, *, *>?
 				?: error("There's no aggregate definition for ID $id (${id::class.qualifiedName}).")
+
+			check(!definition.isIndividual) { "Can't use command execution for individual aggregates." }
+
+			val state = aggregateStates[id] as AggregateState<Id>?
+			val aggregate = state?.aggregate?.copy()
+				?: definition.factory.create(id).let { it as RaptorAggregate<Id, RaptorAggregateCommand<Id>, RaptorAggregateChange<Id>> }
 			val version = state?.version ?: 0
 
 			if (expectedVersion != null && version != expectedVersion)

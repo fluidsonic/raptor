@@ -19,6 +19,7 @@ public data class RaptorAggregateDefinition<
 	val discriminator: String,
 	val factory: RaptorAggregateFactory<Aggregate, Id>,
 	val idClass: KClass<Id>,
+	val isIndividual: Boolean,
 	val projectionDefinition: RaptorAggregateProjectionDefinition<*, *, Change>? = null,
 ) {
 
@@ -31,7 +32,14 @@ public data class RaptorAggregateDefinition<
 	private val commandDefinitionsByClass: Map<KClass<out Command>, RaptorAggregateCommandDefinition<Id, out Command>> =
 		commandDefinitions.associateByTo(hashMapOf()) { it.commandClass }
 
+	val changeType: KType = changeClass.starProjectedType
 	val idType: KType = idClass.starProjectedType
+	val eventType: KType = RaptorAggregateEvent::class.createType(
+		listOf(
+			KTypeProjection.invariant(idType),
+			KTypeProjection.invariant(changeType),
+		)
+	)
 
 
 	@Suppress("UNCHECKED_CAST")

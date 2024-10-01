@@ -39,7 +39,7 @@ public class RaptorDomainComponent internal constructor(
 					logger.debug("Started 'domain: aggregate store' in $storeStartDuration.")
 
 					val managerStartDuration = measureTime {
-						context.aggregateManager.start()
+						context.aggregateManager.start(individualManagers = context.di.get())
 					}
 					logger.debug("Started 'domain: aggregate manager' in $managerStartDuration.")
 

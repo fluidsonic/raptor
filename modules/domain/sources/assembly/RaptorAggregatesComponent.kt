@@ -3,6 +3,7 @@ package io.fluidsonic.raptor.domain
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.di.*
 import kotlin.reflect.*
+import kotlin.reflect.full.*
 
 
 @RaptorDsl
@@ -60,6 +61,43 @@ public class RaptorAggregatesComponent internal constructor(
 
 				if (store != null)
 					provide<RaptorAggregateStore>(store)
+
+				definitions
+					.filter { it.isIndividual }
+					.map { definition ->
+						val eventType = definition.eventType
+						val mangerType = RaptorIndividualAggregateManager::class.createType(
+							listOf(
+								KTypeProjection.invariant(definition.idType),
+								KTypeProjection.invariant(definition.changeType),
+							)
+						)
+						val storeType = RaptorIndividualAggregateStore::class.createType(
+							listOf(
+								KTypeProjection.invariant(definition.idType),
+								KTypeProjection.invariant(definition.changeType),
+							)
+						)
+						val storeName = "events_${definition.discriminator}"
+
+						provide<RaptorIndividualAggregateManager<*, *>>(mangerType) {
+							DefaultIndividualAggregateManager<RaptorAggregateId, RaptorAggregateChange<RaptorAggregateId>>(
+								eventStream = get(),
+								store = get(storeType),
+							)
+						}
+
+						provide<RaptorIndividualAggregateStore<*, *>>(storeType) {
+							get<RaptorIndividualAggregateStoreFactory>().create(name = storeName, eventType = eventType)
+						}
+
+						mangerType
+					}
+					.let { managerTypes ->
+						provide<Collection<DefaultIndividualAggregateManager<*, *>>> {
+							managerTypes.map { get<DefaultIndividualAggregateManager<*, *>>(it) }
+						}
+					}
 			}
 		}
 
@@ -85,6 +123,7 @@ public class RaptorAggregatesComponent internal constructor(
 		changeClass: KClass<Change>,
 		commandClass: KClass<Command>,
 		discriminator: String,
+		individual: Boolean = false,
 		factory: RaptorAggregateFactory<Aggregate, Id>,
 		idClass: KClass<Id>,
 	): RaptorAssemblyQuery<RaptorAggregateComponent<Aggregate, Id, Command, Change>> =
@@ -95,6 +134,7 @@ public class RaptorAggregatesComponent internal constructor(
 			discriminator = discriminator,
 			factory = factory,
 			idClass = idClass,
+			individual = individual,
 			topLevelScope = topLevelScope,
 		).also { componentRegistry.register(Keys.aggregateComponent, it) }
 
@@ -120,6 +160,7 @@ public fun <
 	changeClass: KClass<Change>,
 	commandClass: KClass<Command>,
 	discriminator: String,
+	individual: Boolean = false,
 	factory: RaptorAggregateFactory<Aggregate, Id>,
 	idClass: KClass<Id>,
 ): RaptorAssemblyQuery<RaptorAggregateComponent<Aggregate, Id, Command, Change>> =
@@ -131,6 +172,7 @@ public fun <
 			discriminator = discriminator,
 			factory = factory,
 			idClass = idClass,
+			individual = individual,
 		)
 	}
 
@@ -147,6 +189,7 @@ public fun <
 	changeClass: KClass<Change>,
 	commandClass: KClass<Command>,
 	discriminator: String,
+	individual: Boolean = false,
 	factory: RaptorAggregateFactory<Aggregate, Id>,
 	idClass: KClass<Id>,
 	configure: RaptorAggregateComponent<Aggregate, Id, Command, Change>.() -> Unit = {},
@@ -158,6 +201,7 @@ public fun <
 		discriminator = discriminator,
 		factory = factory,
 		idClass = idClass,
+		individual = individual,
 	).each(configure)
 }
 
@@ -172,6 +216,7 @@ public inline fun <
 	RaptorAssemblyQuery<RaptorAggregatesComponent>.new(
 	factory: RaptorAggregateFactory<Aggregate, Id>,
 	discriminator: String,
+	individual: Boolean = false,
 ): RaptorAssemblyQuery<RaptorAggregateComponent<Aggregate, Id, Command, Change>> =
 	new(
 		aggregateClass = Aggregate::class,
@@ -180,6 +225,7 @@ public inline fun <
 		discriminator = discriminator,
 		factory = factory,
 		idClass = Id::class,
+		individual = individual,
 	)
 
 
@@ -192,6 +238,7 @@ public inline fun <
 	> RaptorAssemblyQuery<RaptorAggregatesComponent>.new(
 	factory: RaptorAggregateFactory<Aggregate, Id>,
 	discriminator: String,
+	individual: Boolean = false,
 	noinline configure: RaptorAggregateComponent<Aggregate, Id, Command, Change>.() -> Unit = {},
 ) {
 	new(
@@ -202,6 +249,7 @@ public inline fun <
 		discriminator = discriminator,
 		factory = factory,
 		idClass = Id::class,
+		individual = individual,
 	)
 }
 
@@ -218,6 +266,7 @@ public fun <
 	changeClass: KClass<Change>,
 	commandClass: KClass<Command>,
 	discriminator: String,
+	individual: Boolean = false,
 	factory: (id: Id) -> Aggregate,
 	idClass: KClass<Id>,
 ): RaptorAssemblyQuery<RaptorAggregateComponent<Aggregate, Id, Command, Change>> =
@@ -228,6 +277,7 @@ public fun <
 		discriminator = discriminator,
 		factory = RaptorAggregateFactory(factory),
 		idClass = idClass,
+		individual = individual,
 	)
 
 
@@ -243,6 +293,7 @@ public fun <
 	changeClass: KClass<Change>,
 	commandClass: KClass<Command>,
 	discriminator: String,
+	individual: Boolean = false,
 	factory: (id: Id) -> Aggregate,
 	idClass: KClass<Id>,
 	configure: RaptorAggregateComponent<Aggregate, Id, Command, Change>.() -> Unit = {},
@@ -254,6 +305,7 @@ public fun <
 		discriminator = discriminator,
 		factory = RaptorAggregateFactory(factory),
 		idClass = idClass,
+		individual = individual,
 	).each(configure)
 }
 
@@ -268,6 +320,7 @@ public inline fun <
 	RaptorAssemblyQuery<RaptorAggregatesComponent>.new(
 	noinline factory: (id: Id) -> Aggregate,
 	discriminator: String,
+	individual: Boolean = false,
 ): RaptorAssemblyQuery<RaptorAggregateComponent<Aggregate, Id, Command, Change>> =
 	new(
 		aggregateClass = Aggregate::class,
@@ -276,6 +329,7 @@ public inline fun <
 		discriminator = discriminator,
 		factory = factory,
 		idClass = Id::class,
+		individual = individual,
 	)
 
 
@@ -288,6 +342,7 @@ public inline fun <
 	> RaptorAssemblyQuery<RaptorAggregatesComponent>.new(
 	noinline factory: (id: Id) -> Aggregate,
 	discriminator: String,
+	individual: Boolean = false,
 	noinline configure: RaptorAggregateComponent<Aggregate, Id, Command, Change>.() -> Unit = {},
 ) {
 	new(
@@ -298,6 +353,7 @@ public inline fun <
 		discriminator = discriminator,
 		factory = factory,
 		idClass = Id::class,
+		individual = individual,
 	)
 }
 

@@ -19,6 +19,7 @@ public class RaptorAggregateComponent<
 	private val discriminator: String,
 	private val factory: RaptorAggregateFactory<Aggregate, Id>,
 	private val idClass: KClass<Id>,
+	private val individual: Boolean,
 	private val topLevelScope: RaptorAssemblyInstallationScope,
 ) : RaptorComponent.Base<RaptorAggregateComponent<Aggregate, Id, Command, Change>>(RaptorDomainPlugin) {
 
@@ -59,6 +60,7 @@ public class RaptorAggregateComponent<
 			discriminator = discriminator,
 			factory = factory,
 			idClass = idClass,
+			isIndividual = individual,
 			projectionDefinition = projectionDefinition,
 		)
 
@@ -68,6 +70,7 @@ public class RaptorAggregateComponent<
 	public fun <Projection : RaptorAggregateProjection<Id>> _project(
 		projectionClass: KClass<Projection>, projectorFactory: () -> RaptorAggregateProjector.Incremental<Projection, *, Change>,
 	) {
+		check(!individual) { "Can't register a projector for an individual aggregate." }
 		check(this.projectionDefinition == null) { "Cannot set multiple projector factories for aggregate $aggregateClass." }
 
 		this.projectionDefinition =
@@ -81,10 +84,12 @@ public class RaptorAggregateComponent<
 			optional(RaptorDIPlugin) {
 //				transactions { // FIXME
 				di.provide<RaptorAggregateProjectionLoader<RaptorAggregateProjection<*>, RaptorAggregateProjectionId>>(
-					RaptorAggregateProjectionLoader::class.createType(listOf(
-						KTypeProjection.invariant(projectionClass.starProjectedType),
-						KTypeProjection.invariant(this@RaptorAggregateComponent.idClass.starProjectedType),
-					))
+					RaptorAggregateProjectionLoader::class.createType(
+						listOf(
+							KTypeProjection.invariant(projectionClass.starProjectedType),
+							KTypeProjection.invariant(this@RaptorAggregateComponent.idClass.starProjectedType),
+						)
+					)
 				) {
 					// FIXME Improve.
 					// FIXME (context as RaptorTransactionContext)

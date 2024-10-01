@@ -1,6 +1,5 @@
 package io.fluidsonic.raptor.domain
 
-import io.fluidsonic.raptor.domain.*
 import kotlin.reflect.*
 
 
@@ -26,7 +25,7 @@ public class RaptorAggregateDefinitions internal constructor(
 
 
 	public inline fun <reified Id : RaptorAggregateId>
-		get(): RaptorAggregateDefinition<out RaptorAggregate<out Id, *, *>, out Id, out RaptorAggregateCommand<Id>, *>? =
+		get(): RaptorAggregateDefinition<out RaptorAggregate<Id, *, *>, Id, out RaptorAggregateCommand<Id>, *>? =
 		get(Id::class)
 
 
@@ -38,9 +37,9 @@ public class RaptorAggregateDefinitions internal constructor(
 	@Suppress("UNCHECKED_CAST")
 	public operator fun <Id : RaptorAggregateId> get(
 		idClass: KClass<Id>,
-	): RaptorAggregateDefinition<out RaptorAggregate<out Id, *, *>, out Id, out RaptorAggregateCommand<Id>, *>? =
+	): RaptorAggregateDefinition<out RaptorAggregate<Id, *, *>, Id, out RaptorAggregateCommand<Id>, *>? =
 		definitionsByIdClass[idClass]
-			as RaptorAggregateDefinition<out RaptorAggregate<out Id, *, *>, out Id, out RaptorAggregateCommand<Id>, *>?
+			as RaptorAggregateDefinition<out RaptorAggregate<Id, *, *>, Id, out RaptorAggregateCommand<Id>, *>?
 
 
 	override fun hashCode(): Int =

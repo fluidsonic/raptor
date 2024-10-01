@@ -6,10 +6,10 @@ import kotlin.reflect.*
 
 private object MemoryIndividualAggregateStoreFactory : RaptorIndividualAggregateStoreFactory {
 
-	override fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>> create(
+	override fun create(
 		name: String,
 		eventType: KType, /* <RaptorAggregateEvent<Id, Change>> */
-	): RaptorIndividualAggregateStore<Id, Change> =
+	): RaptorIndividualAggregateStore<*, *> =
 		RaptorIndividualAggregateStore.memory()
 }
 

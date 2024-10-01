@@ -3,7 +3,6 @@ package io.fluidsonic.raptor.domain.mongo
 import com.mongodb.*
 import io.fluidsonic.mongo.*
 import io.fluidsonic.raptor.domain.*
-import io.fluidsonic.raptor.mongo.*
 import kotlin.reflect.*
 
 
@@ -13,13 +12,15 @@ private class MongoIndividualAggregateStoreFactory(
 	private val transactionOptions: TransactionOptions,
 ) : RaptorIndividualAggregateStoreFactory {
 
-	override fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>> create(
+	override fun create(
 		name: String,
 		eventType: KType, /* <RaptorAggregateEvent<Id, Change>> */
-	): RaptorIndividualAggregateStore<Id, Change> =
+	): RaptorIndividualAggregateStore<*, *> =
 		RaptorIndividualAggregateStore.mongo(
 			client = client,
-			collection = database.getCollectionOfGeneric(name, eventType),
+			collectionName = name,
+			database = database,
+			eventType = eventType,
 			transactionOptions = transactionOptions,
 		)
 }
