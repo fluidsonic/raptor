@@ -7,8 +7,8 @@ public interface RaptorKeyValueStoreFactory {
 
 	public fun <Key : Any, Value : Any> create(
 		name: String,
-		keyClass: KClass<Key>,
-		valueClass: KClass<Value>,
+		keyType: KType,
+		valueType: KType,
 	): RaptorKeyValueStore<Key, Value>
 
 
@@ -17,4 +17,4 @@ public interface RaptorKeyValueStoreFactory {
 
 
 public inline fun <reified Key : Any, reified Value : Any> RaptorKeyValueStoreFactory.create(name: String): RaptorKeyValueStore<Key, Value> =
-	create(name = name, keyClass = Key::class, valueClass = Value::class)
+	create(name = name, keyType = typeOf<Key>(), valueType = typeOf<Value>())
