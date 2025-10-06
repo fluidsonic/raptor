@@ -4,16 +4,14 @@ import io.fluidsonic.raptor.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
-import io.ktor.server.plugins.callloging.*
+import io.ktor.server.plugins.calllogging.*
 import io.ktor.server.plugins.compression.*
 import io.ktor.server.plugins.defaultheaders.*
 import io.ktor.server.plugins.forwardedheaders.*
 import io.ktor.server.routing.*
-import io.ktor.util.*
 import java.io.*
 import java.security.*
 import java.util.concurrent.*
-import kotlin.text.toCharArray
 import kotlinx.atomicfu.*
 import kotlinx.coroutines.*
 import org.slf4j.*
@@ -35,40 +33,8 @@ internal class RaptorKtorServerInternal(
 		private set
 
 
-	override val environment = configuration.engineEnvironmentFactory {
+	override val environment = configuration.applicationEnvironmentFactory {
 		log = LoggerFactory.getLogger("io.ktor.Application")
-
-		for (connector in configuration.connectors)
-			when (connector) {
-				is KtorServerConfiguration.Connector.Http ->
-					connector {
-						host = connector.host
-						port = connector.port
-					}
-
-				is KtorServerConfiguration.Connector.Https -> {
-					val keyStore = KeyStore.getInstance("JKS").apply {
-						FileInputStream(connector.keyStoreFile).use {
-							load(it, connector.keyStorePassword.toCharArray())
-						}
-
-						requireNotNull(getKey(connector.keyAlias, connector.privateKeyPassword.toCharArray())) {
-							"The specified key ${connector.keyAlias} doesn't exist in the key store ${connector.keyStoreFile}"
-						}
-					}
-
-					sslConnector(
-						keyAlias = connector.keyAlias,
-						keyStore = keyStore,
-						keyStorePassword = { connector.keyStorePassword.toCharArray() },
-						privateKeyPassword = { connector.privateKeyPassword.toCharArray() }
-					) {
-						host = connector.host
-						keyStorePath = connector.keyStoreFile
-						port = connector.port
-					}
-				}
-			}
 	}
 
 
@@ -84,7 +50,9 @@ internal class RaptorKtorServerInternal(
 
 
 	private fun startEngineBlocking() {
-		val engine = configuration.engineFactory(environment)
+		val engine = configuration.engineFactory(environment) {
+			configureEngine()
+		}
 
 		var exception: Throwable? = null
 
@@ -181,6 +149,41 @@ internal class RaptorKtorServerInternal(
 		if (rootConfig != null)
 			routing {
 				configure(rootConfig)
+			}
+	}
+
+
+	fun ApplicationEngine.Configuration.configureEngine() {
+		for (connector in configuration.connectors)
+			when (connector) {
+				is KtorServerConfiguration.Connector.Http ->
+					connector {
+						host = connector.host
+						port = connector.port
+					}
+
+				is KtorServerConfiguration.Connector.Https -> {
+					val keyStore = KeyStore.getInstance("JKS").apply {
+						FileInputStream(connector.keyStoreFile).use {
+							load(it, connector.keyStorePassword.toCharArray())
+						}
+
+						requireNotNull(getKey(connector.keyAlias, connector.privateKeyPassword.toCharArray())) {
+							"The specified key ${connector.keyAlias} doesn't exist in the key store ${connector.keyStoreFile}"
+						}
+					}
+
+					sslConnector(
+						keyAlias = connector.keyAlias,
+						keyStore = keyStore,
+						keyStorePassword = { connector.keyStorePassword.toCharArray() },
+						privateKeyPassword = { connector.privateKeyPassword.toCharArray() }
+					) {
+						host = connector.host
+						keyStorePath = connector.keyStoreFile
+						port = connector.port
+					}
+				}
 			}
 	}
 

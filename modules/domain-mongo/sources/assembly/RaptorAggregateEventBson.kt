@@ -108,7 +108,7 @@ internal object RaptorAggregateEventBson {
 	}
 
 
-	fun idBson() = raptor.bson.definition {
+	fun idBson() = raptor.bson.definition<RaptorAggregateEventId> {
 		decode(::RaptorAggregateEventId)
 		encode(RaptorAggregateEventId::toLong)
 	}

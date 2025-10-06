@@ -36,19 +36,23 @@ public class RaptorLifecycleComponent internal constructor() : RaptorComponent.B
 		name: String,
 		factory: RaptorDI.() -> Service,
 	): RaptorServiceComponent<Service> =
-		componentRegistry.register(Keys.serviceComponent, RaptorServiceComponent(factory = factory, name = name))
+		RaptorServiceComponent(factory = factory, name = name).also { component ->
+			componentRegistry.register(Keys.servicesComponent, component as RaptorServiceComponent<RaptorService>) // FIXME
+		}
 
 
 	internal fun serviceRegistrations(): Collection<RaptorServiceRegistration<*>> =
-		componentRegistry.many(Keys.serviceComponent).map { it.registration() }
+		componentRegistry.many(Keys.servicesComponent).map { it.registration() }
 
 
 	override fun RaptorComponentConfigurationEndScope<RaptorLifecycleComponent>.onConfigurationEnded() {
-		propertyRegistry.register(Keys.lifecycleProperty, DefaultLifecycle(
-			context = lazyContext,
-			startActions = startActions.toList(),
-			stopActions = stopActions.toList()
-		))
+		propertyRegistry.register(
+			Keys.lifecycleProperty, DefaultLifecycle(
+				context = lazyContext,
+				startActions = startActions.toList(),
+				stopActions = stopActions.toList()
+			)
+		)
 	}
 
 

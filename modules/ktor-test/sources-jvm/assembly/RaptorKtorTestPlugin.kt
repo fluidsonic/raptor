@@ -1,6 +1,8 @@
 package io.fluidsonic.raptor.ktor
 
 import io.fluidsonic.raptor.*
+import io.ktor.server.application.*
+import io.ktor.server.engine.*
 import io.ktor.server.testing.*
 import kotlinx.coroutines.*
 
@@ -12,8 +14,13 @@ public object RaptorKtorTestPlugin : RaptorPlugin {
 		install(RaptorKtorPlugin)
 
 		ktor.servers.all {
-			engineEnvironmentFactory(::createTestEnvironment)
-			engineFactory(::TestApplicationEngine)
+			applicationEnvironmentFactory(::createTestEnvironment)
+			engineFactory { environment ->
+				// FIXME ok?
+				EmbeddedServer(serverConfig(environment) {
+					watchPaths = emptyList()
+				}, TestEngine).engine
+			}
 			startStopDispatcher(Dispatchers.Unconfined)
 		}
 	}

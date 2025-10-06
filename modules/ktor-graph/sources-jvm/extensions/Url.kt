@@ -4,7 +4,7 @@ import io.fluidsonic.raptor.graph.*
 import io.ktor.http.*
 
 
-public fun Url.Companion.graphDefinition(): RaptorGraphDefinition = graphScalarDefinition {
+public fun Url.Companion.graphDefinition(): RaptorGraphDefinition = graphScalarDefinition<Url> {
 	parseString { runCatching { Url(it) }.getOrNull() ?: invalid() }
 	serialize(Url::toString)
 }

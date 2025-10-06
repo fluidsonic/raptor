@@ -129,7 +129,7 @@ public inline fun <reified Type : Enum<Type>> RaptorAssemblyQuery<RaptorGraphCom
 	noinline configure: RaptorEnumGraphDefinitionBuilder<@NoInfer Type>.() -> Unit = {},
 ) {
 	add(
-		graphEnumDefinition(
+		graphEnumDefinition<Type>(
 			name = name,
 			type = typeOf<Type>(),
 			values = enumValues<Type>().toList(),

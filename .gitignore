@@ -9,5 +9,6 @@
 !/.idea/saveactions_settings.xml
 .DS_Store
 .gradle
+.kotlin
 build
 out

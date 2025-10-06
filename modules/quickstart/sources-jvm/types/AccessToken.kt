@@ -12,7 +12,7 @@ public value class AccessToken(public val value: String) {
 
 	public companion object {
 
-		public fun graphDefinition(): RaptorGraphDefinition = graphScalarDefinition {
+		public fun graphDefinition(): RaptorGraphDefinition = graphScalarDefinition<AccessToken> {
 			parseString(::AccessToken)
 			serialize(AccessToken::value)
 		}

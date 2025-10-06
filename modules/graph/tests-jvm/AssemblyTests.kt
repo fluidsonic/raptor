@@ -162,7 +162,7 @@ class AssemblyTests {
 
 	private object Dummy1 {
 
-		fun graphDefinition(): RaptorGraphDefinition = graphScalarDefinition("Dummy1") {
+		fun graphDefinition(): RaptorGraphDefinition = graphScalarDefinition<Dummy1>("Dummy1") {
 			parseString { Dummy1 }
 			serialize { "dummy1" }
 		}
@@ -171,7 +171,7 @@ class AssemblyTests {
 
 	private object Dummy2 {
 
-		fun graphDefinition(): RaptorGraphDefinition = graphScalarDefinition("Dummy2") {
+		fun graphDefinition(): RaptorGraphDefinition = graphScalarDefinition<Dummy2>("Dummy2") {
 			parseString { Dummy2 }
 			serialize { "dummy2" }
 		}
@@ -180,7 +180,7 @@ class AssemblyTests {
 
 	private object Dummy3 {
 
-		fun graphDefinition(): RaptorGraphDefinition = graphScalarDefinition("Dummy3") {
+		fun graphDefinition(): RaptorGraphDefinition = graphScalarDefinition<Dummy3>("Dummy3") {
 			parseString { Dummy3 }
 			serialize { "dummy3" }
 		}
@@ -189,7 +189,7 @@ class AssemblyTests {
 
 	private object Dummy4 {
 
-		fun graphDefinition(): RaptorGraphDefinition = graphScalarDefinition("Dummy4") {
+		fun graphDefinition(): RaptorGraphDefinition = graphScalarDefinition<Dummy4>("Dummy4") {
 			parseString { Dummy4 }
 			serialize { "dummy4" }
 		}

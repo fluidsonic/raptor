@@ -13,7 +13,7 @@ public value class GraphId(public val value: String) {
 
 	public companion object {
 
-		public fun graphDefinition(): RaptorGraphDefinition = graphScalarDefinition(name = "ID") {
+		public fun graphDefinition(): RaptorGraphDefinition = graphScalarDefinition<GraphId>(name = "ID") {
 			parse { input ->
 				when (input) {
 					is Int -> GraphId(input.toString())

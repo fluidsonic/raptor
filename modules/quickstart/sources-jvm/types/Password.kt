@@ -25,7 +25,7 @@ public value class Password(public val value: String) {
 
 	public companion object {
 
-		public fun graphDefinition(): RaptorGraphDefinition = graphScalarDefinition {
+		public fun graphDefinition(): RaptorGraphDefinition = graphScalarDefinition<Password> {
 			parseString(::Password)
 			serialize(Password::value)
 		}

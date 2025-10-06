@@ -1,16 +1,17 @@
 package io.fluidsonic.raptor.ktor
 
 import io.fluidsonic.raptor.transactions.*
+import io.ktor.server.application.*
 import io.ktor.server.engine.*
 import java.io.*
 import kotlinx.coroutines.*
 
 
 internal class KtorServerConfiguration(
+	val applicationEnvironmentFactory: ((configure: ApplicationEnvironmentBuilder.() -> Unit) -> ApplicationEnvironment),
 	val connectors: Collection<Connector>,
 	val customConfigurations: List<RaptorKtorInitializationScope.() -> Unit>,
-	val engineEnvironmentFactory: ((configure: ApplicationEngineEnvironmentBuilder.() -> Unit) -> ApplicationEngineEnvironment),
-	val engineFactory: (environment: ApplicationEngineEnvironment) -> ApplicationEngine,
+	val engineFactory: (environment: ApplicationEnvironment, configure: ApplicationEngine.Configuration.() -> Unit) -> ApplicationEngine,
 	val forceEncryptedConnection: Boolean,
 	val rootRouteConfiguration: KtorRouteConfiguration?,
 	val startStopDispatcher: CoroutineDispatcher,

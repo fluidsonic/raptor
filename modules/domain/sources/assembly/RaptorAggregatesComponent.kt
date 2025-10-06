@@ -18,11 +18,11 @@ public class RaptorAggregatesComponent internal constructor(
 
 	@RaptorDsl
 	override val all: RaptorAssemblyQuery<RaptorAggregateComponent<*, *, *, *>>
-		get() = componentRegistry.all(Keys.aggregateComponent).all
+		get() = componentRegistry.all(Keys.aggregateComponent()).all
 
 
 	internal fun completeIn(scope: RaptorPluginCompletionScope): RaptorAggregateDefinitions {
-		val definitions = RaptorAggregateDefinitions(componentRegistry.many(Keys.aggregateComponent).mapTo(hashSetOf()) { it.complete() })
+		val definitions = RaptorAggregateDefinitions(componentRegistry.many(Keys.aggregateComponent()).mapTo(hashSetOf()) { it.complete() })
 		val onCommittedActions = onCommittedActions.toList()
 		val store = store
 
@@ -136,7 +136,16 @@ public class RaptorAggregatesComponent internal constructor(
 			idClass = idClass,
 			individual = individual,
 			topLevelScope = topLevelScope,
-		).also { componentRegistry.register(Keys.aggregateComponent, it) }
+		).also { component ->
+			componentRegistry.register(
+				Keys.aggregateComponent(), component as RaptorAggregateComponent<
+					RaptorAggregate<RaptorAggregateId, RaptorAggregateCommand<RaptorAggregateId>, RaptorAggregateChange<RaptorAggregateId>>,
+					RaptorAggregateId,
+					RaptorAggregateCommand<RaptorAggregateId>,
+					RaptorAggregateChange<RaptorAggregateId>,
+					>
+			) // FIXME
+		}
 
 
 	@RaptorDsl

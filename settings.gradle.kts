@@ -14,3 +14,12 @@ file("modules")
 			this.projectDir = directory
 		}
 	}
+
+// FIXME Remove.
+pluginManagement {
+	repositories {
+		mavenLocal()
+		mavenCentral()
+		gradlePluginPortal()
+	}
+}

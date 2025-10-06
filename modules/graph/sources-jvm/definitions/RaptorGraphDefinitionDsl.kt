@@ -57,7 +57,7 @@ public inline fun <reified Type : Enum<Type>> graphEnumDefinition(
 	name: String = RaptorGraphDefinition.defaultName,
 	noinline configure: RaptorEnumGraphDefinitionBuilder<@NoInfer Type>.() -> Unit = {},
 ): RaptorGraphDefinition =
-	graphEnumDefinition(
+	graphEnumDefinition<Type>(
 		name = name,
 		type = typeOf<Type>(),
 		values = enumValues<Type>().toList(),

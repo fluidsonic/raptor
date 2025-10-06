@@ -40,11 +40,11 @@ internal class DefaultComponentRegistry(
 
 	@Suppress("UNCHECKED_CAST")
 	private fun <Component : RaptorComponent<Component>> getOrCreateSet(key: RaptorComponentKey<Component>) =
-		setsByKey.getOrPut(key) { RegistrationSet(key = key) } as RegistrationSet<Component>
+		setsByKey.getOrPut(key) { RegistrationSet(key = key) } as RegistrationSet<Component> // FIXME unsafe
 
 
 	@Suppress("UNCHECKED_CAST")
-	private fun <Component : RaptorComponent<Component>> getSet(key: RaptorComponentKey<Component>) =
+	private fun <Component : RaptorComponent<out Component>> getSet(key: RaptorComponentKey<out Component>) =
 		setsByKey[key] as RegistrationSet<Component>?
 
 
@@ -122,7 +122,7 @@ internal class DefaultComponentRegistry(
 
 
 	private inner class RegistrationSet<Component : RaptorComponent<Component>>(
-		private val key: RaptorComponentKey<Component>,
+		private val key: RaptorComponentKey<out Component>,
 		private val registrations: MutableList<RaptorComponentRegistration<Component>> = mutableListOf(),
 	) : RaptorComponentSet<Component>,
 		RaptorAssemblyQuery<Component>,

@@ -46,7 +46,7 @@ public class RaptorInterfaceExtensionGraphDefinitionBuilder<Type : Any> internal
 	@RaptorDsl
 	@Suppress("NOTHING_TO_INLINE")
 	public inline fun <FieldType> field(
-		function: KSuspendFunction2<Type, RaptorGraphContext, FieldType>,
+		noinline function: KSuspendFunction2<Type, RaptorGraphContext, FieldType>,
 		noinline configure: RaptorGraphFieldBuilder.() -> Unit = {},
 	) {
 		field(name = function.name, type = function.returnType, configure = configure)

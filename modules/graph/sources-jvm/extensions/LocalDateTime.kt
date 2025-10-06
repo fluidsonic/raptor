@@ -4,7 +4,7 @@ import io.fluidsonic.time.*
 import kotlinx.datetime.*
 
 
-public fun LocalDateTime.Companion.graphDefinition(): RaptorGraphDefinition = graphScalarDefinition {
+public fun LocalDateTime.Companion.graphDefinition(): RaptorGraphDefinition = graphScalarDefinition<LocalDateTime> {
 	parseString { parseOrNull(it) ?: invalid() }
 	serialize(LocalDateTime::toString)
 }
