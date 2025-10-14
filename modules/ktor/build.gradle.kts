@@ -23,6 +23,7 @@ fluidLibraryModule(description = "TODO") {
 				implementation(ktor("server-netty"))
 				implementation(ktor("server-websockets"))
 				implementation("org.slf4j:slf4j-api:${Versions.slf4j}")
+				implementation("ch.qos.logback:logback-classic:${Versions.logback}")
 			}
 		}
 	}

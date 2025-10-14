@@ -33,8 +33,8 @@ public val PipelineContext<*, out ApplicationCall>.raptorContext: RaptorTransact
 
 
 @RaptorDsl
-public val Route.raptorContext: RaptorContext
-	get() = application.raptorContext
+public val RoutingContext.raptorContext: RaptorTransactionContext
+	get() = call.raptorContext
 
 
 @RaptorDsl

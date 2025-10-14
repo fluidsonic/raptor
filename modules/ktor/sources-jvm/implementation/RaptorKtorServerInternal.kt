@@ -29,35 +29,48 @@ internal class RaptorKtorServerInternal(
 	val context = parentContext
 
 
-	override var engine: ApplicationEngine? = null
-		private set
+	private fun <TEngine : ApplicationEngine, TConfiguration : ApplicationEngine.Configuration> createEmbeddedServer(
+		engine: KtorServerConfiguration.Engine<TEngine, TConfiguration>,
+	): EmbeddedServer<TEngine, TConfiguration> {
+		val environment = configuration.applicationEnvironmentFactory {
+			log = LoggerFactory.getLogger("io.ktor.Application")
+		}
 
-
-	override val environment = configuration.applicationEnvironmentFactory {
-		log = LoggerFactory.getLogger("io.ktor.Application")
+		return embeddedServer(
+			factory = engine.factory,
+			rootConfig = serverConfig(environment) {
+				configuration.customConfiguration(this)
+			},
+			configure = {
+				engine.configure(this)
+				configureEngine()
+			}
+		)
 	}
+
+
+	override var embeddedServer: EmbeddedServer<*, *>? = null
+		private set
 
 
 	suspend fun start() {
 		check(stateRef.compareAndSet(expect = State.initial, update = State.starting)) { "Cannot start Ktor server unless it's in 'initial' state." }
 
 		withContext(configuration.startStopDispatcher) {
-			startEngineBlocking()
+			startServerBlocking()
 		}
 
 		stateRef.value = State.started
 	}
 
 
-	private fun startEngineBlocking() {
-		val engine = configuration.engineFactory(environment) {
-			configureEngine()
-		}
+	private fun startServerBlocking() {
+		val server = createEmbeddedServer(configuration.engine)
 
 		var exception: Throwable? = null
 
 		// Subscribed only after the engine is created because the engine's subscriptions must be processed first.
-		val subscription = engine.environment.monitor.subscribe(ApplicationStarting) { application ->
+		val subscription = server.monitor.subscribe(ApplicationStarting) { application ->
 			try {
 				application.configure()
 			}
@@ -66,13 +79,13 @@ internal class RaptorKtorServerInternal(
 			}
 		}
 
-		engine.start(wait = false)
+		server.start(wait = false)
 		subscription.dispose()
 
 		@Suppress("NAME_SHADOWING")
 		exception?.let { exception ->
 			try {
-				engine.stop(gracePeriodMillis = 0, timeoutMillis = 0)
+				server.stop(gracePeriodMillis = 0, timeoutMillis = 0)
 			}
 			catch (e: Throwable) {
 				exception.addSuppressed(e)
@@ -81,7 +94,7 @@ internal class RaptorKtorServerInternal(
 			throw exception
 		}
 
-		this.engine = engine
+		this.embeddedServer = server
 	}
 
 
@@ -89,17 +102,17 @@ internal class RaptorKtorServerInternal(
 		check(stateRef.compareAndSet(expect = State.started, update = State.stopping)) { "Cannot start Ktor server unless it's in 'started' state." }
 
 		withContext(configuration.startStopDispatcher) {
-			stopEngineBlocking()
+			stopServerBlocking()
 		}
 
 		stateRef.value = State.stopped
 	}
 
 
-	private fun stopEngineBlocking() {
-		checkNotNull(engine).stop(0, 10, TimeUnit.SECONDS) // TODO
+	private fun stopServerBlocking() {
+		checkNotNull(embeddedServer).stop(0, 10, TimeUnit.SECONDS) // TODO
 
-		this.engine = null
+		this.embeddedServer = null
 	}
 
 
@@ -142,7 +155,7 @@ internal class RaptorKtorServerInternal(
 			transactionFactory(configuration.transactionFactory)
 		}
 
-		for (customConfiguration in configuration.customConfigurations)
+		for (customConfiguration in configuration.customApplicationConfigurations)
 			customConfiguration()
 
 		val rootConfig = configuration.rootRouteConfiguration

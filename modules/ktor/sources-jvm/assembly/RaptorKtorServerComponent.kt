@@ -17,12 +17,13 @@ public class RaptorKtorServerComponent internal constructor(
 	RaptorTaggableComponent<RaptorKtorServerComponent>,
 	RaptorTransactionBoundary<RaptorKtorServerComponent> {
 
-	private val connectors: MutableList<KtorServerConfiguration.Connector> = mutableListOf()
-	private val customConfigurations: MutableList<Application.() -> Unit> = mutableListOf()
-	private val plugins: MutableList<RaptorKtorServerPlugin> = mutableListOf()
 	private var applicationEnvironmentFactory: ((configure: ApplicationEnvironmentBuilder.() -> Unit) -> ApplicationEnvironment)? = null
 	private var configuration: KtorServerConfiguration? = null
-	private var engineFactory: ((environment: ApplicationEnvironment, configure: (ApplicationEngine.Configuration.() -> Unit)) -> ApplicationEngine)? = null
+	private val connectors: MutableList<KtorServerConfiguration.Connector> = mutableListOf()
+	private val customApplicationConfigurations: MutableList<Application.() -> Unit> = mutableListOf()
+	private var customServerConfiguration: (ServerConfigBuilder.() -> Unit)? = null
+	private var engine: KtorServerConfiguration.Engine<*, *>? = null
+	private val plugins: MutableList<RaptorKtorServerPlugin> = mutableListOf()
 	private var startStopDispatcher: CoroutineDispatcher? = null
 
 
@@ -38,32 +39,25 @@ public class RaptorKtorServerComponent internal constructor(
 
 
 	@RaptorDsl
-	public fun custom(configuration: RaptorKtorInitializationScope.() -> Unit) {
-		customConfigurations += configuration
+	public fun custom(configuration: ServerConfigBuilder.() -> Unit) {
+		check(customServerConfiguration == null) { "Server configuration already set." }
+		customServerConfiguration = configuration
 	}
 
 
 	@RaptorDsl
-	public fun engineFactory(
-		factory: (
-			environment: ApplicationEnvironment,
-		) -> ApplicationEngine,
-	) {
-		check(engineFactory == null) { "Factory already set." }
-		engineFactory = { environment, _ ->
-			factory(environment)
-		}
+	public fun customApplication(configuration: RaptorKtorInitializationScope.() -> Unit) {
+		customApplicationConfigurations += configuration
 	}
 
 
 	@RaptorDsl
-	public fun engineFactory(
-		factory: (
-			environment: ApplicationEnvironment, configure: (ApplicationEngine.Configuration.() -> Unit),
-		) -> ApplicationEngine,
+	public fun <TEngine : ApplicationEngine, TConfiguration : ApplicationEngine.Configuration> engine(
+		factory: ApplicationEngineFactory<TEngine, TConfiguration>,
+		configure: TConfiguration.() -> Unit = {},
 	) {
-		check(engineFactory == null) { "Factory already set." }
-		engineFactory = factory
+		check(engine == null) { "Engine already set." }
+		engine = KtorServerConfiguration.Engine(factory = factory, configure = configure)
 	}
 
 
@@ -142,26 +136,21 @@ public class RaptorKtorServerComponent internal constructor(
 		configuration = KtorServerConfiguration(
 			applicationEnvironmentFactory = applicationEnvironmentFactory ?: ::applicationEnvironment,
 			connectors = connectors.toList(),
-			customConfigurations = customConfigurations.toList(),
-			engineFactory = engineFactory ?: { environment, configure ->
-				// TODO make configurable
-				embeddedServer(
-					factory = Netty,
-					environment = environment,
-					configure = {
-						responseWriteTimeoutSeconds = 30
-						httpServerCodec = {
-							HttpServerCodec(
-								4 * 4096,
-								HttpObjectDecoder.DEFAULT_MAX_HEADER_SIZE,
-								HttpObjectDecoder.DEFAULT_MAX_CHUNK_SIZE,
-							)
-						}
-
-						configure(this)
-					},
-				).engine // FIXME ok?
-			},
+			customApplicationConfigurations = customApplicationConfigurations.toList(),
+			customConfiguration = customServerConfiguration ?: {},
+			engine = engine ?: KtorServerConfiguration.Engine(
+				factory = Netty,
+				configure = {
+					responseWriteTimeoutSeconds = 30
+					httpServerCodec = {
+						HttpServerCodec(
+							4 * 4096,
+							HttpObjectDecoder.DEFAULT_MAX_HEADER_SIZE,
+							HttpObjectDecoder.DEFAULT_MAX_CHUNK_SIZE,
+						)
+					}
+				},
+			),
 			forceEncryptedConnection = forceEncryptedConnection,
 			rootRouteConfiguration = rootRouteConfiguration,
 			startStopDispatcher = startStopDispatcher ?: Dispatchers.Default,
@@ -179,7 +168,8 @@ public class RaptorKtorServerComponent internal constructor(
 	}
 
 
-	private class ConfigurationEndScope(parent: RaptorComponentConfigurationEndScope<RaptorKtorServerComponent>) : RaptorKtorServerPluginConfigurationEndScope {
+	private class ConfigurationEndScope(parent: RaptorComponentConfigurationEndScope<RaptorKtorServerComponent>) :
+		RaptorKtorServerPluginConfigurationEndScope {
 
 		private val serverScope = object :
 			RaptorKtorServerPluginConfigurationEndScope.ServerScope,
@@ -213,7 +203,7 @@ public fun RaptorAssemblyQuery<RaptorKtorServerComponent>.applicationEnvironment
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery<RaptorKtorServerComponent>.custom(configuration: RaptorKtorInitializationScope.() -> Unit) {
+public fun RaptorAssemblyQuery<RaptorKtorServerComponent>.custom(configuration: ServerConfigBuilder.() -> Unit) {
 	this {
 		custom(configuration)
 	}
@@ -221,14 +211,20 @@ public fun RaptorAssemblyQuery<RaptorKtorServerComponent>.custom(configuration: 
 
 
 @RaptorDsl
-public fun RaptorAssemblyQuery<RaptorKtorServerComponent>.engineFactory(
-	factory: (
-		environment: ApplicationEnvironment,
-		configure: ApplicationEngine.Configuration.() -> Unit,
-	) -> ApplicationEngine,
+public fun RaptorAssemblyQuery<RaptorKtorServerComponent>.customApplication(configuration: RaptorKtorInitializationScope.() -> Unit) {
+	this {
+		customApplication(configuration)
+	}
+}
+
+
+@RaptorDsl
+public fun <TEngine : ApplicationEngine, TConfiguration : ApplicationEngine.Configuration> RaptorAssemblyQuery<RaptorKtorServerComponent>.engine(
+	factory: ApplicationEngineFactory<TEngine, TConfiguration>,
+	configure: TConfiguration.() -> Unit = {},
 ) {
 	this {
-		engineFactory(factory)
+		engine(factory, configure)
 	}
 }
 

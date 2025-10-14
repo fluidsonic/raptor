@@ -31,7 +31,6 @@
             <option value="$PROJECT_DIR$/modules/entities-core" />
             <option value="$PROJECT_DIR$/modules/environment" />
             <option value="$PROJECT_DIR$/modules/event" />
-            <option value="$PROJECT_DIR$/modules/freemarker" />
             <option value="$PROJECT_DIR$/modules/graph" />
             <option value="$PROJECT_DIR$/modules/graphql" />
             <option value="$PROJECT_DIR$/modules/jobs" />
