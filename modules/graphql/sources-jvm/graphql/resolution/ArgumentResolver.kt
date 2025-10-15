@@ -81,11 +81,13 @@ internal class ArgumentResolver(
 	): Result {
 		val previousContext = currentContext.get()
 
-		currentContext.set(Context(
-			argumentDefinitions = argumentDefinitions,
-			argumentValues = argumentValues,
-			execution = context
-		))
+		currentContext.set(
+			Context(
+				argumentDefinitions = argumentDefinitions,
+				argumentValues = argumentValues,
+				execution = context
+			)
+		)
 
 		try {
 			return action()
@@ -96,8 +98,7 @@ internal class ArgumentResolver(
 	}
 
 
-	@Suppress("ProtectedInFinal")
-	protected class Context(
+	internal class Context(
 		val argumentDefinitions: Collection<GArgumentDefinition>,
 		val argumentValues: Map<String, Any?>,
 		val execution: GExecutorContext,

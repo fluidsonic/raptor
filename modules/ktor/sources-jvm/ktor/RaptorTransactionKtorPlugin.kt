@@ -15,7 +15,7 @@ internal val RaptorTransactionKtorPlugin = createApplicationPlugin(
 	name = "Raptor: transaction",
 	createConfiguration = ::RaptorTransactionKtorPluginConfig,
 ) {
-	val serverContext = checkNotNull(pluginConfig.serverContext) { "serverConfig() not set." }
+	val serverContext = checkNotNull(pluginConfig.serverContext) { "serverContext() not set." }
 	val transactionFactory = checkNotNull(pluginConfig.transactionFactory) { "transactionFactory() not set." }
 
 	on(CallSetup) { call ->

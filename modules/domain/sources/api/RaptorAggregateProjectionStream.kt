@@ -15,7 +15,7 @@ public interface RaptorAggregateProjectionStream {
 }
 
 
-@OptIn(FlowPreview::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 public fun <
 	ProjectionId : RaptorAggregateProjectionId,
 	Projection : RaptorProjection<ProjectionId>,
@@ -74,7 +74,7 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 			catch (e: Throwable) {
 				(failedProjectionIds ?: hashSetOf<RaptorAggregateProjectionId>().also { failedProjectionIds = it })
 					.add(projectionId)
-			
+
 				scope.launch { throw e }
 			}
 		}

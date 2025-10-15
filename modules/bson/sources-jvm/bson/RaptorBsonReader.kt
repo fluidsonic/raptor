@@ -107,7 +107,7 @@ public inline fun <Reader : RaptorBsonReader> Reader.arrayByElement(readElement:
 @RaptorDsl
 public inline fun <Reader : RaptorBsonReader, Value> Reader.arrayOrNull(read: Reader.() -> Value): Value? {
 	contract {
-		callsInPlace(read, InvocationKind.EXACTLY_ONCE)
+		callsInPlace(read, InvocationKind.AT_MOST_ONCE)
 	}
 
 	if (bsonType() == BsonType.NULL) {
@@ -123,7 +123,7 @@ public inline fun <Reader : RaptorBsonReader, Value> Reader.arrayOrNull(read: Re
 @RaptorDsl
 public inline fun <Reader : RaptorBsonReader, Value> Reader.arrayOrNull(field: String, read: Reader.() -> Value): Value? {
 	contract {
-		callsInPlace(read, InvocationKind.EXACTLY_ONCE)
+		callsInPlace(read, InvocationKind.AT_MOST_ONCE)
 	}
 
 	fieldName(field)
@@ -240,7 +240,7 @@ public inline fun <Reader : RaptorBsonReader> Reader.documentByField(field: Stri
 @RaptorDsl
 public inline fun <Reader : RaptorBsonReader, Value> Reader.documentOrNull(read: Reader.() -> Value): Value? {
 	contract {
-		callsInPlace(read, InvocationKind.EXACTLY_ONCE)
+		callsInPlace(read, InvocationKind.AT_MOST_ONCE)
 	}
 
 	if (bsonType() == BsonType.NULL) {
@@ -258,7 +258,7 @@ public inline fun <Reader : RaptorBsonReader, Value> Reader.documentOrNull(read:
 @RaptorDsl
 public inline fun <Reader : RaptorBsonReader, Value> Reader.documentOrNull(field: String, read: Reader.() -> Value): Value? {
 	contract {
-		callsInPlace(read, InvocationKind.EXACTLY_ONCE)
+		callsInPlace(read, InvocationKind.AT_MOST_ONCE)
 	}
 
 	fieldName(field)

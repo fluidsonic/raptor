@@ -21,7 +21,7 @@ public interface RaptorAggregateStream {
 }
 
 
-@OptIn(FlowPreview::class)
+@OptIn(ExperimentalCoroutinesApi::class)
 public fun <
 	AggregateId : RaptorAggregateId,
 	Change : RaptorAggregateChange<AggregateId>,
@@ -61,7 +61,8 @@ public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 		.mapNotNull { batch ->
 			when {
 				batch.events.all { changeClass.isInstance(it.change) } -> batch
-				else -> batch.copy(events = batch.events
+				else -> batch.copy(
+					events = batch.events
 					.filter { changeClass.isInstance(it.change) }
 					.ifEmpty { return@mapNotNull null }
 					as List<RaptorAggregateEvent<Nothing, Nothing>>

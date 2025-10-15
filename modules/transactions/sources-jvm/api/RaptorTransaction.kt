@@ -15,6 +15,10 @@ public interface RaptorTransaction {
 
 
 public suspend inline fun <Result> RaptorTransaction.execute(block: RaptorTransactionScope.() -> Result): Result {
+	contract {
+		callsInPlace(block, InvocationKind.EXACTLY_ONCE)
+	}
+
 	val transaction = context.transaction()
 	transaction.start()
 

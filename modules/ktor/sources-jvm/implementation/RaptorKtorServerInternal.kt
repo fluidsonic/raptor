@@ -1,6 +1,7 @@
 package io.fluidsonic.raptor.ktor
 
 import io.fluidsonic.raptor.*
+import io.fluidsonic.raptor.transactions.*
 import io.ktor.http.*
 import io.ktor.server.application.*
 import io.ktor.server.engine.*
@@ -24,6 +25,7 @@ internal class RaptorKtorServerInternal(
 ) : RaptorKtorServer {
 
 	private val stateRef = atomic(State.initial)
+	private var nextRoutePluginId = 1
 
 	// TODO child context w/ own DI?
 	val context = parentContext
@@ -214,26 +216,7 @@ internal class RaptorKtorServerInternal(
 
 				// TODO Rework.
 				configuration.transactionFactory?.let { transactionFactory ->
-					intercept(ApplicationCallPipeline.Setup) {
-						val parentTransaction = context.raptorTransaction // TODO What if not set?
-						val parentContext = parentTransaction.context
-
-						val transaction = transactionFactory.createTransaction(
-							context = RaptorKtorRouteContext(
-								parent = parentTransaction.context,
-								properties = configuration.properties.withFallback(parentContext.properties),
-							)
-						)
-
-						call.raptorTransaction = transaction
-
-						try {
-							proceed()
-						}
-						finally {
-							call.raptorTransaction = parentTransaction
-						}
-					}
+					install(transactionRoutePlugin(transactionFactory, configuration.properties, nextRoutePluginId++))
 				}
 
 				for (childConfig in configuration.children)
@@ -252,3 +235,39 @@ internal class RaptorKtorServerInternal(
 		stopping
 	}
 }
+
+
+private fun transactionRoutePlugin(
+	transactionFactory: RaptorTransactionFactory,
+	properties: RaptorPropertySet,
+	uniqueId: Int,
+): RouteScopedPlugin<Unit> =
+	/*
+	   No idea why, but re-using the same plugin and name causes the plugin to only run on child routes, not on the parent route if it
+	   is also installed there. Setting a unique name makes sure the parent plugin is executed first, then the child plugin.
+	   Ktor bug? Tested in 3.3.1. --marc
+	*/
+	createRouteScopedPlugin("RaptorRouteTransactionPlugin.$uniqueId") {
+		checkNotNull(route).intercept(ApplicationCallPipeline.Setup) {
+			val parentTransaction = context.raptorTransaction
+			val parentContext = parentTransaction.context
+
+			val transaction = transactionFactory.createTransaction(
+				context = RaptorKtorRouteContext(
+					parent = parentTransaction.context,
+					properties = properties.withFallback(parentContext.properties),
+				)
+			)
+
+			call.raptorTransaction = transaction
+
+			try {
+				coroutineScope {
+					proceed()
+				}
+			}
+			finally {
+				call.raptorTransaction = parentTransaction
+			}
+		}
+	}
