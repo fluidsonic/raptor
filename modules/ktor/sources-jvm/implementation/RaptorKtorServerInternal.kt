@@ -150,7 +150,9 @@ internal class RaptorKtorServerInternal(
 		install(XForwardedHeaders)
 
 		if (configuration.forceEncryptedConnection)
-			install(EncryptionEnforcementKtorPlugin)
+			install(EncryptionEnforcementKtorPlugin) {
+				unencryptedHosts(configuration.unencryptedHosts)
+			}
 
 		install(RaptorTransactionKtorPlugin) {
 			serverContext(this@RaptorKtorServerInternal.context)

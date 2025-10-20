@@ -25,6 +25,7 @@ public class RaptorKtorServerComponent internal constructor(
 	private var engine: KtorServerConfiguration.Engine<*, *>? = null
 	private val plugins: MutableList<RaptorKtorServerPlugin> = mutableListOf()
 	private var startStopDispatcher: CoroutineDispatcher? = null
+	private var unencryptedHosts: Set<String> = emptySet()
 
 
 	@RaptorDsl
@@ -100,6 +101,11 @@ public class RaptorKtorServerComponent internal constructor(
 
 
 	@RaptorDsl
+	public val routes: RaptorKtorRoutesComponent.Root
+		get() = componentRegistry.oneOrRegister(Keys.rootRoutesComponent) { RaptorKtorRoutesComponent.Root() }
+
+
+	@RaptorDsl
 	public fun startStopDispatcher(dispatcher: CoroutineDispatcher) {
 		check(startStopDispatcher == null) { "Dispatcher already set." }
 		startStopDispatcher = dispatcher
@@ -107,8 +113,9 @@ public class RaptorKtorServerComponent internal constructor(
 
 
 	@RaptorDsl
-	public val routes: RaptorKtorRoutesComponent.Root
-		get() = componentRegistry.oneOrRegister(Keys.rootRoutesComponent) { RaptorKtorRoutesComponent.Root() }
+	public fun unencryptedHosts(hosts: Set<String>) {
+		unencryptedHosts = hosts
+	}
 
 
 	override fun RaptorComponentConfigurationEndScope<RaptorKtorServerComponent>.onConfigurationEnded() {
@@ -156,6 +163,7 @@ public class RaptorKtorServerComponent internal constructor(
 			startStopDispatcher = startStopDispatcher ?: Dispatchers.Default,
 			tags = tags(),
 			transactionFactory = transactionFactory(),
+			unencryptedHosts = unencryptedHosts,
 		)
 	}
 
@@ -276,5 +284,13 @@ public val RaptorAssemblyQuery<RaptorKtorServerComponent>.routes: RaptorAssembly
 public fun RaptorAssemblyQuery<RaptorKtorServerComponent>.startStopDispatcher(dispatcher: CoroutineDispatcher) {
 	this {
 		startStopDispatcher(dispatcher)
+	}
+}
+
+
+@RaptorDsl
+public fun RaptorAssemblyQuery<RaptorKtorServerComponent>.unencryptedHosts(hosts: Set<String>) {
+	this {
+		unencryptedHosts(hosts)
 	}
 }

@@ -16,6 +16,7 @@ internal class KtorServerConfiguration(
 	val customConfiguration: ServerConfigBuilder.() -> Unit,
 	val rootRouteConfiguration: KtorRouteConfiguration?,
 	val startStopDispatcher: CoroutineDispatcher,
+	val unencryptedHosts: Set<String>,
 	val tags: Set<Any>,
 	val transactionFactory: RaptorTransactionFactory,
 ) {
