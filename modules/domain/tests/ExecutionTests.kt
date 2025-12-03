@@ -3,6 +3,7 @@ import BankAccountCommand.*
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.di.*
 import io.fluidsonic.raptor.domain.*
+import io.fluidsonic.raptor.event.*
 import io.fluidsonic.raptor.lifecycle.*
 import io.fluidsonic.time.*
 import kotlin.test.*
@@ -18,17 +19,22 @@ class ExecutionTests {
 		val id = BankAccountNumber("1")
 
 		val clock = ManualClock()
-		val store = TestAggregateStore(events = listOf(RaptorAggregateEvent(
-			aggregateId = id,
-			change = Created(owner = "owner"),
-			id = RaptorAggregateEventId(1),
-			timestamp = Timestamp.fromEpochSeconds(0),
-			version = 1,
-		)))
+		val store = TestAggregateStore(
+			events = listOf(
+				RaptorAggregateEvent(
+					aggregateId = id,
+					change = Created(owner = "owner"),
+					id = RaptorAggregateEventId(1),
+					timestamp = Timestamp.fromEpochSeconds(0),
+					version = 1,
+				)
+			)
+		)
 
 		val raptor = raptor {
 			install(RaptorDIPlugin)
 			install(RaptorDomainPlugin)
+			install(RaptorEventPlugin)
 			install(RaptorLifecyclePlugin)
 
 			di {
@@ -67,23 +73,27 @@ class ExecutionTests {
 				execute(id, Label("test"))
 			}
 		}
-		assertEquals(actual = store.takeBatches(), expected = listOf(listOf(
-			RaptorAggregateEvent(
-				aggregateId = id,
-				change = Deposited(amount = 100),
-				id = RaptorAggregateEventId(2),
-				lastVersionInBatch = 3,
-				timestamp = Timestamp.fromEpochSeconds(20),
-				version = 2,
-			),
-			RaptorAggregateEvent(
-				aggregateId = id,
-				change = Labeled("test"),
-				id = RaptorAggregateEventId(3),
-				timestamp = Timestamp.fromEpochSeconds(20),
-				version = 3,
-			),
-		)))
+		assertEquals(
+			actual = store.takeBatches(), expected = listOf(
+				listOf(
+					RaptorAggregateEvent(
+						aggregateId = id,
+						change = Deposited(amount = 100),
+						id = RaptorAggregateEventId(2),
+						lastVersionInBatch = 3,
+						timestamp = Timestamp.fromEpochSeconds(20),
+						version = 2,
+					),
+					RaptorAggregateEvent(
+						aggregateId = id,
+						change = Labeled("test"),
+						id = RaptorAggregateEventId(3),
+						timestamp = Timestamp.fromEpochSeconds(20),
+						version = 3,
+					),
+				)
+			)
+		)
 
 		with(raptor.context.asScope()) {
 			execution {
@@ -94,23 +104,27 @@ class ExecutionTests {
 				execute(id, Delete)
 			}
 		}
-		assertEquals(actual = store.takeBatches(), expected = listOf(listOf(
-			RaptorAggregateEvent(
-				aggregateId = id,
-				change = Withdrawn(amount = 100),
-				id = RaptorAggregateEventId(4),
-				lastVersionInBatch = 5,
-				timestamp = Timestamp.fromEpochSeconds(40),
-				version = 4,
-			),
-			RaptorAggregateEvent(
-				aggregateId = id,
-				change = Deleted,
-				id = RaptorAggregateEventId(5),
-				timestamp = Timestamp.fromEpochSeconds(40),
-				version = 5,
-			),
-		)))
+		assertEquals(
+			actual = store.takeBatches(), expected = listOf(
+				listOf(
+					RaptorAggregateEvent(
+						aggregateId = id,
+						change = Withdrawn(amount = 100),
+						id = RaptorAggregateEventId(4),
+						lastVersionInBatch = 5,
+						timestamp = Timestamp.fromEpochSeconds(40),
+						version = 4,
+					),
+					RaptorAggregateEvent(
+						aggregateId = id,
+						change = Deleted,
+						id = RaptorAggregateEventId(5),
+						timestamp = Timestamp.fromEpochSeconds(40),
+						version = 5,
+					),
+				)
+			)
+		)
 
 		raptor.lifecycle.stop()
 

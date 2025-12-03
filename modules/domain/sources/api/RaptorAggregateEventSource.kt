@@ -10,7 +10,7 @@ public interface RaptorAggregateEventSource {
 		subscribeIn(
 		scope: CoroutineScope,
 		handler: suspend (event: RaptorAggregateEvent<Id, Change>) -> Unit,
-		changeClasses: Set<KClass<Change>>,
+		changeClasses: Set<KClass<out Change>>,
 		idClass: KClass<Id>,
 		async: Boolean = false,
 		replay: Boolean = false,
@@ -28,7 +28,7 @@ public inline fun <reified Id : RaptorAggregateId, reified Change : RaptorAggreg
 	RaptorAggregateEventSource.subscribeIn(
 	scope: CoroutineScope,
 	noinline handler: suspend (event: RaptorAggregateEvent<Id, Change>) -> Unit,
-	changeClasses: Set<KClass<Change>> = setOf(Change::class),
+	changeClasses: Set<KClass<out Change>> = setOf(Change::class),
 	async: Boolean = false,
 	replay: Boolean = false,
 ): Job =

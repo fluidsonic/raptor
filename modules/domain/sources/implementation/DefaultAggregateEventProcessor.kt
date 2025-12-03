@@ -32,7 +32,7 @@ internal class DefaultAggregateEventProcessor(
 			1 -> subscriptions[0].handle(event)?.join()
 			else -> subscriptions
 				.mapNotNullTo(ArrayList(size)) { it.handle(event) }
-				.forEach { it.join() }
+				.joinAll()
 		}
 	}
 
@@ -55,7 +55,7 @@ internal class DefaultAggregateEventProcessor(
 	override fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>> subscribeIn(
 		scope: CoroutineScope,
 		handler: suspend (event: RaptorAggregateEvent<Id, Change>) -> Unit,
-		changeClasses: Set<KClass<Change>>,
+		changeClasses: Set<KClass<out Change>>,
 		idClass: KClass<Id>,
 		async: Boolean,
 		replay: Boolean,
@@ -122,7 +122,7 @@ internal class DefaultAggregateEventProcessor(
 
 	private class Subscription<Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>(
 		private val async: Boolean,
-		val changeClass: KClass<Change>,
+		val changeClass: KClass<out Change>,
 		private val handler: suspend (event: RaptorAggregateEvent<Id, Change>) -> Unit,
 		private val job: Job,
 		private val scope: CoroutineScope,

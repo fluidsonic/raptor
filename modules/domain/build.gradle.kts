@@ -15,7 +15,9 @@ fluidLibraryModule(description = "TODO") {
 			}
 
 			testDependencies {
+				implementation(project(":raptor-domain-memory"))
 				implementation(kotlinx("coroutines-test", Versions.kotlinx_coroutines))
+				implementation("ch.qos.logback:logback-classic:${Versions.logback}")
 			}
 		}
 

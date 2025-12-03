@@ -59,9 +59,9 @@ internal class DefaultAggregateProjectionEventProcessor(
 		> subscribeIn(
 		scope: CoroutineScope,
 		handler: suspend (event: RaptorAggregateProjectionEvent<Id, Projection, Change>) -> Unit,
-		changeClasses: Set<KClass<Change>>,
+		changeClasses: Set<KClass<out Change>>,
 		idClass: KClass<Id>,
-		projectionClass: KClass<Projection>,
+		projectionClass: KClass<out Projection>,
 		async: Boolean,
 		replay: Boolean,
 	): Job {
@@ -138,7 +138,7 @@ internal class DefaultAggregateProjectionEventProcessor(
 		Projection : RaptorAggregateProjection<Id>,
 		>(
 		private val async: Boolean,
-		val changeClass: KClass<Change>,
+		val changeClass: KClass<out Change>,
 		private val handler: suspend (event: RaptorAggregateProjectionEvent<Id, Projection, Change>) -> Unit,
 		private val job: Job,
 		private val scope: CoroutineScope,
