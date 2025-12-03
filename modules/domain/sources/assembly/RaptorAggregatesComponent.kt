@@ -12,6 +12,7 @@ public class RaptorAggregatesComponent internal constructor(
 ) : RaptorComponent.Base<RaptorAggregatesComponent>(RaptorDomainPlugin),
 	RaptorComponentSet<RaptorAggregateComponent<*, *, *, *>> { // FIXME ok? conflicting Set/Query esp. as we remove Set
 
+	private var individualStoreFactory: RaptorIndividualAggregateStoreFactory? = null
 	private val onCommittedActions: MutableList<suspend RaptorScope.() -> Unit> = mutableListOf()
 	private var store: RaptorAggregateStore? = null
 
@@ -23,6 +24,7 @@ public class RaptorAggregatesComponent internal constructor(
 
 	internal fun completeIn(scope: RaptorPluginCompletionScope): RaptorAggregateDefinitions {
 		val definitions = RaptorAggregateDefinitions(componentRegistry.many(Keys.aggregateComponent()).mapTo(hashSetOf()) { it.complete() })
+		val individualStoreFactory = individualStoreFactory
 		val onCommittedActions = onCommittedActions.toList()
 		val store = store
 
@@ -30,6 +32,8 @@ public class RaptorAggregatesComponent internal constructor(
 			di {
 				provide<DefaultAggregateManager> {
 					DefaultAggregateManager(
+						aggregateEventProcessor = get(),
+						aggregateProjectionEventProcessor = get(),
 						clock = get(),
 						context = get(),
 						definitions = definitions,
@@ -56,11 +60,18 @@ public class RaptorAggregatesComponent internal constructor(
 				provide<RaptorAggregateProvider> { get<DefaultAggregateManager>() }
 				provide<RaptorDomain> { get<DefaultAggregateManager>() }
 
+				if (individualStoreFactory != null)
+					provide<RaptorIndividualAggregateStoreFactory>(individualStoreFactory)
+
 				if (store != null)
 					provide<RaptorAggregateStore>(store)
 
 				definitions
 					.filter { it.isIndividual }
+					.also { individualDefinitions ->
+						if (individualDefinitions.isNotEmpty())
+							check(individualStoreFactory != null) { "An individual aggregate store must be set when using individual aggregates." }
+					}
 					.map { definition ->
 						val eventType = definition.eventType
 						val mangerType = RaptorIndividualAggregateManager::class.createType(
@@ -79,7 +90,7 @@ public class RaptorAggregatesComponent internal constructor(
 
 						provide<RaptorIndividualAggregateManager<*, *>>(mangerType) {
 							DefaultIndividualAggregateManager<RaptorAggregateId, RaptorAggregateChange<RaptorAggregateId>>(
-								eventStream = get(),
+								eventProcessor = get(),
 								store = get(storeType),
 							)
 						}
@@ -99,6 +110,14 @@ public class RaptorAggregatesComponent internal constructor(
 		}
 
 		return definitions
+	}
+
+
+	@RaptorDsl
+	public fun individualStoreFactory(individualStoreFactory: RaptorIndividualAggregateStoreFactory) {
+		check(this.individualStoreFactory == null) { "Cannot set multiple individual aggregate store factories." }
+
+		this.individualStoreFactory = individualStoreFactory
 	}
 
 
