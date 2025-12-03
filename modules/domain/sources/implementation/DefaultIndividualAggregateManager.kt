@@ -5,7 +5,7 @@ import kotlinx.coroutines.sync.*
 
 
 internal class DefaultIndividualAggregateManager<Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>(
-	private val eventStream: DefaultAggregateStream,
+	private val eventProcessor: DefaultAggregateEventProcessor,
 	private val store: RaptorIndividualAggregateStore<Id, Change>,
 ) : RaptorIndividualAggregateManager<Id, Change> {
 
@@ -28,7 +28,7 @@ internal class DefaultIndividualAggregateManager<Id : RaptorAggregateId, Change 
 			if (changes.isEmpty())
 				return emptyList()
 
-			val lastEventId = store.lastEventId()?.toLong() ?: 0
+			val lastEventId = store.lastEventId()?.toLong() ?: 0 // FIXME race condition?
 			val lastVersionInBatch = lastVersion + changes.size
 			val events = changes.mapIndexed { index, change ->
 				RaptorAggregateEvent(
@@ -43,13 +43,8 @@ internal class DefaultIndividualAggregateManager<Id : RaptorAggregateId, Change 
 
 			store.save(id, events)
 
-			eventStream.emit(
-				RaptorAggregateEventBatch(
-					aggregateId = id,
-					events = events,
-					version = events.last().version,
-				)
-			)
+			for (event in events)
+				eventProcessor.handleEvent(event)
 
 			return events
 		}
@@ -62,17 +57,11 @@ internal class DefaultIndividualAggregateManager<Id : RaptorAggregateId, Change 
 		}
 
 
+	// FIXME document, maybe rename
 	suspend fun load() {
 		mutex.withLock {
 			for (event in store.reload())
-			// Note that we don't support batching here.
-				eventStream.emit(
-					RaptorAggregateEventBatch(
-						aggregateId = event.aggregateId,
-						events = listOf(event),
-						version = event.version,
-					)
-				)
+				eventProcessor.handleEvent(event)
 		}
 	}
 }

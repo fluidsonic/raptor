@@ -12,6 +12,8 @@ import kotlinx.datetime.*
 
 
 internal class DefaultAggregateManager(
+	private val aggregateEventProcessor: DefaultAggregateEventProcessor,
+	private val aggregateProjectionEventProcessor: DefaultAggregateProjectionEventProcessor,
 	private val clock: Clock,
 	private val context: RaptorContext,
 	private val definitions: RaptorAggregateDefinitions,
@@ -89,12 +91,28 @@ internal class DefaultAggregateManager(
 				}
 			}
 
-			for (batch in commit.events)
-				process(batch)
+			for (event in commit.events)
+				process(event)
 		}
 
 		for (onCommitted in onCommittedActions)
 			onCommitted(context)
+	}
+
+
+	private suspend fun onAggregateEvent(event: RaptorAggregateEvent<*, *>) {
+		aggregateEventProcessor.handleEvent(event)
+	}
+
+
+	private suspend fun onAggregateProjectionEvent(event: RaptorAggregateProjectionEvent<*, *, *>) {
+		aggregateProjectionEventProcessor.handleEvent(event)
+	}
+
+
+	private fun onAggregateReplayCompletedEvent(event: RaptorAggregateReplayCompletedEvent) {
+		aggregateEventProcessor.handleEvent(event)
+		aggregateProjectionEventProcessor.handleEvent(event)
 	}
 
 
@@ -133,14 +151,15 @@ internal class DefaultAggregateManager(
 
 
 	@Suppress("UNCHECKED_CAST")
-	suspend fun start(
+	suspend fun startIn(
+		scope: CoroutineScope,
 		individualManagers: Collection<DefaultIndividualAggregateManager<*, *>>,
 	) {
 		check(status.compareAndSet(Status.new, Status.starting)) { "Cannot start an aggregate manager that is $status." }
 
-		// FIXME implement dispatching to listeners
-//		stopJobs += eventSource.subscribeIn(scope, ::onAggregateEvent)
-//		stopJobs += eventSource.subscribeIn(scope, ::onAggregateProjectionEvent)
+		stopJobs += eventSource.subscribeIn(scope, ::onAggregateEvent)
+		stopJobs += eventSource.subscribeIn(scope, ::onAggregateProjectionEvent)
+		stopJobs += eventSource.subscribeIn(scope, ::onAggregateReplayCompletedEvent)
 
 		var lastEventId = 0L
 
