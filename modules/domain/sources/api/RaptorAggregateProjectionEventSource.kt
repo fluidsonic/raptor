@@ -10,9 +10,9 @@ public interface RaptorAggregateProjectionEventSource {
 		subscribeIn(
 		scope: CoroutineScope,
 		handler: suspend (event: RaptorAggregateProjectionEvent<Id, Projection, Change>) -> Unit,
-		changeClasses: Set<KClass<Change>>,
+		changeClasses: Set<KClass<out Change>>,
 		idClass: KClass<Id>,
-		projectionClass: KClass<Projection>,
+		projectionClass: KClass<out Projection>,
 		async: Boolean = false,
 		replay: Boolean = false,
 	): Job
@@ -33,7 +33,7 @@ public inline fun <
 	RaptorAggregateProjectionEventSource.subscribeIn(
 	scope: CoroutineScope,
 	noinline handler: suspend (event: RaptorAggregateProjectionEvent<Id, Projection, Change>) -> Unit,
-	changeClasses: Set<KClass<Change>> = setOf(Change::class),
+	changeClasses: Set<KClass<out Change>> = setOf(Change::class),
 	async: Boolean = false,
 	replay: Boolean = false,
 ): Job =

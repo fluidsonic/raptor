@@ -18,6 +18,13 @@ public interface RaptorEventSource {
 public inline fun <reified Event : RaptorEvent> RaptorEventSource.subscribeIn(
 	scope: CoroutineScope,
 	noinline handler: suspend (event: Event) -> Unit,
-	async: Boolean = false,
+): Job =
+	subscribeIn(scope, handler, setOf(Event::class), async = false)
+
+
+public inline fun <reified Event : RaptorEvent> RaptorEventSource.subscribeIn(
+	scope: CoroutineScope,
+	noinline handler: suspend (event: Event) -> Unit,
+	async: Boolean,
 ): Job =
 	subscribeIn(scope, handler, setOf(Event::class), async = async)
