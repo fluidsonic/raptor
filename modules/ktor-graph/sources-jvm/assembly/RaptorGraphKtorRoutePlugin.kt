@@ -1,12 +1,15 @@
 package io.fluidsonic.raptor.ktor.graph
 
+import io.fluidsonic.graphql.*
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.graph.*
 import io.fluidsonic.raptor.ktor.*
+import io.fluidsonic.raptor.transactions.*
 import io.ktor.server.routing.*
 
 
 internal class RaptorGraphKtorRoutePlugin(
+	private val executionHook: RaptorGraphKtorRouteExecutionHook? = null,
 	private val tag: Any? = null,
 ) : RaptorKtorRoutePlugin {
 
@@ -14,7 +17,12 @@ internal class RaptorGraphKtorRoutePlugin(
 		val graphConfiguration = require(RaptorGraphPlugin)
 
 		route {
-			propertyRegistry.register(Keys.graphRouteProperty, GraphRoute(graphConfiguration.taggedGraph(tag)))
+			propertyRegistry.register(
+				Keys.graphRouteProperty, GraphRoute(
+					executionHook = executionHook,
+					graph = graphConfiguration.taggedGraph(tag),
+				)
+			)
 		}
 	}
 
@@ -39,8 +47,11 @@ internal class RaptorGraphKtorRoutePlugin(
 
 // TODO Require RaptorKtorGraphPlugin to be installed.
 @RaptorDsl
-public fun RaptorAssemblyQuery<RaptorKtorRouteComponent>.graph(tag: Any? = null) {
-	val plugin = RaptorGraphKtorRoutePlugin(tag = tag)
+public fun RaptorAssemblyQuery<RaptorKtorRouteComponent>.graph(
+	executionHook: RaptorGraphKtorRouteExecutionHook? = null,
+	tag: Any? = null,
+) {
+	val plugin = RaptorGraphKtorRoutePlugin(executionHook = executionHook, tag = tag)
 
 	each {
 		check(extensions[Keys.graphInstalledExtension] != true) {
@@ -52,3 +63,15 @@ public fun RaptorAssemblyQuery<RaptorKtorRouteComponent>.graph(tag: Any? = null)
 		install(plugin)
 	}
 }
+
+
+public data class RaptorKtorGraphRequest(
+	val document: GDocument,
+	val operationName: String?,
+	val query: String,
+	val variableValues: Map<String, Any?>,
+)
+
+
+public typealias RaptorGraphKtorRouteExecutionHook =
+	suspend RaptorTransactionContext.(request: RaptorKtorGraphRequest, next: suspend (request: RaptorKtorGraphRequest) -> GResult<Map<String, Any?>>) -> GResult<Map<String, Any?>>

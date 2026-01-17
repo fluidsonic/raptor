@@ -14,6 +14,7 @@ import org.slf4j.*
 
 
 internal class GraphRoute(
+	private val executionHook: RaptorGraphKtorRouteExecutionHook?,
 	private val graph: RaptorGraph,
 ) {
 
@@ -44,12 +45,33 @@ internal class GraphRoute(
 		val time = measureTimeMillis {
 			result = graph.parse(GDocumentSource.of(query, name = "query"))
 				.flatMapValue { document ->
-					graph.execute(
-						document = document,
-						operationName = operationName,
-						variableValues = variableValues,
-						context = context,
-					)
+					when (executionHook) {
+						null -> graph.execute(
+							document = document,
+							operationName = operationName,
+							variableValues = variableValues,
+							context = context,
+						)
+
+						else -> {
+							executionHook(
+								context,
+								RaptorKtorGraphRequest(
+									document = document,
+									operationName = operationName,
+									query = query,
+									variableValues = variableValues,
+								)
+							) { request ->
+								graph.execute(
+									document = request.document,
+									operationName = request.operationName,
+									variableValues = request.variableValues,
+									context = context,
+								)
+							}
+						}
+					}
 				}
 				.let { graph.serialize(it) }
 		}
