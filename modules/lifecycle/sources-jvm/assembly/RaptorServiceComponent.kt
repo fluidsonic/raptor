@@ -10,7 +10,6 @@ public class RaptorServiceComponent<Service : RaptorService> internal constructo
 	private val name: String,
 ) : RaptorComponent.Base<RaptorServiceComponent<Service>>(RaptorLifecyclePlugin) {
 
-	private val diKey = ServiceDIKey<Service>(name)
 	private val providedKeys: MutableList<RaptorDIKey<out Service>> = mutableListOf()
 
 
