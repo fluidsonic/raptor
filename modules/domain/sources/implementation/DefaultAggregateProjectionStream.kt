@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.*
 // FIXME Error handling? Make sure Flow never stops.
 internal class DefaultAggregateProjectionStream : RaptorAggregateProjectionStream {
 
-	private val flow = MutableSharedFlow<RaptorAggregateProjectionStreamMessage<*, *, *>>()
+	private val flow = MutableSharedFlow<RaptorAggregateProjectionStreamMessage<*, *, *>>(extraBufferCapacity = 64)
 	private val stopMessage = RaptorAggregateProjectionStreamMessage.Other(Ping)
 
 	override val messages: Flow<RaptorAggregateProjectionStreamMessage<*, *, *>> =

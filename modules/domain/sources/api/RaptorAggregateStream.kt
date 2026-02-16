@@ -2,6 +2,7 @@ package io.fluidsonic.raptor.domain
 
 import kotlin.reflect.*
 import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.*
 import kotlinx.coroutines.flow.*
 
 
@@ -53,7 +54,7 @@ public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 		.let { flow ->
 			when (includeReplays) {
 				true -> flow
-				false -> flow.dropWhile { it !is RaptorAggregateStreamMessage.Loaded }
+				false -> flow.buffer(64).dropWhile { it !is RaptorAggregateStreamMessage.Loaded }
 			}
 		}
 		.filterIsInstance<RaptorAggregateEventBatch<*, *>>()
@@ -112,7 +113,7 @@ public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 		.let { flow ->
 			when (includeReplays) {
 				true -> flow
-				false -> flow.dropWhile { it !is RaptorAggregateStreamMessage.Loaded }
+				false -> flow.buffer(64).dropWhile { it !is RaptorAggregateStreamMessage.Loaded }
 			}
 		}
 		.events()
