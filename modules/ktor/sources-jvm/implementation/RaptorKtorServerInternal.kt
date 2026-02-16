@@ -112,7 +112,7 @@ internal class RaptorKtorServerInternal(
 
 
 	private fun stopServerBlocking() {
-		checkNotNull(embeddedServer).stop(0, 10, TimeUnit.SECONDS) // TODO
+		checkNotNull(embeddedServer).stop(1, 10, TimeUnit.SECONDS) // TODO
 
 		this.embeddedServer = null
 	}
