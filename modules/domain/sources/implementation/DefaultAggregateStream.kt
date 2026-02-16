@@ -8,18 +8,36 @@ import kotlinx.coroutines.flow.*
 // FIXME Error handling? Make sure Flow never stops.
 internal class DefaultAggregateStream : RaptorAggregateStream {
 
-	private val flow = MutableSharedFlow<RaptorAggregateStreamMessage<*, *>>(extraBufferCapacity = 64)
+	private val liveFlow = MutableSharedFlow<RaptorAggregateStreamMessage<*, *>>()
+	private val replayFlow = MutableSharedFlow<RaptorAggregateStreamMessage<*, *>>(extraBufferCapacity = 64)
 	private val stopMessage = RaptorAggregateStreamMessage.Other(Ping)
+	private val switchSentinel = RaptorAggregateStreamMessage.Other(Switch)
 
-	override val messages: Flow<RaptorAggregateStreamMessage<*, *>> =
-		flow
+	private var activeFlow: MutableSharedFlow<RaptorAggregateStreamMessage<*, *>> = replayFlow
+
+	override val messages: Flow<RaptorAggregateStreamMessage<*, *>> = flow {
+		replayFlow
+			.takeWhile { it !== switchSentinel }
+			.collect { emit(it) }
+		liveFlow
 			.takeWhile { it !== stopMessage }
-			.filterNot { it is RaptorAggregateStreamMessage.Other && it.value === Ping }
+			.collect { emit(it) }
+	}.filterNot { it is RaptorAggregateStreamMessage.Other && (it.value === Ping || it.value === Switch) }
 
 
 	suspend fun emit(message: RaptorAggregateStreamMessage<*, *>) {
 		// TODO Fail when stopped.
-		flow.emit(message)
+		activeFlow.emit(message)
+	}
+
+
+	suspend fun replayComplete() {
+		val subscriberCount = replayFlow.subscriptionCount.value
+		activeFlow = liveFlow
+		replayFlow.emit(switchSentinel)
+		// Wait until all subscribers have transitioned from replayFlow to liveFlow.
+		if (subscriberCount > 0)
+			liveFlow.subscriptionCount.first { it >= subscriberCount }
 	}
 
 
@@ -27,8 +45,8 @@ internal class DefaultAggregateStream : RaptorAggregateStream {
 		// TODO Make idempotent.
 
 		coroutineScope {
-			flow
-				.onStart { launch { flow.emit(stopMessage) } }
+			liveFlow
+				.onStart { launch { liveFlow.emit(stopMessage) } }
 				.firstOrNull { it === stopMessage }
 		}
 	}
@@ -38,12 +56,13 @@ internal class DefaultAggregateStream : RaptorAggregateStream {
 		val waitEvent = RaptorAggregateStreamMessage.Other(Ping)
 
 		coroutineScope {
-			flow
-				.onStart { launch { flow.emit(waitEvent) } }
+			activeFlow
+				.onStart { launch { activeFlow.emit(waitEvent) } }
 				.firstOrNull { it === waitEvent }
 		}
 	}
 
 
 	private object Ping
+	private object Switch
 }

@@ -198,6 +198,9 @@ internal class DefaultAggregateManager(
 			manager.load()
 
 		mutex.withLock {
+			eventStream.replayComplete()
+			projectionEventStream.replayComplete()
+
 			status.value = Status.started
 
 			projectionLoaderManager.noteLoaded()
