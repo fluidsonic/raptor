@@ -151,15 +151,13 @@ internal class DefaultAggregateManager(
 
 
 	@Suppress("UNCHECKED_CAST")
-	suspend fun startIn(
-		scope: CoroutineScope,
-		individualManagers: Collection<DefaultIndividualAggregateManager<*, *>>,
-	) {
+	context(coroutineScope: CoroutineScope)
+	suspend fun start(individualManagers: Collection<DefaultIndividualAggregateManager<*, *>>) {
 		check(status.compareAndSet(Status.new, Status.starting)) { "Cannot start an aggregate manager that is $status." }
 
-		stopJobs += eventSource.subscribeIn(scope, ::onAggregateEvent)
-		stopJobs += eventSource.subscribeIn(scope, ::onAggregateProjectionEvent)
-		stopJobs += eventSource.subscribeIn(scope, ::onAggregateReplayCompletedEvent)
+		stopJobs += eventSource.subscribe(::onAggregateEvent)
+		stopJobs += eventSource.subscribe(::onAggregateProjectionEvent)
+		stopJobs += eventSource.subscribe(::onAggregateReplayCompletedEvent)
 
 		var lastEventId = 0L
 

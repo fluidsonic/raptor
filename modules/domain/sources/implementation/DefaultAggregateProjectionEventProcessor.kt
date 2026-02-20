@@ -52,12 +52,8 @@ internal class DefaultAggregateProjectionEventProcessor(
 	}
 
 
-	override fun <
-		Id : RaptorAggregateProjectionId,
-		Change : RaptorAggregateChange<Id>,
-		Projection : RaptorAggregateProjection<Id>,
-		> subscribeIn(
-		scope: CoroutineScope,
+	context(coroutineScope: CoroutineScope)
+	override fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>, Projection : RaptorAggregateProjection<Id>> subscribe(
 		handler: suspend (event: RaptorAggregateProjectionEvent<Id, Projection, Change>) -> Unit,
 		changeClasses: Set<KClass<out Change>>,
 		idClass: KClass<Id>,
@@ -67,7 +63,7 @@ internal class DefaultAggregateProjectionEventProcessor(
 	): Job {
 		// TODO Add safeguard against adding subscribers after event emission has begun.
 
-		val job = Job(parent = scope.coroutineContext.job)
+		val job = Job(parent = coroutineScope.coroutineContext.job)
 		if (changeClasses.isEmpty())
 			return job
 
@@ -104,7 +100,7 @@ internal class DefaultAggregateProjectionEventProcessor(
 				changeClass = changeClass,
 				handler = handler,
 				job = job,
-				scope = scope,
+				scope = coroutineScope,
 			).also { subscription ->
 				subscriptionsByChangeAfterReplay.computeIfAbsent(changeClass) { CopyOnWriteArrayList() }.add(subscription)
 
@@ -124,12 +120,9 @@ internal class DefaultAggregateProjectionEventProcessor(
 	}
 
 
-	override fun subscribeIn(
-		scope: CoroutineScope,
-		handler: suspend (event: RaptorAggregateReplayCompletedEvent) -> Unit,
-		async: Boolean,
-	): Job =
-		eventSource.subscribeIn(scope, handler, async = async)
+	context(coroutineScope: CoroutineScope)
+	override fun subscribe(handler: suspend (event: RaptorAggregateReplayCompletedEvent) -> Unit, async: Boolean): Job =
+		eventSource.subscribe(handler, async = async)
 
 
 	private class Subscription<
