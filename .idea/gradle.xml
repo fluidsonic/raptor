@@ -33,12 +33,14 @@
             <option value="$PROJECT_DIR$/modules/event" />
             <option value="$PROJECT_DIR$/modules/graph" />
             <option value="$PROJECT_DIR$/modules/jobs" />
+            <option value="$PROJECT_DIR$/modules/jobs2" />
             <option value="$PROJECT_DIR$/modules/ktor" />
             <option value="$PROJECT_DIR$/modules/ktor-graph" />
             <option value="$PROJECT_DIR$/modules/ktor-test" />
             <option value="$PROJECT_DIR$/modules/lifecycle" />
             <option value="$PROJECT_DIR$/modules/mongodb" />
             <option value="$PROJECT_DIR$/modules/security" />
+            <option value="$PROJECT_DIR$/modules/service2" />
             <option value="$PROJECT_DIR$/modules/settings" />
             <option value="$PROJECT_DIR$/modules/store" />
             <option value="$PROJECT_DIR$/modules/store-memory" />

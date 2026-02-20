@@ -6,9 +6,8 @@ import kotlinx.coroutines.*
 
 public interface RaptorAggregateProjectionEventSource {
 
-	public fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>, Projection : RaptorAggregateProjection<Id>>
-		subscribeIn(
-		scope: CoroutineScope,
+	context(coroutineScope: CoroutineScope)
+	public fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>, Projection : RaptorAggregateProjection<Id>> subscribe(
 		handler: suspend (event: RaptorAggregateProjectionEvent<Id, Projection, Change>) -> Unit,
 		changeClasses: Set<KClass<out Change>>,
 		idClass: KClass<Id>,
@@ -17,8 +16,9 @@ public interface RaptorAggregateProjectionEventSource {
 		replay: Boolean = false,
 	): Job
 
-	public fun subscribeIn(
-		scope: CoroutineScope,
+
+	context(coroutineScope: CoroutineScope)
+	public fun subscribe(
 		handler: suspend (event: RaptorAggregateReplayCompletedEvent) -> Unit,
 		async: Boolean = false,
 	): Job
@@ -37,4 +37,6 @@ public inline fun <
 	async: Boolean = false,
 	replay: Boolean = false,
 ): Job =
-	subscribeIn(scope, handler, changeClasses, Id::class, Projection::class, async = async, replay = replay)
+	context(scope) {
+		subscribe(handler, changeClasses, Id::class, Projection::class, async = async, replay = replay)
+	}

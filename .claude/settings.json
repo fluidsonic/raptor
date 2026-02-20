@@ -17,7 +17,8 @@
 			"coderabbit:*",
 			"gh:*",
 			"git:*",
-			"./gradlew:*"
+			"./gradlew:*",
+			"cd * && ./gradlew *"
 		],
 		"network": {
 			"allowLocalBinding": true

@@ -6,8 +6,8 @@ import kotlinx.coroutines.*
 
 public interface RaptorEventSource {
 
-	public fun <Event : RaptorEvent> subscribeIn(
-		scope: CoroutineScope,
+	context(coroutineScope: CoroutineScope)
+	public fun <Event : RaptorEvent> subscribe(
 		handler: suspend (event: Event) -> Unit,
 		events: Set<KClass<out Event>>,
 		async: Boolean = false,
@@ -15,16 +15,16 @@ public interface RaptorEventSource {
 }
 
 
-public inline fun <reified Event : RaptorEvent> RaptorEventSource.subscribeIn(
-	scope: CoroutineScope,
+context(coroutineScope: CoroutineScope)
+public inline fun <reified Event : RaptorEvent> RaptorEventSource.subscribe(
 	noinline handler: suspend (event: Event) -> Unit,
 ): Job =
-	subscribeIn(scope, handler, setOf(Event::class), async = false)
+	subscribe(handler, setOf(Event::class), async = false)
 
 
-public inline fun <reified Event : RaptorEvent> RaptorEventSource.subscribeIn(
-	scope: CoroutineScope,
+context(coroutineScope: CoroutineScope)
+public inline fun <reified Event : RaptorEvent> RaptorEventSource.subscribe(
 	noinline handler: suspend (event: Event) -> Unit,
 	async: Boolean,
 ): Job =
-	subscribeIn(scope, handler, setOf(Event::class), async = async)
+	subscribe(handler, setOf(Event::class), async = async)
