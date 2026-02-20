@@ -35,6 +35,7 @@
             <option value="$PROJECT_DIR$/modules/graphql" />
             <option value="$PROJECT_DIR$/modules/jobs" />
             <option value="$PROJECT_DIR$/modules/jobs-quartz-mongo" />
+            <option value="$PROJECT_DIR$/modules/jobs2" />
             <option value="$PROJECT_DIR$/modules/key-value-store" />
             <option value="$PROJECT_DIR$/modules/key-value-store-memory" />
             <option value="$PROJECT_DIR$/modules/key-value-store-mongo" />
@@ -46,6 +47,7 @@
             <option value="$PROJECT_DIR$/modules/mongodb" />
             <option value="$PROJECT_DIR$/modules/quickstart" />
             <option value="$PROJECT_DIR$/modules/security" />
+            <option value="$PROJECT_DIR$/modules/service2" />
             <option value="$PROJECT_DIR$/modules/settings" />
             <option value="$PROJECT_DIR$/modules/transactions" />
           </set>
