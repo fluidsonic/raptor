@@ -24,13 +24,13 @@ public class ParallelEventProcessor : RaptorEventProcessor, RaptorEventSource {
 	}
 
 
-	override fun <Event : RaptorEvent> subscribeIn(
-		scope: CoroutineScope,
+	context(coroutineScope: CoroutineScope)
+	override fun <Event : RaptorEvent> subscribe(
 		handler: suspend (event: Event) -> Unit,
 		events: Set<KClass<out Event>>,
 		async: Boolean,
 	): Job {
-		val job = Job(parent = scope.coroutineContext.job)
+		val job = Job(parent = coroutineScope.coroutineContext.job)
 		if (events.isEmpty())
 			return job
 
@@ -40,7 +40,7 @@ public class ParallelEventProcessor : RaptorEventProcessor, RaptorEventSource {
 				eventClass = eventClass,
 				handler = handler,
 				job = job,
-				scope = scope,
+				scope = coroutineScope,
 			).also { subscription ->
 				subscriptionsByEvent.computeIfAbsent(eventClass) { CopyOnWriteArrayList() }.add(subscription)
 			}
