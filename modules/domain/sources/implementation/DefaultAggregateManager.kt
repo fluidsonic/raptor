@@ -19,7 +19,8 @@ internal class DefaultAggregateManager(
 	private val projectionEventStream: DefaultAggregateProjectionStream,
 	private val projectionLoaderManager: DefaultAggregateProjectionLoaderManager, // TODO Hack.
 	private val store: RaptorAggregateStore,
-) : RaptorAggregateCommandExecutor, RaptorAggregateProvider {
+) : RaptorAggregateCommandExecutor,
+	RaptorAggregateProvider {
 
 	private val aggregateStates: MutableMap<RaptorAggregateId, AggregateState<*>> = hashMapOf()
 	private val mutex = Mutex()
@@ -83,12 +84,14 @@ internal class DefaultAggregateManager(
 				}
 			}
 
-			for (batch in commit.eventBatches)
+			for (batch in commit.eventBatches) {
 				process(batch)
+			}
 		}
 
-		for (action in onCommittedActions)
+		for (action in onCommittedActions) {
 			action(context)
+		}
 	}
 
 
@@ -143,45 +146,60 @@ internal class DefaultAggregateManager(
 		val batchEventsByAggregateId: MutableMap<RaptorAggregateId, MutableList<RaptorAggregateEvent<*, *>>> = hashMapOf()
 		var lastEventId = 0L
 
-		store.load()
-			.buffer(capacity = 100_000)
-			.collect { event ->
-				check(event.id.toLong() == lastEventId + 1) { "Expected event ${lastEventId + 1} but got: $event" }
+		// Phase 1: Stream events from MongoDB, build aggregate state + projections, collect batches.
+		val replayEventBatches = mutableListOf<RaptorAggregateEventBatch<*, *>>()
+		val replayProjectionBatches = mutableListOf<RaptorAggregateProjectionEventBatch<*, *, *>>()
 
-				val batchEvents = batchEventsByAggregateId.getOrPut(event.aggregateId, ::mutableListOf)
-				batchEvents += event
+		store.load().buffer(capacity = 100_000).collect { event ->
+			check(event.id.toLong() == lastEventId + 1) { "Expected event ${lastEventId + 1} but got: $event" }
 
-				if (event.version == event.lastVersionInBatch) {
-					val id = event.aggregateId
+			val batchEvents = batchEventsByAggregateId.getOrPut(event.aggregateId, ::mutableListOf)
+			batchEvents += event
 
-					val state = aggregateStates.getOrPut(id) {
-						val definition =
-							checkNotNull(definitions[id]) as RaptorAggregateDefinition<
-								RaptorAggregate<RaptorAggregateId, RaptorAggregateCommand<RaptorAggregateId>, RaptorAggregateChange<RaptorAggregateId>>,
-								RaptorAggregateId,
-								RaptorAggregateCommand<RaptorAggregateId>,
-								RaptorAggregateChange<RaptorAggregateId>
-								>
+			if (event.version == event.lastVersionInBatch) {
+				val id = event.aggregateId
 
-						AggregateState(aggregate = definition.factory.create(id), definition = definition, version = 0)
-					} as AggregateState<RaptorAggregateId>
+				val state = aggregateStates.getOrPut(id) {
+					val definition =
+						checkNotNull(definitions[id]) as RaptorAggregateDefinition<
+							RaptorAggregate<RaptorAggregateId, RaptorAggregateCommand<RaptorAggregateId>, RaptorAggregateChange<RaptorAggregateId>>,
+							RaptorAggregateId,
+							RaptorAggregateCommand<RaptorAggregateId>,
+							RaptorAggregateChange<RaptorAggregateId>
+							>
 
-					for (eventInBatch in batchEvents)
-						state.addEvent(eventInBatch)
+					AggregateState(aggregate = definition.factory.create(id), definition = definition, version = 0)
+				} as AggregateState<RaptorAggregateId>
 
-					process(
-						RaptorAggregateEventBatch(
-							aggregateId = id,
-							events = batchEvents,
-							version = event.version,
-						)
-					)
-
-					batchEventsByAggregateId.remove(id)
+				for (eventInBatch in batchEvents) {
+					state.addEvent(eventInBatch)
 				}
 
-				lastEventId = event.id.toLong()
+				val batch = RaptorAggregateEventBatch(
+					aggregateId = id,
+					events = batchEvents,
+					version = event.version,
+				)
+
+				// Projection loading (no stream emission).
+				val projectionEvents = batch.events.mapNotNull { projectionLoaderManager.addEvent(it) }
+
+				// Collect batches for cold replay dispatch.
+				replayEventBatches += batch
+				if (projectionEvents.isNotEmpty()) {
+					val lastProjectionEvent = projectionEvents.last()
+					replayProjectionBatches += RaptorAggregateProjectionEventBatch(
+						events = projectionEvents,
+						projectionId = lastProjectionEvent.projectionId,
+						version = lastProjectionEvent.version,
+					)
+				}
+
+				batchEventsByAggregateId.remove(id)
 			}
+
+			lastEventId = event.id.toLong()
+		}
 
 		nextEventId = lastEventId + 1
 
@@ -194,10 +212,22 @@ internal class DefaultAggregateManager(
 						.joinToString(", ")
 			)
 
-		for (manager in individualManagers)
+		// Phase 2: Set replay data for cold dispatch to subscribers.
+		eventStream.setReplayData(replayEventBatches)
+		projectionEventStream.setReplayData(replayProjectionBatches)
+
+		// Wait for all subscribers to finish processing replay data.
+		eventStream.awaitReplayProcessing()
+		projectionEventStream.awaitReplayProcessing()
+
+		for (manager in individualManagers) {
 			manager.load()
+		}
 
 		mutex.withLock {
+			eventStream.replayComplete()
+			projectionEventStream.replayComplete()
+
 			status.value = Status.started
 
 			projectionLoaderManager.noteLoaded()
@@ -226,10 +256,10 @@ internal class DefaultAggregateManager(
 
 	private data class AggregateState<Id : RaptorAggregateId>(
 		val aggregate: RaptorAggregate<Id, RaptorAggregateCommand<Id>, RaptorAggregateChange<Id>>,
-		val definition: RaptorAggregateDefinition<RaptorAggregate<Id, RaptorAggregateCommand<Id>, RaptorAggregateChange<Id>>, Id, RaptorAggregateCommand<Id>, RaptorAggregateChange<Id>>,
+		val definition:
+			RaptorAggregateDefinition<RaptorAggregate<Id, RaptorAggregateCommand<Id>, RaptorAggregateChange<Id>>, Id, RaptorAggregateCommand<Id>, RaptorAggregateChange<Id>>,
 		var version: Int,
 	) {
-
 		fun addEvent(event: RaptorAggregateEvent<Id, RaptorAggregateChange<Id>>) {
 			check(event.version == version + 1) {
 				when {
@@ -251,7 +281,6 @@ internal class DefaultAggregateManager(
 		private var nextEventId: Long,
 		private val timestamp: Timestamp,
 	) {
-
 		val aggregates: MutableMap<RaptorAggregateId, RaptorAggregate<*, *, *>> = hashMapOf()
 		val eventBatches: MutableList<RaptorAggregateEventBatch<*, *>> = mutableListOf()
 
@@ -281,14 +310,12 @@ internal class DefaultAggregateManager(
 				.flatMap { command ->
 					try {
 						aggregate.execute(command)
-					}
-					catch (e: Throwable) {
+					} catch (e: Throwable) {
 						throw RuntimeException("Failed executing command on aggregate ${id.debug}: $command", e)
 					}.onEach { change ->
 						try {
 							aggregate.handle(change)
-						}
-						catch (e: Throwable) {
+						} catch (e: Throwable) {
 							throw RuntimeException("Failed handling change to aggregate ${id.debug}: $change", e)
 						}
 					}
@@ -319,7 +346,6 @@ internal class DefaultAggregateManager(
 	private class Execution(
 		private val manager: DefaultAggregateManager,
 	) : RaptorAggregateCommandExecution {
-
 		private val batchByAggregateId: MutableMap<RaptorAggregateId, AggregateBatch<RaptorAggregateId>> = linkedMapOf()
 
 
@@ -328,8 +354,9 @@ internal class DefaultAggregateManager(
 				return
 
 			manager.commit {
-				for (batch in batchByAggregateId.values)
+				for (batch in batchByAggregateId.values) {
 					add(id = batch.id, expectedVersion = batch.expectedVersion, commands = batch.commands)
+				}
 			}
 
 			batchByAggregateId.clear()
@@ -344,8 +371,9 @@ internal class DefaultAggregateManager(
 		}
 
 
-		private class AggregateBatch<Id : RaptorAggregateId>(val id: Id) {
-
+		private class AggregateBatch<Id : RaptorAggregateId>(
+			val id: Id
+		) {
 			val commands: MutableList<RaptorAggregateCommand<Id>> = mutableListOf()
 			var expectedVersion: Int? = null
 
@@ -374,7 +402,6 @@ internal class DefaultAggregateManager(
 
 
 	private enum class Status {
-
 		new,
 		started,
 		starting,

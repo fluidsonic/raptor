@@ -2,13 +2,12 @@
 
 package io.fluidsonic.raptor.domain
 
-import kotlin.reflect.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import kotlin.reflect.*
 
 
 public interface RaptorAggregateProjectionStream {
-
 	public val messages: Flow<RaptorAggregateProjectionStreamMessage<*, *, *>>
 
 	public suspend fun wait()
@@ -20,10 +19,12 @@ public fun <
 	ProjectionId : RaptorAggregateProjectionId,
 	Projection : RaptorProjection<ProjectionId>,
 	Change : RaptorAggregateChange<ProjectionId>,
-	> Flow<RaptorAggregateProjectionStreamMessage<ProjectionId, Projection, Change>>.events(): Flow<RaptorAggregateProjectionEvent<ProjectionId, Projection, Change>> =
+> Flow<RaptorAggregateProjectionStreamMessage<ProjectionId, Projection, Change>>.events(): Flow<RaptorAggregateProjectionEvent<ProjectionId, Projection, Change>> =
 	flatMapConcat { message ->
 		when (message) {
 			is RaptorAggregateProjectionEventBatch<ProjectionId, Projection, Change> -> message.events.asFlow()
+			is RaptorAggregateProjectionStreamMessage.BulkReplay -> message.batches.asFlow()
+				.flatMapConcat { (it as RaptorAggregateProjectionEventBatch<ProjectionId, Projection, Change>).events.asFlow() }
 			else -> emptyFlow()
 		}
 	}
@@ -31,8 +32,7 @@ public fun <
 
 @JvmName("subscribeBatchIn")
 @Suppress("UNCHECKED_CAST")
-public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>, Projection : RaptorProjection<Id>>
-	RaptorAggregateProjectionStream.subscribeIn(
+public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>, Projection : RaptorProjection<Id>> RaptorAggregateProjectionStream.subscribeIn(
 	scope: CoroutineScope,
 	collector: suspend (event: RaptorAggregateProjectionEventBatch<Id, Projection, Change>) -> Unit,
 	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip, // FIXME use
@@ -50,7 +50,13 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 				false -> flow.dropWhile { it !is RaptorAggregateProjectionStreamMessage.Loaded }
 			}
 		}
-		.filterIsInstance<RaptorAggregateProjectionEventBatch<*, *, *>>()
+		.flatMapConcat { message ->
+			when (message) {
+				is RaptorAggregateProjectionEventBatch<*, *, *> -> flowOf(message)
+				is RaptorAggregateProjectionStreamMessage.BulkReplay -> message.batches.asFlow()
+				else -> emptyFlow()
+			}
+		}
 		.filter { idClass.isInstance(it.projectionId) }
 		.mapNotNull { batch ->
 			batch.events
@@ -67,11 +73,9 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 
 			try {
 				collector(event)
-			}
-			catch (e: CancellationException) {
+			} catch (e: CancellationException) {
 				throw e
-			}
-			catch (e: Throwable) {
+			} catch (e: Throwable) {
 				(failedProjectionIds ?: hashSetOf<RaptorAggregateProjectionId>().also { failedProjectionIds = it })
 					.add(projectionId)
 
@@ -81,8 +85,7 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 }
 
 
-public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>, Projection : RaptorProjection<Id>>
-	RaptorAggregateProjectionStream.subscribeIn(
+public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>, Projection : RaptorProjection<Id>> RaptorAggregateProjectionStream.subscribeIn(
 	scope: CoroutineScope,
 	collector: suspend (event: RaptorAggregateProjectionEvent<Id, Projection, Change>) -> Unit,
 	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip, // FIXME use
@@ -110,11 +113,9 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 
 			try {
 				collector(event)
-			}
-			catch (e: CancellationException) {
+			} catch (e: CancellationException) {
 				throw e
-			}
-			catch (e: Throwable) {
+			} catch (e: Throwable) {
 				(failedProjectionIds ?: hashSetOf<RaptorAggregateProjectionId>().also { failedProjectionIds = it })
 					.add(projectionId)
 
@@ -125,8 +126,7 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 
 
 @JvmName("subscribeBatchIn")
-public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Change : RaptorAggregateChange<Id>, reified Projection : RaptorProjection<Id>>
-	RaptorAggregateProjectionStream.subscribeIn(
+public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Change : RaptorAggregateChange<Id>, reified Projection : RaptorProjection<Id>> RaptorAggregateProjectionStream.subscribeIn(
 	scope: CoroutineScope,
 	noinline collector: suspend (event: RaptorAggregateProjectionEventBatch<Id, Projection, Change>) -> Unit,
 	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip,
@@ -143,8 +143,7 @@ public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Cha
 	)
 
 
-public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Change : RaptorAggregateChange<Id>, reified Projection : RaptorProjection<Id>>
-	RaptorAggregateProjectionStream.subscribeIn(
+public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Change : RaptorAggregateChange<Id>, reified Projection : RaptorProjection<Id>> RaptorAggregateProjectionStream.subscribeIn(
 	scope: CoroutineScope,
 	noinline collector: suspend (event: RaptorAggregateProjectionEvent<Id, Projection, Change>) -> Unit,
 	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip,
@@ -162,8 +161,7 @@ public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Cha
 
 
 @Suppress("UNCHECKED_CAST")
-public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>, Projection : RaptorProjection<Id>>
-	RaptorAggregateProjectionStream.subscribeMessagesIn(
+public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>, Projection : RaptorProjection<Id>> RaptorAggregateProjectionStream.subscribeMessagesIn(
 	scope: CoroutineScope,
 	collector: suspend (message: RaptorAggregateProjectionStreamMessage<Id, Projection, Change>) -> Unit,
 	changeClass: KClass<Change>,
@@ -171,6 +169,12 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 	projectionClass: KClass<Projection>,
 ): Job =
 	messages
+		.flatMapConcat { message ->
+			when (message) {
+				is RaptorAggregateProjectionStreamMessage.BulkReplay -> message.batches.asFlow()
+				else -> flowOf(message)
+			}
+		}
 		.mapNotNull { message ->
 			when (message) {
 				is RaptorAggregateProjectionEventBatch<*, *, *> ->
@@ -188,8 +192,7 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 		.startIn(scope, collector)
 
 
-public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Change : RaptorAggregateChange<Id>, reified Projection : RaptorProjection<Id>>
-	RaptorAggregateProjectionStream.subscribeMessagesIn(
+public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Change : RaptorAggregateChange<Id>, reified Projection : RaptorProjection<Id>> RaptorAggregateProjectionStream.subscribeMessagesIn(
 	scope: CoroutineScope,
 	noinline collector: suspend (message: RaptorAggregateProjectionStreamMessage<Id, Projection, Change>) -> Unit,
 ): Job =
@@ -203,8 +206,7 @@ public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Cha
 
 
 @Suppress("UNCHECKED_CAST")
-public fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>, Projection : RaptorProjection<Id>>
-	Flow<RaptorAggregateProjectionEvent<*, *, *>>.filterIsInstance(
+public fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>, Projection : RaptorProjection<Id>> Flow<RaptorAggregateProjectionEvent<*, *, *>>.filterIsInstance(
 	changeClass: KClass<Change>,
 	idClass: KClass<Id>,
 	projectionClass: KClass<Projection>,
@@ -213,14 +215,13 @@ public fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>
 		val previousProjection: RaptorProjection<*>? = event.previousProjection
 		val projection: RaptorProjection<*>? = event.projection
 
-		changeClass.isInstance(event.change)
-			&& (previousProjection == null || idClass.isInstance(previousProjection.id))
-			&& (projection == null || idClass.isInstance(projection.id))
-			&& (previousProjection == null || projectionClass.isInstance(previousProjection))
-			&& (projection == null || projectionClass.isInstance(projection))
+		changeClass.isInstance(event.change) &&
+			(previousProjection == null || idClass.isInstance(previousProjection.id)) &&
+			(projection == null || idClass.isInstance(projection.id)) &&
+			(previousProjection == null || projectionClass.isInstance(previousProjection)) &&
+			(projection == null || projectionClass.isInstance(projection))
 	} as Flow<RaptorAggregateProjectionEvent<Id, Projection, Change>>
 
 
-public inline fun <reified Id : RaptorAggregateProjectionId, reified Change : RaptorAggregateChange<Id>, reified Projection : RaptorProjection<Id>>
-	Flow<RaptorAggregateProjectionEvent<*, *, *>>.filterIsInstance(): Flow<RaptorAggregateProjectionEvent<Id, Projection, Change>> =
+public inline fun <reified Id : RaptorAggregateProjectionId, reified Change : RaptorAggregateChange<Id>, reified Projection : RaptorProjection<Id>> Flow<RaptorAggregateProjectionEvent<*, *, *>>.filterIsInstance(): Flow<RaptorAggregateProjectionEvent<Id, Projection, Change>> =
 	filterIsInstance(changeClass = Change::class, idClass = Id::class, projectionClass = Projection::class)

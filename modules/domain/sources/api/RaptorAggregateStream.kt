@@ -1,19 +1,17 @@
 package io.fluidsonic.raptor.domain
 
-import kotlin.reflect.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
+import kotlin.reflect.*
 
 
 public interface RaptorAggregateStream {
-
 	public val messages: Flow<RaptorAggregateStreamMessage<*, *>>
 
 	public suspend fun wait()
 
 
 	public enum class ErrorStrategy {
-
 		skip,
 		unsubscribeFromAll,
 		unsubscribeFromProjection,
@@ -25,10 +23,12 @@ public interface RaptorAggregateStream {
 public fun <
 	AggregateId : RaptorAggregateId,
 	Change : RaptorAggregateChange<AggregateId>,
-	> Flow<RaptorAggregateStreamMessage<AggregateId, Change>>.events(): Flow<RaptorAggregateEvent<AggregateId, Change>> =
+> Flow<RaptorAggregateStreamMessage<AggregateId, Change>>.events(): Flow<RaptorAggregateEvent<AggregateId, Change>> =
 	flatMapConcat { message ->
 		when (message) {
 			is RaptorAggregateEventBatch<AggregateId, Change> -> message.events.asFlow()
+			is RaptorAggregateStreamMessage.BulkReplay -> message.batches.asFlow()
+				.flatMapConcat { (it as RaptorAggregateEventBatch<AggregateId, Change>).events.asFlow() }
 			else -> emptyFlow()
 		}
 	}
@@ -36,8 +36,7 @@ public fun <
 
 @JvmName("subscribeBatchIn")
 @Suppress("UNCHECKED_CAST")
-public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
-	RaptorAggregateStream.subscribeIn(
+public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>> RaptorAggregateStream.subscribeIn(
 	scope: CoroutineScope,
 	collector: suspend (event: RaptorAggregateEventBatch<Id, Change>) -> Unit,
 	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip, // FIXME use
@@ -56,16 +55,22 @@ public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 				false -> flow.dropWhile { it !is RaptorAggregateStreamMessage.Loaded }
 			}
 		}
-		.filterIsInstance<RaptorAggregateEventBatch<*, *>>()
+		.flatMapConcat { message ->
+			when (message) {
+				is RaptorAggregateEventBatch<*, *> -> flowOf(message)
+				is RaptorAggregateStreamMessage.BulkReplay -> message.batches.asFlow()
+				else -> emptyFlow()
+			}
+		}
 		.filter { idClass.isInstance(it.aggregateId) }
 		.mapNotNull { batch ->
 			when {
 				batch.events.all { changeClass.isInstance(it.change) } -> batch
 				else -> batch.copy(
 					events = batch.events
-					.filter { changeClass.isInstance(it.change) }
-					.ifEmpty { return@mapNotNull null }
-					as List<RaptorAggregateEvent<Nothing, Nothing>>
+						.filter { changeClass.isInstance(it.change) }
+						.ifEmpty { return@mapNotNull null }
+						as List<RaptorAggregateEvent<Nothing, Nothing>>
 				)
 			}
 		}
@@ -78,11 +83,9 @@ public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 
 			try {
 				collector(event)
-			}
-			catch (e: CancellationException) {
+			} catch (e: CancellationException) {
 				throw e
-			}
-			catch (e: Throwable) {
+			} catch (e: Throwable) {
 				(failedAggregateIds ?: hashSetOf<RaptorAggregateId>().also { failedAggregateIds = it })
 					.add(aggregateId)
 
@@ -95,8 +98,7 @@ public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 }
 
 
-public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
-	RaptorAggregateStream.subscribeIn(
+public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>> RaptorAggregateStream.subscribeIn(
 	scope: CoroutineScope,
 	collector: suspend (event: RaptorAggregateEvent<Id, Change>) -> Unit,
 	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip, // FIXME use
@@ -125,11 +127,9 @@ public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 
 			try {
 				collector(event)
-			}
-			catch (e: CancellationException) {
+			} catch (e: CancellationException) {
 				throw e
-			}
-			catch (e: Throwable) {
+			} catch (e: Throwable) {
 				(failedAggregateIds ?: hashSetOf<RaptorAggregateId>().also { failedAggregateIds = it })
 					.add(aggregateId)
 
@@ -143,8 +143,7 @@ public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 
 
 @JvmName("subscribeBatchIn")
-public suspend inline fun <reified Id : RaptorAggregateId, reified Change : RaptorAggregateChange<Id>>
-	RaptorAggregateStream.subscribeIn(
+public suspend inline fun <reified Id : RaptorAggregateId, reified Change : RaptorAggregateChange<Id>> RaptorAggregateStream.subscribeIn(
 	scope: CoroutineScope,
 	noinline collector: suspend (event: RaptorAggregateEventBatch<Id, Change>) -> Unit,
 	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip,
@@ -160,8 +159,7 @@ public suspend inline fun <reified Id : RaptorAggregateId, reified Change : Rapt
 	)
 
 
-public suspend inline fun <reified Id : RaptorAggregateId, reified Change : RaptorAggregateChange<Id>>
-	RaptorAggregateStream.subscribeIn(
+public suspend inline fun <reified Id : RaptorAggregateId, reified Change : RaptorAggregateChange<Id>> RaptorAggregateStream.subscribeIn(
 	scope: CoroutineScope,
 	noinline collector: suspend (event: RaptorAggregateEvent<Id, Change>) -> Unit,
 	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip,
@@ -178,8 +176,7 @@ public suspend inline fun <reified Id : RaptorAggregateId, reified Change : Rapt
 
 
 @Suppress("UNCHECKED_CAST")
-public fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
-	Flow<RaptorAggregateEvent<*, *>>.filterIsInstance(
+public fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>> Flow<RaptorAggregateEvent<*, *>>.filterIsInstance(
 	changeClass: KClass<Change>,
 	idClass: KClass<Id>,
 ): Flow<RaptorAggregateEvent<Id, Change>> =
@@ -188,6 +185,5 @@ public fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 	} as Flow<RaptorAggregateEvent<Id, Change>>
 
 
-public inline fun <reified Id : RaptorAggregateId, reified Change : RaptorAggregateChange<Id>>
-	Flow<RaptorAggregateEvent<*, *>>.filterIsInstance(): Flow<RaptorAggregateEvent<Id, Change>> =
+public inline fun <reified Id : RaptorAggregateId, reified Change : RaptorAggregateChange<Id>> Flow<RaptorAggregateEvent<*, *>>.filterIsInstance(): Flow<RaptorAggregateEvent<Id, Change>> =
 	filterIsInstance(changeClass = Change::class, idClass = Id::class)
