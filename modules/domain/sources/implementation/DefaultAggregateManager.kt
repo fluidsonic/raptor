@@ -150,7 +150,7 @@ internal class DefaultAggregateManager(
 		val replayEventBatches = mutableListOf<RaptorAggregateEventBatch<*, *>>()
 		val replayProjectionBatches = mutableListOf<RaptorAggregateProjectionEventBatch<*, *, *>>()
 
-		store.load().buffer(capacity = 100_000).collect { event ->
+		store.load().buffer(capacity = 1_000_000).collect { event ->
 			check(event.id.toLong() == lastEventId + 1) { "Expected event ${lastEventId + 1} but got: $event" }
 
 			val batchEvents = batchEventsByAggregateId.getOrPut(event.aggregateId, ::mutableListOf)

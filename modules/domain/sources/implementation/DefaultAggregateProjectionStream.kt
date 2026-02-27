@@ -2,29 +2,33 @@ package io.fluidsonic.raptor.domain
 
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
-import org.slf4j.*
-import java.util.concurrent.atomic.*
 
 
-// FIXME Make sure all subscribers subscribe before the first events are emitted.
-// FIXME Error handling? Make sure Flow never stops.
 internal class DefaultAggregateProjectionStream : RaptorAggregateProjectionStream {
+
 	private val liveFlow = MutableSharedFlow<RaptorAggregateProjectionStreamMessage<*, *, *>>()
-	private val logger: Logger = LoggerFactory.getLogger(DefaultAggregateProjectionStream::class.java)
 	private val replayData = CompletableDeferred<RaptorAggregateProjectionStreamMessage.BulkReplay?>()
 	private val replayFlow = MutableSharedFlow<RaptorAggregateProjectionStreamMessage<*, *, *>>()
 	private val stopMessage = RaptorAggregateProjectionStreamMessage.Other(Ping)
-	private val subscriberCount = AtomicInteger(0)
-	private var subscriberCountLogged = false
+	private val subscriberCount = MutableStateFlow(0)
 	private val switchSentinel = RaptorAggregateProjectionStreamMessage.Other(Switch)
 
-	override val messages: Flow<RaptorAggregateProjectionStreamMessage<*, *, *>> = flow {
-		subscriberCount.incrementAndGet()
 
-		// Process replay data independently per subscriber (cold emission).
-		val replay = replayData.await()
-		if (replay != null) {
-			emit(replay)
+	override val messages: Flow<RaptorAggregateProjectionStreamMessage<*, *, *>> = flow {
+		subscriberCount.update { it + 1 }
+
+		try {
+			// Process replay data independently per subscriber (cold emission).
+			// Unpack into individual batches for backwards compatibility with subscribers
+			// that use `when (message)` without a BulkReplay branch.
+			val replay = replayData.await()
+			if (replay != null)
+				for (batch in replay.batches)
+					emit(batch)
+		} catch (e: Throwable) {
+			// Allow startup to continue when a non-critical subscriber fails during replay.
+			subscriberCount.update { it - 1 }
+			throw e
 		}
 
 		// Subscribe to replayFlow as a synchronization barrier.
@@ -40,20 +44,16 @@ internal class DefaultAggregateProjectionStream : RaptorAggregateProjectionStrea
 
 
 	suspend fun awaitReplayProcessing() {
-		val expected = subscriberCount.get()
-		System.err.println("[boot-profiling] ProjectionStream: waiting for $expected subscribers to finish replay processing")
-		if (expected > 0)
-			replayFlow.subscriptionCount.first { it >= expected }
-		System.err.println("[boot-profiling] ProjectionStream: all $expected subscribers ready")
+		// Wait until every subscriber that started replay has either
+		// finished processing (parked on replayFlow) or failed (decremented subscriberCount).
+		combine(subscriberCount, replayFlow.subscriptionCount) { expected, parked ->
+			parked >= expected
+		}.first { it }
 	}
 
 
 	suspend fun emit(message: RaptorAggregateProjectionStreamMessage<*, *, *>) {
 		// TODO Fail when stopped.
-		if (!subscriberCountLogged) {
-			subscriberCountLogged = true
-			System.err.println("[boot-profiling] ProjectionStream: ${liveFlow.subscriptionCount.value} active subscribers at first live emit")
-		}
 		liveFlow.emit(message)
 	}
 
