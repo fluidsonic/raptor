@@ -78,7 +78,7 @@ internal class RaptorServiceController2<Service : RaptorService2>(
 	}
 
 
-	private suspend fun handleError(error: RaptorService2.Error) {
+	private suspend fun handleError(error: RaptorServiceError2) {
 		when (errorHandler) {
 			is RaptorServiceComponent2.ErrorHandler.Default -> {
 				// Default: log and continue

@@ -63,7 +63,7 @@ internal data class BatchByInputSource<in Service : RaptorService2, Value>(
 //							throw e
 //						}
 //						catch (e: Exception) {
-//							errorHandler(RaptorService2.Error(coroutineContext, e))
+//							errorHandler(RaptorServiceError2(coroutineContext, e))
 //						}
 //					}
 //				}

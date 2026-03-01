@@ -122,7 +122,7 @@ internal class RaptorServiceSubscriptionEngine(
 	internal fun <Service : RaptorService2, Value> wrapWithErrorHandling(
 		service: Service,
 		handler: suspend Service.(Value) -> Unit,
-		errorHandler: suspend (RaptorService2.Error) -> Unit,
+		errorHandler: suspend (RaptorServiceError2) -> Unit,
 	): suspend Service.(Value) -> Unit = { value ->
 		try {
 			handler(value)
@@ -131,7 +131,7 @@ internal class RaptorServiceSubscriptionEngine(
 			throw e
 		}
 		catch (e: Exception) {
-			errorHandler(RaptorService2.Error(currentCoroutineContext(), e))
+			errorHandler(RaptorServiceError2(currentCoroutineContext(), e))
 		}
 	}
 

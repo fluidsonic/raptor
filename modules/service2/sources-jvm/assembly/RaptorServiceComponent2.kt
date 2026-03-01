@@ -49,7 +49,7 @@ public class RaptorServiceComponent2<Service : RaptorService2> internal construc
 
 		data object StopLifecycle : ErrorHandler
 
-		data class Custom(val handler: suspend (RaptorService2.Error) -> Unit) : ErrorHandler
+		data class Custom(val handler: suspend (RaptorServiceError2) -> Unit) : ErrorHandler
 	}
 }
 
@@ -69,12 +69,12 @@ public fun <Service : RaptorService2> factory(factory: context(RaptorDI) () -> S
 
 @RaptorDsl
 context (component: RaptorServiceComponent2<Service>)
-public fun <Service : RaptorService2> onError(): RaptorServiceInput2<Service, RaptorService2.Error> =
+public fun <Service : RaptorService2> onError(): RaptorServiceInput2<Service, RaptorServiceError2> =
 	ErrorInputSource(component)
 
 
 @RaptorDsl
-public fun RaptorServiceInput2<*, RaptorService2.Error>.log() {
+public fun RaptorServiceInput2<*, RaptorServiceError2>.log() {
 	when (this) {
 		is ErrorInputSource<*> -> component.errorHandler = RaptorServiceComponent2.ErrorHandler.Default
 	}
@@ -82,7 +82,7 @@ public fun RaptorServiceInput2<*, RaptorService2.Error>.log() {
 
 
 @RaptorDsl
-public fun RaptorServiceInput2<*, RaptorService2.Error>.stopService() {
+public fun RaptorServiceInput2<*, RaptorServiceError2>.stopService() {
 	when (this) {
 		is ErrorInputSource<*> -> component.errorHandler = RaptorServiceComponent2.ErrorHandler.StopService
 	}
@@ -90,7 +90,7 @@ public fun RaptorServiceInput2<*, RaptorService2.Error>.stopService() {
 
 
 @RaptorDsl
-public fun RaptorServiceInput2<*, RaptorService2.Error>.stopLifecycle() {
+public fun RaptorServiceInput2<*, RaptorServiceError2>.stopLifecycle() {
 	when (this) {
 		is ErrorInputSource<*> -> component.errorHandler = RaptorServiceComponent2.ErrorHandler.StopLifecycle
 	}
@@ -107,10 +107,10 @@ public fun RaptorServiceInput2<*, RaptorService2.Error>.stopLifecycle() {
  */
 internal data class ErrorInputSource<Service : RaptorService2>(
 	val component: RaptorServiceComponent2<Service>,
-) : RaptorServiceInput2<Service, RaptorService2.Error> {
+) : RaptorServiceInput2<Service, RaptorServiceError2> {
 
 	context(coroutineScope: CoroutineScope, context: RaptorContext, service: Service)
-	override fun subscribe(handler: suspend (RaptorService2.Error) -> Unit): Job {
+	override fun subscribe(handler: suspend (RaptorServiceError2) -> Unit): Job {
 		throw UnsupportedOperationException(
 			"onError().handle { ... } is not supported. Use onError().log(), onError().stopService(), or onError().stopLifecycle() instead."
 		)

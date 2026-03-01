@@ -98,7 +98,7 @@ class AggregateSubscriptionTests {
 		val eventSource = TestAggregateEventSource()
 		val engine = createEngineWithEventSources(aggregateEventSource = eventSource)
 		val service = TestServiceImpl()
-		val errors = mutableListOf<RaptorService2.Error>()
+		val errors = mutableListOf<RaptorServiceError2>()
 		val testException = RuntimeException("test error")
 
 		val source = DefaultAggregateChangesInputSource<TestService, TestId, TestChange>(
@@ -289,7 +289,7 @@ class AggregateSubscriptionTests {
 		val eventSource = TestAggregateProjectionEventSource()
 		val engine = createEngineWithEventSources(aggregateProjectionEventSource = eventSource)
 		val service = TestServiceImpl()
-		val errors = mutableListOf<RaptorService2.Error>()
+		val errors = mutableListOf<RaptorServiceError2>()
 		val testException = RuntimeException("projection error")
 
 		val source = AggregateProjectionChangesInputSource<TestService, TestId, TestChange, TestProjection>(

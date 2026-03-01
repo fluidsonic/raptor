@@ -365,7 +365,7 @@ class RaptorServiceController2Tests {
 		val service = TestServiceImpl()
 		val diKey = ServiceDIKey2<TestService>("test-service")
 		val testException = RuntimeException("test error")
-		val receivedErrors = mutableListOf<RaptorService2.Error>()
+		val receivedErrors = mutableListOf<RaptorServiceError2>()
 
 		val inputSources = listOf(
 			RaptorServiceInputRegistration<TestService, Unit>(
