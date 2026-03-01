@@ -2,9 +2,6 @@ package io.fluidsonic.raptor.di
 
 import io.fluidsonic.raptor.*
 import java.util.concurrent.locks.*
-import kotlin.collections.component1
-import kotlin.collections.component2
-import kotlin.collections.set
 import kotlin.concurrent.*
 
 
@@ -39,15 +36,16 @@ internal class DefaultRaptorDI(
 	override fun <Value : Any> getOrNull(key: RaptorDIKey<out Value?>): Value? =
 		lock.withLock { // TODO Add fast-path if dependency is already resolved.
 			dependenciesByKey.getOrPutNullable(key) {
-				val notOptionalKey = key.notOptional()
+				if (key.isOptional)
+					return getOrNull(key.notOptional())
 
-				if (currentlyResolvingKeys.contains(notOptionalKey))
-					reportCyclicDependency(notOptionalKey)
+				if (currentlyResolvingKeys.contains(key))
+					reportCyclicDependency(key)
 
-				currentlyResolvingKeys += notOptionalKey
+				currentlyResolvingKeys += key
 
 				try {
-					resolve(notOptionalKey)
+					resolve(key)
 				}
 				finally {
 					currentlyResolvingKeys.removeLast()

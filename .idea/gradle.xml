@@ -43,7 +43,6 @@
             <option value="$PROJECT_DIR$/modules/ktor-graph" />
             <option value="$PROJECT_DIR$/modules/ktor-test" />
             <option value="$PROJECT_DIR$/modules/lifecycle" />
-            <option value="$PROJECT_DIR$/modules/mongo2" />
             <option value="$PROJECT_DIR$/modules/mongodb" />
             <option value="$PROJECT_DIR$/modules/quickstart" />
             <option value="$PROJECT_DIR$/modules/security" />
