@@ -23,13 +23,19 @@ public fun <
 	> Flow<RaptorAggregateProjectionStreamMessage<ProjectionId, Projection, Change>>.events(): Flow<RaptorAggregateProjectionEvent<ProjectionId, Projection, Change>> =
 	flatMapConcat { message ->
 		when (message) {
-			is RaptorAggregateProjectionEventBatch<ProjectionId, Projection, Change> -> message.events.asFlow()
-			else -> emptyFlow()
+			is RaptorAggregateProjectionEventBatch<ProjectionId, Projection, Change>,
+				-> message.events.asFlow()
+
+			RaptorAggregateProjectionStreamMessage.Loaded,
+			is RaptorAggregateProjectionStreamMessage.Other,
+			is RaptorAggregateProjectionStreamMessage.Replay,
+				-> emptyFlow()
 		}
 	}
 
 
 @JvmName("subscribeBatchIn")
+@OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("UNCHECKED_CAST")
 public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>, Projection : RaptorProjection<Id>>
 	RaptorAggregateProjectionStream.subscribeIn(
@@ -39,17 +45,11 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 	changeClass: KClass<Change>,
 	idClass: KClass<Id>,
 	projectionClass: KClass<Projection>,
-	includeReplays: Boolean = false,
 ): Job {
 	var failedProjectionIds: MutableSet<RaptorAggregateProjectionId>? = null
 
 	return messages
-		.let { flow ->
-			when (includeReplays) {
-				true -> flow
-				false -> flow.dropWhile { it !is RaptorAggregateProjectionStreamMessage.Loaded }
-			}
-		}
+		.dropWhile { it !is RaptorAggregateProjectionStreamMessage.Loaded }
 		.filterIsInstance<RaptorAggregateProjectionEventBatch<*, *, *>>()
 		.filter { idClass.isInstance(it.projectionId) }
 		.mapNotNull { batch ->
@@ -89,17 +89,11 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 	changeClass: KClass<Change>,
 	idClass: KClass<Id>,
 	projectionClass: KClass<Projection>,
-	includeReplays: Boolean = false,
 ): Job {
 	var failedProjectionIds: MutableSet<RaptorAggregateProjectionId>? = null
 
 	return messages
-		.let { flow ->
-			when (includeReplays) {
-				true -> flow
-				false -> flow.dropWhile { it !is RaptorAggregateProjectionStreamMessage.Loaded }
-			}
-		}
+		.dropWhile { it !is RaptorAggregateProjectionStreamMessage.Loaded }
 		.events()
 		.filterIsInstance(changeClass = changeClass, idClass = idClass, projectionClass = projectionClass)
 		.startIn(scope) { event ->
@@ -130,7 +124,6 @@ public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Cha
 	scope: CoroutineScope,
 	noinline collector: suspend (event: RaptorAggregateProjectionEventBatch<Id, Projection, Change>) -> Unit,
 	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip,
-	includeReplays: Boolean = false,
 ): Job =
 	subscribeIn(
 		scope = scope,
@@ -139,7 +132,6 @@ public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Cha
 		changeClass = Change::class,
 		idClass = Id::class,
 		projectionClass = Projection::class,
-		includeReplays = includeReplays,
 	)
 
 
@@ -148,7 +140,6 @@ public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Cha
 	scope: CoroutineScope,
 	noinline collector: suspend (event: RaptorAggregateProjectionEvent<Id, Projection, Change>) -> Unit,
 	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip,
-	includeReplays: Boolean = false,
 ): Job =
 	subscribeIn(
 		scope = scope,
@@ -157,10 +148,10 @@ public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Cha
 		changeClass = Change::class,
 		idClass = Id::class,
 		projectionClass = Projection::class,
-		includeReplays = includeReplays,
 	)
 
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("UNCHECKED_CAST")
 public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>, Projection : RaptorProjection<Id>>
 	RaptorAggregateProjectionStream.subscribeMessagesIn(
@@ -171,6 +162,12 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 	projectionClass: KClass<Projection>,
 ): Job =
 	messages
+		.flatMapConcat { message ->
+			when (message) {
+				is RaptorAggregateProjectionStreamMessage.Replay -> message.batches.asFlow()
+				else -> flowOf(message)
+			}
+		}
 		.mapNotNull { message ->
 			when (message) {
 				is RaptorAggregateProjectionEventBatch<*, *, *> ->

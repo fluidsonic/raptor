@@ -15,16 +15,19 @@ internal class DefaultAggregateManager(
 	private val context: RaptorContext,
 	private val definitions: RaptorAggregateDefinitions,
 	private val eventStream: DefaultAggregateStream,
+	private val hooks: List<RaptorDomainStreamHook>,
 	private val onCommittedActions: List<suspend RaptorScope.() -> Unit>,
 	private val projectionEventStream: DefaultAggregateProjectionStream,
 	private val projectionLoaderManager: DefaultAggregateProjectionLoaderManager, // TODO Hack.
 	private val store: RaptorAggregateStore,
-) : RaptorAggregateCommandExecutor, RaptorAggregateProvider {
+) : RaptorAggregateCommandExecutor, RaptorAggregateProvider, RaptorDomain {
 
 	private val aggregateStates: MutableMap<RaptorAggregateId, AggregateState<*>> = hashMapOf()
 	private val mutex = Mutex()
 	private var nextEventId = 1L
 	private var status = atomic(Status.new)
+
+	override val loaded = CompletableDeferred<RaptorDomain>()
 
 
 	override fun execution(): RaptorAggregateCommandExecution {
@@ -94,21 +97,30 @@ internal class DefaultAggregateManager(
 
 	private suspend fun process(batch: RaptorAggregateEventBatch<*, *>) {
 		// FIXME Rework projection event logic. Create batches before committing to ensure consistency.
-		val projectionEvents = batch.events.mapNotNull { projectionLoaderManager.addEvent(it) }
+		val projectionBatch = batch.events
+			.mapNotNull { projectionLoaderManager.addEvent(it) }
+			.ifEmpty { null }
+			?.let { events ->
+				val lastEvent = events.last()
+
+				RaptorAggregateProjectionEventBatch(
+					events = events,
+					projectionId = lastEvent.projectionId,
+					version = lastEvent.version,
+				)
+			}
+
+		for (hook in hooks) {
+			hook.onAggregateStreamMessage(batch)
+
+			if (projectionBatch != null)
+				hook.onAggregateProjectionStreamMessage(projectionBatch)
+		}
 
 		eventStream.emit(batch)
 
-		if (projectionEvents.isNotEmpty()) {
-			val lastProjectionEvent = projectionEvents.last()
-
-			projectionEventStream.emit(
-				RaptorAggregateProjectionEventBatch(
-					events = projectionEvents,
-					projectionId = lastProjectionEvent.projectionId,
-					version = lastProjectionEvent.version,
-				)
-			)
-		}
+		if (projectionBatch != null)
+			projectionEventStream.emit(projectionBatch)
 	}
 
 
@@ -143,45 +155,60 @@ internal class DefaultAggregateManager(
 		val batchEventsByAggregateId: MutableMap<RaptorAggregateId, MutableList<RaptorAggregateEvent<*, *>>> = hashMapOf()
 		var lastEventId = 0L
 
-		store.load()
-			.buffer(capacity = 100_000)
-			.collect { event ->
-				check(event.id.toLong() == lastEventId + 1) { "Expected event ${lastEventId + 1} but got: $event" }
+		// Phase 1: Stream events from MongoDB, build aggregate state + projections, collect batches.
+		val batches = mutableListOf<RaptorAggregateEventBatch<*, *>>()
+		val projectionBatches = mutableListOf<RaptorAggregateProjectionEventBatch<*, *, *>>()
 
-				val batchEvents = batchEventsByAggregateId.getOrPut(event.aggregateId, ::mutableListOf)
-				batchEvents += event
+		store.load().buffer(capacity = 1_000_000).collect { event ->
+			check(event.id.toLong() == lastEventId + 1) { "Expected event ${lastEventId + 1} but got: $event" }
 
-				if (event.version == event.lastVersionInBatch) {
-					val id = event.aggregateId
+			val batchEvents = batchEventsByAggregateId.getOrPut(event.aggregateId, ::mutableListOf)
+			batchEvents += event
 
-					val state = aggregateStates.getOrPut(id) {
-						val definition =
-							checkNotNull(definitions[id]) as RaptorAggregateDefinition<
-								RaptorAggregate<RaptorAggregateId, RaptorAggregateCommand<RaptorAggregateId>, RaptorAggregateChange<RaptorAggregateId>>,
-								RaptorAggregateId,
-								RaptorAggregateCommand<RaptorAggregateId>,
-								RaptorAggregateChange<RaptorAggregateId>
-								>
+			if (event.version == event.lastVersionInBatch) {
+				val id = event.aggregateId
 
-						AggregateState(aggregate = definition.factory.create(id), definition = definition, version = 0)
-					} as AggregateState<RaptorAggregateId>
+				val state = aggregateStates.getOrPut(id) {
+					val definition =
+						checkNotNull(definitions[id]) as RaptorAggregateDefinition<
+							RaptorAggregate<RaptorAggregateId, RaptorAggregateCommand<RaptorAggregateId>, RaptorAggregateChange<RaptorAggregateId>>,
+							RaptorAggregateId,
+							RaptorAggregateCommand<RaptorAggregateId>,
+							RaptorAggregateChange<RaptorAggregateId>
+							>
 
-					for (eventInBatch in batchEvents)
-						state.addEvent(eventInBatch)
+					AggregateState(aggregate = definition.factory.create(id), definition = definition, version = 0)
+				} as AggregateState<RaptorAggregateId>
 
-					process(
-						RaptorAggregateEventBatch(
-							aggregateId = id,
-							events = batchEvents,
-							version = event.version,
-						)
+				for (eventInBatch in batchEvents)
+					state.addEvent(eventInBatch)
+
+				val batch = RaptorAggregateEventBatch(
+					aggregateId = id,
+					events = batchEvents,
+					version = event.version,
+				)
+				batches += batch
+
+				// Projection loading (no stream emission).
+				val projectionBatchEvents = batch.events.mapNotNull { projectionLoaderManager.addEvent(it) }
+
+				// Collect batches for cold replay dispatch.
+				if (projectionBatchEvents.isNotEmpty()) {
+					val lastProjectionEvent = projectionBatchEvents.last()
+
+					projectionBatches += RaptorAggregateProjectionEventBatch(
+						events = projectionBatchEvents,
+						projectionId = lastProjectionEvent.projectionId,
+						version = lastProjectionEvent.version,
 					)
-
-					batchEventsByAggregateId.remove(id)
 				}
 
-				lastEventId = event.id.toLong()
+				batchEventsByAggregateId.remove(id)
 			}
+
+			lastEventId = event.id.toLong()
+		}
 
 		nextEventId = lastEventId + 1
 
@@ -194,15 +221,40 @@ internal class DefaultAggregateManager(
 						.joinToString(", ")
 			)
 
+		if (batches.isNotEmpty()) {
+			val batch = RaptorAggregateStreamMessage.Replay(batches)
+			val projectionBatch = projectionBatches
+				.ifEmpty { null }
+				?.let(RaptorAggregateProjectionStreamMessage<*, *, *>::Replay)
+
+			for (hook in hooks) {
+				hook.onAggregateStreamMessage(batch)
+
+				if (projectionBatch != null)
+					hook.onAggregateProjectionStreamMessage(projectionBatch)
+			}
+
+			eventStream.emit(batch)
+
+			if (projectionBatch != null)
+				projectionEventStream.emit(projectionBatch)
+		}
+
 		for (manager in individualManagers)
 			manager.load()
 
 		mutex.withLock {
 			status.value = Status.started
 
+			loaded.complete(this)
 			projectionLoaderManager.noteLoaded()
 
 			// TODO Might have deadlock potential. Add buffer somewhere?
+			for (hook in hooks) {
+				hook.onAggregateStreamMessage(RaptorAggregateStreamMessage.Loaded)
+				hook.onAggregateProjectionStreamMessage(RaptorAggregateProjectionStreamMessage.Loaded)
+			}
+
 			eventStream.emit(RaptorAggregateStreamMessage.Loaded)
 			projectionEventStream.emit(RaptorAggregateProjectionStreamMessage.Loaded)
 		}

@@ -12,3 +12,4 @@
 .kotlin
 build
 out
+.tmp/

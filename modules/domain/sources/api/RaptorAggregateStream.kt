@@ -28,13 +28,19 @@ public fun <
 	> Flow<RaptorAggregateStreamMessage<AggregateId, Change>>.events(): Flow<RaptorAggregateEvent<AggregateId, Change>> =
 	flatMapConcat { message ->
 		when (message) {
-			is RaptorAggregateEventBatch<AggregateId, Change> -> message.events.asFlow()
-			else -> emptyFlow()
+			is RaptorAggregateEventBatch<AggregateId, Change>,
+				-> message.events.asFlow()
+
+			RaptorAggregateStreamMessage.Loaded,
+			is RaptorAggregateStreamMessage.Other,
+			is RaptorAggregateStreamMessage.Replay,
+				-> emptyFlow()
 		}
 	}
 
 
 @JvmName("subscribeBatchIn")
+@OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("UNCHECKED_CAST")
 public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 	RaptorAggregateStream.subscribeIn(
@@ -43,19 +49,13 @@ public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip, // FIXME use
 	changeClass: KClass<Change>,
 	idClass: KClass<Id>,
-	includeReplays: Boolean = false,
 ): Job {
 	val completion = CompletableDeferred<Unit>()
 	var failedAggregateIds: MutableSet<RaptorAggregateId>? = null
 
 	// FIXME Using a Flow means that the events are no longer processed synchronously. OK? Workarounds?
 	return messages
-		.let { flow ->
-			when (includeReplays) {
-				true -> flow
-				false -> flow.dropWhile { it !is RaptorAggregateStreamMessage.Loaded }
-			}
-		}
+		.dropWhile { it !is RaptorAggregateStreamMessage.Loaded }
 		.filterIsInstance<RaptorAggregateEventBatch<*, *>>()
 		.filter { idClass.isInstance(it.aggregateId) }
 		.mapNotNull { batch ->
@@ -63,9 +63,9 @@ public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 				batch.events.all { changeClass.isInstance(it.change) } -> batch
 				else -> batch.copy(
 					events = batch.events
-					.filter { changeClass.isInstance(it.change) }
-					.ifEmpty { return@mapNotNull null }
-					as List<RaptorAggregateEvent<Nothing, Nothing>>
+						.filter { changeClass.isInstance(it.change) }
+						.ifEmpty { return@mapNotNull null }
+						as List<RaptorAggregateEvent<Nothing, Nothing>>
 				)
 			}
 		}
@@ -102,19 +102,13 @@ public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip, // FIXME use
 	changeClass: KClass<Change>,
 	idClass: KClass<Id>,
-	includeReplays: Boolean = false,
 ): Job {
 	val completion = CompletableDeferred<Unit>()
 	var failedAggregateIds: MutableSet<RaptorAggregateId>? = null
 
 	// FIXME Using a Flow means that the events are no longer processed synchronously. OK? Workarounds?
 	return messages
-		.let { flow ->
-			when (includeReplays) {
-				true -> flow
-				false -> flow.dropWhile { it !is RaptorAggregateStreamMessage.Loaded }
-			}
-		}
+		.dropWhile { it !is RaptorAggregateStreamMessage.Loaded }
 		.events()
 		.filterIsInstance(changeClass = changeClass, idClass = idClass)
 		.onEach { event ->
@@ -148,7 +142,6 @@ public suspend inline fun <reified Id : RaptorAggregateId, reified Change : Rapt
 	scope: CoroutineScope,
 	noinline collector: suspend (event: RaptorAggregateEventBatch<Id, Change>) -> Unit,
 	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip,
-	includeReplays: Boolean = false,
 ): Job =
 	subscribeIn(
 		scope = scope,
@@ -156,7 +149,6 @@ public suspend inline fun <reified Id : RaptorAggregateId, reified Change : Rapt
 		errorStrategy = errorStrategy,
 		changeClass = Change::class,
 		idClass = Id::class,
-		includeReplays = includeReplays,
 	)
 
 
@@ -165,7 +157,6 @@ public suspend inline fun <reified Id : RaptorAggregateId, reified Change : Rapt
 	scope: CoroutineScope,
 	noinline collector: suspend (event: RaptorAggregateEvent<Id, Change>) -> Unit,
 	errorStrategy: RaptorAggregateStream.ErrorStrategy = RaptorAggregateStream.ErrorStrategy.skip,
-	includeReplays: Boolean = false,
 ): Job =
 	subscribeIn(
 		scope = scope,
@@ -173,7 +164,6 @@ public suspend inline fun <reified Id : RaptorAggregateId, reified Change : Rapt
 		errorStrategy = errorStrategy,
 		changeClass = Change::class,
 		idClass = Id::class,
-		includeReplays = includeReplays,
 	)
 
 

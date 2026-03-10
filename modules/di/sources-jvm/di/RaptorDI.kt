@@ -106,6 +106,48 @@ public fun <Value : Any> RaptorDI.getOrNull(type: KType): Value? =
 	getOrNull(RaptorDIKey<Value?>(type))
 
 
+@JvmName("getWithContext")
+@RaptorDsl
+context(di: RaptorDI)
+public inline fun <reified Value> get(): Value =
+	get(typeOf<Value>())
+
+
+@JvmName("getWithContextForKey")
+@RaptorDsl
+context(di: RaptorDI)
+public fun <Value> get(key: RaptorDIKey<out Value>): Value =
+	di.get(key)
+
+
+@JvmName("getWithContextForType")
+@RaptorDsl
+context(di: RaptorDI)
+public fun <Value> get(type: KType): Value =
+	get(RaptorDIKey<Value>(type))
+
+
+@JvmName("getOrNullWithContext")
+@RaptorDsl
+context(di: RaptorDI)
+public inline fun <reified Value : Any> getOrNull(): Value? =
+	getOrNull(typeOf<Value>())
+
+
+@JvmName("getOrNullWithContextForKey")
+@RaptorDsl
+context(di: RaptorDI)
+public fun <Value : Any> getOrNull(key: RaptorDIKey<out Value?>): Value? =
+	di.getOrNull(key)
+
+
+@JvmName("getOrNullWithContextForType")
+@RaptorDsl
+context(di: RaptorDI)
+public fun <Value : Any> getOrNull(type: KType): Value? =
+	getOrNull(RaptorDIKey<Value?>(type))
+
+
 @RaptorDsl
 public inline operator fun <reified Value> RaptorDI.invoke(): PropertyDelegateProvider<Any?, Lazy<Value>> =
 	object : PropertyDelegateProvider<Any?, Lazy<Value>> {

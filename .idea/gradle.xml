@@ -38,7 +38,6 @@
             <option value="$PROJECT_DIR$/modules/key-value-store" />
             <option value="$PROJECT_DIR$/modules/key-value-store-memory" />
             <option value="$PROJECT_DIR$/modules/key-value-store-mongo" />
-            <option value="$PROJECT_DIR$/modules/key-value-store-mongo2" />
             <option value="$PROJECT_DIR$/modules/ktor" />
             <option value="$PROJECT_DIR$/modules/ktor-graph" />
             <option value="$PROJECT_DIR$/modules/ktor-test" />

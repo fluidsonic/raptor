@@ -12,7 +12,6 @@ import io.ktor.server.plugins.forwardedheaders.*
 import io.ktor.server.routing.*
 import java.io.*
 import java.security.*
-import java.util.concurrent.*
 import kotlinx.atomicfu.*
 import kotlinx.coroutines.*
 import org.slf4j.*
@@ -112,7 +111,7 @@ internal class RaptorKtorServerInternal(
 
 
 	private fun stopServerBlocking() {
-		checkNotNull(embeddedServer).stop(0, 10, TimeUnit.SECONDS) // TODO
+		checkNotNull(embeddedServer).stop() // TODO
 
 		this.embeddedServer = null
 	}

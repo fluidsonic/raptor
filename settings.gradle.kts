@@ -4,6 +4,7 @@ rootProject.name = "raptor"
 
 file("modules")
 	.listFilesOrdered(File::isDirectory)
+	.filter { it.resolve("build.gradle.kts").exists() }
 	.forEach { directory ->
 		val name = directory.name
 

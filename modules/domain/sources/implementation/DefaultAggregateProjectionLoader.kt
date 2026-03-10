@@ -44,12 +44,17 @@ internal class DefaultAggregateProjectionLoader<
 
 	override fun fetchAll(): Flow<Projection> =
 		flow {
+			check(loaded.isCompleted) { "Cannot fetch projections during replay. Use event.projection for point-in-time state." }
+
 			projectors.values.mapNotNull { it.projection }.forEach { emit(it) } // TODO Probably not concurrency-safe.
 		}
 
 
-	override suspend fun fetchOrNull(id: Id): Projection? =
-		projectors[id]?.projection
+	override suspend fun fetchOrNull(id: Id): Projection? {
+		check(loaded.isCompleted) { "Cannot fetch projections during replay. Use event.projection for point-in-time state." }
+
+		return projectors[id]?.projection
+	}
 
 
 	override suspend fun loaded() =
