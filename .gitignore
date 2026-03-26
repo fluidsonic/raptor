@@ -6,7 +6,7 @@
 !/.idea/runConfigurations/
 !/.idea/runConfigurations/**
 !/.idea/gradle.xml
-!/.idea/saveactions_settings.xml
+!/.idea/misc.xml
 .DS_Store
 .gradle
 .kotlin
