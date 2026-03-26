@@ -6,6 +6,10 @@
 - Renamed `key-value-store` modules to `store`, `store-memory`, and `store-mongo`.
 - Changed package names from `io.fluidsonic.raptor.keyvaluestore` to `io.fluidsonic.raptor.store`.
 
+### Removed
+
+- `quickstart` module
+
 ## [0.32.0] - 2026-03-10
 
 ### Added

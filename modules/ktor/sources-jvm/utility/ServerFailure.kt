@@ -1,7 +1,6 @@
 package io.fluidsonic.raptor.ktor
 
 
-// TODO better move to quickstart & make usage in this module configurable
 @Suppress("MemberVisibilityCanBePrivate") // TODO Add tests.
 public open class ServerFailure(
 	public val code: String,
