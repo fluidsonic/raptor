@@ -11,7 +11,6 @@ public interface RaptorKeyValueStoreFactory {
 		valueClass: KClass<Value>,
 	): RaptorKeyValueStore<Key, Value>
 
-
 	public companion object
 }
 

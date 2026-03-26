@@ -13,6 +13,8 @@ public interface RaptorKeyValueStore<Key : Any, Value : Any> {
 	public suspend fun remove(key: Key): Boolean
 	public suspend fun set(key: Key, value: Value)
 	public suspend fun setIfAbsent(key: Key, value: Value): Boolean
+
+	public companion object
 }
 
 
