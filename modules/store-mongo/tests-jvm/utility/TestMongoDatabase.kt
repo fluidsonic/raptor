@@ -6,7 +6,6 @@ import io.fluidsonic.mongo.*
 import org.bson.*
 import org.bson.codecs.configuration.*
 import org.bson.conversions.*
-import java.util.concurrent.*
 import kotlin.reflect.*
 
 
@@ -18,7 +17,7 @@ internal class TestMongoDatabase(
 	override val readConcern: ReadConcern = ReadConcern.DEFAULT,
 ) : MongoDatabase {
 
-	private val collections = ConcurrentHashMap<String, MutableMap<BsonValue, BsonDocument>>()
+	private val collections = hashMapOf<String, MutableMap<BsonValue, BsonDocument>>()
 
 	override fun withCodecRegistry(codecRegistry: CodecRegistry): MongoDatabase =
 		TestMongoDatabase(
@@ -67,7 +66,7 @@ internal class TestMongoDatabase(
 			readPreference = readPreference,
 			writeConcern = writeConcern,
 			readConcern = readConcern,
-			data = collections.getOrPut(name) { ConcurrentHashMap() },
+			data = collections.getOrPut(name) { linkedMapOf() },
 		)
 
 

@@ -5,13 +5,15 @@
 ### Added
 - Comprehensive tests for `store`, `store-memory`, and `store-mongo` modules covering all code paths
 - In-memory mock MongoDB infrastructure (`TestMongoCollection`, `TestMongoDatabase`, `TestFindFlow`) for testing store-mongo without a database
+- Log store abstraction (`RaptorLogStore`, `RaptorLogStoreFactory`) for append-only storage
+- In-memory log store implementation with `RaptorLogStoreFactory.memory()`
+- MongoDB log store implementation with `RaptorLogStoreFactory.mongo()`
 
 ### Changed
 - Renamed `key-value-store` modules to `store`, `store-memory`, and `store-mongo`.
 - Changed package names from `io.fluidsonic.raptor.keyvaluestore` to `io.fluidsonic.raptor.store`.
 
 ### Removed
-
 - `quickstart` module
 
 ## [0.32.0] - 2026-03-10

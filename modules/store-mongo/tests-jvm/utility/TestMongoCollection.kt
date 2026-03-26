@@ -12,7 +12,6 @@ import org.bson.*
 import org.bson.codecs.*
 import org.bson.codecs.configuration.*
 import org.bson.conversions.*
-import java.util.concurrent.*
 import kotlin.reflect.*
 
 
@@ -265,10 +264,23 @@ internal class TestMongoCollection<TDocument : Any>(
 	override fun mapReduce(clientSession: ClientSession, mapFunction: String, reduceFunction: String): MapReduceFlow<TDocument> = error("not implemented")
 	override fun <TResult : Any> mapReduce(clientSession: ClientSession, mapFunction: String, reduceFunction: String, resultClass: KClass<out TResult>): MapReduceFlow<TResult> = error("not implemented")
 
-	override suspend fun insertOne(document: TDocument): InsertOneResult = error("not implemented")
-	override suspend fun insertOne(document: TDocument, options: InsertOneOptions): InsertOneResult = error("not implemented")
-	override suspend fun insertOne(clientSession: ClientSession, document: TDocument): InsertOneResult = error("not implemented")
-	override suspend fun insertOne(clientSession: ClientSession, document: TDocument, options: InsertOneOptions): InsertOneResult = error("not implemented")
+	override suspend fun insertOne(document: TDocument): InsertOneResult =
+		insertOne(document, InsertOneOptions())
+
+	override suspend fun insertOne(document: TDocument, options: InsertOneOptions): InsertOneResult {
+		val codec = codecRegistry.get(documentClass.java) as Codec<TDocument>
+		val bsonDoc = encodeToBson(document, codec)
+		val id = bsonDoc["_id"] ?: BsonObjectId()
+		if (!bsonDoc.containsKey("_id")) bsonDoc.append("_id", id)
+		data[id] = bsonDoc
+		return InsertOneResult.acknowledged(id)
+	}
+
+	override suspend fun insertOne(clientSession: ClientSession, document: TDocument): InsertOneResult =
+		insertOne(document)
+
+	override suspend fun insertOne(clientSession: ClientSession, document: TDocument, options: InsertOneOptions): InsertOneResult =
+		insertOne(document, options)
 	override suspend fun insertMany(documents: List<TDocument>): InsertManyResult = error("not implemented")
 	override suspend fun insertMany(documents: List<TDocument>, options: InsertManyOptions): InsertManyResult = error("not implemented")
 	override suspend fun insertMany(clientSession: ClientSession, documents: List<TDocument>): InsertManyResult = error("not implemented")
