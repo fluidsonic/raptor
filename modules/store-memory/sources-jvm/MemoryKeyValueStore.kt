@@ -1,6 +1,6 @@
-package io.fluidsonic.raptor.keyvaluestore.memory
+package io.fluidsonic.raptor.store.memory
 
-import io.fluidsonic.raptor.keyvaluestore.*
+import io.fluidsonic.raptor.store.*
 import java.util.concurrent.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.flow.Flow

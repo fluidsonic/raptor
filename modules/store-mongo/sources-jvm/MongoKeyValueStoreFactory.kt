@@ -1,7 +1,7 @@
-package io.fluidsonic.raptor.keyvaluestore.mongo
+package io.fluidsonic.raptor.store.mongo
 
 import io.fluidsonic.mongo.*
-import io.fluidsonic.raptor.keyvaluestore.*
+import io.fluidsonic.raptor.store.*
 import kotlin.reflect.*
 
 

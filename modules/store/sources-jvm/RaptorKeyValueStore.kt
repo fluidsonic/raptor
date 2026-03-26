@@ -1,4 +1,4 @@
-package io.fluidsonic.raptor.keyvaluestore
+package io.fluidsonic.raptor.store
 
 import kotlinx.coroutines.flow.*
 

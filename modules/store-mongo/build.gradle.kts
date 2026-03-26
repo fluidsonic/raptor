@@ -4,7 +4,7 @@ fluidLibraryModule(description = "TODO") {
 	targets {
 		jvm {
 			dependencies {
-				api(project(":raptor-key-value-store"))
+				api(project(":raptor-store"))
 
 				implementation(project(":raptor-mongodb"))
 			}

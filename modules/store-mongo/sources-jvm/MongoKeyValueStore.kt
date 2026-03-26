@@ -1,4 +1,4 @@
-package io.fluidsonic.raptor.keyvaluestore.mongo
+package io.fluidsonic.raptor.store.mongo
 
 import com.mongodb.client.model.*
 import com.mongodb.client.model.Filters.*
@@ -6,8 +6,8 @@ import com.mongodb.client.model.Updates.*
 import io.fluidsonic.mongo.*
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.bson.*
-import io.fluidsonic.raptor.keyvaluestore.*
-import io.fluidsonic.raptor.keyvaluestore.RaptorKeyValueStore.*
+import io.fluidsonic.raptor.store.*
+import io.fluidsonic.raptor.store.RaptorKeyValueStore.*
 import io.fluidsonic.raptor.mongo.*
 import kotlin.reflect.*
 import kotlinx.coroutines.flow.*
