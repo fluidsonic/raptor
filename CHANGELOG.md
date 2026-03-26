@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+- Comprehensive tests for `store`, `store-memory`, and `store-mongo` modules covering all code paths
+- In-memory mock MongoDB infrastructure (`TestMongoCollection`, `TestMongoDatabase`, `TestFindFlow`) for testing store-mongo without a database
+
 ### Changed
 - Renamed `key-value-store` modules to `store`, `store-memory`, and `store-mongo`.
 - Changed package names from `io.fluidsonic.raptor.keyvaluestore` to `io.fluidsonic.raptor.store`.
