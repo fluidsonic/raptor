@@ -111,7 +111,7 @@ internal class RaptorKtorServerInternal(
 
 
 	private fun stopServerBlocking() {
-		checkNotNull(embeddedServer).stop() // TODO
+		checkNotNull(embeddedServer).stop(gracePeriodMillis = 1_000) // TODO Why do we need a grace period?
 
 		this.embeddedServer = null
 	}
