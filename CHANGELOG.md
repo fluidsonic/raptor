@@ -16,6 +16,7 @@
 
 ### Removed
 - `quickstart` module
+- Broken `MongoDBTests.testDefaultCodecs` test (hardcoded codec string no longer matches driver)
 
 ## [0.32.0] - 2026-03-10
 
