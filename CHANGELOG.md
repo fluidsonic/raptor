@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## [0.34.0] - 2026-03-27
 
 ### Added
 - KDoc for all public API in `store`, `store-memory`, and `store-mongo` modules
