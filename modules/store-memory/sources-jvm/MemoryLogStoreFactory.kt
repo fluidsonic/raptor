@@ -11,5 +11,6 @@ private object MemoryLogStoreFactory : RaptorLogStoreFactory {
 }
 
 
+/** Creates a [RaptorLogStoreFactory] that stores entries in memory. Data is not persisted and will be lost when the process exits. */
 public fun RaptorLogStoreFactory.Companion.memory(): RaptorLogStoreFactory =
 	MemoryLogStoreFactory

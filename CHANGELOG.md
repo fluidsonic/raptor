@@ -3,6 +3,7 @@
 ## [Unreleased]
 
 ### Added
+- KDoc for all public API in `store`, `store-memory`, and `store-mongo` modules
 - Comprehensive tests for `store`, `store-memory`, and `store-mongo` modules covering all code paths
 - In-memory mock MongoDB infrastructure (`TestMongoCollection`, `TestMongoDatabase`, `TestFindFlow`) for testing store-mongo without a database
 - Log store abstraction (`RaptorLogStore`, `RaptorLogStoreFactory`) for append-only storage

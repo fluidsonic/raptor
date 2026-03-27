@@ -16,5 +16,8 @@ private class MongoLogStoreFactory(
 }
 
 
+/**
+ * Creates a [RaptorLogStoreFactory] backed by MongoDB, using collections in the given [database].
+ */
 public fun RaptorLogStoreFactory.Companion.mongo(database: MongoDatabase): RaptorLogStoreFactory =
 	MongoLogStoreFactory(database = database)

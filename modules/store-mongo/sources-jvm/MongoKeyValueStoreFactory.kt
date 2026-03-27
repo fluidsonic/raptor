@@ -18,5 +18,8 @@ private class MongoKeyValueStoreFactory(
 }
 
 
+/**
+ * Creates a [RaptorKeyValueStoreFactory] backed by MongoDB, using collections in the given [database].
+ */
 public fun RaptorKeyValueStoreFactory.Companion.mongo(database: MongoDatabase): RaptorKeyValueStoreFactory =
 	MongoKeyValueStoreFactory(database = database)

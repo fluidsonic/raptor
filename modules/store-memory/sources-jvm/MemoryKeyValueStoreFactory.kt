@@ -11,5 +11,6 @@ private object MemoryKeyValueStoreFactory : RaptorKeyValueStoreFactory {
 }
 
 
+/** Creates a [RaptorKeyValueStoreFactory] that stores entries in memory. Data is not persisted and will be lost when the process exits. */
 public fun RaptorKeyValueStoreFactory.Companion.memory(): RaptorKeyValueStoreFactory =
 	MemoryKeyValueStoreFactory
