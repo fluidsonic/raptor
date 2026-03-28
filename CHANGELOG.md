@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.35.0] - 2026-03-28
+
+### Changed
+- Updated Gradle to 9.4.1
+- Updated Kotlin to 2.3.20
+- Updated `io.fluidsonic.gradle` plugin to 3.0.0
+- Updated fluid-country to 0.14.0
+- Updated fluid-currency to 0.14.0
+- Updated fluid-graphql to 0.16.0
+- Updated fluid-i18n to 0.14.0
+- Updated fluid-json to 2.0.0
+- Updated fluid-locale to 0.14.0
+- Updated fluid-mongo to 1.9.0
+- Updated fluid-stdlib to 0.15.0
+- Updated fluid-time to 0.19.0
+- Updated kotlinx-atomicfu to 0.32.1
+- Updated kotlinx-serialization to 1.10.0
+- Updated Ktor to 3.4.2
+- Updated Logback to 1.5.32
+- Updated MongoDB driver to 5.6.4
+### Removed
+- `jobs-quartz-mongo` module
+
 ## [0.34.0] - 2026-03-27
 
 ### Added

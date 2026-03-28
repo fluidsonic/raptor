@@ -34,7 +34,6 @@
             <option value="$PROJECT_DIR$/modules/graph" />
             <option value="$PROJECT_DIR$/modules/graphql" />
             <option value="$PROJECT_DIR$/modules/jobs" />
-            <option value="$PROJECT_DIR$/modules/jobs-quartz-mongo" />
             <option value="$PROJECT_DIR$/modules/ktor" />
             <option value="$PROJECT_DIR$/modules/ktor-graph" />
             <option value="$PROJECT_DIR$/modules/ktor-test" />

@@ -4,7 +4,7 @@
 package io.fluidsonic.raptor
 
 import io.fluidsonic.time.*
-import kotlinx.datetime.*
+import kotlin.time.*
 
 
 public fun Instant.Companion.graphDefinitions(): RaptorGraphDefinition = graphScalarDefinition("Timestamp") {

@@ -10,7 +10,7 @@ fluidLibraryModule(description = "TODO") {
 			}
 
 			testDependencies {
-				api(kotlinx("coroutines-test", Versions.kotlinx_coroutines))
+				implementation(kotlinx("coroutines-test", Versions.kotlinx_coroutines))
 			}
 		}
 	}

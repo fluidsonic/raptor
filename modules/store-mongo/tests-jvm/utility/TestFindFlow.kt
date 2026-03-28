@@ -3,13 +3,13 @@ package tests.utility
 import com.mongodb.*
 import com.mongodb.client.model.*
 import io.fluidsonic.mongo.*
+import java.util.concurrent.*
+import kotlin.reflect.*
 import kotlinx.coroutines.flow.*
 import org.bson.*
 import org.bson.codecs.*
 import org.bson.codecs.configuration.*
 import org.bson.conversions.*
-import java.util.concurrent.*
-import kotlin.reflect.*
 
 
 internal class TestFindFlow<TResult : Any>(
@@ -42,7 +42,8 @@ internal class TestFindFlow<TResult : Any>(
 			if (value is BsonInt32) {
 				if (value.value == 1) includeFields.add(key)
 				else if (value.value == 0 && key == "_id") excludeId = true
-			} else if (value is BsonDocument) {
+			}
+			else if (value is BsonDocument) {
 				// Nested projection document (from Projections.fields combining multiple projections)
 				for (nestedKey in value.keys) {
 					val nestedValue = value[nestedKey]
@@ -115,7 +116,6 @@ internal class TestFindFlow<TResult : Any>(
 	override fun maxAwaitTime(maxAwaitTime: Long, timeUnit: TimeUnit): FindFlow<TResult> = this
 	override fun sort(sort: Bson?): FindFlow<TResult> = this
 	override fun noCursorTimeout(noCursorTimeout: Boolean): FindFlow<TResult> = this
-	override fun oplogReplay(oplogReplay: Boolean): FindFlow<TResult> = this
 	override fun partial(partial: Boolean): FindFlow<TResult> = this
 	override fun cursorType(cursorType: CursorType): FindFlow<TResult> = this
 	override fun collation(collation: Collation?): FindFlow<TResult> = this

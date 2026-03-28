@@ -2,10 +2,10 @@ import io.fluidsonic.gradle.*
 import org.jetbrains.kotlin.gradle.dsl.*
 
 plugins {
-	id("io.fluidsonic.gradle") version "2.0.2"
+	id("io.fluidsonic.gradle") version "3.0.0"
 }
 
-fluidLibrary(name = "raptor", version = "0.34.0", prefixName = false) {
+fluidLibrary(name = "raptor", version = "0.35.0", prefixName = false) {
 	allModules {
 		language {
 			withExperimentalApi("io.fluidsonic.raptor.RaptorInternalApi")
@@ -23,5 +23,12 @@ subprojects {
 				freeCompilerArgs.add("-Xcontext-sensitive-resolution")
 			}
 		}
+	}
+}
+
+allprojects {
+	repositories {
+		mavenCentral()
+		mavenLocal()
 	}
 }
