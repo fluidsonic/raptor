@@ -19,6 +19,7 @@ internal class DefaultAggregateManager(
 	private val definitions: RaptorAggregateDefinitions,
 	private val eventEmitter: RaptorEventEmitter,
 	private val eventSource: RaptorEventSource,
+	private val hooks: List<RaptorDomainStreamHook>,
 	private val onCommittedActions: List<suspend RaptorScope.() -> Unit>,
 	private val projectionLoaderManager: DefaultAggregateProjectionLoaderManager, // TODO Hack.
 	private val store: RaptorAggregateStore,
@@ -123,8 +124,15 @@ internal class DefaultAggregateManager(
 		// FIXME Emit in parallel.
 		eventEmitter.emit(event)
 
-		if (projectionEvent != null)
+		for (hook in hooks)
+			hook.onAggregateEvent(event)
+
+		if (projectionEvent != null) {
 			eventEmitter.emit(projectionEvent)
+
+			for (hook in hooks)
+				hook.onAggregateProjectionEvent(projectionEvent)
+		}
 	}
 
 
@@ -200,6 +208,9 @@ internal class DefaultAggregateManager(
 
 			loaded.complete(this)
 			eventEmitter.emit(RaptorAggregateReplayCompletedEvent)
+
+			for (hook in hooks)
+				hook.onReplayCompleted()
 		}
 	}
 

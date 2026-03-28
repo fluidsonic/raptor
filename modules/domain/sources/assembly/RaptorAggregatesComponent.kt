@@ -12,6 +12,7 @@ public class RaptorAggregatesComponent internal constructor(
 ) : RaptorComponent.Base<RaptorAggregatesComponent>(RaptorDomainPlugin),
 	RaptorComponentSet<RaptorAggregateComponent<*, *, *, *>> { // FIXME ok? conflicting Set/Query esp. as we remove Set
 
+	private val hooks: MutableList<(RaptorDI) -> RaptorDomainStreamHook> = mutableListOf()
 	private var individualStoreFactory: RaptorIndividualAggregateStoreFactory? = null
 	private val onCommittedActions: MutableList<suspend RaptorScope.() -> Unit> = mutableListOf()
 	private var store: RaptorAggregateStore? = null
@@ -24,6 +25,7 @@ public class RaptorAggregatesComponent internal constructor(
 
 	internal fun completeIn(scope: RaptorPluginCompletionScope): RaptorAggregateDefinitions {
 		val definitions = RaptorAggregateDefinitions(componentRegistry.many(Keys.aggregateComponent()).mapTo(hashSetOf()) { it.complete() })
+		val hooks = hooks.toList()
 		val individualStoreFactory = individualStoreFactory
 		val onCommittedActions = onCommittedActions.toList()
 		val store = store
@@ -39,6 +41,7 @@ public class RaptorAggregatesComponent internal constructor(
 						definitions = definitions,
 						eventEmitter = get(),
 						eventSource = get(),
+						hooks = hooks.map { it(this) },
 						onCommittedActions = onCommittedActions,
 						projectionLoaderManager = get(),
 						store = get(),
@@ -110,6 +113,12 @@ public class RaptorAggregatesComponent internal constructor(
 		}
 
 		return definitions
+	}
+
+
+	@RaptorDsl
+	public fun hook(factory: (RaptorDI) -> RaptorDomainStreamHook) {
+		hooks += factory
 	}
 
 
@@ -380,6 +389,14 @@ public inline fun <
 		idClass = Id::class,
 		individual = individual,
 	)
+}
+
+
+@RaptorDsl
+public fun RaptorAssemblyQuery<RaptorAggregatesComponent>.hook(
+	factory: (RaptorDI) -> RaptorDomainStreamHook,
+) {
+	each { hook(factory) }
 }
 
 
