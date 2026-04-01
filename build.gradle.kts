@@ -25,10 +25,3 @@ subprojects {
 		}
 	}
 }
-
-allprojects {
-	repositories {
-		mavenCentral()
-		mavenLocal()
-	}
-}
