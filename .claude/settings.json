@@ -11,6 +11,7 @@
 		"autoAllowBashIfSandboxed": true,
 		"enabled": true,
 		"excludedCommands": [
+			"coderabbit:*",
 			"gh:*",
 			"git:*",
 			"./gradlew:*"
