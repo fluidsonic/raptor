@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.36.0] - 2026-06-09
+
+### Added
+- Atomic `RaptorKeyValueStore.update` for safe read-modify-write of an entry via an `UpdateDecision` (`Update`/`Keep`/`Remove`) callback. The in-memory store applies the change atomically; backends that use optimistic concurrency retry on conflict and throw the new `RaptorOptimisticUpdateException` once attempts are exhausted
+
 ## [0.35.0] - 2026-03-28
 
 ### Changed

@@ -37,6 +37,15 @@ internal class TestMongoCollection<TDocument : Any>(
 		return filterDoc["_id"]
 	}
 
+	// Matches a stored document against a filter by requiring every field in the filter to be
+	// equal in the document. A simple `eq("_id", …)` filter therefore matches by id, while a full
+	// stored document used as a filter (the optimistic compare-and-swap path) matches only when
+	// the document is byte-for-byte unchanged.
+	private fun matches(document: BsonDocument, filter: Bson): Boolean {
+		val filterDoc = filter.toBsonDocument(BsonDocument::class.java, codecRegistry)
+		return filterDoc.all { (field, value) -> document[field] == value }
+	}
+
 
 	// -- withX methods --
 
@@ -152,9 +161,12 @@ internal class TestMongoCollection<TDocument : Any>(
 	// -- deleteOne --
 
 	override suspend fun deleteOne(filter: Bson): DeleteResult {
-		val id = extractIdFromFilter(filter) ?: return DeleteResult.acknowledged(0)
-		val removed = data.remove(id)
-		return DeleteResult.acknowledged(if (removed != null) 1L else 0L)
+		val matchKey = data.entries.firstOrNull { matches(it.value, filter) }?.key
+			?: return DeleteResult.acknowledged(0)
+
+		data.remove(matchKey)
+
+		return DeleteResult.acknowledged(1L)
 	}
 
 	override suspend fun deleteOne(filter: Bson, options: DeleteOptions): DeleteResult = deleteOne(filter)
@@ -168,21 +180,24 @@ internal class TestMongoCollection<TDocument : Any>(
 		replaceOne(filter, replacement, ReplaceOptions())
 
 	override suspend fun replaceOne(filter: Bson, replacement: TDocument, options: ReplaceOptions): UpdateResult {
-		val id = extractIdFromFilter(filter) ?: return UpdateResult.acknowledged(0, 0, null)
-
 		val codec = codecRegistry.get(documentClass.java) as Codec<TDocument>
 		val bsonDoc = encodeToBson(replacement, codec)
 
-		val existed = data.containsKey(id)
+		val matchKey = data.entries.firstOrNull { matches(it.value, filter) }?.key
+		if (matchKey != null) {
+			data[matchKey] = bsonDoc
+
+			return UpdateResult.acknowledged(1, 1, null)
+		}
+
+		if (!options.isUpsert)
+			return UpdateResult.acknowledged(0, 0, null)
+
+		val id = extractIdFromFilter(filter) ?: bsonDoc["_id"] ?: BsonObjectId()
+		if (!bsonDoc.containsKey("_id")) bsonDoc.append("_id", id)
 		data[id] = bsonDoc
 
-		return if (existed) {
-			UpdateResult.acknowledged(1, 1, null)
-		} else if (options.isUpsert) {
-			UpdateResult.acknowledged(0, 0, id)
-		} else {
-			UpdateResult.acknowledged(0, 0, null)
-		}
+		return UpdateResult.acknowledged(0, 0, id)
 	}
 
 	override suspend fun replaceOne(clientSession: ClientSession, filter: Bson, replacement: TDocument): UpdateResult =
@@ -272,7 +287,14 @@ internal class TestMongoCollection<TDocument : Any>(
 		val bsonDoc = encodeToBson(document, codec)
 		val id = bsonDoc["_id"] ?: BsonObjectId()
 		if (!bsonDoc.containsKey("_id")) bsonDoc.append("_id", id)
+
+		// Mongo rejects a second insert with the same _id; the duplicate-key error drives the
+		// optimistic-update retry loop when a concurrent insert wins the race.
+		if (data.containsKey(id))
+			throw MongoWriteException(WriteError(11000, "E11000 duplicate key error: _id $id", BsonDocument()), ServerAddress())
+
 		data[id] = bsonDoc
+
 		return InsertOneResult.acknowledged(id)
 	}
 

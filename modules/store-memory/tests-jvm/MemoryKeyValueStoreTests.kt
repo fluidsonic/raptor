@@ -1,6 +1,7 @@
 package tests
 
 import io.fluidsonic.raptor.store.*
+import io.fluidsonic.raptor.store.RaptorKeyValueStore.*
 import io.fluidsonic.raptor.store.memory.*
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.test.*
@@ -125,5 +126,73 @@ class MemoryKeyValueStoreTests {
 	fun testValues_emptyStore_returnsEmptyFlow() = runTest {
 		val store = createStore()
 		assertEquals(actual = store.values().toList(), expected = emptyList())
+	}
+
+	@Test
+	fun testUpdate_update_replacesExistingValue() = runTest {
+		val store = createStore()
+		store.set("a", "1")
+		val result = store.update("a") { UpdateDecision.Update("2") }
+		assertEquals(actual = result, expected = "2")
+		assertEquals(actual = store.get("a"), expected = "2")
+	}
+
+	@Test
+	fun testUpdate_update_insertsWhenAbsent() = runTest {
+		val store = createStore()
+		val result = store.update("a") { UpdateDecision.Update("1") }
+		assertEquals(actual = result, expected = "1")
+		assertEquals(actual = store.get("a"), expected = "1")
+	}
+
+	@Test
+	fun testUpdate_receivesCurrentValue() = runTest {
+		val store = createStore()
+		store.set("a", "1")
+		store.update("a") { current ->
+			assertEquals(actual = current, expected = "1")
+
+			UpdateDecision.Keep
+		}
+	}
+
+	@Test
+	fun testUpdate_keep_leavesValueUnchangedAndReturnsIt() = runTest {
+		val store = createStore()
+		store.set("a", "1")
+		val result = store.update("a") { UpdateDecision.Keep }
+		assertEquals(actual = result, expected = "1")
+		assertEquals(actual = store.get("a"), expected = "1")
+	}
+
+	@Test
+	fun testUpdate_keep_absentKey_returnsNull() = runTest {
+		val store = createStore()
+		assertNull(store.update("a") { UpdateDecision.Keep })
+		assertNull(store.get("a"))
+	}
+
+	@Test
+	fun testUpdate_remove_deletesEntry() = runTest {
+		val store = createStore()
+		store.set("a", "1")
+		assertNull(store.update("a") { UpdateDecision.Remove })
+		assertNull(store.get("a"))
+	}
+
+	@Test
+	fun testUpdate_invokesDecideExactlyOnce() = runTest {
+		val store = createStore()
+		store.set("a", "1")
+
+		var invocations = 0
+		store.update("a") {
+			invocations += 1
+
+			UpdateDecision.Update("2")
+		}
+
+		// The in-memory store applies the change atomically, so decide is never retried.
+		assertEquals(actual = invocations, expected = 1)
 	}
 }
