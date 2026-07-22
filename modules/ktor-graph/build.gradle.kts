@@ -12,6 +12,7 @@ fluidLibraryModule(description = "TODO") {
 			}
 
 			testDependencies {
+				implementation(project(":raptor-ktor-test"))
 				implementation("ch.qos.logback:logback-classic:${Versions.logback}")
 			}
 		}

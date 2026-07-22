@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.37.0] - 2026-07-22
+
+### Added
+- GraphQL queries can now be sent over HTTP `GET` on the Ktor graph route, following the GraphQL-over-HTTP specification: `query`, `operationName`, and `variables` (as a JSON string) are read from the query string. Mutations and subscriptions over `GET` are rejected with `405 Method Not Allowed`
+
+### Fixed
+- The Ktor GraphQL route no longer responds with HTTP `500` to requests with an empty or malformed body (such as a `GET`, or invalid/empty JSON). Transport-level problems — invalid JSON, a missing or non-string `query`, a non-string `operationName`, or non-object `variables` — now return HTTP `400` with a GraphQL error body (`{"errors":[{"message":…}]}`) that includes the underlying JSON parse error, while GraphQL parse/validation/execution errors continue to return HTTP `200` with an `errors` array
+
 ## [0.36.0] - 2026-06-09
 
 ### Added
