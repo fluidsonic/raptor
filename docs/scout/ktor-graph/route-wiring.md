@@ -1,7 +1,7 @@
 # GraphQL HTTP route wiring (ktor-graph)
 
-The current HTTP surface for GraphQL. `modules/ktor-graph` is the live module; the
-deprecated `graphql` module has a parallel copy (see `graphql/two-implementations.md`).
+The HTTP surface for GraphQL: `modules/ktor-graph` wires `modules/graph` into Ktor routes
+(see `../graph/schema-generation.md` for the schema side).
 
 - **`graph()` and `graphSchema()` are mutually exclusive per Ktor route.** Both DSL
   functions guard installation using the *same* extension key `Keys.graphInstalledExtension`
@@ -41,4 +41,3 @@ For a non-null `tag` (and a non-empty graph set), `taggedGraph(tag)` resolves vi
 fall through the same `?:` and report the misleading "There are multiple graphs but exactly
 one was expected with tag: $tag". Anchor:
 `modules/graph/sources-jvm/api/RaptorGraphPluginConfiguration.kt` (`taggedGraph`).
-</content>

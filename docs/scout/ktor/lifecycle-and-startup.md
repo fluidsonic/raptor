@@ -31,4 +31,3 @@ Startup/shutdown wiring for the Ktor server that isn't visible from the public A
 `if (plugins.add(plugin)) { ...onConfigurationStarted() }`, but `plugins` is a `MutableList`
 whose `add` always returns true. The `if (collection.add)` idiom reads like Set-based
 idempotency but is a no-op here — installing the same plugin twice runs its callbacks twice.
-</content>

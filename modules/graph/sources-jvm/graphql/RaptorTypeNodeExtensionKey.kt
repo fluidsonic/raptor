@@ -30,13 +30,3 @@ internal var GNodeExtensionSet.Builder<GFieldDefinition>.raptorType: GraphType?
 	set(value) {
 		set(RaptorTypeNodeExtensionKey, value)
 	}
-
-internal val GNamedType.raptorType: GraphType?
-	get() = extensions[RaptorTypeNodeExtensionKey]
-
-
-internal var GNodeExtensionSet.Builder<GNamedType>.raptorType: GraphType?
-	get() = get(RaptorTypeNodeExtensionKey)
-	set(value) {
-		set(RaptorTypeNodeExtensionKey, value)
-	}

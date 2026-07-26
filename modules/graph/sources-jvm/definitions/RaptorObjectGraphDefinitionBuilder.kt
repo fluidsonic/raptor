@@ -167,7 +167,7 @@ public class RaptorObjectGraphDefinitionBuilder<Type : Any> internal constructor
 		name: String,
 		type: KType,
 		stackTrace: List<StackTraceElement>,
-		implicitResolver: (suspend RaptorGraphOutputScope.(parent: Any) -> Any?)?,
+		implicitResolver: (suspend RaptorGraphResolverScope.(parent: Any) -> Any?)?,
 		configure: RaptorGraphFieldBuilder.WithResolver<FieldType, Type>.() -> Unit,
 	) {
 		if (fieldDefinitions.any { it.name === name })
@@ -177,7 +177,6 @@ public class RaptorObjectGraphDefinitionBuilder<Type : Any> internal constructor
 			kotlinType = KotlinType.of(
 				type = type,
 				containingType = kotlinType,
-				allowMaybe = false,
 				allowNull = true,
 				allowedVariance = KVariance.OUT,
 				requireSpecialization = true
@@ -195,7 +194,6 @@ public class RaptorObjectGraphDefinitionBuilder<Type : Any> internal constructor
 				kotlinType = KotlinType.of(
 					type = type.withNullability(false),
 					containingType = null,
-					allowMaybe = false,
 					allowNull = false,
 					allowedVariance = KVariance.OUT,
 					requireSpecialization = true,

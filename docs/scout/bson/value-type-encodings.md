@@ -35,4 +35,3 @@ extended) uses a free function `DayOfWeek_bsonDefinition()` with `@Suppress("Fun
 
 The BSON plugin works without DI: `RaptorBsonPlugin` registers its component
 unconditionally but only wires DI providers inside `optional(RaptorDIPlugin) { }`.
-</content>

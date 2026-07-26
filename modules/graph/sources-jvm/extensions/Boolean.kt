@@ -1,7 +1,7 @@
 package io.fluidsonic.raptor.graph
 
+import kotlin.reflect.*
 
-public fun Boolean.Companion.graphDefinition(): RaptorGraphDefinition = graphScalarDefinition<Boolean> {
-	parseBoolean(::identity)
-	serialize(::identity)
-}
+
+public fun Boolean.Companion.graphDefinition(): RaptorGraphDefinition =
+	graphUncoercedScalarDefinition(type = typeOf<Boolean>())

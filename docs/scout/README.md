@@ -19,5 +19,3 @@ note ever disagrees with the code, **trust the code** — it may have gone stale
 **Turning Scout off:** create an empty `.scout-disabled` file at the repository root.
 While it exists, Scout stays dormant; delete it to re-enable. (Removing `docs/scout/`
 entirely also disables Scout.)
-</content>
-</invoke>

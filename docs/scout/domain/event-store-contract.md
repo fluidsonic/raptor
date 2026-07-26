@@ -37,4 +37,3 @@ hazards documented only in code comments.
 
 Related: `domain/streams.md`, `domain/command-execution.md`,
 `domain/individual-aggregates.md`.
-</content>

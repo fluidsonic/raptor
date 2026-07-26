@@ -20,4 +20,3 @@ confirm true multi-tag combinators are unbuilt. Anchors:
 wrapped as a single tag object, so `tagsToMatch` becomes the array instance rather than the
 individual tags and the configuration never matches. The sibling
 `RaptorComponentSet<Component>.tagged` overload correctly spreads with `*tags`.
-</content>

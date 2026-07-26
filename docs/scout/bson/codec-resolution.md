@@ -32,4 +32,3 @@ with a documented crash consequence.
 Anchors: `RaptorBsonComponent.kt`, `DefaultBsonRootCodecRegistry.kt`,
 `DefaultScopedBsonCodec.kt`, `definitions/DefaultRaptorBsonDefinition.kt`,
 `definitions/BsonCodecDefinition.kt`.
-</content>

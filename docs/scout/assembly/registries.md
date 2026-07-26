@@ -30,4 +30,3 @@ Traps inside the core registries used during assembly.
   this lazy context during completion — dereferencing it too early fails deliberately.
 
 Related: `assembly/raptor-key-identity.md`, `assembly/plugin-lifecycle.md`.
-</content>

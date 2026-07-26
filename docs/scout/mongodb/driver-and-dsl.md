@@ -35,4 +35,3 @@ version: io.fluidsonic.mongo 1.9.0 (as of 2026-07-22; declared as `Versions.flui
   both valid driver idioms.
 - **Update builder uses `Maybe<*>` for partial updates:** absent `Maybe` = leave field
   untouched, present null with `setOrUnsetIfNull` = `$unset`, present value = `$set`.
-</content>

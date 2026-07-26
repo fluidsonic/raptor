@@ -35,4 +35,3 @@ Internals of `DefaultTransaction` and its builder.
 `startAction`/`stopAction`. So you can register two `onStart` actions with no error (last
 wins), but registering an `onStart`/`onStop` *after* an `onFail` throws the wrong "Cannot
 define multiple start actions." error.
-</content>

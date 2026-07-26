@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.38.0] - 2026-07-26
+
+### Added
+- `RaptorGraphResolverScope`, the scope a field's or operation's `resolver { … }` now runs in — it carries the surrounding transaction, and with it dependency injection, exactly as the output scope did before
+
+### Changed
+- Updated fluid-graphql to 0.17.0
+- GraphQL parsing and serialization no longer have access to the surrounding transaction: `RaptorGraphInputScope` and `RaptorGraphOutputScope` no longer extend `RaptorTransactionScope`, making a scalar's `parse`/`serialize`, an alias' conversions, an input object's factory and an argument's `map`/`validate` transforms pure transformations of the value they are given. Field resolvers are unaffected — they now run in `RaptorGraphResolverScope`
+- Rejecting a value with `invalid(details)` now reaches the client as `The value is invalid: <details>` with extension `code: "invalid value"`, matching how invalid arguments were already reported
+
+### Removed
+- `Maybe` support in GraphQL, together with the `@optional` directive — arguments can no longer be declared as `Maybe<T>`
+- `GraphId`. It was registered as the `ID` scalar but was never usable: returning one from a field failed output coercion and aborted the request. Declare an ID alias instead, e.g. `definitions.newIdAlias<MyId> { parse { MyId(it) }; serialize(MyId::value) }`
+- The deprecated `graphql` module (`io.fluidsonic.raptor:raptor-graphql`), superseded by `raptor-graph`
+
+### Fixed
+- Generated schemas no longer declare the built-in scalars `Boolean`, `Float`, `ID`, `Int` and `String`. Raptor registered its own types under those names, which the GraphQL specification forbids — every served schema document contained `scalar Int` and friends, and introspection listed each of the five built-ins twice
+
 ## [0.37.0] - 2026-07-22
 
 ### Added

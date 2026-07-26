@@ -15,7 +15,6 @@ public class RaptorGraphArgumentDefinitionBuilder<Value> internal constructor(
 
 	private var default: GValue? = null
 	private var description: String? = null
-	private val isMaybe = kotlinType.classifier == Maybe::class
 	private var name: String? = null
 
 
@@ -32,7 +31,6 @@ public class RaptorGraphArgumentDefinitionBuilder<Value> internal constructor(
 
 	@RaptorDsl
 	private fun default(default: GValue) {
-		check(!isMaybe) { "An optional argument of type '$kotlinType' cannot have a default value." }
 		check(this.default === null) { "Cannot define multiple defaults." }
 
 		this.default = default
@@ -142,7 +140,6 @@ public class RaptorGraphArgumentDefinitionBuilder<Value> internal constructor(
 				kotlinType = KotlinType.of(
 					type = type,
 					containingType = parentKotlinType,
-					allowMaybe = true,
 					allowNull = true,
 					allowedVariance = KVariance.OUT,
 					requireSpecialization = true

@@ -34,4 +34,3 @@ helpers.
   and a recovered stacktrace when it is re-thrown across a coroutine boundary. It is opt-in per
   exception type — not a general requirement for every exception that crosses coroutine
   machinery.
-</content>

@@ -1,7 +1,6 @@
 package io.fluidsonic.raptor.graph
 
 import io.fluidsonic.raptor.*
-import io.fluidsonic.stdlib.*
 import kotlin.properties.*
 
 
@@ -16,20 +15,6 @@ public interface RaptorGraphArgumentDelegate<out Type> : PropertyDelegateProvide
 
 
 @RaptorDsl
-public fun <Type, TransformedType> RaptorGraphArgumentDelegate<Maybe<Type>>.mapValue(
-	transform: RaptorGraphInputScope.(value: Type) -> TransformedType,
-): RaptorGraphArgumentDelegate<Maybe<TransformedType>> =
-	map { maybe -> maybe.map { transform(it) } }
-
-
-@RaptorDsl
-public fun <Type : Any, TransformedType> RaptorGraphArgumentDelegate<Maybe<Type?>>.mapValueIfNotNull(
-	transform: RaptorGraphInputScope.(value: Type) -> TransformedType?,
-): RaptorGraphArgumentDelegate<Maybe<TransformedType?>> =
-	map { maybe -> maybe.mapIfNotNull { transform(it) } }
-
-
-@RaptorDsl
 public fun <Type> RaptorGraphArgumentDelegate<Type>.validate(
 	validate: RaptorGraphInputScope.(value: Type) -> Unit,
 ): RaptorGraphArgumentDelegate<Type> =
@@ -41,17 +26,3 @@ public fun <Type : Any, NullableType : Type?> RaptorGraphArgumentDelegate<Nullab
 	validate: RaptorGraphInputScope.(value: Type) -> Unit,
 ): RaptorGraphArgumentDelegate<NullableType> =
 	validate { if (it != null) validate(it) }
-
-
-@RaptorDsl
-public fun <Type> RaptorGraphArgumentDelegate<Maybe<Type>>.validateValue(
-	validate: RaptorGraphInputScope.(value: Type) -> Unit,
-): RaptorGraphArgumentDelegate<Maybe<Type>> =
-	validate { if (it.hasValue()) validate(it.get()) }
-
-
-@RaptorDsl
-public fun <Type : Any, NullableType : Type?> RaptorGraphArgumentDelegate<Maybe<NullableType>>.validateValueIfNotNull(
-	validate: RaptorGraphInputScope.(value: Type) -> Unit,
-): RaptorGraphArgumentDelegate<Maybe<NullableType>> =
-	validateValue { if (it != null) validate(it) }

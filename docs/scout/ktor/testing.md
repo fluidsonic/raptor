@@ -20,4 +20,3 @@ requests against such a server, see `http-integration-tests.md`.
 - **Build note:** the dependency on `ktor("server-test-host")` explicitly excludes
   `org.jetbrains.kotlin:kotlin-test-junit`. Easy to drop during a dependency bump and
   break test wiring.
-</content>

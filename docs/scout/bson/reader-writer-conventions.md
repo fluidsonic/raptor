@@ -29,4 +29,3 @@ Getting these wrong silently produces incompatible documents or runtime failures
 Generic element types reach a decoder only via `DefaultScopedBsonCodec` — see
 `bson/codec-resolution.md`. Collection decoders (`List.kt`, `Collection.kt`) read
 `arguments?.singleOrNull()?.type`, falling back to a runtime-BSON-type map when raw.
-</content>

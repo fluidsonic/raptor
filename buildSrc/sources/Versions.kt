@@ -4,7 +4,7 @@ object Versions {
 	const val dotenv = "6.5.1"
 	const val fluid_country = "0.14.0"
 	const val fluid_currency = "0.14.0"
-	const val fluid_graphql = "0.16.0"
+	const val fluid_graphql = "0.17.0"
 	const val fluid_i18n = "0.14.0"
 	const val fluid_json = "2.0.0"
 	const val fluid_locale = "0.14.0"

@@ -35,4 +35,3 @@ registration.
 Note the fold-implementation divergence for deletes: an aggregate's `handle(Deleted)` may
 retain state (e.g. flips a flag), while a projector's `apply(Deleted)` drops the projection
 to null. Do not assume aggregate and projector agree post-delete.
-</content>

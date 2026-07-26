@@ -61,7 +61,6 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 				kotlinType = KotlinType.of(
 					type = type,
 					containingType = null,
-					allowMaybe = false,
 					allowNull = false,
 					allowedVariance = KVariance.OUT, // TODO prb. wrong
 					requireSpecialization = true
@@ -101,7 +100,6 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 				kotlinType = KotlinType.of(
 					type = type,
 					containingType = null,
-					allowMaybe = false,
 					allowNull = false,
 					allowedVariance = KVariance.OUT, // TODO prb. wrong
 					requireSpecialization = false
@@ -141,7 +139,6 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 				kotlinType = KotlinType.of(
 					type = type,
 					containingType = null,
-					allowMaybe = false,
 					allowNull = false,
 					allowedVariance = KVariance.OUT, // TODO prb. wrong
 					requireSpecialization = false
@@ -180,7 +177,6 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 				kotlinType = KotlinType.of(
 					type = type,
 					containingType = null,
-					allowMaybe = false,
 					allowNull = false,
 					allowedVariance = KVariance.OUT, // TODO prb. wrong
 					requireSpecialization = false
@@ -219,7 +215,6 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 				kotlinType = KotlinType.of(
 					type = type,
 					containingType = null,
-					allowMaybe = false,
 					allowNull = false,
 					allowedVariance = KVariance.OUT, // TODO prb. wrong
 					requireSpecialization = false
@@ -258,7 +253,6 @@ public abstract class RaptorStructuredGraphTypeDefinitionBuilder<Value : Any> in
 				kotlinType = KotlinType.of(
 					type = type,
 					containingType = null,
-					allowMaybe = false,
 					allowNull = false,
 					allowedVariance = KVariance.OUT, // TODO prb. wrong
 					requireSpecialization = false

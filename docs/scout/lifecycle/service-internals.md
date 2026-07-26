@@ -36,4 +36,3 @@ Service DI keys compare by **object identity, not by name.** `ServiceDIKey`
 instance built in `RaptorServiceRegistration` (the `install` function) is threaded into both the
 DI provider and the `RaptorServiceController` lookup so they match; a freshly constructed
 `ServiceDIKey(sameName)` will *not* resolve an already-registered service.
-</content>

@@ -35,4 +35,3 @@ it picks — a frequent source of "my handler never fires" bugs.
 
 The stop/flush barrier (`DefaultAggregateStream`) uses a self-emitted `Ping`/`stopMessage`
 sentinel round-trip through the shared flow, hidden from consumers via `filterNot`.
-</content>

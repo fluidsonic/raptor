@@ -12,19 +12,19 @@ internal object FieldResolver : GFieldResolver<Any> {
 		val resolve = checkNotNull(field.resolve)
 		val argumentResolver = checkNotNull(field.argumentResolver)
 
-		val outputScope = object : RaptorGraphOutputScope, RaptorTransactionScope by context {}  // TODO improve
+		// Unlike coercion, a field resolver may use the transaction — and thus dependency injection.
+		val resolverScope = object : RaptorGraphResolverScope, RaptorTransactionScope by context {}
 
 		val value = argumentResolver.withArguments(
 			argumentValues = arguments,
 			argumentDefinitions = fieldDefinition.argumentDefinitions,
-			context = execution
-		) { resolve(outputScope, parent) }
+		) { resolve(resolverScope, parent) }
 			?: return null
 
 		val aliasType = fieldDefinition.raptorType as? AliasGraphType
 			?: return value
 
-		return outputScope.serializeAliasValue(value, serialize = aliasType.convertAliasToReferenced, typeRef = fieldDefinition.type)
+		return GraphOutputScope.serializeAliasValue(value, serialize = aliasType.convertAliasToReferenced, typeRef = fieldDefinition.type)
 	}
 
 

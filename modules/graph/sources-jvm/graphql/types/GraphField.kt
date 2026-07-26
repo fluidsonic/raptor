@@ -14,7 +14,7 @@ internal sealed class GraphField(
 		description: String?,
 		kotlinType: KotlinType,
 		name: String,
-		val resolve: suspend RaptorGraphOutputScope.(parent: Any) -> Any?,
+		val resolve: suspend RaptorGraphResolverScope.(parent: Any) -> Any?,
 	) : GraphField(
 		arguments = arguments,
 		description = description,

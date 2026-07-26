@@ -84,7 +84,7 @@ public class RaptorObjectExtensionGraphDefinitionBuilder<Type : Any> internal co
 		name: String,
 		type: KType,
 		stackTrace: List<StackTraceElement>,
-		implicitResolver: (suspend RaptorGraphOutputScope.(parent: Any) -> Any?)?,
+		implicitResolver: (suspend RaptorGraphResolverScope.(parent: Any) -> Any?)?,
 		configure: RaptorGraphFieldBuilder.WithResolver<FieldType, Type>.() -> Unit,
 	) {
 		if (fieldDefinitions.any { it.name === name })
@@ -94,7 +94,6 @@ public class RaptorObjectExtensionGraphDefinitionBuilder<Type : Any> internal co
 			kotlinType = KotlinType.of(
 				type = type,
 				containingType = kotlinType,
-				allowMaybe = false,
 				allowNull = true,
 				allowedVariance = KVariance.OUT,
 				requireSpecialization = true

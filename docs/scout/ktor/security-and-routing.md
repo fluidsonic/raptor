@@ -23,12 +23,12 @@
   `internalMessage`, `userMessage`). `internal(cause)` sets `code = "internal"` and both
   `userMessage` and `developerMessage` to the same generic string; only `internalMessage`
   keeps `cause.message`. So for internal failures `developerMessage` is *not* diagnostic —
-  only `internalMessage` is. (This model drives the GraphQL error mapping — see
-  `graphql/exception-handling.md`.) The class is flagged untested (`// TODO Add tests`).
+  only `internalMessage` is. (The unreferenced GraphQL handler in `modules/ktor-graph` maps
+  exceptions through this model — see `graph/exception-handling.md`.) The class is flagged
+  untested (`// TODO Add tests`).
 
 Root path quirk: user root routes register path `"/"`, but the synthetic server-level
 container route uses empty path `""` with `host = null` — two different "root" strings.
 
 Route DSL: `RaptorAssemblyQuery<...Root>.new(host)` extensions need `@JvmName("rootNew")` to
 avoid a JVM signature clash (erasure) with the `new(path, host)` overloads.
-</content>

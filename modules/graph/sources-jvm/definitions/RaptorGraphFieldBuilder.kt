@@ -40,7 +40,7 @@ public open class RaptorGraphFieldBuilder internal constructor(
 
 	@RaptorDsl
 	public class WithResolver<Type, ParentType : Any> internal constructor(
-		implicitResolver: (suspend RaptorGraphOutputScope.(parent: Any) -> Any?)? = null,
+		implicitResolver: (suspend RaptorGraphResolverScope.(parent: Any) -> Any?)? = null,
 		kotlinType: KotlinType,
 		name: String,
 		parentKotlinType: KotlinType,
@@ -58,7 +58,7 @@ public open class RaptorGraphFieldBuilder internal constructor(
 	) {
 
 		private var isImplicitResolve = implicitResolver !== null
-		private var resolve: (suspend RaptorGraphOutputScope.(parent: Any) -> Any?)? = implicitResolver
+		private var resolve: (suspend RaptorGraphResolverScope.(parent: Any) -> Any?)? = implicitResolver
 
 
 		override fun build(): GraphFieldDefinition {
@@ -86,11 +86,11 @@ public open class RaptorGraphFieldBuilder internal constructor(
 
 		@RaptorDsl
 		@Suppress("UNCHECKED_CAST")
-		public fun resolver(resolve: suspend RaptorGraphOutputScope.(parent: ParentType) -> Type) {
+		public fun resolver(resolve: suspend RaptorGraphResolverScope.(parent: ParentType) -> Type) {
 			check(this.resolve === null && !this.isImplicitResolve) { "Cannot define multiple resolutions." }
 
 			this.isImplicitResolve = false
-			this.resolve = resolve as suspend RaptorGraphOutputScope.(parent: Any) -> Any?
+			this.resolve = resolve as suspend RaptorGraphResolverScope.(parent: Any) -> Any?
 		}
 	}
 }

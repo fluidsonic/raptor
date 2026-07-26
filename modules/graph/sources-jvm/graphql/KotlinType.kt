@@ -39,7 +39,6 @@ internal data class KotlinType(
 				null -> of(
 					type = classifier.typeParameters[index].upperBounds.single(),
 					containingType = null,
-					allowMaybe = false,
 					allowNull = true,
 					allowedVariance = KVariance.OUT,
 					requireSpecialization = true
@@ -101,7 +100,6 @@ internal data class KotlinType(
 		fun of(
 			type: KType,
 			containingType: KotlinType?,
-			allowMaybe: Boolean,
 			allowNull: Boolean,
 			allowedVariance: KVariance,
 			requireSpecialization: Boolean,
@@ -109,7 +107,6 @@ internal data class KotlinType(
 			of(
 				type = type,
 				containingType = containingType,
-				allowMaybe = allowMaybe,
 				allowNull = allowNull,
 				allowedTypeParameterName = containingType?.classifier?.typeParameters?.singleOrNull()?.name,
 				allowedVariance = allowedVariance,
@@ -122,7 +119,6 @@ internal data class KotlinType(
 		private fun of(
 			type: KType,
 			containingType: KotlinType?,
-			allowMaybe: Boolean,
 			allowNull: Boolean,
 			allowedTypeParameterName: String?,
 			allowedVariance: KVariance,
@@ -131,8 +127,8 @@ internal data class KotlinType(
 		): KotlinType? {
 			if (!allowNull && type.isMarkedNullable)
 				error("Type '$rootType' cannot be used here. The Kotlin type must not be nullable.")
-			if (!allowMaybe && type.classifier == Maybe::class)
-				error("Type '$rootType' cannot be used here. 'Maybe' is not allowed in this context.")
+			if (type.classifier == Maybe::class)
+				error("Type '$rootType' cannot be used here. 'Maybe' is not supported by the GraphQL type mapping.")
 
 			fun checkTypeVariance(variance: KVariance?) {
 				when (variance) {
@@ -165,7 +161,6 @@ internal data class KotlinType(
 								else -> of(
 									type = argument,
 									containingType = containingType,
-									allowMaybe = false,
 									allowNull = true,
 									allowedTypeParameterName = allowedTypeParameterName,
 									allowedVariance = allowedVariance,

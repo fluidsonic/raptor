@@ -17,7 +17,7 @@ public class RaptorGraphOperationDefinitionBuilder<Value> internal constructor(
 ) : RaptorGraphArgumentDefinitionBuilder.ContainerInternal by argumentContainer {
 
 	private var description: String? = null
-	private var resolve: (suspend RaptorGraphOutputScope.() -> Any?)? = null
+	private var resolve: (suspend RaptorGraphResolverScope.() -> Any?)? = null
 
 
 	internal fun build(): GraphOperationDefinition {
@@ -49,7 +49,7 @@ public class RaptorGraphOperationDefinitionBuilder<Value> internal constructor(
 
 
 	@RaptorDsl
-	public fun resolver(resolve: suspend RaptorGraphOutputScope.() -> Value) {
+	public fun resolver(resolve: suspend RaptorGraphResolverScope.() -> Value) {
 		check(this.resolve === null) { "Cannot define multiple resolutions." }
 
 		this.resolve = resolve

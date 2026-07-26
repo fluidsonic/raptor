@@ -26,4 +26,3 @@ scheduling fails at runtime unless another module provides one.
   Only **fluid-time** is a direct dependency (an `api` entry in `modules/jobs/build.gradle.kts`);
   **`kotlinx.datetime`** is an external dependency pulled in only transitively (not declared),
   while `kotlin.time` needs no dependency at all — it ships with the Kotlin standard library.
-</content>

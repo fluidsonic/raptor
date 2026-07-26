@@ -12,9 +12,7 @@ internal class DefaultRaptorGraph(
 
 	private val executor = GExecutor.default(
 		exceptionHandler = ExceptionHandler(handlers = exceptionHandlers),
-		nodeInputCoercer = NodeInputCoercer,
 		schema = schema,
-		variableInputCoercer = VariableInputCoercer,
 	)
 
 

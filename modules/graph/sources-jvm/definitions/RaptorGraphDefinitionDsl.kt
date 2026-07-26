@@ -33,7 +33,6 @@ public fun <Type : Any, ReferencedType : Any> graphAliasDefinition(
 		kotlinType = KotlinType.of(
 			type = type,
 			containingType = null,
-			allowMaybe = false,
 			allowNull = false,
 			allowedVariance = KVariance.OUT, // TODO prb. wrong
 			requireSpecialization = false
@@ -41,7 +40,6 @@ public fun <Type : Any, ReferencedType : Any> graphAliasDefinition(
 		referencedKotlinType = KotlinType.of(
 			type = referencedType,
 			containingType = null,
-			allowMaybe = false,
 			allowNull = false,
 			allowedVariance = KVariance.OUT, // TODO prb. wrong
 			requireSpecialization = false
@@ -76,7 +74,6 @@ public fun <Type : Enum<Type>> graphEnumDefinition(
 		kotlinType = KotlinType.of(
 			type = type,
 			containingType = null,
-			allowMaybe = false,
 			allowNull = false,
 			allowedVariance = KVariance.OUT, // TODO prb. wrong
 			requireSpecialization = true
@@ -109,7 +106,6 @@ public fun <Type : Any> graphIdAliasDefinition(
 		kotlinType = KotlinType.of(
 			type = type,
 			containingType = null,
-			allowMaybe = false,
 			allowNull = false,
 			allowedVariance = KVariance.OUT, // TODO prb. wrong
 			requireSpecialization = false
@@ -117,7 +113,6 @@ public fun <Type : Any> graphIdAliasDefinition(
 		referencedKotlinType = KotlinType.of(
 			type = typeOf<String>(),
 			containingType = null,
-			allowMaybe = false,
 			allowNull = false,
 			allowedVariance = KVariance.OUT, // TODO prb. wrong
 			requireSpecialization = false
@@ -150,7 +145,6 @@ public fun <Type : Any> graphInputObjectDefinition(
 		kotlinType = KotlinType.of(
 			type = type,
 			containingType = null,
-			allowMaybe = false,
 			allowNull = false,
 			allowedVariance = KVariance.OUT, // TODO prb. wrong
 			requireSpecialization = false
@@ -184,7 +178,6 @@ public fun <Type : Any> graphInterfaceDefinition(
 		kotlinType = KotlinType.of(
 			type = type,
 			containingType = null,
-			allowMaybe = false,
 			allowNull = false,
 			allowedVariance = KVariance.OUT, // TODO prb. wrong
 			requireSpecialization = false
@@ -215,7 +208,6 @@ public fun <Type : Any> graphInterfaceExtensionDefinition(
 		kotlinType = KotlinType.of(
 			type = type,
 			containingType = null,
-			allowMaybe = false,
 			allowNull = false,
 			allowedVariance = KVariance.OUT, // TODO prb. wrong
 			requireSpecialization = false
@@ -249,7 +241,6 @@ public fun <Type : Any> graphObjectDefinition(
 		kotlinType = KotlinType.of(
 			type = type,
 			containingType = null,
-			allowMaybe = false,
 			allowNull = false,
 			allowedVariance = KVariance.OUT, // TODO prb. wrong
 			requireSpecialization = false
@@ -280,7 +271,6 @@ public fun <Type : Any> graphObjectExtensionDefinition(
 		kotlinType = KotlinType.of(
 			type = type,
 			containingType = null,
-			allowMaybe = false,
 			allowNull = false,
 			allowedVariance = KVariance.OUT, // TODO prb. wrong
 			requireSpecialization = false
@@ -317,7 +307,6 @@ public fun <Value> graphOperationDefinition(
 		kotlinType = KotlinType.of(
 			type = type,
 			containingType = null,
-			allowMaybe = false,
 			allowNull = true,
 			allowedVariance = KVariance.OUT,
 			requireSpecialization = true
@@ -352,7 +341,6 @@ public fun <Type : Any> graphScalarDefinition(
 		kotlinType = KotlinType.of(
 			type = type,
 			containingType = null,
-			allowMaybe = false,
 			allowNull = false,
 			allowedVariance = KVariance.OUT, // TODO prb. wrong
 			requireSpecialization = false
@@ -362,6 +350,38 @@ public fun <Type : Any> graphScalarDefinition(
 	)
 		.apply(configure)
 		.build()
+
+
+/**
+ * Creates the definition of a scalar type that raptor neither parses nor serializes.
+ *
+ * This exists solely to map a Kotlin type onto one of GraphQL's five built-in scalars (`Boolean`, `Float`, `ID`, `Int`
+ * and `String`). Fluid GraphQL declares and coerces those itself, so raptor must register the mapping without emitting
+ * a type or a coercer of its own.
+ *
+ * It is deliberately internal: a scalar defined through the public [graphScalarDefinition] always coerces.
+ */
+internal fun graphUncoercedScalarDefinition(
+	name: String = RaptorGraphDefinition.defaultName,
+	type: KType,
+): RaptorGraphDefinition =
+	ScalarGraphDefinition(
+		additionalDefinitions = emptyList(),
+		description = null,
+		isInput = true,
+		isOutput = true,
+		kotlinType = KotlinType.of(
+			type = type,
+			containingType = null,
+			allowNull = false,
+			allowedVariance = KVariance.OUT, // TODO prb. wrong
+			requireSpecialization = false
+		),
+		name = RaptorGraphDefinition.resolveName(name, type = type),
+		parse = null,
+		serialize = null,
+		stackTrace = stackTrace(skipCount = 1)
+	)
 
 
 @RaptorDsl
@@ -386,7 +406,6 @@ public fun <Type : Any> graphUnionDefinition(
 		kotlinType = KotlinType.of(
 			type = type,
 			containingType = null,
-			allowMaybe = false,
 			allowNull = false,
 			allowedVariance = KVariance.OUT, // TODO prb. wrong
 			requireSpecialization = false

@@ -1,6 +1,5 @@
 package io.fluidsonic.raptor.graph
 
-import io.fluidsonic.stdlib.*
 import kotlin.reflect.*
 
 
@@ -44,7 +43,6 @@ internal class GraphTypeSystemBuilder private constructor(
 					RaptorGraphOperationType.query -> typeOf<QueryRoot>()
 				},
 				containingType = null,
-				allowMaybe = false,
 				allowNull = false,
 				allowedVariance = KVariance.INVARIANT,
 				requireSpecialization = false
@@ -114,7 +112,6 @@ internal class GraphTypeSystemBuilder private constructor(
 				GraphArgument(
 					defaultValue = argumentDefinition.defaultValue,
 					description = argumentDefinition.description,
-					directives = directivesForArgument(argumentDefinition),
 					kotlinType = argumentDefinition.kotlinType.specialize(),
 					name = argumentDefinition.name!! // TODO Hack.
 				)
@@ -130,7 +127,6 @@ internal class GraphTypeSystemBuilder private constructor(
 				GraphArgument(
 					defaultValue = argumentDefinition.defaultValue,
 					description = argumentDefinition.description,
-					directives = directivesForArgument(argumentDefinition),
 					kotlinType = argumentDefinition.kotlinType.specialize(),
 					name = argumentDefinition.name!! // TODO Hack.
 				)
@@ -149,7 +145,6 @@ internal class GraphTypeSystemBuilder private constructor(
 				GraphArgument(
 					defaultValue = argumentDefinition.defaultValue,
 					description = argumentDefinition.description,
-					directives = directivesForArgument(argumentDefinition),
 					kotlinType = argumentDefinition.kotlinType.specialize(),
 					name = argumentDefinition.name!! // TODO Hack.
 				)
@@ -199,13 +194,6 @@ internal class GraphTypeSystemBuilder private constructor(
 			kotlinType = definition.kotlinType,
 			name = definition.name
 		)
-
-
-	private fun directivesForArgument(argument: GraphArgumentDefinition) =
-		when (argument.kotlinType.classifier) {
-			Maybe::class -> listOf(GraphDirective.optional)
-			else -> emptyList()
-		}
 
 
 	companion object {

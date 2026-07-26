@@ -27,4 +27,3 @@ combined design choices in different files, with no "last wins" comment anywhere
 (`type == other.type`) is stable.
 
 Related: `di/builder-and-scopes.md`.
-</content>

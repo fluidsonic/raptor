@@ -31,4 +31,3 @@ Surprising behavior of the transaction API surface and how to layer scoped trans
 `onConfigurationEnded`; its plugin's `complete()` publishes that factory under a property key;
 a domain extension reads it and calls `createTransaction(context = this) {
 propertyRegistry.register(key, scopedState) }`.
-</content>

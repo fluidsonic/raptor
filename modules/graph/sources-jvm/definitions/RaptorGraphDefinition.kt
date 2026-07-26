@@ -225,7 +225,7 @@ internal sealed class GraphFieldDefinition(
 		description: String?,
 		kotlinType: KotlinType,
 		name: String,
-		val resolve: suspend RaptorGraphOutputScope.(parent: Any) -> Any?,
+		val resolve: suspend RaptorGraphResolverScope.(parent: Any) -> Any?,
 		stackTrace: List<StackTraceElement>,
 	) : GraphFieldDefinition(
 		argumentDefinitions = argumentDefinitions,
@@ -525,6 +525,13 @@ internal class ObjectExtensionGraphDefinition(
 }
 
 
+/**
+ * The definition of a GraphQL scalar type.
+ *
+ * [parse] and [serialize] are `null` together for the Kotlin-type mappings of GraphQL's built-in scalars, which fluid
+ * GraphQL declares and coerces itself. Only raptor's own default definitions may omit them — see
+ * [graphUncoercedScalarDefinition].
+ */
 internal class ScalarGraphDefinition(
 	additionalDefinitions: Collection<RaptorGraphDefinition>,
 	description: String?,
@@ -532,8 +539,8 @@ internal class ScalarGraphDefinition(
 	override val isOutput: Boolean,
 	kotlinType: KotlinType,
 	name: String,
-	val parse: RaptorGraphInputScope.(input: Any) -> Any,
-	val serialize: RaptorGraphOutputScope.(output: Any) -> Any,
+	val parse: (RaptorGraphInputScope.(input: Any) -> Any)?,
+	val serialize: (RaptorGraphOutputScope.(output: Any) -> Any)?,
 	stackTrace: List<StackTraceElement>,
 ) : NamedGraphTypeDefinition(
 	additionalDefinitions = additionalDefinitions,
@@ -545,6 +552,7 @@ internal class ScalarGraphDefinition(
 
 	init {
 		require(isInput || isOutput)
+		require((parse === null) == (serialize === null)) { "'parse' and 'serialize' must either both be defined or both be absent." }
 	}
 
 

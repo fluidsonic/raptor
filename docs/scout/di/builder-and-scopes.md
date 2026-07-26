@@ -37,4 +37,3 @@ Registration-time rules and the module's three distinct DI scopes.
 - **`RaptorDIBoundary` is `@RaptorInternalApi`**; its `diFactory(name)` silently returns
   `RaptorDI.Factory.empty` when unconfigured (TODO to throw) — inconsistent with the
   plugin accessors elsewhere that throw `RaptorPluginNotInstalledException`.
-</content>

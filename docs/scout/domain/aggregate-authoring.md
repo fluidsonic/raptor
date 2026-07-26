@@ -21,4 +21,3 @@ Conventions a `RaptorAggregate`/projector implementation must follow, demonstrat
   purely to satisfy Kotlin's exhaustiveness checker after the outer `when` already handled
   `Created`. This is the pattern for incremental projectors over a sealed change hierarchy.
   Anchor: `modules/domain/tests/domain/BankAccountProjector.kt` (`apply`).
-</content>

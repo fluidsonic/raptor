@@ -1,28 +1,18 @@
 package io.fluidsonic.raptor.graph
 
 import io.fluidsonic.graphql.*
-import io.fluidsonic.raptor.transactions.*
 
 
-internal object InputObjectCoercer : GNodeInputCoercer<Map<String, Any?>>, GVariableInputCoercer<Map<String, Any?>> {
+internal class InputObjectCoercer(
+	private val argumentDefinitions: Collection<GArgumentDefinition>,
+	private val raptorType: InputObjectGraphType,
+) : GNodeInputCoercer<Map<String, Any?>>, GVariableInputCoercer<Map<String, Any?>> {
 
-	private fun GInputCoercerContext.coerceInput(input: Map<String, Any?>): Any {
-		val context = checkNotNull(execution.raptorContext)
-		val type = type as GInputObjectType
-		val definition = type.raptorType as InputObjectGraphType
-
-		val inputScope = object : RaptorGraphInputScope, RaptorTransactionScope by context { // TODO improve
-
-			override fun invalid(details: String?): Nothing =
-				this@coerceInput.invalid(details = details)
-		}
-
-		return definition.argumentResolver.withArguments(
+	private fun coerceInput(input: Map<String, Any?>): Any =
+		raptorType.argumentResolver.withArguments(
 			argumentValues = input,
-			argumentDefinitions = type.argumentDefinitions,
-			context = execution
-		) { definition.create(inputScope) }
-	}
+			argumentDefinitions = argumentDefinitions,
+		) { raptorType.create(GraphInputScope) }
 
 
 	override fun GNodeInputCoercerContext.coerceNodeInput(input: Map<String, Any?>): Any =

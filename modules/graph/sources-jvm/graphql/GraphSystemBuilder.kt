@@ -21,52 +21,39 @@ internal class GraphSystemBuilder private constructor(
 
 	// TODO validate
 	private fun buildSchema() = GSchema(
-		document = GDocument(definitions = buildDirectiveDefinitions() + buildTypeDefinitions()),
-		supportOptional = true,
+		document = GDocument(definitions = buildTypeDefinitions()),
 	)
 
 
-	private fun buildDirectiveDefinitions(): List<GDirectiveDefinition> = buildList {
-		val referencedDirectiveNames = findReferencedDirectiveNames()
+	private fun buildEnumDefinition(type: EnumGraphType): GEnumType {
+		val coercer = EnumCoercer(type)
 
-		if (referencedDirectiveNames.contains(GraphDirective.optional.name))
-			add(GDirectiveDefinition(
-				description = "An argument with this directive does not require a value. " +
-					"Providing no value may lead to a different behavior than providing a null value.",
-				name = GraphDirective.optional.name,
-				locations = setOf(GDirectiveLocation.ARGUMENT_DEFINITION, GDirectiveLocation.INPUT_FIELD_DEFINITION)
-			))
-	}
-
-
-	private fun buildEnumDefinition(type: EnumGraphType) = GEnumType(
-		description = type.description,
-		name = type.name,
-		values = type.values
-			.map { value ->
-				GEnumValueDefinition(
-					description = value.description,
-					name = value.name,
-				)
+		return GEnumType(
+			description = type.description,
+			name = type.name,
+			values = type.values
+				.map { value ->
+					GEnumValueDefinition(
+						description = value.description,
+						name = value.name,
+					)
+				}
+				.sortedBy { it.name },
+			extensions = GNodeExtensionSet {
+				nodeInputCoercer = coercer
+				outputCoercer = coercer
+				variableInputCoercer = coercer
 			}
-			.sortedBy { it.name },
-		extensions = GNodeExtensionSet {
-			outputCoercer = EnumCoercer
-			nodeInputCoercer = EnumCoercer
-			raptorType = type
-			variableInputCoercer = EnumCoercer
-		}
-	)
+		)
+	}
 
 
 	private fun buildFieldArgumentDefinition(argument: GraphArgument) = GFieldArgumentDefinition(
 		defaultValue = argument.defaultValue,
 		description = argument.description,
-		directives = argument.directives.map { GDirective(name = it.name) }.sortedBy { it.name },
 		name = argument.name,
 		type = typeRef(argument.kotlinType, isInput = true),
 		extensions = GNodeExtensionSet {
-			raptorArgument = argument
 			raptorType = underlyingType(argument.kotlinType, isInput = true)
 		}
 	)
@@ -88,35 +75,34 @@ internal class GraphSystemBuilder private constructor(
 	private fun buildInputObjectArgumentDefinition(argument: GraphArgument) = GInputObjectArgumentDefinition(
 		defaultValue = argument.defaultValue,
 		description = argument.description,
-		directives = argument.directives.map { GDirective(name = it.name) }.sortedBy { it.name },
 		name = argument.name,
 		type = typeRef(argument.kotlinType, isInput = true),
 		extensions = GNodeExtensionSet {
-			raptorArgument = argument
 			raptorType = underlyingType(argument.kotlinType, isInput = true)
 		}
 	)
 
 
-	private fun buildInputObjectDefinition(type: InputObjectGraphType) = GInputObjectType(
-		argumentDefinitions = type.arguments.map(::buildInputObjectArgumentDefinition).sortedBy { it.name },
-		description = type.description,
-		name = type.name,
-		extensions = GNodeExtensionSet {
-			nodeInputCoercer = InputObjectCoercer
-			raptorType = type
-			variableInputCoercer = InputObjectCoercer
-		}
-	)
+	private fun buildInputObjectDefinition(type: InputObjectGraphType): GInputObjectType {
+		val argumentDefinitions = type.arguments.map(::buildInputObjectArgumentDefinition).sortedBy { it.name }
+		val coercer = InputObjectCoercer(argumentDefinitions = argumentDefinitions, raptorType = type)
+
+		return GInputObjectType(
+			argumentDefinitions = argumentDefinitions,
+			description = type.description,
+			name = type.name,
+			extensions = GNodeExtensionSet {
+				nodeInputCoercer = coercer
+				variableInputCoercer = coercer
+			}
+		)
+	}
 
 
 	private fun buildInterfaceDefinition(type: InterfaceGraphType) = GInterfaceType(
 		description = type.description,
 		fieldDefinitions = type.fields.map(::buildFieldDefinition).sortedBy { it.name },
 		name = type.name,
-		extensions = GNodeExtensionSet {
-			raptorType = type
-		}
 	)
 
 
@@ -127,21 +113,23 @@ internal class GraphSystemBuilder private constructor(
 		name = type.name,
 		extensions = GNodeExtensionSet {
 			kotlinType = type.kotlinType.classifier
-			raptorType = type
 		}
 	)
 
 
-	private fun buildScalarDefinition(type: ScalarGraphType) = GCustomScalarType(
-		description = type.description,
-		name = type.name,
-		extensions = GNodeExtensionSet {
-			nodeInputCoercer = ScalarCoercer
-			outputCoercer = ScalarCoercer
-			raptorType = type
-			variableInputCoercer = ScalarCoercer
-		}
-	)
+	private fun buildScalarDefinition(type: ScalarGraphType): GCustomScalarType {
+		val coercer = ScalarCoercer(type)
+
+		return GCustomScalarType(
+			description = type.description,
+			name = type.name,
+			extensions = GNodeExtensionSet {
+				nodeInputCoercer = coercer
+				outputCoercer = coercer
+				variableInputCoercer = coercer
+			}
+		)
+	}
 
 
 	private fun buildTypeDefinition(type: NamedGraphType) = when (type) {
@@ -155,39 +143,25 @@ internal class GraphSystemBuilder private constructor(
 
 
 	private fun buildTypeDefinitions(): List<GNamedType> =
-		typeSystem.types.filterIsInstance<NamedGraphType>().map(::buildTypeDefinition).sortedBy { it.name }
+		typeSystem.types
+			.filterIsInstance<NamedGraphType>()
+			.filterNot(::isDeclaredByFluid)
+			.map(::buildTypeDefinition)
+			.sortedBy { it.name }
 
 
 	private fun buildUnionDefinition(type: UnionGraphType) = GUnionType(
 		description = type.description,
 		name = type.name,
 		possibleTypes = resolvePossibleTypesForKotlinType(type.kotlinType),
-		extensions = GNodeExtensionSet {
-			raptorType = type
-		}
 	)
 
 
-	private fun findReferencedDirectiveNames(): Set<String> =
-		typeSystem.types.flatMapTo(hashSetOf()) { type ->
-			when (type) {
-				is AliasGraphType,
-				is EnumGraphType,
-				is ScalarGraphType,
-				is UnionGraphType,
-				->
-					emptyList()
-
-				is InputObjectGraphType ->
-					type.arguments.flatMap { it.directives }.map { it.name }
-
-				is InterfaceGraphType ->
-					type.fields.flatMap { it.arguments }.flatMap { it.directives }.map { it.name }
-
-				is ObjectGraphType ->
-					type.fields.flatMap { it.arguments }.flatMap { it.directives }.map { it.name }
-			}
-		}
+	// A scalar without a coercer is one of raptor's Kotlin-type mappings for GraphQL's built-in scalars. Fluid GraphQL
+	// declares and coerces those itself, and the GraphQL specification forbids redeclaring them, so raptor must keep
+	// them in its type system but leave them out of the schema.
+	private fun isDeclaredByFluid(type: NamedGraphType): Boolean =
+		type is ScalarGraphType && !type.hasCoercer
 
 
 	private fun interfaceTypeRefsForKotlinType(kotlinType: KotlinType): List<GNamedTypeRef> {
@@ -248,9 +222,6 @@ internal class GraphSystemBuilder private constructor(
 			Collection::class, List::class, Set::class -> // TODO improve
 				GListTypeRef(typeRef(checkNotNull(nonNullKotlinType.typeArguments.single()), isInput = isInput))
 
-			Maybe::class ->
-				return typeRef(checkNotNull(nonNullKotlinType.typeArguments.single()), isInput = isInput)
-
 			else -> when (isInput) {
 				true -> typeSystem.resolveInputType(nonNullKotlinType)
 				false -> typeSystem.resolveOutputType(nonNullKotlinType)
@@ -281,7 +252,7 @@ internal class GraphSystemBuilder private constructor(
 		val kotlinType = kotlinType.withNullable(false)
 
 		return when (kotlinType.classifier) {
-			Collection::class, List::class, Maybe::class, Set::class -> // TODO improve
+			Collection::class, List::class, Set::class -> // TODO improve
 				underlyingType(checkNotNull(kotlinType.typeArguments.single()), isInput = isInput)
 
 			else -> when (isInput) {

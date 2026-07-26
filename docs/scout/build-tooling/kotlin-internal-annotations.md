@@ -24,5 +24,7 @@ Evidence-backed motivations cited in inline comments:
   (`KTypeDIKey.kt`, `LabeledDIKey.kt`), and the graph DSL
   (`RaptorGraphComponent.kt` `newEnum`/`newObject`/…, `RaptorGraphDefinitionDsl.kt`).
 
-See also `build-tooling/jvmname-conventions.md` for the related `@file:JvmName` workaround.
-</content>
+A related, load-bearing workaround: in
+`modules/graph/sources-jvm/graphql/RaptorTypeNodeExtensionKey.kt` the two `raptorType`
+extension properties (for `GArgumentDefinition` and `GFieldDefinition` builders) carry explicit
+`@JvmName`s on their getters/setters to avoid a platform-declaration clash — not decorative.

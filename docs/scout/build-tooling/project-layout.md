@@ -28,6 +28,5 @@ How Raptor's Gradle multi-module build is structured — needed before adding a 
   `build.gradle.kts` (version 3.0.0 as of this pass). The project's own declared version
   lives in that file's `fluidLibrary(...)` call.
 
-Deprecated modules slated for deletion: `graphql`, `entities`, `entities-core` (their
-build files carry `// TODO Deprecated module. Delete.`).
-</content>
+Deprecated modules slated for deletion: `entities`, `entities-core` (their build files carry
+`// TODO Deprecated module. Delete.`).

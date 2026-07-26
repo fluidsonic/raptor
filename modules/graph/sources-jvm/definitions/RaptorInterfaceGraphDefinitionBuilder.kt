@@ -71,7 +71,6 @@ public class RaptorInterfaceGraphDefinitionBuilder<Type : Any> internal construc
 			kotlinType = KotlinType.of(
 				type = type,
 				containingType = kotlinType,
-				allowMaybe = false,
 				allowNull = true,
 				allowedVariance = KVariance.OUT,
 				requireSpecialization = true

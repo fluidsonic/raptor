@@ -33,4 +33,3 @@ prepending a prefix to every lookup. Anchor:
   non-null provider wins).
 - **`RaptorSettingsPlugin.install` is an empty no-op placeholder** (`// TODO Actually use`);
   settings are read off the component-registry root during assembly, not via runtime DI.
-</content>

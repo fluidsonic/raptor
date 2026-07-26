@@ -38,4 +38,3 @@ action completes* before flipping to `started` (it does not fire-and-forget — 
 `modules/lifecycle/tests-jvm/LifecycleTests.kt` `testLifecycleWaitsForActions`), so callers
 `launch` it in a scope to observe the intermediate `starting` state. `DefaultLifecycle` builds
 its `_coroutineContext` fresh in `startIn()` and nulls it in `stop()`.
-</content>

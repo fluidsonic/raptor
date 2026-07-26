@@ -20,4 +20,3 @@ behavior is unfinished — know this before relying on it.
   no per-type multiplexing; every subscriber re-filters the same source flow.
 - The plugin registers `RaptorEventEmitter`/`RaptorEventSource` into DI only when the optional
   `RaptorDIPlugin` is present.
-</content>

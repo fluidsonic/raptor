@@ -99,7 +99,6 @@ public fun <Input : Any, Output> RaptorGraphOperation<Input, Output>.define(
 		inputKotlinType = KotlinType.of(
 			type = inputType,
 			containingType = null,
-			allowMaybe = true,
 			allowNull = false,
 			allowedVariance = KVariance.IN, // TODO prb. wrong
 			requireSpecialization = true
@@ -108,7 +107,6 @@ public fun <Input : Any, Output> RaptorGraphOperation<Input, Output>.define(
 		outputKotlinType = KotlinType.of(
 			type = outputType,
 			containingType = null,
-			allowMaybe = false,
 			allowNull = true,
 			allowedVariance = KVariance.OUT, // TODO prb. wrong
 			requireSpecialization = true

@@ -35,4 +35,3 @@ Non-obvious invariants of `RaptorComponent` and its registration.
 Test fixtures encode the convention: a `RaptorComponent.Base` subclass passes its owning
 plugin to `super`, exposes results by `propertyRegistry.register(...)` in
 `onConfigurationEnded`, and the plugin installs the component in `install`.
-</content>

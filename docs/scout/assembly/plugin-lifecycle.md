@@ -29,4 +29,3 @@ Key behaviors:
 `RaptorPlugin` = `RaptorPluginWithConfiguration<Unit>` with a no-op `complete()`.
 `RaptorFeature`/`RaptorFeatureScope` are deprecated aliases (the API was renamed from
 "Feature" to "Plugin"). See also `assembly/component-model.md`, `assembly/registries.md`.
-</content>

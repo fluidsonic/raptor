@@ -45,7 +45,6 @@ internal class GraphSystemDefinitionBuilder private constructor(
 									KotlinType.of(
 										type = typeArgument,
 										containingType = null,
-										allowMaybe = false,
 										allowNull = true,
 										allowedVariance = KVariance.OUT,
 										requireSpecialization = true
@@ -333,7 +332,6 @@ internal class GraphSystemDefinitionBuilder private constructor(
 		private val defaultDefinitions: Collection<RaptorGraphDefinition> = listOf(
 			Boolean.graphDefinition(),
 			Double.graphDefinition(),
-			GraphId.graphDefinition(),
 			Int.graphDefinition(),
 			String.graphDefinition()
 		)

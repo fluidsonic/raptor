@@ -34,4 +34,3 @@ existing code.
 Part of the entity graph wiring is commented out (`RaptorEntitiesPlugin.complete` graph block;
 `RaptorEntityIdDefinition.kt`, `RaptorEntityId.jvm.kt` files) — the live path uses a different
 nested `RaptorEntityId.Definition` type.
-</content>

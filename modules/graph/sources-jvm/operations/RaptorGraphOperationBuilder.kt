@@ -1,7 +1,6 @@
 package io.fluidsonic.raptor.graph
 
 import io.fluidsonic.raptor.*
-import io.fluidsonic.raptor.transactions.*
 import io.fluidsonic.stdlib.*
 
 
@@ -66,13 +65,7 @@ public class RaptorGraphOperationBuilder<Input : Any, Output> @PublishedApi inte
 				description?.let(this::description)
 
 				resolver {
-					val inputScope = object : RaptorGraphInputScope, RaptorTransactionScope by context { // TODO improve
-
-						override fun invalid(details: String?): Nothing =
-							invalidValueError("invalid argument ($details)") // TODO improve
-					}
-
-					val input = inputFactory(inputScope)
+					val input = inputFactory(GraphInputScope)
 
 					val output = with(operation) {
 						this@resolver.execute(input)

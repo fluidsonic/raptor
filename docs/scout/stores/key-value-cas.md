@@ -30,4 +30,3 @@ differently, and the callback carries an unusual constraint.
 `RaptorLogStore` is write-only by contract — the interface exposes only `append`.
 `MemoryLogStore.values()` (a non-override snapshot) is a test/inspection affordance;
 `MongoLogStore` provides no read path at all.
-</content>
