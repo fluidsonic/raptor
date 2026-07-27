@@ -19,7 +19,13 @@ class AssemblyTests {
 			install(RaptorKtorPlugin)
 			install(RaptorTransactionPlugin)
 
-			graphs.new()
+			graphs.new {
+				definitions.add(
+					graphOperationDefinition<String>(name = "hello", operationType = RaptorGraphOperationType.query) {
+						resolver { "world" }
+					},
+				)
+			}
 
 			ktor.servers.new {
 				routes.new("graphql") {

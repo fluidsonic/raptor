@@ -11,13 +11,14 @@ therefore dependency injection. The three scopes look interchangeable but are no
   `RaptorGraphResolverScope` (field and operation `resolver { … }`) also implements
   `RaptorTransactionScope`. Anchors: `modules/graph/sources-jvm/graphql/coercion/`,
   `modules/graph/sources-jvm/graphql/resolution/RaptorGraphResolverScope.kt`.
-- `invalid(details)` on the input scope throws through raptor's own `invalidValueError`
-  (`modules/graph/sources-jvm/exceptions/InvalidValueException.kt`); nothing routes through
-  fluid GraphQL's coercer context any more, which fluid-graphql 0.17.0 removed. Every graph
-  registers a default handler turning that exception into a client error with
-  `extensions.code = "invalid value"` (`RaptorGraphComponent`'s init block). Both literal and
-  variable input rejections reach the client as an `errors` entry instead of an escaping
-  exception — asserted by `modules/graph/tests-jvm/InvalidInputTests.kt`.
+- `invalid(details)` on the input scope throws a fluid `GErrorException` that already carries
+  `extensions = {"code": "invalid value"}` (`GraphInputScope.invalid`); raptor has no exception type
+  of its own for it, and nothing routes through fluid GraphQL's coercer context any more — those
+  context types were removed in fluid-graphql 0.19.0, whose coercer interfaces
+  (`GInputLiteralCoercer`, `GInputValueCoercer`, `GOutputValueCoercer`, implemented in
+  `modules/graph/sources-jvm/graphql/coercion/`) take a plain value with no receiver. Literal and
+  variable rejections both reach the client as an `errors` entry carrying that code — see
+  `invalid-input-errors.md` for what differs.
 - Coercers are **per-type instances**, constructed with their raptor type by
   `GraphSystemBuilder` (`ScalarCoercer`, `EnumCoercer`, `InputObjectCoercer`), not shared
   singletons that look a type up by name. One application may host several graphs whose type

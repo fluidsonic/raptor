@@ -19,13 +19,21 @@ internal class GraphFixture(
 	val graph: RaptorGraph,
 ) {
 
-	/** Parses and executes [query], returning the serialized result — including any `errors` entry. */
+	/**
+	 * Parses and executes [query], returning the serialized result — including any `errors` entry.
+	 *
+	 * Mirrors what a client observes through the production Ktor route: a parse or validation failure
+	 * is serialized into the `errors` entry rather than thrown, so the returned map is always a valid
+	 * GraphQL response.
+	 */
 	fun execute(query: String, variableValues: Map<String, Any?> = emptyMap()): Map<String, Any?> {
-		val document = checkNotNull(graph.parse(GDocumentSource.of(query, name = "query")).valueOrNull()) {
-			"cannot parse or validate query: $query"
-		}
+		val documentResult = graph.parse(GDocumentSource.of(query, name = "query"))
 		val context = raptor.transaction().context
-		val result = runBlocking { graph.execute(document = document, variableValues = variableValues, context = context) }
+		val result = runBlocking {
+			documentResult.flatMapValue { document ->
+				graph.execute(document = document, variableValues = variableValues, context = context)
+			}
+		}
 
 		return graph.serialize(result)
 	}
@@ -59,13 +67,17 @@ internal fun graphFixture(configure: RaptorGraphComponent.() -> Unit): GraphFixt
  * Executes a query whose input is expected to be rejected, and asserts the rejection reaches the
  * client as an `errors` entry rather than as an exception escaping the executor.
  *
- * The full payload is printed under [label]. The exact wording is deliberately never asserted — it
- * is expected to change — so the printed baseline is the only record of it.
+ * The full payload is printed under [label]. The message wording is deliberately never asserted —
+ * it is expected to change — so the printed baseline is the only record of it. [expectedErrorCode],
+ * when given, additionally asserts that every error carries exactly that `extensions.code`; that
+ * part *is* a client contract. Leave it `null` for rejections produced by fluid-graphql itself
+ * (output coercion, document validation), which carry no code.
  */
 internal fun GraphFixture.executeExpectingClientErrors(
 	query: String,
 	variableValues: Map<String, Any?> = emptyMap(),
 	label: String,
+	expectedErrorCode: String? = null,
 ): Map<String, Any?> {
 	val outcome = runCatching { execute(query = query, variableValues = variableValues) }
 	assertTrue(outcome.isSuccess, "execute/serialize must not throw but did: ${outcome.exceptionOrNull()}")
@@ -79,6 +91,15 @@ internal fun GraphFixture.executeExpectingClientErrors(
 	val errors = assertNotNull(serialized["errors"], "expected an 'errors' entry in $serialized")
 	assertTrue(errors is Collection<*>, "expected 'errors' to be a collection but was $errors")
 	assertTrue(errors.isNotEmpty(), "expected at least one error in $serialized")
+
+	if (expectedErrorCode !== null)
+		for (error in errors) {
+			assertTrue(error is Map<*, *>, "expected each error to be a map but was $error")
+
+			val extensions = assertNotNull(error["extensions"], "expected 'extensions' in error $error of $serialized")
+			assertTrue(extensions is Map<*, *>, "expected 'extensions' to be a map but was $extensions")
+			assertEquals(actual = extensions["code"], expected = expectedErrorCode, message = "in error $error of $serialized")
+		}
 
 	return serialized
 }

@@ -25,13 +25,26 @@ internal class GraphTypeSystemBuilder private constructor(
 	private val typeDefinitions = systemDefinition.definitions.filterIsInstance<GraphTypeDefinition>()
 
 
-	private fun build() =
-		GraphTypeSystem(
-			types = typeDefinitions.map(::buildType) +
-				operationDefinitionsByType.map { (operationType, definitions) ->
-					buildType(operationType, definitions)
-				}
+	private fun build(): GraphTypeSystem {
+		val externallyDeclaredTypeNamesByKotlinType = mutableMapOf<KotlinType, String>()
+		val types = mutableListOf<GraphType>()
+
+		for (definition in typeDefinitions)
+			// A scalar definition without coercion functions exists only to map a Kotlin type onto a type fluid GraphQL
+			// already declares, so it contributes a name to resolve references against but no type of raptor's own.
+			if (definition is ScalarGraphDefinition && definition.parse === null && definition.serialize === null)
+				externallyDeclaredTypeNamesByKotlinType[definition.kotlinType] = definition.name
+			else
+				types += buildType(definition)
+
+		for ((operationType, definitions) in operationDefinitionsByType)
+			types += buildType(operationType, definitions)
+
+		return GraphTypeSystem(
+			externallyDeclaredTypeNamesByKotlinType = externallyDeclaredTypeNamesByKotlinType,
+			types = types
 		)
+	}
 
 
 	private fun buildType(operationType: RaptorGraphOperationType, definitions: Collection<GraphOperationDefinition>) =
@@ -176,6 +189,7 @@ internal class GraphTypeSystemBuilder private constructor(
 		)
 
 
+	// `build` routes definitions without coercion functions elsewhere, so only coercing ones reach this.
 	private fun buildScalarType(definition: ScalarGraphDefinition) =
 		ScalarGraphType(
 			description = definition.description,
@@ -183,8 +197,8 @@ internal class GraphTypeSystemBuilder private constructor(
 			isOutput = definition.isOutput,
 			kotlinType = definition.kotlinType,
 			name = definition.name,
-			parse = definition.parse,
-			serialize = definition.serialize
+			parse = checkNotNull(definition.parse),
+			serialize = checkNotNull(definition.serialize)
 		)
 
 

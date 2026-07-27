@@ -18,13 +18,12 @@ flagged `// FIXME Rework exception handling.` — this FIXME is only on this cla
   sole `isInstance` match; with 2+ matches `closest()` cannot locate the interface up the
   `superclass` chain and fails. **Register handlers on concrete classes.**
 
-Every graph auto-registers (in `RaptorGraphComponent`'s init block,
-`modules/graph/sources-jvm/assembly/RaptorGraphComponent.kt`) a handler for
-`InvalidValueException` → code `"invalid value"`. Subclasses (`TooLong`/`TooShort`/
-`TooLarge`/`TooSmall`) assert in their constructor that the value violates the bound
-(`ForbiddenCharacter` asserts its index is in range) — a non-violating value throws
-`IllegalArgumentException`. Anchor:
-`modules/graph/sources-jvm/exceptions/InvalidValueException.kt`.
+**No handler is pre-registered.** `RaptorGraphComponent`
+(`modules/graph/sources-jvm/assembly/RaptorGraphComponent.kt`) registers none, so until an
+application calls `handle<…>` every failing resolver yields that generic internal error. Input
+rejections are the exception that proves the first rule: `invalid(…)` throws a ready-made
+`GErrorException` and reaches the client with its own `extensions` (`invalid-input-errors.md`) —
+which is also why registering a handler for them is pointless.
 
 Trap: `modules/ktor-graph/sources-jvm/graphql/execution/ExceptionHandler.kt` is an unreferenced
 second `GExceptionHandler` that maps any non-`ServerFailure` to `ServerFailure.internal` and

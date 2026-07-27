@@ -20,7 +20,7 @@ internal fun RaptorEntityId.Companion.graphDefinition(definitions: Collection<Ra
 
 		parse { string ->
 			val definition = string.substringBefore(":", missingDelimiterValue = "")
-				.ifEmpty { invalidValueError() }
+				.ifEmpty { invalid() }
 				.let { discriminator ->
 					definitionsByDiscriminator[discriminator] ?: error("No definition provided for entity IDs with discriminator '$discriminator'.")
 				}

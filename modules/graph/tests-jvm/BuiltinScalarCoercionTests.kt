@@ -28,6 +28,12 @@ class BuiltinScalarCoercionTests {
 
 				resolver { value }
 			},
+			graphOperationDefinition<Double>(name = "nanFloat", operationType = RaptorGraphOperationType.query) {
+				resolver { Double.NaN }
+			},
+			graphOperationDefinition<Double>(name = "infiniteFloat", operationType = RaptorGraphOperationType.query) {
+				resolver { Double.POSITIVE_INFINITY }
+			},
 			graphOperationDefinition<Int>(name = "constInt", operationType = RaptorGraphOperationType.query) {
 				resolver { 42 }
 			},
@@ -93,6 +99,19 @@ class BuiltinScalarCoercionTests {
 			),
 			expected = mapOf("echoFloat" to 2.25),
 		)
+	}
+
+
+	// `Float` cannot represent `NaN` or the infinities, so output coercion must reject them instead of
+	// emitting a value no JSON document can carry. Both fields are non-null, so the rejection nulls the
+	// whole `data` entry rather than just the field.
+	@Test
+	fun nonFiniteFloatOutputProducesClientError() {
+		val nan = fixture.executeExpectingClientErrors(query = "{nanFloat}", label = "FLOAT NAN OUTPUT")
+		assertNull(actual = nan["data"], message = "expected 'data' to be null in $nan")
+
+		val infinity = fixture.executeExpectingClientErrors(query = "{infiniteFloat}", label = "FLOAT INFINITY OUTPUT")
+		assertNull(actual = infinity["data"], message = "expected 'data' to be null in $infinity")
 	}
 
 

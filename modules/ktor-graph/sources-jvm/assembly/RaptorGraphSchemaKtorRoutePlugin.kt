@@ -1,5 +1,6 @@
 package io.fluidsonic.raptor.ktor.graph
 
+import io.fluidsonic.graphql.*
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.graph.*
 import io.fluidsonic.raptor.ktor.*
@@ -27,7 +28,7 @@ internal class RaptorGraphSchemaKtorRoutePlugin(
 				get {
 					val schema = checkNotNull(raptorContext[Keys.graphSchemaProperty])
 
-					call.respondText(schema.toString(), ContentType.Text.Plain)
+					call.respondText(printSchema(schema, indent = "\t"), ContentType.Text.Plain)
 				}
 			}
 		}

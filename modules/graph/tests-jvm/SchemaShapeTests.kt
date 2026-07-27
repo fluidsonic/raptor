@@ -11,11 +11,28 @@ import kotlin.test.*
  */
 class SchemaShapeTests {
 
+	// `GSchema` lists a built-in scalar only when a type or directive definition refers to it, so the
+	// schema under test must name all five for the assertions below to be meaningful.
 	private val fixture = graphFixture {
 		definitions.includeDefault()
+
+		definitions.newIdAlias<ThingId> {
+			parse { ThingId(it) }
+			serialize { it.value }
+		}
+
 		definitions.add(
 			graphOperationDefinition<String>(name = "hello", operationType = RaptorGraphOperationType.query) {
 				resolver { "world" }
+			},
+			graphOperationDefinition<Double>(name = "ratio", operationType = RaptorGraphOperationType.query) {
+				resolver { 0.5 }
+			},
+			graphOperationDefinition<Int>(name = "count", operationType = RaptorGraphOperationType.query) {
+				resolver { 1 }
+			},
+			graphOperationDefinition<ThingId>(name = "thingId", operationType = RaptorGraphOperationType.query) {
+				resolver { ThingId("thing-1") }
 			},
 		)
 	}
@@ -24,7 +41,7 @@ class SchemaShapeTests {
 		get() = fixture.graph.schema
 
 	private val sdlLines: List<String>
-		get() = schema.toString().lines()
+		get() = printSchema(schema, indent = "\t").lines()
 
 
 	@Test
@@ -67,9 +84,10 @@ class SchemaShapeTests {
 	}
 
 
-	// `GSchema` appends fluid's built-in types last, so they win the by-name lookup used by
-	// `resolveType(…)` even while raptor also emits its own custom scalars for those names.
-	// This asserts the underlying type list itself is free of such duplicates.
+	// Raptor maps Kotlin types like `Boolean` and `Int` onto the built-in scalar names, and `GSchema`
+	// drops those mappings in favour of fluid's own singletons. This asserts the type list carries no
+	// leftover custom scalar under a built-in name — which would shadow the singleton by-name lookups
+	// asserted above.
 	@Test
 	fun schemaDeclaresNoCustomScalarsForBuiltInNames() {
 		val builtInNames = listOf("Boolean", "Float", "ID", "Int", "String")
@@ -119,6 +137,34 @@ class SchemaShapeTests {
 	}
 
 
+	// The built-in scalar names resolve through a lookup that carries no raptor type, since raptor emits no
+	// definition for them. A Kotlin type with no mapping at all must still be rejected by raptor's own
+	// diagnostic rather than pass through that lookup unnoticed. An object field is the vehicle because a
+	// missing mapping on an operation's own output type is caught one stage earlier.
+	@Test
+	fun unmappedKotlinTypeIsRejected() {
+		val exception = assertNotNull(
+			runCatching {
+				graphFixture {
+					definitions.add(
+						graphObjectDefinition<Thing> {
+							field(Thing::unmapped)
+						},
+						graphOperationDefinition<Thing>(name = "thing", operationType = RaptorGraphOperationType.query) {
+							resolver { Thing(Unmapped) }
+						},
+					)
+				}
+			}.exceptionOrNull(),
+			"expected assembly to fail for a Kotlin type without a GraphQL mapping",
+		)
+
+		assertIs<IllegalStateException>(exception, "expected raptor's own error but got $exception")
+		assertContains(exception.message.orEmpty(), "Cannot resolve GraphQL type for Kotlin type")
+		assertContains(exception.message.orEmpty(), "Unmapped")
+	}
+
+
 	private fun assertSdlContains(line: String) {
 		assertTrue(sdlLines.contains(line), "expected SDL to contain the line '$line':\n$schema")
 	}
@@ -128,3 +174,15 @@ class SchemaShapeTests {
 		assertFalse(sdlLines.contains(line), "expected SDL to not contain the line '$line':\n$schema")
 	}
 }
+
+
+@JvmInline
+private value class ThingId(val value: String)
+
+
+private class Thing(
+	val unmapped: Unmapped,
+)
+
+
+private object Unmapped

@@ -62,6 +62,7 @@ class InputObjectFactoryTests {
 		fixture.executeExpectingClientErrors(
 			query = "{describeRange(value: {start: 5, endInclusive: 1})}",
 			label = "INPUT OBJECT FACTORY LITERAL",
+			expectedErrorCode = "invalid value",
 		)
 	}
 
@@ -72,6 +73,7 @@ class InputObjectFactoryTests {
 			query = "query(\$value: Range!) {describeRange(value: \$value)}",
 			variableValues = mapOf("value" to mapOf("start" to 5, "endInclusive" to 1)),
 			label = "INPUT OBJECT FACTORY VARIABLE",
+			expectedErrorCode = "invalid value",
 		)
 	}
 

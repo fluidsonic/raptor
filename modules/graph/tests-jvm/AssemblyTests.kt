@@ -19,6 +19,7 @@ class AssemblyTests {
 					add(Dummy1.graphDefinition())
 					add(listOf(Dummy2.graphDefinition()))
 				}
+				addHelloQuery()
 			}
 
 			graphs.new().apply {
@@ -27,6 +28,7 @@ class AssemblyTests {
 					add(Dummy3.graphDefinition())
 					add(listOf(Dummy4.graphDefinition()))
 				}
+				addHelloQuery()
 			}
 		}
 
@@ -46,7 +48,10 @@ class AssemblyTests {
 			install(RaptorDIPlugin)
 			install(RaptorGraphPlugin)
 
-			graphs.new().tag("A")
+			graphs.new().apply {
+				tag("A")
+				addHelloQuery()
+			}
 
 			di.provide<RaptorGraph> { context.plugins.graph.taggedGraph("A") }
 		}
@@ -63,10 +68,12 @@ class AssemblyTests {
 			graphs.new {
 				tag("A")
 				definitions.includeDefault()
+				addHelloQuery()
 			}
 
 			graphs.new().apply {
 				tag("B")
+				addHelloQuery()
 			}
 		}
 
@@ -101,11 +108,11 @@ class AssemblyTests {
 		val raptor = raptor {
 			install(RaptorGraphPlugin)
 
-			graphs.new()
-			graphs.new {}
+			graphs.new().addHelloQuery()
+			graphs.new { addHelloQuery() }
 			graphs {
-				new()
-				new {}
+				new().addHelloQuery()
+				new { addHelloQuery() }
 			}
 
 			graphs.all {
@@ -128,9 +135,13 @@ class AssemblyTests {
 		val raptor = raptor {
 			install(RaptorGraphPlugin)
 
-			graphs.new().tag("A")
+			graphs.new().apply {
+				tag("A")
+				addHelloQuery()
+			}
 			graphs.new {
 				tag("B", "C")
+				addHelloQuery()
 			}
 
 			graphs.tagged("A") {
@@ -146,7 +157,10 @@ class AssemblyTests {
 				dTagged += 1
 			}
 
-			graphs.new().tag("D")
+			graphs.new().apply {
+				tag("D")
+				addHelloQuery()
+			}
 		}
 
 		assertEquals(actual = aTagged, expected = 1)
@@ -156,6 +170,17 @@ class AssemblyTests {
 		assertEquals(
 			actual = raptor.context.plugins.graph.graphs.mapTo(hashSetOf()) { it.tags },
 			expected = setOf<Set<Any>>(setOf("A"), setOf("B", "C"), setOf("D")),
+		)
+	}
+
+
+	// Every graph needs a query root type to assemble. These tests are about graph creation, tagging and DI, so each
+	// graph gets the same throwaway query operation — nothing here asserts on it.
+	private fun RaptorGraphComponent.addHelloQuery() {
+		definitions.add(
+			graphOperationDefinition<String>(name = "hello", operationType = RaptorGraphOperationType.query) {
+				resolver { "world" }
+			},
 		)
 	}
 

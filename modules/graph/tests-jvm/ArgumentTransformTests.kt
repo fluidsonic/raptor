@@ -73,6 +73,7 @@ class ArgumentTransformTests {
 		fixture.executeExpectingClientErrors(
 			query = "{doublePositive(value: 0)}",
 			label = "ARGUMENT VALIDATE LITERAL",
+			expectedErrorCode = "invalid value",
 		)
 	}
 
@@ -83,6 +84,7 @@ class ArgumentTransformTests {
 			query = "query(\$value: Int!) {doublePositive(value: \$value)}",
 			variableValues = mapOf("value" to 0),
 			label = "ARGUMENT VALIDATE VARIABLE",
+			expectedErrorCode = "invalid value",
 		)
 	}
 }

@@ -41,6 +41,7 @@ class InvalidInputTests {
 		fixture.executeExpectingClientErrors(
 			query = """{echoRestricted(value: "nope")}""",
 			label = "SCALAR INVALID LITERAL",
+			expectedErrorCode = "invalid value",
 		)
 	}
 
@@ -51,6 +52,7 @@ class InvalidInputTests {
 			query = "query(\$value: Restricted!) {echoRestricted(value: \$value)}",
 			variableValues = mapOf("value" to "nope"),
 			label = "SCALAR INVALID VARIABLE",
+			expectedErrorCode = "invalid value",
 		)
 	}
 

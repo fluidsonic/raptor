@@ -12,7 +12,9 @@ The HTTP surface for GraphQL: `modules/ktor-graph` wires `modules/graph` into Kt
   `RaptorGraphSchemaKtorRoutePlugin.kt` (`graphSchema`).
 - **HTTP methods:** the graph query route registers both `get` and `post` dispatching to
   `GraphRoute.handle(call)`; the schema route registers only `get` responding with
-  `schema.toString()` as `text/plain`.
+  `printSchema(schema, indent = "\t")` as `text/plain` — the indent is passed explicitly instead of
+  relying on `GSchema.toString()`, so the served SDL is tab-indented regardless of fluid GraphQL's
+  own default.
 - **Two-phase route plugin lifecycle.** The `get`/`post` handlers are claimed in
   `onConfigurationStarted`, but the actual `GraphRoute` / `GSchema` property (resolved via
   `require(RaptorGraphPlugin).taggedGraph(tag)`) is registered into `propertyRegistry` only

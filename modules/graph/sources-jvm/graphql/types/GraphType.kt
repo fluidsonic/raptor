@@ -127,10 +127,10 @@ internal class ObjectGraphType(
 
 
 /**
- * A GraphQL scalar type.
+ * A GraphQL scalar type that raptor declares in the schema and coerces itself.
  *
- * [parse] and [serialize] are `null` together for the Kotlin-type mappings of GraphQL's built-in scalars, which
- * fluid GraphQL declares and coerces itself. See [ScalarGraphType.hasCoercer].
+ * Kotlin-type mappings of GraphQL's built-in scalars are not represented as scalar types: fluid GraphQL declares and
+ * coerces those, so [GraphTypeSystem] carries them as type names only.
  */
 internal class ScalarGraphType(
 	description: String?,
@@ -138,8 +138,8 @@ internal class ScalarGraphType(
 	override val isOutput: Boolean,
 	kotlinType: KotlinType,
 	name: String,
-	val parse: (RaptorGraphInputScope.(input: Any) -> Any)?,
-	val serialize: (RaptorGraphOutputScope.(output: Any) -> Any)?,
+	val parse: RaptorGraphInputScope.(input: Any) -> Any,
+	val serialize: RaptorGraphOutputScope.(output: Any) -> Any,
 ) : NamedGraphType(
 	description = description,
 	kotlinType = kotlinType,
@@ -148,13 +148,7 @@ internal class ScalarGraphType(
 
 	init {
 		require(isInput || isOutput)
-		require((parse === null) == (serialize === null)) { "'parse' and 'serialize' must either both be defined or both be absent." }
 	}
-
-
-	/** Whether this type brings its own coercion, as opposed to leaving coercion to fluid GraphQL. */
-	val hasCoercer: Boolean
-		get() = parse !== null
 }
 
 

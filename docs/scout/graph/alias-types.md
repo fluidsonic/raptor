@@ -20,5 +20,10 @@ produces no GraphQL type of its own, which changes what clients must write and w
 - Consequence: conversion happens only where an argument or field definition carries that
   extension. Anywhere fluid GraphQL coerces by type — variable coercion in particular — the
   value is handled as the referenced type, and raptor converts it afterwards.
+- **`raptorType` is nullable and both readers narrow it with `as? AliasGraphType`**
+  (`ArgumentResolver`, `FieldResolver`). It is filled from `GraphSystemBuilder.underlyingType`,
+  which returns `null` for a Kotlin type mapped onto a built-in scalar (`builtin-scalars.md`), so it
+  reads back as `null` on an argument or field of type `Int` or `String`. A new reader that assumes
+  a non-null `GraphType` there would break on exactly those.
 
 Related: `builtin-scalars.md` (ID has no raptor scalar type), `coercion-scopes.md`.

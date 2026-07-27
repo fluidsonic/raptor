@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.40.0] - 2026-07-28
+
+### Changed
+- Updated fluid-graphql to 0.19.0
+- A literal rejected by a scalar, enum or input-object coercer is now a validation error and fails before any resolver runs
+- Rejected input now carries `extensions.code` on every error; a rejected variable no longer carries a `path`
+- A non-null argument or input field without a default is now always required
+- `Float` now rejects `NaN` and the infinities instead of emitting invalid JSON
+- A cancelled request no longer turns into a GraphQL error
+- Schemas are validated against the GraphQL specification when a graph is assembled
+- Assembling a graph fails when a type name is reserved by GraphQL, notably `ID` or any `__` prefix
+- `graphSchema()` serves the schema through fluid-graphql's `printSchema`, changing the document's formatting
+
+### Removed
+- `InvalidValueException` and `invalidValueError()` are gone. Use `RaptorGraphInputScope.invalid()` or throw `GErrorException`
+
+### Fixed
+- A graph declaring no query operation now fails at assembly instead of producing a schema that breaks every request
+
 ## [0.39.0] - 2026-07-27
 
 ### Changed

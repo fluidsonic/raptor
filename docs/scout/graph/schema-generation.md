@@ -27,9 +27,11 @@ declaration-order output or a richer default scalar set. The GraphQL implementat
   forks on `kotlinType.classifier.objectInstance`: a singleton `object` with no fields gets
   an injected `_` field of type `Unit` (description cites `graphql/graphql-spec#568`); a
   non-object class with no fields errors "At least one field must be defined."
-- **Reserved names & no subscriptions.** `registerNamedTypeDefinition` (same
-  `GraphSystemDefinitionBuilder.kt`) errors if a type name equals the default Query/Mutation
-  type name (the Subscription check is commented out). `GraphTypeSystemBuilder.buildType`
+- **Reserved names & no subscriptions.** Names are guarded in two places:
+  `registerNamedTypeDefinition` (same `GraphSystemDefinitionBuilder.kt`) errors if a type name
+  equals the default Query/Mutation type name (the Subscription check is commented out), and
+  `GraphSystemBuilder.checkTypeNameIsNotReserved` errors on GraphQL's reserved type names — see
+  `schema-assembly-checks.md`. `GraphTypeSystemBuilder.buildType`
   (`modules/graph/sources-jvm/graphql/GraphTypeSystemBuilder.kt`) has an exhaustive `when`
   over `RaptorGraphOperationType` with only `query` and `mutation` arms — **subscriptions are
   not implemented.** Query/Mutation roots are backed by empty private placeholder `object`s

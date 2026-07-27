@@ -5,20 +5,20 @@ import io.fluidsonic.graphql.*
 
 internal class ScalarCoercer(
 	raptorType: ScalarGraphType,
-) : GNodeInputCoercer<GValue>, GOutputCoercer<Any>, GVariableInputCoercer<Any> {
+) : GInputLiteralCoercer<GValue>, GOutputValueCoercer<Any>, GInputValueCoercer<Any> {
 
-	private val parse = checkNotNull(raptorType.parse) { "Scalar type '${raptorType.name}' does not coerce values." }
-	private val serialize = checkNotNull(raptorType.serialize) { "Scalar type '${raptorType.name}' does not coerce values." }
-
-
-	override fun GNodeInputCoercerContext.coerceNodeInput(input: GValue): Any =
-		parse(GraphInputScope, input.unwrap() ?: GraphInputScope.invalid())
+	private val parse = raptorType.parse
+	private val serialize = raptorType.serialize
 
 
-	override fun GOutputCoercerContext.coerceOutput(output: Any): Any =
-		serialize(GraphOutputScope, output)
+	override fun coerceInputLiteral(value: GValue): Any =
+		parse(GraphInputScope, value.unwrap() ?: GraphInputScope.invalid())
 
 
-	override fun GVariableInputCoercerContext.coerceVariableInput(input: Any): Any =
-		parse(GraphInputScope, input)
+	override fun coerceOutputValue(value: Any): Any =
+		serialize(GraphOutputScope, value)
+
+
+	override fun coerceInputValue(value: Any): Any =
+		parse(GraphInputScope, value)
 }

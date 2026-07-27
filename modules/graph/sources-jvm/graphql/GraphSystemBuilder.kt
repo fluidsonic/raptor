@@ -1,7 +1,6 @@
 package io.fluidsonic.raptor.graph
 
 import io.fluidsonic.graphql.*
-import io.fluidsonic.stdlib.*
 import kotlin.reflect.*
 import kotlin.reflect.full.*
 
@@ -19,10 +18,15 @@ internal class GraphSystemBuilder private constructor(
 		buildSchema()
 
 
-	// TODO validate
-	private fun buildSchema() = GSchema(
-		document = GDocument(definitions = buildTypeDefinitions()),
-	)
+	private fun buildSchema(): GSchema {
+		val typeDefinitions = buildTypeDefinitions()
+		checkQueryRootTypeIsProvided(typeDefinitions)
+
+		val schema = GSchema(document = GDocument(definitions = typeDefinitions))
+		schema.assertValid()
+
+		return schema
+	}
 
 
 	private fun buildEnumDefinition(type: EnumGraphType): GEnumType {
@@ -40,9 +44,9 @@ internal class GraphSystemBuilder private constructor(
 				}
 				.sortedBy { it.name },
 			extensions = GNodeExtensionSet {
-				nodeInputCoercer = coercer
-				outputCoercer = coercer
-				variableInputCoercer = coercer
+				inputLiteralCoercer = coercer
+				outputValueCoercer = coercer
+				inputValueCoercer = coercer
 			}
 		)
 	}
@@ -92,8 +96,8 @@ internal class GraphSystemBuilder private constructor(
 			description = type.description,
 			name = type.name,
 			extensions = GNodeExtensionSet {
-				nodeInputCoercer = coercer
-				variableInputCoercer = coercer
+				inputLiteralCoercer = coercer
+				inputValueCoercer = coercer
 			}
 		)
 	}
@@ -124,9 +128,9 @@ internal class GraphSystemBuilder private constructor(
 			description = type.description,
 			name = type.name,
 			extensions = GNodeExtensionSet {
-				nodeInputCoercer = coercer
-				outputCoercer = coercer
-				variableInputCoercer = coercer
+				inputLiteralCoercer = coercer
+				outputValueCoercer = coercer
+				inputValueCoercer = coercer
 			}
 		)
 	}
@@ -145,7 +149,7 @@ internal class GraphSystemBuilder private constructor(
 	private fun buildTypeDefinitions(): List<GNamedType> =
 		typeSystem.types
 			.filterIsInstance<NamedGraphType>()
-			.filterNot(::isDeclaredByFluid)
+			.onEach(::checkTypeNameIsNotReserved)
 			.map(::buildTypeDefinition)
 			.sortedBy { it.name }
 
@@ -157,11 +161,29 @@ internal class GraphSystemBuilder private constructor(
 	)
 
 
-	// A scalar without a coercer is one of raptor's Kotlin-type mappings for GraphQL's built-in scalars. Fluid GraphQL
-	// declares and coerces those itself, and the GraphQL specification forbids redeclaring them, so raptor must keep
-	// them in its type system but leave them out of the schema.
-	private fun isDeclaredByFluid(type: NamedGraphType): Boolean =
-		type is ScalarGraphType && !type.hasCoercer
+	// Asserts on the emitted type definitions rather than on the declared operation types: the query root type being
+	// present is the actual requirement, and any future route that contributes it must satisfy this check too.
+	// `assertValid()` would catch this as well, but only with fluid GraphQL's `Query root type must be provided.`, which
+	// names neither raptor's DSL nor the graph that lacks the operation.
+	private fun checkQueryRootTypeIsProvided(typeDefinitions: List<GNamedType>) {
+		if (typeDefinitions.none { it is GObjectType && it.name == GLanguage.defaultQueryTypeName })
+			error(
+				"A GraphQL schema must provide a query root type, so a graph must define at least one query operation.\n" +
+					"Add one to this graph, for example:\n" +
+					"graphOperationDefinition<String>(name = \"hello\", operationType = RaptorGraphOperationType.query) { … }\n---"
+			)
+	}
+
+
+	// Applied to every type the type system holds: those are exactly the types raptor emits, so raptor's own mappings
+	// for the built-in scalar names — which fluid GraphQL declares instead — never reach this check and need no
+	// exemption from it.
+	// Unlike `GraphSystemDefinitionBuilder`, this stage no longer holds the definition or its stack trace — only the
+	// type — so the Kotlin type is the best definition-site locator available.
+	private fun checkTypeNameIsNotReserved(type: NamedGraphType) {
+		if (GLanguage.isReservedTypeName(type.name))
+			error("A GraphQL type definition must not use the reserved type name '${type.name}':\n${type.kotlinType}\n---")
+	}
 
 
 	private fun interfaceTypeRefsForKotlinType(kotlinType: KotlinType): List<GNamedTypeRef> {
@@ -222,22 +244,26 @@ internal class GraphSystemBuilder private constructor(
 			Collection::class, List::class, Set::class -> // TODO improve
 				GListTypeRef(typeRef(checkNotNull(nonNullKotlinType.typeArguments.single()), isInput = isInput))
 
-			else -> when (isInput) {
-				true -> typeSystem.resolveInputType(nonNullKotlinType)
-				false -> typeSystem.resolveOutputType(nonNullKotlinType)
-			}
-				.ifNull { error("Cannot resolve GraphQL type for Kotlin type '$nonNullKotlinType'.") } // TODO print stacktrace of usage(s) here
-				.let { type ->
-					when (type) {
-						is AliasGraphType -> when {
-							type.isId -> GIdTypeRef
-							else -> typeRef(type.referencedKotlinType, isInput = isInput).nullableRef
-						}
-
-						is NamedGraphType ->
-							GNamedTypeRef(type.name)
-					}
+			else -> when (
+				val type = when (isInput) {
+					true -> typeSystem.resolveInputType(nonNullKotlinType)
+					false -> typeSystem.resolveOutputType(nonNullKotlinType)
 				}
+			) {
+				is AliasGraphType -> when {
+					type.isId -> GIdTypeRef
+					else -> typeRef(type.referencedKotlinType, isInput = isInput).nullableRef
+				}
+
+				is NamedGraphType ->
+					GNamedTypeRef(type.name)
+
+				// A type declared outside raptor has no entry among the emitted types, so only its name is available.
+				null -> GNamedTypeRef(
+					typeSystem.resolveExternallyDeclaredTypeName(nonNullKotlinType)
+						?: error("Cannot resolve GraphQL type for Kotlin type '$nonNullKotlinType'.") // TODO print stacktrace of usage(s) here
+				)
+			}
 		}.let { typeRef ->
 			when (kotlinType.isNullable) {
 				true -> typeRef
@@ -247,7 +273,9 @@ internal class GraphSystemBuilder private constructor(
 	}
 
 
-	private fun underlyingType(kotlinType: KotlinType, isInput: Boolean): GraphType {
+	// `null` for a type declared outside raptor, which raptor has no type of its own for. Callers that also need the
+	// type to exist go through `typeRef`, which rejects a Kotlin type with no mapping at all.
+	private fun underlyingType(kotlinType: KotlinType, isInput: Boolean): GraphType? {
 		@Suppress("NAME_SHADOWING")
 		val kotlinType = kotlinType.withNullable(false)
 
@@ -258,7 +286,7 @@ internal class GraphSystemBuilder private constructor(
 			else -> when (isInput) {
 				true -> typeSystem.resolveInputType(kotlinType)
 				false -> typeSystem.resolveOutputType(kotlinType)
-			} ?: error("Cannot resolve GraphQL type for Kotlin type '$kotlinType'.")
+			}
 		}
 	}
 

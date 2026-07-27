@@ -6,7 +6,7 @@ import io.fluidsonic.graphql.*
 internal class InputObjectCoercer(
 	private val argumentDefinitions: Collection<GArgumentDefinition>,
 	private val raptorType: InputObjectGraphType,
-) : GNodeInputCoercer<Map<String, Any?>>, GVariableInputCoercer<Map<String, Any?>> {
+) : GInputLiteralCoercer<Map<String, Any?>>, GInputValueCoercer<Map<String, Any?>> {
 
 	private fun coerceInput(input: Map<String, Any?>): Any =
 		raptorType.argumentResolver.withArguments(
@@ -15,10 +15,10 @@ internal class InputObjectCoercer(
 		) { raptorType.create(GraphInputScope) }
 
 
-	override fun GNodeInputCoercerContext.coerceNodeInput(input: Map<String, Any?>): Any =
-		coerceInput(input)
+	override fun coerceInputLiteral(value: Map<String, Any?>): Any =
+		coerceInput(value)
 
 
-	override fun GVariableInputCoercerContext.coerceVariableInput(input: Map<String, Any?>): Any =
-		coerceInput(input)
+	override fun coerceInputValue(value: Map<String, Any?>): Any =
+		coerceInput(value)
 }

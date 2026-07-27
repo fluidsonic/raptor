@@ -5,7 +5,7 @@ import io.fluidsonic.graphql.*
 
 internal class EnumCoercer(
 	private val raptorType: EnumGraphType,
-) : GNodeInputCoercer<Any>, GOutputCoercer<Any>, GVariableInputCoercer<Any> {
+) : GInputLiteralCoercer<Any>, GOutputValueCoercer<Any>, GInputValueCoercer<Any> {
 
 	private fun coerceInput(input: Any?): Any =
 		(input as? String)
@@ -13,14 +13,14 @@ internal class EnumCoercer(
 			?: GraphInputScope.invalid()
 
 
-	override fun GNodeInputCoercerContext.coerceNodeInput(input: Any): Any =
-		coerceInput((input as? GEnumValue)?.name)
+	override fun coerceInputLiteral(value: Any): Any =
+		coerceInput((value as? GEnumValue)?.name)
 
 
-	override fun GOutputCoercerContext.coerceOutput(output: Any): Any =
-		raptorType.serialize(GraphOutputScope, output)
+	override fun coerceOutputValue(value: Any): Any =
+		raptorType.serialize(GraphOutputScope, value)
 
 
-	override fun GVariableInputCoercerContext.coerceVariableInput(input: Any): Any =
-		coerceInput(input)
+	override fun coerceInputValue(value: Any): Any =
+		coerceInput(value)
 }

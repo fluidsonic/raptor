@@ -20,6 +20,12 @@ How a Kotlin type becomes a GraphQL type reference. `KotlinType`
   `tailrec`) — resolving one reference can register new definitions. A definition that reaches
   `GraphTypeSystemBuilder.buildType` unspecialized fails with "Definition has not been
   specialized", and generic object types are excluded from union possible types (`unions.md`).
+- **An unmapped Kotlin type fails at one of two stages, with two different messages.** As an
+  operation's own output type, `GraphSystemDefinitionBuilder.resolveReferences` rejects it ("Cannot
+  resolve output type of …"); on a field or an input-object argument `TypeDefinitionRegistry.resolve`
+  silently returns `null` and the failure only surfaces in `GraphSystemBuilder.typeRef` ("Cannot
+  resolve GraphQL type for Kotlin type '…'."). To exercise the second, reference the type from a
+  field — see `unmappedKotlinTypeIsRejected` in `modules/graph/tests-jvm/SchemaShapeTests.kt`.
 - **`Maybe<T>` is rejected outright** ("'Maybe' is not supported by the GraphQL type mapping").
   Argument absence is not representable; use a nullable argument, plus `defaultNull()` if a
   default is wanted.
