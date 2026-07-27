@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.39.0] - 2026-07-27
+
+### Changed
+- Updated fluid-graphql to 0.18.0
+- **GraphQL document validation is substantially stricter.** Raptor validates every incoming document, and several of fluid-graphql's validation rules were previously partly or wholly inert — field selection merging, for one, only ever checked the first selection set of the first definition in a document. Queries that raptor accepted before may now be rejected, failing with an `errors` array before any resolver runs
+- Validation error messages, their order and their number now follow graphql-js. Raptor passes them to the client verbatim, so anything matching on `errors[].message`, on error order (now document order rather than grouped by rule), or on error count (one error per conflicting field pair, and at most 100 followed by `Too many validation errors, error limit reached. Validation aborted.`) may break
+
+### Fixed
+- A GraphQL request whose document nests deeply, or whose fragment spreads itself, no longer crashes validation with a `StackOverflowError`. Both were reachable from untrusted input on every request
+
 ## [0.38.0] - 2026-07-26
 
 ### Added

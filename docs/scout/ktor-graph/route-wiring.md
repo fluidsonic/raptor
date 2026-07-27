@@ -34,7 +34,8 @@ document parses, GraphQL parse/validation/execution errors return **HTTP 200** w
 array — `executeDocument` serializes every `GResult` failure via `graph.serialize` instead of
 throwing. There is still no StatusPages plugin, so any *unexpected* exception escapes as a 500.
 Anchors: `modules/ktor-graph/sources-jvm/graphql/GraphRoute.kt` (`parseGraphRequest`,
-`resolveGraphOperation`, `GraphRoute.handle`, `executeDocument`).
+`resolveGraphOperation`, `GraphRoute.handle`, `executeDocument`). Those validation errors are
+fluid GraphQL's own, passed through unmodified — see `../graph/document-validation.md`.
 
 For a non-null `tag` (and a non-empty graph set), `taggedGraph(tag)` resolves via
 `graphs.singleOrNull { it.tags.contains(tag) }`, so BOTH the no-match and multi-match cases

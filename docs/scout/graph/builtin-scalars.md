@@ -23,5 +23,5 @@ without emitting a scalar type for them. Know this before adding or "fixing" a d
 - There is no raptor type for `ID` at all — no Kotlin type maps to it by default. Expose one as
   an ID alias (`graphIdAliasDefinition` / `definitions.newIdAlias`) — see `alias-types.md`.
 
-version: io.fluidsonic.graphql 0.17.0 (as of this pass; `Versions.fluid_graphql` in
+version: io.fluidsonic.graphql 0.18.0 (as of 2026-07-27; `Versions.fluid_graphql` in
 `buildSrc/sources/Versions.kt`)
