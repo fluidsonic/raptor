@@ -21,3 +21,9 @@ Conventions a `RaptorAggregate`/projector implementation must follow, demonstrat
   purely to satisfy Kotlin's exhaustiveness checker after the outer `when` already handled
   `Created`. This is the pattern for incremental projectors over a sealed change hierarchy.
   Anchor: `modules/domain/tests/domain/BankAccountProjector.kt` (`apply`).
+- **Dispatch on sealed command/change objects needs `is X ->`, never bare `X ->`.**
+  `BankAccountAggregate`/`CounterAggregate`'s `execute`/`handle` route each sealed member to an
+  identically-named private overload by narrowed type. Matching a `when` subject against a bare
+  `object` (e.g. `Create -> execute(command)`) does not smart-cast the subject, so the call
+  resolves against the *original* (unnarrowed) overload — for a `Unit`-returning overload this
+  compiles cleanly and silently infinite-recurses at runtime with no warning.

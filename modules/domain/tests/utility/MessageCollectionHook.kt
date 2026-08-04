@@ -1,7 +1,11 @@
 import io.fluidsonic.raptor.domain.*
+import kotlin.reflect.*
 
 
-internal class MessageCollectionHook : RaptorDomainStreamHook {
+internal class MessageCollectionHook(
+	override val aggregateIdClassFilter: Set<KClass<out RaptorAggregateId>>? = null,
+	override val projectionIdClassFilter: Set<KClass<out RaptorAggregateProjectionId>>? = null,
+) : RaptorDomainStreamHook {
 
 	val messages = mutableListOf<RaptorAggregateStreamMessage<*, *>>()
 	val projectionMessages = mutableListOf<RaptorAggregateProjectionStreamMessage<*, *, *>>()

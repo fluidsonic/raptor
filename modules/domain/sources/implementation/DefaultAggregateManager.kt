@@ -3,6 +3,7 @@ package io.fluidsonic.raptor.domain
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.di.*
 import io.fluidsonic.time.*
+import kotlin.reflect.*
 import kotlinx.atomicfu.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.*
@@ -28,6 +29,8 @@ internal class DefaultAggregateManager(
 	private var status = atomic(Status.new)
 
 	override val loaded = CompletableDeferred<RaptorDomain>()
+
+	private val hookDispatcher = HookDispatcher(hooks = hooks, definitions = definitions)
 
 
 	override fun execution(): RaptorAggregateCommandExecution {
@@ -110,12 +113,7 @@ internal class DefaultAggregateManager(
 				)
 			}
 
-		for (hook in hooks) {
-			hook.onAggregateStreamMessage(batch)
-
-			if (projectionBatch != null)
-				hook.onAggregateProjectionStreamMessage(projectionBatch)
-		}
+		hookDispatcher.dispatchLive(batch, projectionBatch)
 
 		eventStream.emit(batch)
 
@@ -157,7 +155,9 @@ internal class DefaultAggregateManager(
 
 		// Phase 1: Stream events from MongoDB, build aggregate state + projections, collect batches.
 		val batches = mutableListOf<RaptorAggregateEventBatch<*, *>>()
+		val batchAggregateIdClasses = mutableListOf<KClass<out RaptorAggregateId>>()
 		val projectionBatches = mutableListOf<RaptorAggregateProjectionEventBatch<*, *, *>>()
+		val projectionBatchIdClasses = mutableListOf<KClass<out RaptorAggregateProjectionId>>()
 
 		store.load().buffer(capacity = 1_000_000).collect { event ->
 			check(event.id.toLong() == lastEventId + 1) { "Expected event ${lastEventId + 1} but got: $event" }
@@ -189,6 +189,7 @@ internal class DefaultAggregateManager(
 					version = event.version,
 				)
 				batches += batch
+				batchAggregateIdClasses += state.definition.idClass
 
 				// Projection loading (no stream emission).
 				val projectionBatchEvents = batch.events.mapNotNull { projectionLoaderManager.addEvent(it) }
@@ -202,6 +203,9 @@ internal class DefaultAggregateManager(
 						projectionId = lastProjectionEvent.projectionId,
 						version = lastProjectionEvent.version,
 					)
+					projectionBatchIdClasses += checkNotNull(state.definition.projectionDefinition?.idClass) {
+						"Aggregate ${id.debug} produced a projection event but has no registered projection definition."
+					}
 				}
 
 				batchEventsByAggregateId.remove(id)
@@ -227,12 +231,7 @@ internal class DefaultAggregateManager(
 				.ifEmpty { null }
 				?.let(RaptorAggregateProjectionStreamMessage<*, *, *>::Replay)
 
-			for (hook in hooks) {
-				hook.onAggregateStreamMessage(batch)
-
-				if (projectionBatch != null)
-					hook.onAggregateProjectionStreamMessage(projectionBatch)
-			}
+			hookDispatcher.dispatchReplay(batch, batchAggregateIdClasses, projectionBatch, projectionBatchIdClasses)
 
 			eventStream.emit(batch)
 
@@ -250,10 +249,7 @@ internal class DefaultAggregateManager(
 			projectionLoaderManager.noteLoaded()
 
 			// TODO Might have deadlock potential. Add buffer somewhere?
-			for (hook in hooks) {
-				hook.onAggregateStreamMessage(RaptorAggregateStreamMessage.Loaded)
-				hook.onAggregateProjectionStreamMessage(RaptorAggregateProjectionStreamMessage.Loaded)
-			}
+			hookDispatcher.dispatchLoaded()
 
 			eventStream.emit(RaptorAggregateStreamMessage.Loaded)
 			projectionEventStream.emit(RaptorAggregateProjectionStreamMessage.Loaded)
