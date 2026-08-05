@@ -1,5 +1,11 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- `RaptorBsonType<Value>`, a resolve-once BSON value type created with `raptor.bson.type<T>()`. Read it through `RaptorBsonReader.valueOrThrow`/`valueOrNull` and write it through `RaptorBsonWriter.value(type, value)`, skipping the reflective type dispatch and codec-registry lookup a bare `reader.value<T>(field)`/`writer.value(field, value)` repeats on every call, with primitive-specialized overloads for `Int`/`Long`/`Double`/`Boolean` that avoid boxing on read
+- `RaptorBsonTypeAwareCodec`, letting a `raptor.bson.definition { }` opt into a `decodeWithType { }` block that receives the precomputed `RaptorBsonType` it's being decoded through — including nested and multi-argument generic type arguments (`argumentTypes`/`argumentNullability`) resolved once rather than per decode
+
 ## [0.40.0] - 2026-07-28
 
 ### Changed

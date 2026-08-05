@@ -63,6 +63,49 @@ public interface RaptorBsonWriter {
 	public fun value(value: Timestamp)
 
 	@RaptorDsl
+	public fun <Value : Any> value(type: RaptorBsonType<Value>, value: Value?)
+
+	/**
+	 * Writes [value] as an unboxed `Boolean`, ignoring [type].
+	 *
+	 * Unlike the generic overload this does not consult the codec registry, so none of the coercions the
+	 * registry's `Boolean` codec would apply take place — the value is written directly, the same way the
+	 * corresponding read-side overload avoids boxing.
+	 */
+	@RaptorDsl
+	public fun value(type: RaptorBsonType<Boolean>, value: Boolean)
+
+	/**
+	 * Writes [value] as an unboxed `Double`, ignoring [type].
+	 *
+	 * Unlike the generic overload this does not consult the codec registry, so none of the numeric widening
+	 * the registry's `Double` codec would apply takes place — the value is written directly, the same way
+	 * the corresponding read-side overload avoids boxing.
+	 */
+	@RaptorDsl
+	public fun value(type: RaptorBsonType<Double>, value: Double)
+
+	/**
+	 * Writes [value] as an unboxed `Int`, ignoring [type].
+	 *
+	 * Unlike the generic overload this does not consult the codec registry, so none of the numeric narrowing
+	 * the registry's `Int` codec would apply takes place — the value is written directly, the same way the
+	 * corresponding read-side overload avoids boxing.
+	 */
+	@RaptorDsl
+	public fun value(type: RaptorBsonType<Int>, value: Int)
+
+	/**
+	 * Writes [value] as an unboxed `Long`, ignoring [type].
+	 *
+	 * Unlike the generic overload this does not consult the codec registry, so none of the coercions the
+	 * registry's `Long` codec would apply take place — the value is written directly, the same way the
+	 * corresponding read-side overload avoids boxing.
+	 */
+	@RaptorDsl
+	public fun value(type: RaptorBsonType<Long>, value: Long)
+
+	@RaptorDsl
 	public fun <Value : Any> valueAs(value: Value?, valueClass: KClass<out Value>)
 }
 
@@ -292,6 +335,44 @@ public fun RaptorBsonWriter.value(field: String, value: Timestamp?, preserveNull
 		null -> value(null)
 		else -> value(value)
 	}
+}
+
+
+@RaptorDsl
+public fun <Value : Any> RaptorBsonWriter.value(field: String, type: RaptorBsonType<Value>, value: Value?, preserveNull: Boolean = false) {
+	if (value == null && !preserveNull)
+		return
+
+	fieldName(field)
+	value(type, value)
+}
+
+
+@RaptorDsl
+public fun RaptorBsonWriter.value(field: String, type: RaptorBsonType<Boolean>, value: Boolean) {
+	fieldName(field)
+	value(type, value)
+}
+
+
+@RaptorDsl
+public fun RaptorBsonWriter.value(field: String, type: RaptorBsonType<Double>, value: Double) {
+	fieldName(field)
+	value(type, value)
+}
+
+
+@RaptorDsl
+public fun RaptorBsonWriter.value(field: String, type: RaptorBsonType<Int>, value: Int) {
+	fieldName(field)
+	value(type, value)
+}
+
+
+@RaptorDsl
+public fun RaptorBsonWriter.value(field: String, type: RaptorBsonType<Long>, value: Long) {
+	fieldName(field)
+	value(type, value)
 }
 
 

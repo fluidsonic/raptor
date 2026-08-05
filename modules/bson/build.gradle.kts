@@ -19,6 +19,7 @@ fluidLibraryModule(description = "TODO") {
 			dependencies {
 				api(project(":raptor-core"))
 				api("org.mongodb:bson:${Versions.mongodb}")
+				api(kotlinx("serialization-core", Versions.kotlinx_serialization))
 
 				implementation(project(":raptor-di"))
 			}

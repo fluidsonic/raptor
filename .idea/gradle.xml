@@ -32,7 +32,6 @@
             <option value="$PROJECT_DIR$/modules/environment" />
             <option value="$PROJECT_DIR$/modules/event" />
             <option value="$PROJECT_DIR$/modules/graph" />
-            <option value="$PROJECT_DIR$/modules/graphql" />
             <option value="$PROJECT_DIR$/modules/jobs" />
             <option value="$PROJECT_DIR$/modules/ktor" />
             <option value="$PROJECT_DIR$/modules/ktor-graph" />

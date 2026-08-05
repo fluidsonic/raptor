@@ -100,6 +100,50 @@ internal class DefaultBsonWriterScope(
 	}
 
 
+	@Suppress("UNCHECKED_CAST")
+	override fun <Value : Any> value(type: RaptorBsonType<Value>, value: Value?) {
+		if (value == null) {
+			writeNull()
+			return
+		}
+
+		when (type.collectionKind) {
+			BsonCollectionKind.list, BsonCollectionKind.set -> collectionValue(type = type, values = value as Collection<Any?>)
+			null -> type.codec(codecRegistry).encode(scope = this, value = value as Any)
+		}
+	}
+
+
+	override fun value(type: RaptorBsonType<Boolean>, value: Boolean) {
+		value(value)
+	}
+
+
+	override fun value(type: RaptorBsonType<Double>, value: Double) {
+		value(value)
+	}
+
+
+	override fun value(type: RaptorBsonType<Int>, value: Int) {
+		value(value)
+	}
+
+
+	override fun value(type: RaptorBsonType<Long>, value: Long) {
+		value(value)
+	}
+
+
+	private fun collectionValue(type: RaptorBsonType<*>, values: Collection<Any?>) {
+		val elementType = type.elementType ?: error("Cannot write elements of unknown type: ${type.type}")
+
+		array {
+			for (element in values)
+				value(elementType, element)
+		}
+	}
+
+
 	override fun <Value : Any> valueAs(value: Value?, valueClass: KClass<out Value>) {
 		if (value == null) {
 			writeNull()

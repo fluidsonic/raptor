@@ -1,13 +1,21 @@
 package io.fluidsonic.raptor.bson
 
 import io.fluidsonic.raptor.*
+import java.util.concurrent.*
 import org.bson.codecs.*
+import org.bson.codecs.configuration.*
 
 
 internal object ListExtensions {
 
 	private val bsonTypeClassMap = BsonTypeClassMap()
 	private val decoderContext = DecoderContext.builder().build()
+
+	// `BsonTypeCodecMap`'s constructor resolves a codec for every `BsonType`, which is expensive to redo on
+	// every untyped-collection decode. Cache it per underlying registry instead of rebuilding it each time -
+	// there is normally only one registry per process, but tests (and potentially other callers) can
+	// construct several, so the cache must be keyed by registry identity rather than a single shared value.
+	private val codecMapsByRegistry = ConcurrentHashMap<CodecRegistry, BsonTypeCodecMap>()
 
 
 	// TODO Support decoding of common subtypes.
@@ -17,8 +25,8 @@ internal object ListExtensions {
 			val elements = mutableListOf<Any?>()
 
 			if (valueType == null) {
-				// TODO Hack. Rework the BSON definition system.
-				val codecMap = BsonTypeCodecMap(bsonTypeClassMap, codecRegistry.internal())
+				val internalRegistry = codecRegistry.internal()
+				val codecMap = codecMapsByRegistry.getOrPut(internalRegistry) { BsonTypeCodecMap(bsonTypeClassMap, internalRegistry) }
 
 				reader.arrayByElement {
 					val codec = codecMap.get(bsonType())

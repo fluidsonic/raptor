@@ -6,6 +6,7 @@ import kotlin.reflect.*
 internal class DefaultRaptorBsonDefinition<Value : Any>(
 	private val additionalDefinitions: List<RaptorBsonDefinition>,
 	private val decode: (RaptorBsonReaderScope.(arguments: List<KTypeProjection>?) -> Value)?,
+	private val decodeWithType: (RaptorBsonReaderScope.(type: RaptorBsonType<*>) -> Value)?,
 	private val encode: (RaptorBsonWriterScope.(value: Value) -> Unit)?,
 	private val encodesSubclasses: Boolean,
 	override val valueClass: KClass<Value>,
@@ -21,11 +22,23 @@ internal class DefaultRaptorBsonDefinition<Value : Any>(
 
 	@Suppress("UNCHECKED_CAST")
 	override fun <Value : Any> codecForValueClass(valueClass: KClass<Value>, registry: RaptorBsonCodecRegistry) = when {
-		valueClass == this.valueClass -> DefaultRaptorBsonCodec(
-			decode = decode as (RaptorBsonReaderScope.(arguments: List<KTypeProjection>?) -> Value)?,
-			encode = encode as (RaptorBsonWriterScope.(value: Value) -> Unit)?,
-			valueClass = valueClass
-		)
+		valueClass == this.valueClass -> when (val decodeWithType = decodeWithType) {
+			// Only a definition that actually provided a `decodeWithType { … }` block may produce a
+			// `RaptorBsonTypeAwareCodec` — the reader dispatches on that interface, so implementing it
+			// unconditionally would route every codec through a decoder it does not have.
+			null -> DefaultRaptorBsonCodec(
+				decode = decode as (RaptorBsonReaderScope.(arguments: List<KTypeProjection>?) -> Value)?,
+				encode = encode as (RaptorBsonWriterScope.(value: Value) -> Unit)?,
+				valueClass = valueClass
+			)
+
+			else -> DefaultRaptorBsonTypeAwareCodec(
+				decode = decode as (RaptorBsonReaderScope.(arguments: List<KTypeProjection>?) -> Value)?,
+				decodeWithType = decodeWithType as RaptorBsonReaderScope.(type: RaptorBsonType<*>) -> Value,
+				encode = encode as (RaptorBsonWriterScope.(value: Value) -> Unit)?,
+				valueClass = valueClass
+			)
+		}
 
 		encodesSubclasses && this.valueClass.java.isAssignableFrom(valueClass.java) -> DefaultRaptorBsonCodec(
 			decode = null,

@@ -14,16 +14,22 @@ public class RaptorBsonDefinitionBuilder<Value : Any> internal constructor(
 
 	private var additionalDefinitions: List<RaptorBsonDefinition> = emptyList()
 	private var decode: (RaptorBsonReaderScope.(arguments: List<KTypeProjection>?) -> Value)? = null
+	private var decodeWithType: (RaptorBsonReaderScope.(type: RaptorBsonType<*>) -> Value)? = null
 	private var encode: (RaptorBsonWriterScope.(value: Value) -> Unit)? = null
 	private var encodesSubclasses = false
 
 
 	internal fun build(): RaptorBsonDefinition.ForValue<Value> {
 		check(decode != null || encode != null) { "A `decode { … }` block, an `encode { … }` block, or both must be provided." }
+		check(decodeWithType == null || decode != null) {
+			"A `decodeWithType { … }` block also requires a `decode { … }` block, which serves the reflective " +
+				"`reader.value<…>()` path where no RaptorBsonType is available."
+		}
 
 		return DefaultRaptorBsonDefinition(
 			additionalDefinitions = additionalDefinitions,
 			decode = decode,
+			decodeWithType = decodeWithType,
 			encode = encode,
 			encodesSubclasses = encodesSubclasses,
 			valueClass = valueClass,
@@ -65,12 +71,49 @@ public class RaptorBsonDefinitionBuilder<Value : Any> internal constructor(
 	}
 
 
-	// TODO add more primitive overloads to avoid codecs
+	/**
+	 * Decodes using the [RaptorBsonType] the value is being read through, whose
+	 * [argumentTypes][RaptorBsonType.argumentTypes] and
+	 * [argumentNullability][RaptorBsonType.argumentNullability] resolve this type's own generic arguments once
+	 * instead of once per read — for a generic type like `Foo<T>` or `Bar<K, V>`.
+	 *
+	 * Used in place of [decode] whenever the value is read through a [RaptorBsonType], i.e. via
+	 * [RaptorBsonReader.valueOrThrow] or [RaptorBsonReader.valueOrNull]. A `decode { … }` block is still
+	 * required alongside it, for the reflective `reader.value<…>()` path where no [RaptorBsonType] exists.
+	 */
+	@RaptorDsl
+	public fun decodeWithType(decode: RaptorBsonReaderScope.(type: RaptorBsonType<*>) -> @NoInfer Value) {
+		check(this.decodeWithType == null) { "Cannot provide multiple `decodeWithType { … }` blocks." }
+
+		this.decodeWithType = decode
+	}
+
+
 	@LowPriorityInOverloadResolution
 	@RaptorDsl
 	public inline fun <reified DecodedValue : Any> decode(noinline decode: (value: DecodedValue) -> Value) {
 		decode {
 			decode(reader.value())
+		}
+	}
+
+
+	@JvmName("decodeBoolean")
+	@LowPriorityInOverloadResolution
+	@RaptorDsl
+	public fun decode(decode: (value: Boolean) -> Value) {
+		decode {
+			decode(reader.boolean())
+		}
+	}
+
+
+	@JvmName("decodeDouble")
+	@LowPriorityInOverloadResolution
+	@RaptorDsl
+	public fun decode(decode: (value: Double) -> Value) {
+		decode {
+			decode(reader.double())
 		}
 	}
 
@@ -114,11 +157,30 @@ public class RaptorBsonDefinitionBuilder<Value : Any> internal constructor(
 	}
 
 
-	// TODO add more primitive overloads to avoid codecs
 	@LowPriorityInOverloadResolution
 	@RaptorDsl
 	public fun <EncodedValue : Any> encode(encode: (value: Value) -> EncodedValue) {
 		encode { value ->
+			writer.value(encode(value))
+		}
+	}
+
+
+	@JvmName("encodeBoolean")
+	@LowPriorityInOverloadResolution
+	@RaptorDsl
+	public fun encode(encode: (value: Value) -> Boolean, includingSubclasses: Boolean = false) {
+		encode(includingSubclasses = includingSubclasses) { value ->
+			writer.value(encode(value))
+		}
+	}
+
+
+	@JvmName("encodeDouble")
+	@LowPriorityInOverloadResolution
+	@RaptorDsl
+	public fun encode(encode: (value: Value) -> Double, includingSubclasses: Boolean = false) {
+		encode(includingSubclasses = includingSubclasses) { value ->
 			writer.value(encode(value))
 		}
 	}

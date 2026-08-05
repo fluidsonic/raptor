@@ -26,11 +26,35 @@ internal class DefaultBsonReaderScope(
 		underlyingReader.readBinaryData().data
 
 
+	// A codec that opted into [RaptorBsonTypeAwareCodec] gets the type itself — and with it the precomputed
+	// per-argument types — instead of the raw type-argument list it would otherwise have to resolve
+	// reflectively on every read.
+	private fun codecValue(type: RaptorBsonType<*>): Any =
+		when (val codec = type.codec(codecRegistry)) {
+			is RaptorBsonTypeAwareCodec<*> -> codec.decode(scope = this, type = type)
+			else -> codec.decode(scope = this, arguments = type.arguments)
+		}
+
+
 	private fun <Value, Destination : MutableCollection<Value>> collectionValue(type: KType, destination: Destination): Destination {
 		val elementType = type.arguments.single().type ?: error("Cannot read elements of unknown type: $type")
 
 		arrayByElement {
 			destination.add(value(elementType))
+		}
+
+		return destination
+	}
+
+
+	private fun <Destination : MutableCollection<Any?>> collectionValue(
+		type: RaptorBsonType<*>,
+		destination: Destination,
+	): Destination {
+		val elementType = type.elementType ?: error("Cannot read elements of unknown type: ${type.type}")
+
+		arrayByElement {
+			destination.add(if (type.elementIsNullable) valueOrNull(elementType) else valueOrThrow(elementType))
 		}
 
 		return destination
@@ -116,6 +140,47 @@ internal class DefaultBsonReaderScope(
 
 
 	@Suppress("UNCHECKED_CAST")
+	override fun <Value : Any> valueOrThrow(type: RaptorBsonType<Value>): Value =
+		when (bsonType()) {
+			BsonType.NULL -> error("Cannot decode BSON null value as type '${type.type}'.")
+
+			else -> when (type.collectionKind) {
+				BsonCollectionKind.list -> collectionValue(type = type, destination = arrayListOf<Any?>()) as Value
+				BsonCollectionKind.set -> collectionValue(type = type, destination = LinkedHashSet<Any?>()) as Value
+				null -> codecValue(type) as Value
+			}
+		}
+
+
+	@Suppress("UNCHECKED_CAST")
+	override fun <Value : Any> valueOrNull(type: RaptorBsonType<Value>): Value? =
+		when (bsonType()) {
+			BsonType.NULL -> {
+				readNull()
+				null
+			}
+
+			else -> valueOrThrow(type)
+		}
+
+
+	override fun valueOrThrow(type: RaptorBsonType<Boolean>): Boolean =
+		boolean()
+
+
+	override fun valueOrThrow(type: RaptorBsonType<Double>): Double =
+		double()
+
+
+	override fun valueOrThrow(type: RaptorBsonType<Int>): Int =
+		int()
+
+
+	override fun valueOrThrow(type: RaptorBsonType<Long>): Long =
+		long()
+
+
+	@Suppress("UNCHECKED_CAST")
 	override fun <Value> value(type: KType): Value =
 		when (bsonType()) {
 			BsonType.NULL -> when (type.isMarkedNullable) {
@@ -127,18 +192,22 @@ internal class DefaultBsonReaderScope(
 				false -> error("Cannot decode BSON null value as type '$type'.")
 			}
 
-			else -> when (type.classifier) {
-				ArrayList::class, MutableList::class, List::class, MutableCollection::class, Collection::class ->
-					collectionValue(type = type, destination = arrayListOf<Value>()) as Value
+			else -> {
+				val classifier = type.classifier
 
-				HashSet::class, LinkedHashSet::class, MutableSet::class, Set::class ->
-					collectionValue(type = type, destination = LinkedHashSet<Value>()) as Value
+				when (bsonCollectionKindOf(classifier)) {
+					BsonCollectionKind.list ->
+						collectionValue(type = type, destination = arrayListOf<Value>()) as Value
 
-				else -> {
-					val valueClass = type.classifier as? KClass<*>
-						?: error("Cannot decode type '$type'.")
+					BsonCollectionKind.set ->
+						collectionValue(type = type, destination = LinkedHashSet<Value>()) as Value
 
-					codecRegistry.decode(scope = this, valueClass = valueClass, arguments = type.arguments) as Value
+					null -> {
+						val valueClass = classifier as? KClass<*>
+							?: error("Cannot decode type '$type'.")
+
+						codecRegistry.decode(scope = this, valueClass = valueClass, arguments = type.arguments) as Value
+					}
 				}
 			}
 		}

@@ -62,6 +62,71 @@ public interface RaptorBsonReader {
 	@RaptorDsl
 	public fun timestamp(): Timestamp
 
+	/**
+	 * Reads the value through [type]'s bound codec, throwing if the stored value is BSON null.
+	 *
+	 * Use [valueOrNull] when the field may legitimately be null.
+	 */
+	@RaptorDsl
+	public fun <Value : Any> valueOrThrow(type: RaptorBsonType<Value>): Value
+
+	/**
+	 * Reads the value through [type]'s bound codec, returning `null` if the stored value is BSON null.
+	 */
+	@RaptorDsl
+	public fun <Value : Any> valueOrNull(type: RaptorBsonType<Value>): Value?
+
+	/**
+	 * Reads the value through [boolean], returning an unboxed `Boolean`, throwing if the stored value is
+	 * BSON null.
+	 *
+	 * Unlike the generic overload this does not consult the codec registry, so none of the coercions the
+	 * registry's `Boolean` codec would apply take place — the stored BSON value has to be a boolean.
+	 *
+	 * There is no primitive-specialized [valueOrNull] for `Boolean`: a nullable `Boolean` field always boxes
+	 * regardless of dispatch mechanism, so a nullable field falls back to the generic [valueOrNull].
+	 */
+	@RaptorDsl
+	public fun valueOrThrow(type: RaptorBsonType<Boolean>): Boolean
+
+	/**
+	 * Reads the value through [double], returning an unboxed `Double`, throwing if the stored value is
+	 * BSON null.
+	 *
+	 * Unlike the generic overload this does not consult the codec registry, so none of the numeric widening
+	 * the registry's `Double` codec would apply takes place — the stored BSON value has to be a double.
+	 *
+	 * There is no primitive-specialized [valueOrNull] for `Double`: a nullable `Double` field always boxes
+	 * regardless of dispatch mechanism, so a nullable field falls back to the generic [valueOrNull].
+	 */
+	@RaptorDsl
+	public fun valueOrThrow(type: RaptorBsonType<Double>): Double
+
+	/**
+	 * Reads the value through [int], returning an unboxed `Int`, throwing if the stored value is BSON null.
+	 *
+	 * Unlike the generic overload this does not consult the codec registry, so none of the numeric narrowing
+	 * the registry's `Int` codec would apply takes place — the stored BSON value has to be a 32-bit integer.
+	 *
+	 * There is no primitive-specialized [valueOrNull] for `Int`: a nullable `Int` field always boxes
+	 * regardless of dispatch mechanism, so a nullable field falls back to the generic [valueOrNull].
+	 */
+	@RaptorDsl
+	public fun valueOrThrow(type: RaptorBsonType<Int>): Int
+
+	/**
+	 * Reads the value through [long], returning an unboxed `Long`, throwing if the stored value is BSON null.
+	 *
+	 * Unlike the generic overload this does not consult the codec registry, so none of the coercions the
+	 * registry's `Long` codec would apply take place — the stored BSON value has to be a 32-bit or 64-bit
+	 * integer.
+	 *
+	 * There is no primitive-specialized [valueOrNull] for `Long`: a nullable `Long` field always boxes
+	 * regardless of dispatch mechanism, so a nullable field falls back to the generic [valueOrNull].
+	 */
+	@RaptorDsl
+	public fun valueOrThrow(type: RaptorBsonType<Long>): Long
+
 	@RaptorDsl
 	public fun <Value> value(type: KType): Value
 }
@@ -474,6 +539,54 @@ public inline fun <reified Value> RaptorBsonReader.value(field: String): Value {
 	fieldName(field)
 
 	return value()
+}
+
+
+@RaptorDsl
+public fun <Value : Any> RaptorBsonReader.valueOrThrow(field: String, type: RaptorBsonType<Value>): Value {
+	fieldName(field)
+
+	return valueOrThrow(type)
+}
+
+
+@RaptorDsl
+public fun <Value : Any> RaptorBsonReader.valueOrNull(field: String, type: RaptorBsonType<Value>): Value? {
+	fieldName(field)
+
+	return valueOrNull(type)
+}
+
+
+@RaptorDsl
+public fun RaptorBsonReader.valueOrThrow(field: String, type: RaptorBsonType<Boolean>): Boolean {
+	fieldName(field)
+
+	return valueOrThrow(type)
+}
+
+
+@RaptorDsl
+public fun RaptorBsonReader.valueOrThrow(field: String, type: RaptorBsonType<Double>): Double {
+	fieldName(field)
+
+	return valueOrThrow(type)
+}
+
+
+@RaptorDsl
+public fun RaptorBsonReader.valueOrThrow(field: String, type: RaptorBsonType<Int>): Int {
+	fieldName(field)
+
+	return valueOrThrow(type)
+}
+
+
+@RaptorDsl
+public fun RaptorBsonReader.valueOrThrow(field: String, type: RaptorBsonType<Long>): Long {
+	fieldName(field)
+
+	return valueOrThrow(type)
 }
 
 

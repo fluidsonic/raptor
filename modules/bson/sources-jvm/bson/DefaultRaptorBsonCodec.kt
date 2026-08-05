@@ -3,7 +3,7 @@ package io.fluidsonic.raptor.bson
 import kotlin.reflect.*
 
 
-internal class DefaultRaptorBsonCodec<Value : Any>(
+internal open class DefaultRaptorBsonCodec<Value : Any>(
 	private val decode: (RaptorBsonReaderScope.(arguments: List<KTypeProjection>?) -> Value)?,
 	private val encode: (RaptorBsonWriterScope.(value: Value) -> Unit)?,
 	override val valueClass: KClass<Value>,
