@@ -3,33 +3,26 @@
 Load-bearing invariants an aggregate store implementation must satisfy, plus operational
 hazards documented only in code comments.
 
-- **Event IDs are globally monotonic and double as Mongo `_id`.**
-  `RaptorAggregateEventId` (a Long) persists as the document `_id` (`Fields.id = "_id"`).
-  Both Mongo stores order by `_id` for loads, `_id` descending to find the newest, and
-  `MongoIndividualAggregateStore.lastEventId` reads `_id` directly. So the event id is both
-  primary key and global ordering key — IDs must be globally monotonic across all
-  aggregates. `DefaultAggregateManager.start()` asserts every loaded event's id equals
-  `lastEventId + 1` (contiguous from 1). `loadAggregate` (single-aggregate reads) instead
-  orders by `version` — see `aggregate-loader-interface.md`.
-- **Batch closure via `lastVersionInBatch`.** Events for different aggregates interleave in
-  the stream; each event carries `lastVersionInBatch` so the manager knows when a
-  per-aggregate batch is complete (`event.version == event.lastVersionInBatch`). Any
-  aggregate with unclosed batch events after the stream ends aborts startup.
-  `AggregateState.addEvent` also enforces contiguous per-aggregate versions (each event's
-  version must equal the previous + 1; no gaps).
+- **Event IDs are globally monotonic and double as Mongo `_id`.** `RaptorAggregateEventId`
+  (a Long) persists as the document `_id`; both Mongo stores order loads by `_id`, so IDs must
+  be monotonic across *all* aggregates, not just per-aggregate. `DefaultAggregateManager.start()`
+  asserts every loaded event's id equals `lastEventId + 1` (contiguous from 1). `loadAggregate`
+  (single-aggregate reads) instead orders by `version` — see `aggregate-loader-interface.md`.
+- **No startup batching by `lastVersionInBatch` anymore.** `RaptorAggregateEvent.lastVersionInBatch`
+  (required `>= version`, carried through unchanged to `RaptorAggregateProjectionEvent`) is still on
+  the wire model, but `DefaultAggregateManager.start()` no longer buffers events per aggregate or
+  aborts startup on an incomplete batch — it dispatches each loaded event immediately via `process()`
+  as the stream delivers it. `AggregateState.addEvent` still enforces contiguous per-aggregate
+  versions (no gaps).
 - **Persisted BSON field order is a hard decode contract** — see `event-bson-field-order.md`.
-- **Single-instance only; write conflict is unrecoverable.** `MongoAggregateStore` does not
+- **Single-instance only; write conflict is unrecoverable.** `MongoAggregateStore` doesn't
   support horizontal scaling (TODO); its `add()` rethrows `MongoBulkWriteException` with a
-  comment that Raptor "cannot recover from this without stopping Raptor & starting a new
-  one." Version-conflict detection is commented out. Duplicate-key protection is a unique
-  index on `(aggregateType, aggregateId, version)` created in `start()`. **A multi-instance
-  deploy violates the design.**
-- **`load()` sets `batchSize(1_000_000)` deliberately** — a comment cites a measured "4-6x
-  speed increase" for full event-stream reads. Not a bug.
-- **`reload()` diverges by backend:** `MemoryIndividualAggregateStore.reload()` clears the
-  cache and returns `emptyList()`; `MongoIndividualAggregateStore.reload()` reloads all
-  events and returns them. Same interface method, opposite contract.
+  comment that Raptor "cannot recover from this without stopping Raptor & starting a new one."
+  Duplicate-key protection is a unique index on `(aggregateType, aggregateId, version)`.
+  **A multi-instance deploy violates the design.**
+- **`reload()` diverges by backend:** `MemoryIndividualAggregateStore` clears its cache and
+  returns `emptyList()`; `MongoIndividualAggregateStore` reloads and returns all events. Same
+  interface method, opposite contract.
 
-Related: `domain/streams.md`, `domain/command-execution.md`,
-`domain/individual-aggregates.md`, `domain/aggregate-loader-interface.md`,
-`domain/event-bson-field-order.md`.
+Related: `domain/command-execution.md`, `domain/individual-aggregates.md`,
+`domain/aggregate-loader-interface.md`, `domain/event-bson-field-order.md`.

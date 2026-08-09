@@ -8,7 +8,7 @@ This bites indirectly: `DefaultAggregateManager.commit()` calls `clock.now()` to
 event, so *any* test that executes a live command against a `RaptorAggregateCommandExecutor` — not
 only a test that reads the clock directly — needs the clock seeded first. Existing domain tests
 construct `ManualClock()` with no timestamp, then call `clock.set(Timestamp...)` right before the
-first live command (`modules/domain/tests/EventTests.kt`, `AssemblyTests.kt`, `ExecutionTests.kt`);
+first live command (`modules/domain/tests/EventTests.kt`, `ExecutionTests.kt`);
 `HookFilteringTests.kt` instead seeds it inline at construction
 (`ManualClock().also { it.set(Timestamp.fromEpochSeconds(0)) }`). A new domain test that constructs
 `ManualClock()` and executes a live command without calling `.set()` first anywhere on that path
