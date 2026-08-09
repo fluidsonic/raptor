@@ -18,10 +18,10 @@ How Raptor's Gradle multi-module build is structured — needed before adding a 
 - **Context parameters are enabled build-wide.** The `subprojects {}` block adds
   `-Xcontext-parameters` and `-Xcontext-sensitive-resolution` to every Kotlin
   multiplatform subproject (every `fluidLibraryModule` is a multiplatform project, even
-  JVM-only ones). Code using the `context(...)` declaration — e.g. `context(di: RaptorDI)`
-  in `modules/di/sources-jvm/di/RaptorDI.kt` and the `context(RaptorDI) () -> ...` factory
-  types in `modules/domain/sources/assembly/RaptorAggregatesComponent.kt` — depends on
-  these experimental flags being set at the root, not per module. (Note: the BSON codec's
+  JVM-only ones). Code using the `context(...)` declaration — e.g. `context(coroutineScope:
+  CoroutineScope)` in `modules/event/sources/api/RaptorEventSource.kt` and on
+  `DefaultAggregateManager.start` (`modules/domain/sources/implementation/DefaultAggregateManager.kt`)
+  — depends on these experimental flags being set at the root, not per module. (Note: the BSON codec's
   `with(scope){...}` receiver style in `modules/bson/sources-jvm/bson/RaptorBsonCodec.kt`
   is ordinary Kotlin scoping and does not need these flags.)
 - Built with the third-party `io.fluidsonic.gradle` plugin, applied in the root
