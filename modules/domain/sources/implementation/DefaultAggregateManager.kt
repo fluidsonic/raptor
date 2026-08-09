@@ -26,6 +26,7 @@ internal class DefaultAggregateManager(
 ) : RaptorAggregateCommandExecutor, RaptorAggregateProvider, RaptorDomain {
 
 	private val aggregateStates: MutableMap<RaptorAggregateId, AggregateState<*>> = hashMapOf()
+	private val hookDispatcher = HookDispatcher(hooks = hooks, definitions = definitions)
 	private val mutex = Mutex()
 	private var nextEventId = 1L
 	private var status = atomic(Status.new)
@@ -124,14 +125,12 @@ internal class DefaultAggregateManager(
 		// FIXME Emit in parallel.
 		eventEmitter.emit(event)
 
-		for (hook in hooks)
-			hook.onAggregateEvent(event)
+		hookDispatcher.dispatchAggregateEvent(event)
 
 		if (projectionEvent != null) {
 			eventEmitter.emit(projectionEvent)
 
-			for (hook in hooks)
-				hook.onAggregateProjectionEvent(projectionEvent)
+			hookDispatcher.dispatchAggregateProjectionEvent(projectionEvent)
 		}
 	}
 
@@ -209,8 +208,7 @@ internal class DefaultAggregateManager(
 			loaded.complete(this)
 			eventEmitter.emit(RaptorAggregateReplayCompletedEvent)
 
-			for (hook in hooks)
-				hook.onReplayCompleted()
+			hookDispatcher.dispatchReplayCompleted()
 		}
 	}
 
