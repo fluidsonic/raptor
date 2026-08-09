@@ -2,6 +2,7 @@ import BankAccountChange.*
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.di.*
 import io.fluidsonic.raptor.domain.*
+import io.fluidsonic.raptor.event.*
 import io.fluidsonic.raptor.lifecycle.*
 import io.fluidsonic.time.*
 import kotlin.reflect.*
@@ -52,11 +53,11 @@ private class EqualityHook(
 	override val aggregateIdClassFilter: Set<KClass<out RaptorAggregateId>>?,
 ) : RaptorDomainStreamHook {
 
-	val messages = mutableListOf<RaptorAggregateStreamMessage<*, *>>()
+	val events = mutableListOf<RaptorAggregateEvent<*, *>>()
 
 
-	override fun onAggregateStreamMessage(message: RaptorAggregateStreamMessage<*, *>) {
-		messages += message
+	override fun onAggregateEvent(event: RaptorAggregateEvent<*, *>) {
+		events += event
 	}
 
 
@@ -124,6 +125,7 @@ class HookFilteringTests {
 		raptor {
 			install(RaptorDIPlugin)
 			install(RaptorDomainPlugin)
+			install(RaptorEventPlugin)
 			install(RaptorLifecyclePlugin)
 
 			di {
@@ -185,39 +187,14 @@ class HookFilteringTests {
 
 
 	@Test
-	fun testUnfilteredHooksReceiveIdenticalList() = runTest {
-		val store = TestAggregateStore(events = seedEvents())
-		val hook1 = MessageCollectionHook()
-		val hook2 = MessageCollectionHook()
-
-		val raptor = buildRaptor(store, listOf(hook1, hook2))
-		raptor.lifecycle.startIn(this)
-
-		val replay1 = hook1.messages.filterIsInstance<RaptorAggregateStreamMessage.Replay>().single()
-		val replay2 = hook2.messages.filterIsInstance<RaptorAggregateStreamMessage.Replay>().single()
-
-		assertSame(actual = replay2.batches, expected = replay1.batches)
-
-		raptor.lifecycle.stop()
-	}
-
-
-	@Test
-	fun testSingleClassFilterReceivesOnlyOwnBatches() = runTest {
+	fun testSingleClassFilterReceivesOnlyOwnEvents() = runTest {
 		val store = TestAggregateStore(events = seedEvents())
 		val hook = MessageCollectionHook(aggregateIdClassFilter = setOf(CounterNumber::class))
 
 		val raptor = buildRaptor(store, listOf(hook))
 		raptor.lifecycle.startIn(this)
 
-		val replay = hook.messages.filterIsInstance<RaptorAggregateStreamMessage.Replay>().single()
-		assertEquals(
-			actual = replay.batches,
-			expected = listOf(
-				RaptorAggregateEventBatch(aggregateId = counterId, events = listOf(e2), version = 1),
-				RaptorAggregateEventBatch(aggregateId = counterId, events = listOf(e4), version = 2),
-			),
-		)
+		assertEquals<List<RaptorAggregateEvent<*, *>>>(actual = hook.events, expected = listOf(e2, e4))
 
 		raptor.lifecycle.stop()
 	}
@@ -231,34 +208,23 @@ class HookFilteringTests {
 		val raptor = buildRaptor(store, listOf(hook))
 		raptor.lifecycle.startIn(this)
 
-		val replay = hook.messages.filterIsInstance<RaptorAggregateStreamMessage.Replay>().single()
-		assertEquals(
-			actual = replay.batches,
-			expected = listOf(
-				RaptorAggregateEventBatch(aggregateId = counterId, events = listOf(e2), version = 1),
-				RaptorAggregateEventBatch(aggregateId = bankAccountId1, events = listOf(e1, e3), version = 2),
-				RaptorAggregateEventBatch(aggregateId = counterId, events = listOf(e4), version = 2),
-				RaptorAggregateEventBatch(aggregateId = bankAccountId2, events = listOf(e5), version = 1),
-			),
-		)
+		assertEquals<List<RaptorAggregateEvent<*, *>>>(actual = hook.events, expected = seedEvents())
 
 		raptor.lifecycle.stop()
 	}
 
 
 	@Test
-	fun testEmptyFilterSkipsReplay() = runTest {
+	fun testEmptyFilterSkipsEventsButReplayCompletedStillFires() = runTest {
 		val store = TestAggregateStore(events = seedEvents())
 		val hook = MessageCollectionHook(aggregateIdClassFilter = emptySet(), projectionIdClassFilter = emptySet())
 
 		val raptor = buildRaptor(store, listOf(hook))
 		raptor.lifecycle.startIn(this)
 
-		assertEquals<List<RaptorAggregateStreamMessage<*, *>>>(actual = hook.messages, expected = listOf(RaptorAggregateStreamMessage.Loaded))
-		assertEquals<List<RaptorAggregateProjectionStreamMessage<*, *, *>>>(
-			actual = hook.projectionMessages,
-			expected = listOf(RaptorAggregateProjectionStreamMessage.Loaded),
-		)
+		assertEquals<List<RaptorAggregateEvent<*, *>>>(actual = hook.events, expected = emptyList())
+		assertEquals<List<RaptorAggregateProjectionEvent<*, *, *>>>(actual = hook.projectionEvents, expected = emptyList())
+		assertEquals(actual = hook.replayCompletedCount, expected = 1)
 
 		raptor.lifecycle.stop()
 	}
@@ -285,16 +251,7 @@ class HookFilteringTests {
 		val raptor = buildRaptor(store, listOf(hook))
 		raptor.lifecycle.startIn(this)
 
-		val replay = hook.messages.filterIsInstance<RaptorAggregateStreamMessage.Replay>().single()
-		assertEquals(
-			actual = replay.batches,
-			expected = listOf(
-				RaptorAggregateEventBatch(aggregateId = counterId, events = listOf(e2), version = 1),
-				RaptorAggregateEventBatch(aggregateId = bankAccountId1, events = listOf(e1, e3), version = 2),
-				RaptorAggregateEventBatch(aggregateId = counterId, events = listOf(e4), version = 2),
-				RaptorAggregateEventBatch(aggregateId = bankAccountId2, events = listOf(e5), version = 1),
-			),
-		)
+		assertEquals<List<RaptorAggregateEvent<*, *>>>(actual = hook.events, expected = seedEvents())
 
 		raptor.lifecycle.stop()
 	}
@@ -326,11 +283,8 @@ class HookFilteringTests {
 			commandExecutor.execute(bankAccountId1, BankAccountCommand.Create("Marc"))
 		}
 
-		val bankBatches = bankHook.messages.filterIsInstance<RaptorAggregateEventBatch<*, *>>()
-		val counterBatches = counterHook.messages.filterIsInstance<RaptorAggregateEventBatch<*, *>>()
-
-		assertEquals(actual = bankBatches.map { it.aggregateId }, expected = listOf(bankAccountId1))
-		assertEquals(actual = counterBatches, expected = emptyList())
+		assertEquals(actual = bankHook.events.map { it.aggregateId }, expected = listOf(bankAccountId1))
+		assertEquals<List<RaptorAggregateEvent<*, *>>>(actual = counterHook.events, expected = emptyList())
 
 		raptor.lifecycle.stop()
 	}
@@ -347,31 +301,11 @@ class HookFilteringTests {
 		val raptor = buildRaptor(store, listOf(hook))
 		raptor.lifecycle.startIn(this)
 
-		assertEquals<List<RaptorAggregateStreamMessage<*, *>>>(actual = hook.messages, expected = listOf(RaptorAggregateStreamMessage.Loaded))
-
-		val projectionReplay = hook.projectionMessages.filterIsInstance<RaptorAggregateProjectionStreamMessage.Replay>().single()
+		assertEquals<List<RaptorAggregateEvent<*, *>>>(actual = hook.events, expected = emptyList())
 		assertEquals(
-			actual = projectionReplay.batches.map { it.projectionId },
-			expected = listOf(bankAccountId1, bankAccountId2),
+			actual = hook.projectionEvents.map { it.projectionId },
+			expected = listOf(bankAccountId1, bankAccountId1, bankAccountId2),
 		)
-
-		raptor.lifecycle.stop()
-	}
-
-
-	@Test
-	fun testSharedFilterSetSharesList() = runTest {
-		val store = TestAggregateStore(events = seedEvents())
-		val hook1 = MessageCollectionHook(aggregateIdClassFilter = setOf(BankAccountNumber::class, CounterNumber::class))
-		val hook2 = MessageCollectionHook(aggregateIdClassFilter = setOf(BankAccountNumber::class, CounterNumber::class))
-
-		val raptor = buildRaptor(store, listOf(hook1, hook2))
-		raptor.lifecycle.startIn(this)
-
-		val replay1 = hook1.messages.filterIsInstance<RaptorAggregateStreamMessage.Replay>().single()
-		val replay2 = hook2.messages.filterIsInstance<RaptorAggregateStreamMessage.Replay>().single()
-
-		assertSame(actual = replay2.batches, expected = replay1.batches)
 
 		raptor.lifecycle.stop()
 	}
@@ -386,11 +320,11 @@ class HookFilteringTests {
 		val raptor = buildRaptor(store, listOf(bankHook, counterHook))
 		raptor.lifecycle.startIn(this)
 
-		val bankReplay = bankHook.messages.filterIsInstance<RaptorAggregateStreamMessage.Replay>().single()
-		val counterReplay = counterHook.messages.filterIsInstance<RaptorAggregateStreamMessage.Replay>().single()
-
-		assertEquals(actual = bankReplay.batches.map { it.aggregateId }, expected = listOf(bankAccountId1, bankAccountId2))
-		assertEquals(actual = counterReplay.batches.map { it.aggregateId }, expected = listOf(counterId, counterId))
+		assertEquals(
+			actual = bankHook.events.map { it.aggregateId },
+			expected = listOf(bankAccountId1, bankAccountId1, bankAccountId2),
+		)
+		assertEquals(actual = counterHook.events.map { it.aggregateId }, expected = listOf(counterId, counterId))
 
 		raptor.lifecycle.stop()
 	}

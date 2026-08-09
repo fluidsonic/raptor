@@ -5,11 +5,11 @@ import kotlin.reflect.full.*
 
 
 /**
- * Fans out aggregate/projection stream messages to registered hooks, honoring each hook's optional
+ * Fans out aggregate/projection events to registered hooks, honoring each hook's optional
  * [RaptorDomainStreamHook.aggregateIdClassFilter] / [RaptorDomainStreamHook.projectionIdClassFilter].
  *
  * Filters are resolved once at construction — see [RaptorDomainStreamHook.aggregateIdClassFilter] for the
- * exact semantics — so steady-state and cold-replay dispatch only ever need a `Set.contains` check.
+ * exact semantics — so dispatch only ever needs a `Set.contains` check.
  */
 internal class HookDispatcher(
 	private val hooks: List<RaptorDomainStreamHook>,
@@ -89,103 +89,44 @@ internal class HookDispatcher(
 	}
 
 
-	// Steady-state dispatch (one commit's worth of batches). Deliberately a single loop with per-hook
-	// aggregate-then-projection interleaving, matching each hook's own call order — not two separate loops.
-	fun dispatchLive(batch: RaptorAggregateEventBatch<*, *>, projectionBatch: RaptorAggregateProjectionEventBatch<*, *, *>?) {
-		val aggregateIdClass = batch.aggregateId::class
-		val projectionIdClass = projectionBatch?.projectionId?.let { it::class }
-
-		for (index in hooks.indices) {
-			val hook = hooks[index]
-
-			if (!hasAggregateFilter || resolvedAggregateIdClassFilters[index]?.contains(aggregateIdClass) != false)
-				hook.onAggregateStreamMessage(batch)
-
-			if (projectionBatch != null && projectionIdClass != null)
-				if (!hasProjectionFilter || resolvedProjectionIdClassFilters[index]?.contains(projectionIdClass) != false)
-					hook.onAggregateProjectionStreamMessage(projectionBatch)
-		}
-	}
-
-
-	// Cold-replay dispatch. `batchAggregateIdClasses`/`projectionBatchIdClasses` are parallel to
-	// `batch.batches`/`projectionBatch?.batches` (same index), sourced from stored KClasses — zero
-	// `::class` calls across the whole replay. Never sorted: batches are already in construction order,
-	// which is the only order that's correct (a batch can span non-contiguous event ids).
-	fun dispatchReplay(
-		batch: RaptorAggregateStreamMessage.Replay,
-		batchAggregateIdClasses: List<KClass<out RaptorAggregateId>>,
-		projectionBatch: RaptorAggregateProjectionStreamMessage.Replay?,
-		projectionBatchIdClasses: List<KClass<out RaptorAggregateProjectionId>>,
-	) {
-		if (!hasAggregateFilter && !hasProjectionFilter) {
-			for (hook in hooks) {
-				hook.onAggregateStreamMessage(batch)
-
-				if (projectionBatch != null)
-					hook.onAggregateProjectionStreamMessage(projectionBatch)
-			}
+	fun dispatchAggregateEvent(event: RaptorAggregateEvent<*, *>) {
+		if (!hasAggregateFilter) {
+			for (hook in hooks)
+				hook.onAggregateEvent(event)
 
 			return
 		}
 
-		val batches = batch.batches
-		val projectionBatches = projectionBatch?.batches.orEmpty()
-
-		val batchesByIdClass = if (hasAggregateFilter) groupByIndex(batches, batchAggregateIdClasses) else emptyMap()
-		val projectionBatchesByIdClass =
-			if (hasProjectionFilter) groupByIndex(projectionBatches, projectionBatchIdClasses) else emptyMap()
-		val assembledBatchesByFilter = hashMapOf<Set<KClass<out RaptorAggregateId>>, List<RaptorAggregateEventBatch<*, *>>>()
-		val assembledProjectionBatchesByFilter =
-			hashMapOf<Set<KClass<out RaptorAggregateProjectionId>>, List<RaptorAggregateProjectionEventBatch<*, *, *>>>()
+		val aggregateIdClass = event.aggregateId::class
 
 		for (index in hooks.indices) {
-			val hook = hooks[index]
-			val aggregateFilter = resolvedAggregateIdClassFilters[index]
-			val hookBatches = when {
-				aggregateFilter == null -> batches
-				aggregateFilter.isEmpty() -> null
-				aggregateFilter.size == 1 -> batchesByIdClass[aggregateFilter.single()]
-				else -> assembledBatchesByFilter.getOrPut(aggregateFilter) {
-					batches.filterIndexed { i, _ -> batchAggregateIdClasses[i] in aggregateFilter }
-				}
-			}
-
-			if (!hookBatches.isNullOrEmpty())
-				hook.onAggregateStreamMessage(RaptorAggregateStreamMessage.Replay(hookBatches))
-
-			if (projectionBatch != null) {
-				val projectionFilter = resolvedProjectionIdClassFilters[index]
-				val hookProjectionBatches = when {
-					projectionFilter == null -> projectionBatches
-					projectionFilter.isEmpty() -> null
-					projectionFilter.size == 1 -> projectionBatchesByIdClass[projectionFilter.single()]
-					else -> assembledProjectionBatchesByFilter.getOrPut(projectionFilter) {
-						projectionBatches.filterIndexed { i, _ -> projectionBatchIdClasses[i] in projectionFilter }
-					}
-				}
-
-				if (!hookProjectionBatches.isNullOrEmpty())
-					hook.onAggregateProjectionStreamMessage(RaptorAggregateProjectionStreamMessage.Replay(hookProjectionBatches))
-			}
+			val filter = resolvedAggregateIdClassFilters[index]
+			if (filter == null || filter.contains(aggregateIdClass))
+				hooks[index].onAggregateEvent(event)
 		}
 	}
 
 
-	fun dispatchLoaded() {
-		for (hook in hooks) {
-			hook.onAggregateStreamMessage(RaptorAggregateStreamMessage.Loaded)
-			hook.onAggregateProjectionStreamMessage(RaptorAggregateProjectionStreamMessage.Loaded)
+	fun dispatchAggregateProjectionEvent(event: RaptorAggregateProjectionEvent<*, *, *>) {
+		if (!hasProjectionFilter) {
+			for (hook in hooks)
+				hook.onAggregateProjectionEvent(event)
+
+			return
+		}
+
+		val projectionIdClass = event.projectionId::class
+
+		for (index in hooks.indices) {
+			val filter = resolvedProjectionIdClassFilters[index]
+			if (filter == null || filter.contains(projectionIdClass))
+				hooks[index].onAggregateProjectionEvent(event)
 		}
 	}
-}
 
 
-private fun <Key, Value> groupByIndex(values: List<Value>, keys: List<Key>): Map<Key, List<Value>> {
-	val result: MutableMap<Key, MutableList<Value>> = hashMapOf()
-
-	for (index in values.indices)
-		result.getOrPut(keys[index], ::mutableListOf) += values[index]
-
-	return result
+	fun dispatchReplayCompleted() {
+		for (hook in hooks)
+			hook.onReplayCompleted()
+	}
 }
