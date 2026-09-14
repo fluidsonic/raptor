@@ -57,6 +57,33 @@ private class MongoAggregateStore(
 			.sort(ascending(Fields.id))
 
 
+	override fun <Id : RaptorAggregateId> loadAggregate(
+		definition: RaptorAggregateDefinition<*, out Id, *, *>,
+		id: Id,
+		afterVersion: Int?,
+	): Flow<RaptorAggregateEvent<*, *>> {
+		require(definition.idClass == id::class) {
+			"`id` must be of type `${definition.idClass.qualifiedName}` for aggregate '${definition.discriminator}', but was `${id::class.qualifiedName}`: $id"
+		}
+		check(!definition.isIndividual) {
+			"Cannot load events for individual aggregate '${definition.discriminator}' via `loadAggregate`; use its dedicated `RaptorIndividualAggregateStore` instead."
+		}
+
+		return collection.find()
+			// A single aggregate's history is small; a large batch size costs nothing and avoids
+			// unnecessary round-trips.
+			.batchSize(1_000_000)
+			.filter(Filters.and(
+				listOfNotNull(
+					Filters.eq(Fields.aggregateType, definition.discriminator),
+					Filters.eq(Fields.aggregateId, id),
+					afterVersion?.let { Filters.gt(Fields.version, it) },
+				)
+			))
+			.sort(ascending(Fields.version))
+	}
+
+
 	override suspend fun start() {
 		coroutineScope {
 			launch {

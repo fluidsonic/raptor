@@ -9,20 +9,15 @@ hazards documented only in code comments.
   `MongoIndividualAggregateStore.lastEventId` reads `_id` directly. So the event id is both
   primary key and global ordering key — IDs must be globally monotonic across all
   aggregates. `DefaultAggregateManager.start()` asserts every loaded event's id equals
-  `lastEventId + 1` (contiguous from 1).
+  `lastEventId + 1` (contiguous from 1). `loadAggregate` (single-aggregate reads) instead
+  orders by `version` — see `aggregate-loader-interface.md`.
 - **Batch closure via `lastVersionInBatch`.** Events for different aggregates interleave in
   the stream; each event carries `lastVersionInBatch` so the manager knows when a
   per-aggregate batch is complete (`event.version == event.lastVersionInBatch`). Any
   aggregate with unclosed batch events after the stream ends aborts startup.
   `AggregateState.addEvent` also enforces contiguous per-aggregate versions (each event's
   version must equal the previous + 1; no gaps).
-- **Persisted BSON field order is a hard decode contract.** `RaptorAggregateEventBson`
-  decode is stateful: `aggregateType` must precede `aggregateId` and `changeType`;
-  `changeType` must precede `change`. Violations throw "Invalid field order when
-  decoding ...". A manual DB edit or reordered encoder that changes this order makes decoding
-  **fail explicitly** with that "Invalid field order" error (thrown by `checkNotNull` on the
-  not-yet-resolved `definition`/`changeDefinition`) — it does not decode wrong data silently.
-  Anchor: `modules/domain-mongo/sources/assembly/RaptorAggregateEventBson.kt`.
+- **Persisted BSON field order is a hard decode contract** — see `event-bson-field-order.md`.
 - **Single-instance only; write conflict is unrecoverable.** `MongoAggregateStore` does not
   support horizontal scaling (TODO); its `add()` rethrows `MongoBulkWriteException` with a
   comment that Raptor "cannot recover from this without stopping Raptor & starting a new
@@ -36,4 +31,5 @@ hazards documented only in code comments.
   events and returns them. Same interface method, opposite contract.
 
 Related: `domain/streams.md`, `domain/command-execution.md`,
-`domain/individual-aggregates.md`.
+`domain/individual-aggregates.md`, `domain/aggregate-loader-interface.md`,
+`domain/event-bson-field-order.md`.

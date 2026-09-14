@@ -27,4 +27,11 @@ aggregates; the divergence is scattered across guards and the completion block.
 
 `RaptorAggregateProvider.provide(id)` returns `Pair<RaptorAggregate<...>, Int>` where the
 bare `Int` is the aggregate's current version — the same value used as `expectedVersion` in
-`commit`. Related: `domain/event-store-contract.md`.
+`commit`.
+
+- **Wired eagerly, even in unrelated tests.** Registering *any* individual aggregate forces
+  `raptor.lifecycle.startIn()` to resolve a `RaptorIndividualAggregateStoreFactory` DI binding,
+  whether or not the test ever touches that store. `AggregateStoreLoadTests.kt` provides a
+  no-op `StubIndividualAggregateStoreFactory` purely to satisfy this.
+
+Related: `domain/event-store-contract.md`, `domain/aggregate-loader-interface.md`.

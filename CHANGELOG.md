@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.42.0] - 2026-09-15
+
+### Added
+- `RaptorAggregateStore` gained `loadAggregate(definition, id, afterVersion)`, a cursor-resumable per-aggregate event `Flow` ordered by version; extends new `RaptorAggregateLoader`, breaking third-party implementors
+
 ## [0.41.0] - 2026-08-05
 
 ### Added
