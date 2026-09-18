@@ -3,6 +3,7 @@ import BankAccountCommand.*
 import io.fluidsonic.raptor.*
 import io.fluidsonic.raptor.di.*
 import io.fluidsonic.raptor.domain.*
+import io.fluidsonic.raptor.event.*
 import io.fluidsonic.raptor.lifecycle.*
 import io.fluidsonic.time.*
 import kotlin.reflect.*
@@ -106,15 +107,16 @@ class AggregateStoreLoadTests {
 		raptor {
 			install(RaptorDIPlugin)
 			install(RaptorDomainPlugin)
+			install(RaptorEventPlugin)
 			install(RaptorLifecyclePlugin)
 
 			di {
 				provide<Clock>(ManualClock().also { it.set(Timestamp.fromEpochSeconds(0)) })
 				provide<Logger>(NOPLogger.NOP_LOGGER)
-				provide<RaptorIndividualAggregateStoreFactory>(StubIndividualAggregateStoreFactory())
 			}
 
 			domain.aggregates {
+				individualStoreFactory(StubIndividualAggregateStoreFactory())
 				store(store)
 
 				new(::BankAccountAggregate, "bank account") {
