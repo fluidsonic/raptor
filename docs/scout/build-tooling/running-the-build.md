@@ -19,4 +19,5 @@ looks like a broken machine rather than a sandbox restriction.
   because every module is a Kotlin multiplatform project. Pass `-i` to see what a test prints;
   several graph tests record their client-facing payload that way and assert nothing about it.
 
-See `project-layout.md` for module naming and the Gradle plugin itself.
+See `project-layout.md` for module naming and the Gradle plugin itself, and
+`kotlin-js-yarn-lock.md` for a `check` failure caused by a Kotlin version bump.
