@@ -15,6 +15,8 @@ registered. Only `RaptorEventPlugin` provides `RaptorEventEmitter`/`RaptorEventS
 `RaptorEventEmitter`) thrown from `DefaultRaptorDI` — nothing in the message points back to the domain
 module.
 
-Every domain test module (`EventTests.kt`, `ExecutionTests.kt`, `HookFilteringTests.kt`) installs
-`RaptorDIPlugin`, `RaptorDomainPlugin`, `RaptorEventPlugin`, and `RaptorLifecyclePlugin` together for
-this reason — copy that set, not just the two that seem relevant to what you're testing.
+Every domain test module (`EventTests.kt`, `ExecutionTests.kt`, `HookFilteringTests.kt`,
+`AggregateStoreLoadTests.kt`) installs `RaptorDIPlugin`, `RaptorDomainPlugin`, `RaptorEventPlugin`,
+and `RaptorLifecyclePlugin` together for this reason — copy that set, not just the two that seem
+relevant to what you're testing. `AggregateStoreLoadTests.kt` was itself added without
+`RaptorEventPlugin` and failed with this exact DI error until it was added.

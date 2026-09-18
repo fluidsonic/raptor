@@ -13,19 +13,20 @@ How Raptor's Gradle multi-module build is structured — needed before adding a 
   `src/main/kotlin` or `src/test/kotlin`. Internal implementation classes sit in
   `sources-jvm/` alongside a public `api/` subpackage.
 - **Root `build.gradle.kts` (the `fluidLibrary` block)** globally opts every module into
-  the experimental marker `io.fluidsonic.raptor.RaptorInternalApi` and calls `noDokka()`.
-  This is why modules use `@RaptorInternalApi` members without a local `@OptIn`.
-- **Context parameters are enabled build-wide.** The `subprojects {}` block adds
-  `-Xcontext-parameters` and `-Xcontext-sensitive-resolution` to every Kotlin
-  multiplatform subproject (every `fluidLibraryModule` is a multiplatform project, even
-  JVM-only ones). Code using the `context(...)` declaration — e.g. `context(coroutineScope:
-  CoroutineScope)` in `modules/event/sources/api/RaptorEventSource.kt` and on
-  `DefaultAggregateManager.start` (`modules/domain/sources/implementation/DefaultAggregateManager.kt`)
-  — depends on these experimental flags being set at the root, not per module. (Note: the BSON codec's
-  `with(scope){...}` receiver style in `modules/bson/sources-jvm/bson/RaptorBsonCodec.kt`
-  is ordinary Kotlin scoping and does not need these flags.)
+  the experimental marker `io.fluidsonic.raptor.RaptorInternalApi` and calls `disableDokka()`
+  (renamed from `noDokka()` in plugin 4.x). This is why modules use `@RaptorInternalApi`
+  members without a local `@OptIn`.
+- **Context-sensitive resolution is enabled build-wide.** The `subprojects {}` block adds
+  `-Xcontext-sensitive-resolution` to every Kotlin multiplatform subproject (every
+  `fluidLibraryModule` is multiplatform, even JVM-only ones). It previously also added
+  `-Xcontext-parameters`, dropped after the plugin bump because Kotlin 2.4 reports that flag
+  redundant — context parameters no longer need an opt-in flag. Code using `context(...)` —
+  e.g. `context(coroutineScope: CoroutineScope)` in
+  `modules/event/sources/api/RaptorEventSource.kt` and on `DefaultAggregateManager.start`
+  (`modules/domain/sources/implementation/DefaultAggregateManager.kt`) — still needs
+  `-Xcontext-sensitive-resolution` set at the root, not per module.
 - Built with the third-party `io.fluidsonic.gradle` plugin, applied in the root
-  `build.gradle.kts` (version 3.0.0 as of this pass). The project's own declared version
+  `build.gradle.kts` (version 4.2.0 as of this pass). The project's own declared version
   lives in that file's `fluidLibrary(...)` call.
 
 Deprecated modules slated for deletion: `entities`, `entities-core` (their build files carry
