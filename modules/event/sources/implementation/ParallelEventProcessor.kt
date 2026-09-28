@@ -1,6 +1,7 @@
 package io.fluidsonic.raptor.event
 
 import java.util.concurrent.*
+import kotlin.coroutines.*
 import kotlin.reflect.*
 import kotlinx.coroutines.*
 
@@ -70,7 +71,7 @@ public class ParallelEventProcessor : RaptorEventProcessor, RaptorEventSource {
 		// 'UNDISPATCHED' to allow the handler to maintain the order of events across coroutine launches.
 		// 'join()' to suspend this method until the handler is complete to ensure sequential processing.
 		fun handle(event: Event): Job? =
-			scope.launch(start = CoroutineStart.UNDISPATCHED) {
+			scope.launch(if (async) EmptyCoroutineContext else RaptorEventDispatch, start = CoroutineStart.UNDISPATCHED) {
 				// Ensure that the subscription wasn't canceled in the meantime.
 				if (!isCanceled())
 					handler(event)

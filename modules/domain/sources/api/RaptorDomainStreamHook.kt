@@ -38,7 +38,25 @@ public interface RaptorDomainStreamHook {
 		get() = null
 
 
+	/**
+	 * Called synchronously for each aggregate event passing [aggregateIdClassFilter], after synchronous subscribers
+	 * have handled it.
+	 *
+	 * Live events are delivered while the app-wide commit lock is held, and replayed events are delivered during
+	 * start, which commits wait for. Every commit is therefore held up until this returns, so it must not block.
+	 * [RaptorAggregateStreamDispatch] can't be observed here because this function isn't suspending.
+	 */
 	public fun onAggregateEvent(event: RaptorAggregateEvent<*, *>) {}
+
+	/**
+	 * Called synchronously for each aggregate projection event passing [projectionIdClassFilter], with the same timing
+	 * and constraints as [onAggregateEvent]: it must not block, and [RaptorAggregateStreamDispatch] can't be observed
+	 * here.
+	 */
 	public fun onAggregateProjectionEvent(event: RaptorAggregateProjectionEvent<*, *, *>) {}
+
+	/**
+	 * Called synchronously once replay has completed, while the app-wide commit lock is held. It must not block.
+	 */
 	public fun onReplayCompleted() {}
 }

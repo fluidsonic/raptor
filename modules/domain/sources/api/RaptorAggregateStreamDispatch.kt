@@ -4,29 +4,19 @@ import io.fluidsonic.raptor.event.*
 
 
 /**
- * Coroutine context element marking code that runs as part of delivering aggregate stream messages to a subscriber.
- * It's the same element as [RaptorEventDispatch], so checking either key covers both aggregate streams and events.
+ * Coroutine context element marking code that runs as part of delivering aggregate events to a synchronous subscriber.
  *
- * It's present in the collection coroutine of every subscription made with [RaptorAggregateStream]'s and
- * [RaptorAggregateProjectionStream]'s `subscribeIn` or [RaptorAggregateProjectionStream]'s `subscribeMessagesIn`,
- * so it's visible via `currentCoroutineContext()[RaptorAggregateStreamDispatch]` while a subscriber's handler runs.
- * Coroutines launched from within the handler's own context inherit it, including those started by flow operators
- * like `buffer` in a flow the handler collects. Coroutines launched in other scopes (e.g. `otherScope.launch { … }`),
- * code consuming a `Channel` fed by the handler, and code collecting [RaptorAggregateStream.messages] or
- * [RaptorAggregateProjectionStream.messages] directly don't.
+ * It's present while the handler of a [RaptorAggregateEventSource] or [RaptorAggregateProjectionEventSource]
+ * subscription made with `async = false` runs, visible via `currentCoroutineContext()[RaptorAggregateStreamDispatch]`.
+ * Live events are delivered while an aggregate commit holds the app-wide commit lock, so a slow handler holds up
+ * every commit. Replayed events are delivered during start, which commits wait for, and
+ * [RaptorAggregateReplayCompletedEvent] is delivered while the commit lock is held.
  *
- * The streams are unbuffered: no further message can be emitted until every subscriber has finished handling the
- * previous one. While this marker is present, the handler therefore holds up the next emission:
- * - Live event batches are emitted while an aggregate commit holds the app-wide commit lock, so a slow handler holds
- *   up the next commit and, through the lock, every commit after it.
- * - [RaptorAggregateStreamMessage.Replay] and [RaptorAggregateProjectionStreamMessage.Replay] are emitted during
- *   start outside of the commit lock, and [RaptorAggregateStreamMessage.Loaded] and
- *   [RaptorAggregateProjectionStreamMessage.Loaded] are emitted while it's held. Start (and thus every commit)
- *   doesn't proceed until they've been taken by all subscribers.
+ * Handlers of subscriptions made with `async = true` don't get this marker added (they only inherit it if the scope
+ * they were subscribed in already carries it). Their part before the first suspension still runs within the commit
+ * and holds it up, unmarked.
+ * [RaptorDomainStreamHook] callbacks are not suspending, so this marker can't reach them.
  *
- * Code that may block for a long time (e.g. retrying I/O) can use this marker to fail fast instead.
- *
- * [RaptorDomainStreamHook] callbacks are not suspending and run synchronously within commits and start.
- * No coroutine context is observable from them, so this marker can't reach them.
+ * See [RaptorEventDispatch] for inheritance by child coroutines.
  */
 public typealias RaptorAggregateStreamDispatch = RaptorEventDispatch
