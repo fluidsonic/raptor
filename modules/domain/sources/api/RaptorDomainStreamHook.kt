@@ -39,6 +39,21 @@ public interface RaptorDomainStreamHook {
 		get() = null
 
 
+	/**
+	 * Called synchronously for each aggregate stream message passing [aggregateIdClassFilter], before stream
+	 * subscribers receive it.
+	 *
+	 * Live event batches and [RaptorAggregateStreamMessage.Loaded] are delivered while the app-wide commit lock is
+	 * held, and [RaptorAggregateStreamMessage.Replay] is delivered during start, which commits wait for. Every commit
+	 * is therefore held up until this returns, so it must not block. [RaptorAggregateStreamDispatch] can't be observed
+	 * here because this function isn't suspending.
+	 */
 	public fun onAggregateStreamMessage(message: RaptorAggregateStreamMessage<*, *>) {}
+
+	/**
+	 * Called synchronously for each aggregate projection stream message passing [projectionIdClassFilter], with the
+	 * same timing and constraints as [onAggregateStreamMessage]: it must not block, and [RaptorAggregateStreamDispatch]
+	 * can't be observed here.
+	 */
 	public fun onAggregateProjectionStreamMessage(message: RaptorAggregateProjectionStreamMessage<*, *, *>) {}
 }

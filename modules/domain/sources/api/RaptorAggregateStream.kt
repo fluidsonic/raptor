@@ -90,7 +90,7 @@ public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 			}
 		}
 		.onStart { completion.complete(Unit) }
-		.launchIn(scope)
+		.launchDispatchIn(scope)
 		.also { completion.await() }
 }
 
@@ -131,7 +131,7 @@ public suspend fun <Id : RaptorAggregateId, Change : RaptorAggregateChange<Id>>
 			}
 		}
 		.onStart { completion.complete(Unit) }
-		.launchIn(scope)
+		.launchDispatchIn(scope)
 		.also { completion.await() }
 }
 

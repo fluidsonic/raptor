@@ -1,5 +1,15 @@
 # Changelog
 
+## [0.43.0] - 2026-09-29
+
+### Added
+- `RaptorEventDispatch`, aliased as `RaptorAggregateStreamDispatch`, a coroutine context element present while an event or aggregate stream subscriber's handler holds up its emitter
+- `isProcessingRaptorEvent()` and `CoroutineContext.isProcessingRaptorEvent`, checking whether the current code runs as part of such event processing
+
+### Changed
+- `raptor-domain` now depends on `raptor-event`
+- Projection stream `subscribeIn`/`subscribeMessagesIn` and event `subscribeIn` are no longer `suspend`
+
 ## [0.42.0] - 2026-09-15
 
 ### Added

@@ -5,6 +5,7 @@ fluidLibraryModule(description = "TODO") {
 		common {
 			dependencies {
 				api(project(":raptor-di"))
+				api(project(":raptor-event"))
 				api(project(":raptor-lifecycle"))
 				api(fluid("time", Versions.fluid_time))
 				implementation(kotlin("reflect"))

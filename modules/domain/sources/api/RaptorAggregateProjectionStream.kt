@@ -37,7 +37,7 @@ public fun <
 @JvmName("subscribeBatchIn")
 @OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("UNCHECKED_CAST")
-public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>, Projection : RaptorProjection<Id>>
+public fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>, Projection : RaptorProjection<Id>>
 	RaptorAggregateProjectionStream.subscribeIn(
 	scope: CoroutineScope,
 	collector: suspend (event: RaptorAggregateProjectionEventBatch<Id, Projection, Change>) -> Unit,
@@ -81,7 +81,7 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 }
 
 
-public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>, Projection : RaptorProjection<Id>>
+public fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>, Projection : RaptorProjection<Id>>
 	RaptorAggregateProjectionStream.subscribeIn(
 	scope: CoroutineScope,
 	collector: suspend (event: RaptorAggregateProjectionEvent<Id, Projection, Change>) -> Unit,
@@ -119,7 +119,7 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 
 
 @JvmName("subscribeBatchIn")
-public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Change : RaptorAggregateChange<Id>, reified Projection : RaptorProjection<Id>>
+public inline fun <reified Id : RaptorAggregateProjectionId, reified Change : RaptorAggregateChange<Id>, reified Projection : RaptorProjection<Id>>
 	RaptorAggregateProjectionStream.subscribeIn(
 	scope: CoroutineScope,
 	noinline collector: suspend (event: RaptorAggregateProjectionEventBatch<Id, Projection, Change>) -> Unit,
@@ -135,7 +135,7 @@ public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Cha
 	)
 
 
-public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Change : RaptorAggregateChange<Id>, reified Projection : RaptorProjection<Id>>
+public inline fun <reified Id : RaptorAggregateProjectionId, reified Change : RaptorAggregateChange<Id>, reified Projection : RaptorProjection<Id>>
 	RaptorAggregateProjectionStream.subscribeIn(
 	scope: CoroutineScope,
 	noinline collector: suspend (event: RaptorAggregateProjectionEvent<Id, Projection, Change>) -> Unit,
@@ -153,7 +153,7 @@ public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Cha
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @Suppress("UNCHECKED_CAST")
-public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>, Projection : RaptorProjection<Id>>
+public fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateChange<Id>, Projection : RaptorProjection<Id>>
 	RaptorAggregateProjectionStream.subscribeMessagesIn(
 	scope: CoroutineScope,
 	collector: suspend (message: RaptorAggregateProjectionStreamMessage<Id, Projection, Change>) -> Unit,
@@ -185,7 +185,7 @@ public suspend fun <Id : RaptorAggregateProjectionId, Change : RaptorAggregateCh
 		.startIn(scope, collector)
 
 
-public suspend inline fun <reified Id : RaptorAggregateProjectionId, reified Change : RaptorAggregateChange<Id>, reified Projection : RaptorProjection<Id>>
+public inline fun <reified Id : RaptorAggregateProjectionId, reified Change : RaptorAggregateChange<Id>, reified Projection : RaptorProjection<Id>>
 	RaptorAggregateProjectionStream.subscribeMessagesIn(
 	scope: CoroutineScope,
 	noinline collector: suspend (message: RaptorAggregateProjectionStreamMessage<Id, Projection, Change>) -> Unit,

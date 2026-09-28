@@ -15,7 +15,7 @@ public interface RaptorEventSource {
 
 
 @Suppress("UNCHECKED_CAST")
-public suspend fun <Event : RaptorEvent> RaptorEventSource.subscribeIn(
+public fun <Event : RaptorEvent> RaptorEventSource.subscribeIn(
 	scope: CoroutineScope,
 	event: KClass<out Event>,
 	action: suspend (Event) -> Unit,
@@ -26,7 +26,7 @@ public suspend fun <Event : RaptorEvent> RaptorEventSource.subscribeIn(
 		.startIn(scope, action)
 
 
-public suspend inline fun <reified Event : RaptorEvent> RaptorEventSource.subscribeIn(
+public inline fun <reified Event : RaptorEvent> RaptorEventSource.subscribeIn(
 	scope: CoroutineScope,
 	noinline action: suspend (Event) -> Unit,
 ): Job =
