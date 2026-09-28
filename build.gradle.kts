@@ -5,7 +5,7 @@ plugins {
 	id("io.fluidsonic.gradle") version "4.2.0"
 }
 
-fluidLibrary(name = "raptor", version = "0.44.0", prefixName = false) {
+fluidLibrary(name = "raptor", version = "0.45.0-SNAPSHOT", prefixName = false) {
 	allModules {
 		language {
 			withExperimentalApi("io.fluidsonic.raptor.RaptorInternalApi")
