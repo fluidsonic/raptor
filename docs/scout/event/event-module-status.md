@@ -21,4 +21,4 @@ is unfinished — know this before relying on it.
 - The plugin registers `RaptorEventEmitter`/`RaptorEventSource` into DI only when the optional
   `RaptorDIPlugin` is present.
 
-Related: `dispatch-marker.md` (the `RaptorEventDispatch` coroutine context marker `subscribeIn` attaches).
+Related: `dispatch-marker.md` (the `RaptorEventDispatch` coroutine context marker attached to synchronous subscriptions).
