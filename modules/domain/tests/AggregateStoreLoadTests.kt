@@ -53,6 +53,36 @@ private class LoadTestsIndividualAggregate(
 }
 
 
+private class LoadTestsNestedId(private val value: String) : RaptorAggregateId {
+	override fun toString() = value
+}
+
+
+// Mirrors a change hierarchy where the registered leaf sits below intermediate sealed types.
+private sealed interface LoadTestsNestedChange : RaptorAggregateChange<LoadTestsNestedId> {
+	sealed interface Outer : LoadTestsNestedChange {
+		sealed interface Inner : Outer {
+			object Leaf : Inner
+		}
+	}
+}
+
+
+private sealed interface LoadTestsNestedCommand : RaptorAggregateCommand<LoadTestsNestedId> {
+	object Create : LoadTestsNestedCommand
+}
+
+
+private class LoadTestsNestedAggregate(
+	override val id: LoadTestsNestedId,
+) : RaptorAggregate<LoadTestsNestedId, LoadTestsNestedCommand, LoadTestsNestedChange> {
+
+	override fun copy() = LoadTestsNestedAggregate(id)
+	override fun execute(command: LoadTestsNestedCommand): List<LoadTestsNestedChange> = listOf(LoadTestsNestedChange.Outer.Inner.Leaf)
+	override fun handle(change: LoadTestsNestedChange) {}
+}
+
+
 class AggregateStoreLoadTests {
 
 	private val bankAccountId1 = BankAccountNumber("1")
@@ -102,6 +132,7 @@ class AggregateStoreLoadTests {
 	private suspend fun TestScope.buildRaptor(
 		store: TestAggregateStore,
 		includeIndividualAggregate: Boolean = false,
+		includeNestedAggregate: Boolean = false,
 	) =
 		raptor {
 			install(RaptorDIPlugin)
@@ -142,6 +173,13 @@ class AggregateStoreLoadTests {
 					change<CounterChange.Created>("created")
 					change<CounterChange.Incremented>("incremented")
 				}
+
+				if (includeNestedAggregate)
+					new(::LoadTestsNestedAggregate, "load tests nested thing") {
+						command<LoadTestsNestedCommand.Create>()
+
+						change<LoadTestsNestedChange.Outer.Inner.Leaf>("leaf")
+					}
 
 				if (includeIndividualAggregate)
 					new(::LoadTestsIndividualAggregate, "load tests individual thing", individual = true) {}
@@ -320,6 +358,259 @@ class AggregateStoreLoadTests {
 		assertFailsWith<IllegalStateException> {
 			store.loadAggregate(definition, id)
 		}
+
+		raptor.lifecycle.stop()
+	}
+
+
+	private fun page(vararg events: RaptorAggregateEvent<*, *>) = events.toList()
+
+
+	// Arguments are validated on the call itself, so a failing call throws here before anything is collected.
+	private suspend fun RaptorScope.loadEvents(
+		limit: Int,
+		changes: Map<KClass<out RaptorAggregateId>, Set<KClass<out RaptorAggregateChange<*>>>?>? = null,
+		before: RaptorAggregateEventId? = null,
+		after: RaptorAggregateEventId? = null,
+		descending: Boolean = true,
+	) =
+		loadAggregateEvents(limit = limit, changes = changes, before = before, after = after, descending = descending).toList()
+
+
+	@Test
+	fun testLoadPageDescendingPagesBackToFirstEvent() = runTest {
+		val store = TestAggregateStore(events = seedEvents())
+		val raptor = buildRaptor(store)
+		raptor.lifecycle.startIn(this)
+		val scope = raptor.context.asScope()
+
+		val page1 = scope.loadEvents(limit = 2)
+		assertEquals(actual = page1, expected = page(e5, e4))
+
+		val page2 = scope.loadEvents(limit = 2, before = page1.last().id)
+		assertEquals(actual = page2, expected = page(e3, e2))
+
+		val page3 = scope.loadEvents(limit = 2, before = page2.last().id)
+		assertEquals(actual = page3, expected = page(e1))
+
+		raptor.lifecycle.stop()
+	}
+
+
+	@Test
+	fun testLoadPageAscendingPagesForward() = runTest {
+		val store = TestAggregateStore(events = seedEvents())
+		val raptor = buildRaptor(store)
+		raptor.lifecycle.startIn(this)
+		val scope = raptor.context.asScope()
+
+		val page1 = scope.loadEvents(limit = 2, descending = false)
+		assertEquals(actual = page1, expected = page(e1, e2))
+
+		val page2 = scope.loadEvents(limit = 2, descending = false, after = page1.last().id)
+		assertEquals(actual = page2, expected = page(e3, e4))
+
+		val page3 = scope.loadEvents(limit = 2, descending = false, after = page2.last().id)
+		assertEquals(actual = page3, expected = page(e5))
+
+		raptor.lifecycle.stop()
+	}
+
+
+	@Test
+	fun testLoadPageBeforeAndAfterFormRange() = runTest {
+		val store = TestAggregateStore(events = seedEvents())
+		val raptor = buildRaptor(store)
+		raptor.lifecycle.startIn(this)
+		val scope = raptor.context.asScope()
+
+		assertEquals(
+			actual = scope.loadEvents(limit = 10, after = e1.id, before = e5.id),
+			expected = page(e4, e3, e2),
+		)
+		assertFailsWith<IllegalArgumentException> {
+			scope.loadEvents(limit = 10, after = e3.id, before = e3.id)
+		}
+
+		raptor.lifecycle.stop()
+	}
+
+
+	@Test
+	fun testLoadPageFiltersByAggregateType() = runTest {
+		val store = TestAggregateStore(events = seedEvents())
+		val raptor = buildRaptor(store)
+		raptor.lifecycle.startIn(this)
+		val scope = raptor.context.asScope()
+
+		assertEquals(
+			actual = scope.loadEvents(limit = 10, changes = mapOf(BankAccountNumber::class to null)),
+			expected = page(e5, e4, e3, e1),
+		)
+		assertEquals(
+			actual = scope.loadEvents(limit = 10, changes = emptyMap()),
+			expected = emptyList(),
+		)
+
+		raptor.lifecycle.stop()
+	}
+
+
+	@Test
+	fun testLoadPageFiltersByAggregateTypeAndChangeTypeAcrossAggregates() = runTest {
+		val store = TestAggregateStore(events = seedEvents())
+		val raptor = buildRaptor(store)
+		raptor.lifecycle.startIn(this)
+		val scope = raptor.context.asScope()
+
+		// Both aggregates have a `created` change; only the listed pairs may match.
+		assertEquals(
+			actual = scope.loadEvents(
+				limit = 10,
+				changes = mapOf(
+					BankAccountNumber::class to setOf(Deposited::class),
+					CounterNumber::class to setOf(CounterChange.Created::class),
+				),
+			),
+			expected = page(e4, e3, e2),
+		)
+
+		raptor.lifecycle.stop()
+	}
+
+
+	@Test
+	fun testLoadPageMatchesNestedSealedLeafByExactClass() = runTest {
+		val nestedEvent = RaptorAggregateEvent(
+			aggregateId = LoadTestsNestedId("n"),
+			change = LoadTestsNestedChange.Outer.Inner.Leaf,
+			id = RaptorAggregateEventId(6),
+			timestamp = Timestamp.fromEpochSeconds(6),
+			version = 1,
+		)
+		val store = TestAggregateStore(events = seedEvents() + nestedEvent)
+		val raptor = buildRaptor(store, includeNestedAggregate = true)
+		raptor.lifecycle.startIn(this)
+		val scope = raptor.context.asScope()
+
+		assertEquals(
+			actual = scope.loadEvents(
+				limit = 10,
+				changes = mapOf(LoadTestsNestedId::class to setOf(LoadTestsNestedChange.Outer.Inner.Leaf::class)),
+			),
+			expected = page(nestedEvent),
+		)
+
+		raptor.lifecycle.stop()
+	}
+
+
+	@Test
+	fun testLoadAggregateEventsRejectsUnregisteredTypes() = runTest {
+		val store = TestAggregateStore(events = seedEvents())
+		val raptor = buildRaptor(store, includeIndividualAggregate = true)
+		raptor.lifecycle.startIn(this)
+		val scope = raptor.context.asScope()
+
+		assertFailsWith<IllegalArgumentException> {
+			scope.loadEvents(limit = 10, changes = mapOf(LoadTestsNestedId::class to null))
+		}
+		// `CounterChange.Created` is registered, but not for the bank account aggregate.
+		assertFailsWith<IllegalArgumentException> {
+			scope.loadEvents(limit = 10, changes = mapOf(BankAccountNumber::class to setOf(CounterChange.Created::class)))
+		}
+		assertFailsWith<IllegalStateException> {
+			scope.loadEvents(limit = 10, changes = mapOf(LoadTestsIndividualId::class to null))
+		}
+
+		raptor.lifecycle.stop()
+	}
+
+
+	@Test
+	fun testLoadPageSingleBoundInEitherDirection() = runTest {
+		val store = TestAggregateStore(events = seedEvents())
+		val raptor = buildRaptor(store)
+		raptor.lifecycle.startIn(this)
+		val scope = raptor.context.asScope()
+
+		assertEquals(actual = scope.loadEvents(limit = 2, after = e2.id), expected = page(e5, e4))
+		assertEquals(actual = scope.loadEvents(limit = 2, descending = false, before = e4.id), expected = page(e1, e2))
+
+		raptor.lifecycle.stop()
+	}
+
+
+	@Test
+	fun testLoadPageEmptyChangeSetMatchesNothing() = runTest {
+		val store = TestAggregateStore(events = seedEvents())
+		val raptor = buildRaptor(store)
+		raptor.lifecycle.startIn(this)
+		val scope = raptor.context.asScope()
+
+		assertEquals(
+			actual = scope.loadEvents(limit = 10, changes = mapOf(BankAccountNumber::class to emptySet())),
+			expected = emptyList(),
+		)
+
+		raptor.lifecycle.stop()
+	}
+
+
+	@Test
+	fun testLoadPageRejectsChangeDefinitionOfAnotherAggregate() = runTest {
+		val store = TestAggregateStore(events = seedEvents())
+		val raptor = buildRaptor(store)
+		raptor.lifecycle.startIn(this)
+
+		val bankDefinition = definitionFor(raptor, bankAccountId1)
+		val counterDefinition = definitionFor(raptor, counterId)
+		val counterCreated = counterDefinition.changeDefinitions.first { it.changeClass == CounterChange.Created::class }
+
+		assertFailsWith<IllegalArgumentException> {
+			store.loadPage(limit = 10, changes = mapOf(bankDefinition to setOf(counterCreated)))
+		}
+
+		raptor.lifecycle.stop()
+	}
+
+
+	@Test
+	fun testLoadPageLimitBounds() = runTest {
+		val store = TestAggregateStore(events = seedEvents())
+		val raptor = buildRaptor(store)
+		raptor.lifecycle.startIn(this)
+		val scope = raptor.context.asScope()
+
+		assertFailsWith<IllegalArgumentException> { scope.loadEvents(limit = 0) }
+		assertFailsWith<IllegalArgumentException> { scope.loadEvents(limit = RaptorAggregateLoader.MAX_PAGE_SIZE + 1) }
+		assertEquals(actual = scope.loadEvents(limit = RaptorAggregateLoader.MAX_PAGE_SIZE), expected = page(e5, e4, e3, e2, e1))
+		assertEquals(actual = scope.loadEvents(limit = 1), expected = page(e5))
+
+		raptor.lifecycle.stop()
+	}
+
+
+	@Test
+	fun testLoadPageOlderPagesAreStableWhileEventsAreAddedAtHead() = runTest {
+		val store = TestAggregateStore(events = seedEvents())
+		val raptor = buildRaptor(store)
+		raptor.lifecycle.startIn(this)
+		val scope = raptor.context.asScope()
+
+		val page1 = scope.loadEvents(limit = 2)
+
+		val e6 = RaptorAggregateEvent(
+			aggregateId = counterId,
+			change = CounterChange.Incremented,
+			id = RaptorAggregateEventId(6),
+			timestamp = Timestamp.fromEpochSeconds(6),
+			version = 2,
+		)
+		store.add(listOf(e6))
+
+		assertEquals(actual = scope.loadEvents(limit = 2, before = page1.last().id), expected = page(e3, e2))
+		assertEquals(actual = scope.loadEvents(limit = 2), expected = page(e6, e5))
 
 		raptor.lifecycle.stop()
 	}

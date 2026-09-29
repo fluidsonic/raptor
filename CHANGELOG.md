@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.44.0] - 2026-09-29
+
+### Added
+- `RaptorScope.loadAggregateEvents()` and `RaptorAggregateLoader.loadPage()`, paging aggregate events by event ID, newest first or oldest first, filtered by aggregate and change type
+- `RaptorAggregateLoader.loadPage()` is a new abstract member, breaking third-party `RaptorAggregateStore` implementors
+- The Mongo aggregate store creates an `(aggregateType, changeType, _id)` index on start, built on first start
+
 ## [0.43.0] - 2026-09-29
 
 ### Added

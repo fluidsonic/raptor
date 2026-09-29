@@ -24,4 +24,6 @@ into a new `RaptorAggregateLoader` interface, which `RaptorAggregateStore` now e
   already return an out-projected, `Id`-parameterized definition via one internal
   `@Suppress("UNCHECKED_CAST")`, so a generic `loadAggregate<Id>` accepts it directly.
 
+The interface's other member, `loadPage`, is covered in `aggregate-event-paging.md`.
+
 Related: `event-store-contract.md`, `individual-aggregates.md`, `aggregate-store-test-coverage.md`.

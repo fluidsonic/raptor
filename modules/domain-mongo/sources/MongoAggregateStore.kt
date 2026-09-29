@@ -84,12 +84,64 @@ private class MongoAggregateStore(
 	}
 
 
+	override fun loadPage(
+		limit: Int,
+		changes: Map<RaptorAggregateDefinition<*, *, *, *>, Set<RaptorAggregateChangeDefinition<*, *>>?>?,
+		before: RaptorAggregateEventId?,
+		after: RaptorAggregateEventId?,
+		descending: Boolean,
+	): Flow<RaptorAggregateEvent<*, *>> {
+		require(limit in 1..RaptorAggregateLoader.MAX_PAGE_SIZE) {
+			"`limit` must be in 1..${RaptorAggregateLoader.MAX_PAGE_SIZE}, but was $limit."
+		}
+		require(before == null || after == null || before > after) {
+			"`before` ($before) must be greater than `after` ($after)."
+		}
+
+		val changeFilters = changes?.entries?.map { (definition, changeDefinitions) ->
+			check(!definition.isIndividual) {
+				"Cannot load events for individual aggregate '${definition.discriminator}' via `loadPage`; use its dedicated `RaptorIndividualAggregateStore` instead."
+			}
+			require(changeDefinitions == null || changeDefinitions.all { changeDefinition -> definition.changeDefinitions.any { it == changeDefinition } }) {
+				"`changes` contains a change definition that does not belong to aggregate '${definition.discriminator}'."
+			}
+
+			// "All changes" is expanded to the aggregate's registered discriminators instead of matching on
+			// `aggregateType` alone: an unbounded `changeType` would keep the index from returning `_id` order.
+			// An event with an unregistered discriminator could not be decoded anyway.
+			Filters.and(
+				Filters.eq(Fields.aggregateType, definition.discriminator),
+				Filters.`in`(Fields.changeType, (changeDefinitions ?: definition.changeDefinitions).map { it.discriminator }),
+			)
+		}
+
+		val filters = listOfNotNull(
+			before?.let { Filters.lt(Fields.id, it) },
+			after?.let { Filters.gt(Fields.id, it) },
+			// `$or` of nothing is invalid in MongoDB; an empty map matches nothing.
+			changeFilters?.let { if (it.isEmpty()) return emptyFlow() else Filters.or(it) },
+		)
+
+		return collection.find()
+			.filter(if (filters.isEmpty()) Filters.empty() else Filters.and(filters))
+			.sort(if (descending) descending(Fields.id) else ascending(Fields.id))
+			.limit(limit)
+	}
+
+
 	override suspend fun start() {
 		coroutineScope {
 			launch {
 				collection.createIndex(
 					Indexes.ascending(Fields.aggregateType, Fields.aggregateId, Fields.version),
-					IndexOptions().unique(true),
+					IndexOptions().background(true).unique(true),
+				)
+			}
+			launch {
+				// Serves `loadPage`: each `$or` branch walks this index and MongoDB merge-sorts the branches by `_id`.
+				collection.createIndex(
+					Indexes.ascending(Fields.aggregateType, Fields.changeType, Fields.id),
+					IndexOptions().background(true),
 				)
 			}
 		}

@@ -31,5 +31,5 @@ hazards documented only in code comments.
   events and returns them. Same interface method, opposite contract.
 
 Related: `domain/streams.md`, `domain/command-execution.md`,
-`domain/individual-aggregates.md`, `domain/aggregate-loader-interface.md`,
+`domain/individual-aggregates.md`, `domain/aggregate-loader-interface.md`, `domain/aggregate-event-paging.md`,
 `domain/event-bson-field-order.md`.

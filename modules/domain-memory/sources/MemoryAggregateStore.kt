@@ -2,6 +2,7 @@ package io.fluidsonic.raptor.domain.memory
 
 import io.fluidsonic.raptor.domain.*
 import io.fluidsonic.time.Timestamp
+import kotlin.reflect.*
 import kotlinx.coroutines.flow.*
 
 
@@ -57,6 +58,46 @@ private class MemoryAggregateStore : RaptorAggregateStore {
 
 		return aggregateEvents
 			.let { events -> if (afterVersion == null) events else events.filter { it.version > afterVersion } }
+			.asFlow()
+	}
+
+
+	override fun loadPage(
+		limit: Int,
+		changes: Map<RaptorAggregateDefinition<*, *, *, *>, Set<RaptorAggregateChangeDefinition<*, *>>?>?,
+		before: RaptorAggregateEventId?,
+		after: RaptorAggregateEventId?,
+		descending: Boolean,
+	): Flow<RaptorAggregateEvent<*, *>> {
+		require(limit in 1..RaptorAggregateLoader.MAX_PAGE_SIZE) {
+			"`limit` must be in 1..${RaptorAggregateLoader.MAX_PAGE_SIZE}, but was $limit."
+		}
+		require(before == null || after == null || before > after) {
+			"`before` ($before) must be greater than `after` ($after)."
+		}
+
+		val changeClassesByIdClass = changes?.entries?.associate { (definition, changeDefinitions) ->
+			check(!definition.isIndividual) {
+				"Cannot load events for individual aggregate '${definition.discriminator}' via `loadPage`; use its dedicated `RaptorIndividualAggregateStore` instead."
+			}
+			require(changeDefinitions == null || changeDefinitions.all { changeDefinition -> definition.changeDefinitions.any { it == changeDefinition } }) {
+				"`changes` contains a change definition that does not belong to aggregate '${definition.discriminator}'."
+			}
+
+			definition.idClass to changeDefinitions?.mapTo(hashSetOf<KClass<*>>()) { it.changeClass }
+		}
+
+		return (if (descending) events.asReversed() else events)
+			.asSequence()
+			.filter { before == null || it.id < before }
+			.filter { after == null || it.id > after }
+			.filter { event ->
+				changeClassesByIdClass == null ||
+					changeClassesByIdClass.containsKey(event.aggregateId::class) &&
+					changeClassesByIdClass[event.aggregateId::class].let { it == null || event.change::class in it }
+			}
+			.take(limit)
+			.toList()
 			.asFlow()
 	}
 }
