@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.44.1] - 2026-10-26
+
+### Added
+- `defaultObject()` for GraphQL argument definitions, defaulting the argument to an empty input object
+
 ## [0.44.0] - 2026-09-29
 
 ### Added

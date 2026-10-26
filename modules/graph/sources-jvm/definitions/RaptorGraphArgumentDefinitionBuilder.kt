@@ -46,6 +46,12 @@ public class RaptorGraphArgumentDefinitionBuilder<Value> internal constructor(
 
 
 	@RaptorDsl
+	public fun defaultObject() {
+		default(GObjectValue(emptyList()))
+	}
+
+
+	@RaptorDsl
 	public fun defaultNull() {
 		default(GNullValue.withoutOrigin)
 	}
